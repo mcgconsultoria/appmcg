@@ -1,0 +1,331 @@
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Building2,
+  CheckCircle,
+  ArrowRight,
+  BarChart3,
+  Users,
+  Truck,
+  Target,
+  Zap,
+  Shield,
+  Calculator,
+  ClipboardCheck,
+  TrendingUp,
+  Phone,
+  Mail,
+  MapPin,
+} from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
+
+const features = [
+  {
+    icon: ClipboardCheck,
+    title: "Checklist Completo",
+    description: "15 departamentos com questões estruturadas para diagnóstico completo da operação",
+  },
+  {
+    icon: Calculator,
+    title: "Calculadoras",
+    description: "Cálculo preciso de frete e armazenagem com ICMS, GRIS, ADV e impostos",
+  },
+  {
+    icon: Users,
+    title: "CRM Integrado",
+    description: "Gestão completa de clientes com pipeline visual e acompanhamento de propostas",
+  },
+  {
+    icon: BarChart3,
+    title: "Dashboard Gerencial",
+    description: "Visualização em tempo real dos indicadores da sua operação comercial",
+  },
+  {
+    icon: TrendingUp,
+    title: "Módulo Financeiro",
+    description: "Controle de contas a pagar e receber com gestão de encargos contábeis",
+  },
+  {
+    icon: Shield,
+    title: "Multi-empresas",
+    description: "Arquitetura segura com isolamento completo de dados entre empresas",
+  },
+];
+
+const services = [
+  {
+    title: "Diagnóstico de Maturidade Comercial",
+    description: "Avaliação completa da estrutura comercial da sua empresa de logística, identificando pontos de melhoria e oportunidades de crescimento.",
+    features: [
+      "Análise de 15 departamentos",
+      "Checklist personalizado por segmento",
+      "Relatório detalhado de gaps",
+      "Plano de ação recomendado",
+    ],
+    icon: Target,
+  },
+  {
+    title: "Estruturação de Vendas",
+    description: "Implementação de processos comerciais eficientes, desde a prospecção até o fechamento de contratos de transporte e armazenagem.",
+    features: [
+      "Definição de processos comerciais",
+      "Treinamento da equipe de vendas",
+      "Implantação de CRM",
+      "Acompanhamento de resultados",
+    ],
+    icon: Zap,
+  },
+];
+
+export default function Landing() {
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
+        <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center">
+              <Truck className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-lg leading-tight">MCG</span>
+              <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
+            </div>
+          </div>
+          <nav className="hidden md:flex items-center gap-6">
+            <a href="#servicos" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Serviços
+            </a>
+            <a href="#funcionalidades" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Funcionalidades
+            </a>
+            <a href="#contato" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Contato
+            </a>
+          </nav>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <a href="/api/login">
+              <Button data-testid="button-login">Entrar</Button>
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <section className="relative min-h-screen flex items-center justify-center pt-16">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
+          <div className="relative max-w-screen-xl mx-auto px-6 py-20 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8">
+              <Building2 className="h-4 w-4" />
+              Modelo Completo de Gestão Comercial
+            </div>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 max-w-4xl mx-auto">
+              Transforme sua{" "}
+              <span className="text-primary">operação comercial</span>{" "}
+              em logística
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
+              Sistema completo para gestão de empresas do setor logístico. CRM, calculadoras, 
+              checklists e controle financeiro em uma única plataforma.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <a href="/api/login">
+                <Button size="lg" className="gap-2" data-testid="button-start-free">
+                  Começar agora
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </a>
+              <a href="#servicos">
+                <Button size="lg" variant="outline" data-testid="button-learn-more">
+                  Conhecer serviços
+                </Button>
+              </a>
+            </div>
+            <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">15+</div>
+                <div className="text-sm text-muted-foreground">Anos de experiência</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">100+</div>
+                <div className="text-sm text-muted-foreground">Empresas atendidas</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">15</div>
+                <div className="text-sm text-muted-foreground">Departamentos analisados</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary">27</div>
+                <div className="text-sm text-muted-foreground">Estados cobertos</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="servicos" className="py-20 bg-muted/30">
+          <div className="max-w-screen-xl mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Nossos Serviços</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Soluções especializadas para empresas de transporte e armazenagem que buscam 
+                excelência comercial
+              </p>
+            </div>
+            <div className="grid lg:grid-cols-2 gap-8">
+              {services.map((service) => (
+                <Card key={service.title} className="overflow-hidden">
+                  <CardContent className="p-8">
+                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
+                      <service.icon className="h-7 w-7 text-primary" />
+                    </div>
+                    <h3 className="text-2xl font-semibold mb-3">{service.title}</h3>
+                    <p className="text-muted-foreground mb-6">{service.description}</p>
+                    <ul className="space-y-3">
+                      {service.features.map((feature) => (
+                        <li key={feature} className="flex items-center gap-3 text-sm">
+                          <CheckCircle className="h-5 w-5 text-primary flex-shrink-0" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="funcionalidades" className="py-20">
+          <div className="max-w-screen-xl mx-auto px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Funcionalidades do Sistema</h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Tudo que você precisa para gerenciar sua operação comercial em um só lugar
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {features.map((feature) => (
+                <Card key={feature.title} className="hover-elevate">
+                  <CardContent className="p-6">
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                      <feature.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 bg-primary text-primary-foreground">
+          <div className="max-w-screen-xl mx-auto px-6 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Pronto para transformar sua gestão comercial?
+            </h2>
+            <p className="text-primary-foreground/80 max-w-2xl mx-auto mb-8">
+              Comece agora e tenha acesso ao sistema completo de gestão para empresas de logística
+            </p>
+            <a href="/api/login">
+              <Button size="lg" variant="secondary" className="gap-2" data-testid="button-cta-start">
+                Acessar o sistema
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </a>
+          </div>
+        </section>
+
+        <section id="contato" className="py-20 bg-muted/30">
+          <div className="max-w-screen-xl mx-auto px-6">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Entre em Contato</h2>
+              <p className="text-muted-foreground">Fale conosco para saber mais sobre nossos serviços</p>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
+              <Card>
+                <CardContent className="p-6 flex flex-col items-center text-center">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <Phone className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-medium mb-1">Telefone</h3>
+                  <p className="text-sm text-muted-foreground">(41) 99999-9999</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 flex flex-col items-center text-center">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <Mail className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-medium mb-1">Email</h3>
+                  <p className="text-sm text-muted-foreground">contato@mcgconsultoria.com.br</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-6 flex flex-col items-center text-center">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <MapPin className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-medium mb-1">Localização</h3>
+                  <p className="text-sm text-muted-foreground">Curitiba, PR</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="bg-card border-t border-border py-12">
+        <div className="max-w-screen-xl mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center">
+                  <Truck className="h-6 w-6 text-primary-foreground" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-bold text-lg leading-tight">MCG</span>
+                  <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Consultoria especializada em logística com foco na área comercial.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Serviços</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>Diagnóstico Comercial</li>
+                <li>Estruturação de Vendas</li>
+                <li>Treinamentos</li>
+                <li>Consultoria</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Sistema</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>CRM</li>
+                <li>Calculadoras</li>
+                <li>Checklists</li>
+                <li>Dashboard</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Suporte</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>Central de Ajuda</li>
+                <li>Contato</li>
+                <li>Termos de Uso</li>
+                <li>Privacidade</li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-border mt-12 pt-8 text-center text-sm text-muted-foreground">
+            <p>&copy; {new Date().getFullYear()} MCG Consultoria. Todos os direitos reservados.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
