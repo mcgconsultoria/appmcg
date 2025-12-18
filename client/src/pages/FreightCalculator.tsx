@@ -50,6 +50,7 @@ import {
   productTypes,
   packagingTypes,
   vehicleAxles,
+  glpModels,
   formatCurrency,
   calculateAnttMinFreight,
   getTaxInfo,
@@ -80,6 +81,9 @@ interface RouteData {
   unloadingValue: string;
   grisRate: string;
   advRate: string;
+  glpModel: string;
+  glpQuantity: string;
+  unitFreight: string;
 }
 
 const createEmptyRoute = (): RouteData => ({
@@ -101,6 +105,9 @@ const createEmptyRoute = (): RouteData => ({
   unloadingValue: "",
   grisRate: "0.3",
   advRate: "0.3",
+  glpModel: "",
+  glpQuantity: "",
+  unitFreight: "",
 });
 
 interface ProposalData {
@@ -536,46 +543,129 @@ export default function FreightCalculator() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`packagingType-${route.id}`}>
-                      Tipo de Embalagem
-                    </Label>
-                    <Select
-                      value={route.packagingType}
-                      onValueChange={(value) =>
-                        updateRoute(route.id, "packagingType", value)
-                      }
-                    >
-                      <SelectTrigger
-                        id={`packagingType-${route.id}`}
-                        data-testid={`select-packaging-type-${index}`}
-                      >
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {packagingTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`weight-${route.id}`}>Peso (kg)</Label>
-                    <Input
-                      id={`weight-${route.id}`}
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="0,00"
-                      value={route.weight}
-                      onChange={(e) =>
-                        updateRoute(route.id, "weight", e.target.value)
-                      }
-                      data-testid={`input-weight-${index}`}
-                    />
-                  </div>
+                  {route.productType === "glp" ? (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor={`glpModel-${route.id}`}>
+                          Modelo do Botijao
+                        </Label>
+                        <Select
+                          value={route.glpModel}
+                          onValueChange={(value) => {
+                            const model = glpModels.find(m => m.value === value);
+                            const quantity = parseInt(route.glpQuantity) || 0;
+                            const totalWeight = model ? model.totalKg * quantity : 0;
+                            updateRoute(route.id, "glpModel", value);
+                            if (model && quantity > 0) {
+                              updateRoute(route.id, "weight", totalWeight.toString());
+                            }
+                          }}
+                        >
+                          <SelectTrigger
+                            id={`glpModel-${route.id}`}
+                            data-testid={`select-glp-model-${index}`}
+                          >
+                            <SelectValue placeholder="Selecione o modelo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {glpModels.map((model) => (
+                              <SelectItem key={model.value} value={model.value}>
+                                {model.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`glpQuantity-${route.id}`}>
+                          Quantidade de Botijoes
+                        </Label>
+                        <Input
+                          id={`glpQuantity-${route.id}`}
+                          type="number"
+                          min="1"
+                          placeholder="0"
+                          value={route.glpQuantity}
+                          onChange={(e) => {
+                            const quantity = parseInt(e.target.value) || 0;
+                            const model = glpModels.find(m => m.value === route.glpModel);
+                            const totalWeight = model ? model.totalKg * quantity : 0;
+                            updateRoute(route.id, "glpQuantity", e.target.value);
+                            if (model && quantity > 0) {
+                              updateRoute(route.id, "weight", totalWeight.toString());
+                            }
+                          }}
+                          data-testid={`input-glp-quantity-${index}`}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`weight-${route.id}`}>
+                          Peso Total (kg)
+                          {route.glpModel && (
+                            <span className="text-xs text-muted-foreground ml-1">
+                              (calculado automaticamente)
+                            </span>
+                          )}
+                        </Label>
+                        <Input
+                          id={`weight-${route.id}`}
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0,00"
+                          value={route.weight}
+                          onChange={(e) =>
+                            updateRoute(route.id, "weight", e.target.value)
+                          }
+                          disabled={!!route.glpModel && !!route.glpQuantity}
+                          data-testid={`input-weight-${index}`}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor={`packagingType-${route.id}`}>
+                          Tipo de Embalagem
+                        </Label>
+                        <Select
+                          value={route.packagingType}
+                          onValueChange={(value) =>
+                            updateRoute(route.id, "packagingType", value)
+                          }
+                        >
+                          <SelectTrigger
+                            id={`packagingType-${route.id}`}
+                            data-testid={`select-packaging-type-${index}`}
+                          >
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {packagingTypes.map((type) => (
+                              <SelectItem key={type.value} value={type.value}>
+                                {type.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`weight-${route.id}`}>Peso (kg)</Label>
+                        <Input
+                          id={`weight-${route.id}`}
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0,00"
+                          value={route.weight}
+                          onChange={(e) =>
+                            updateRoute(route.id, "weight", e.target.value)
+                          }
+                          data-testid={`input-weight-${index}`}
+                        />
+                      </div>
+                    </>
+                  )}
                   <div className="space-y-2">
                     <Label htmlFor={`cargoValue-${route.id}`}>
                       Valor da NF (R$)
@@ -671,23 +761,70 @@ export default function FreightCalculator() {
                 </div>
 
                 {!route.useAnttMinFreight && (
-                  <div className="space-y-2">
-                    <Label htmlFor={`freightValue-${route.id}`}>
-                      Frete Liquido (R$)
-                    </Label>
-                    <Input
-                      id={`freightValue-${route.id}`}
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="0,00"
-                      value={route.freightValue}
-                      onChange={(e) =>
-                        updateRoute(route.id, "freightValue", e.target.value)
-                      }
-                      data-testid={`input-freight-value-${index}`}
-                    />
-                  </div>
+                  route.productType === "glp" ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`unitFreight-${route.id}`}>
+                          Frete Unitario por Botijao (R$)
+                        </Label>
+                        <Input
+                          id={`unitFreight-${route.id}`}
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0,00"
+                          value={route.unitFreight}
+                          onChange={(e) => {
+                            const unitValue = parseFloat(e.target.value) || 0;
+                            const quantity = parseInt(route.glpQuantity) || 0;
+                            const totalFreight = unitValue * quantity;
+                            updateRoute(route.id, "unitFreight", e.target.value);
+                            updateRoute(route.id, "freightValue", totalFreight.toString());
+                          }}
+                          data-testid={`input-unit-freight-${index}`}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`freightValue-${route.id}`}>
+                          Frete Total (R$)
+                          <span className="text-xs text-muted-foreground ml-1">
+                            (calculado: {route.glpQuantity || 0} x {formatCurrency(parseFloat(route.unitFreight) || 0)})
+                          </span>
+                        </Label>
+                        <Input
+                          id={`freightValue-${route.id}`}
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0,00"
+                          value={route.freightValue}
+                          onChange={(e) =>
+                            updateRoute(route.id, "freightValue", e.target.value)
+                          }
+                          disabled={!!route.unitFreight && !!route.glpQuantity}
+                          data-testid={`input-freight-value-${index}`}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor={`freightValue-${route.id}`}>
+                        Frete Liquido (R$)
+                      </Label>
+                      <Input
+                        id={`freightValue-${route.id}`}
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0,00"
+                        value={route.freightValue}
+                        onChange={(e) =>
+                          updateRoute(route.id, "freightValue", e.target.value)
+                        }
+                        data-testid={`input-freight-value-${index}`}
+                      />
+                    </div>
+                  )
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

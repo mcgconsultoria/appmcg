@@ -49,6 +49,14 @@ export const productTypes = [
   { value: "perigosa_container", label: "Perigosa Conteinerizada", anttCode: "perigosa_container" },
   { value: "perigosa_geral", label: "Perigosa Carga Geral", anttCode: "perigosa_geral" },
   { value: "pressurizada", label: "Granel Pressurizada", anttCode: "pressurizada" },
+  { value: "glp", label: "GLP (Gás de Cozinha)", anttCode: "perigosa" },
+];
+
+export const glpModels = [
+  { value: "P5", label: "P5 (5kg)", weightKg: 5, taraKg: 4.8, totalKg: 9.8 },
+  { value: "P13", label: "P13 (13kg)", weightKg: 13, taraKg: 13.5, totalKg: 26.5 },
+  { value: "P20", label: "P20 (20kg)", weightKg: 20, taraKg: 18, totalKg: 38 },
+  { value: "P45", label: "P45 (45kg)", weightKg: 45, taraKg: 45, totalKg: 90 },
 ];
 
 export const packagingTypes = [
