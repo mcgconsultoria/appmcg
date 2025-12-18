@@ -124,6 +124,9 @@ export default function FreightCalculator() {
 
   const { data: clients } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
+    retry: false,
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   const updateRoute = (routeId: string, field: keyof RouteData, value: any) => {
