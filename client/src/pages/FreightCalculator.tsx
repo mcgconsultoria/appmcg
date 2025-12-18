@@ -249,6 +249,16 @@ export default function FreightCalculator() {
     const tollValue = parseFloat(route.tollValue) || 0;
     const unloadingValue = parseFloat(route.unloadingValue) || 0;
 
+    const emptyKmPickupValue = route.emptyKmPickupType === "unit"
+      ? (parseFloat(route.emptyKmPickup) || 0) * (parseFloat(route.emptyKmPickupRate) || 0)
+      : parseFloat(route.emptyKmPickupFlat) || 0;
+
+    const emptyKmDeliveryValue = route.emptyKmDeliveryType === "unit"
+      ? (parseFloat(route.emptyKmDelivery) || 0) * (parseFloat(route.emptyKmDeliveryRate) || 0)
+      : parseFloat(route.emptyKmDeliveryFlat) || 0;
+
+    const emptyKmTotalValue = emptyKmPickupValue + emptyKmDeliveryValue;
+
     const anttMinFreight = calculateAnttMinFreight(
       distanceKm,
       route.productType,
@@ -278,7 +288,7 @@ export default function FreightCalculator() {
 
     const tollExempt = isTollExemptFromIcms(route.originState);
 
-    let baseForTax = freightValue + grisValue + advValue + unloadingValue;
+    let baseForTax = freightValue + grisValue + advValue + unloadingValue + emptyKmTotalValue;
     if (!tollExempt && routeType !== "municipal") {
       baseForTax += tollValue;
     }
@@ -288,7 +298,7 @@ export default function FreightCalculator() {
         ? baseForTax / (1 - taxInfo.rate / 100) - baseForTax
         : baseForTax * (taxInfo.rate / 100);
 
-    const totalValue = freightValue + grisValue + advValue + tollValue + unloadingValue + taxValue;
+    const totalValue = freightValue + grisValue + advValue + tollValue + unloadingValue + emptyKmTotalValue + taxValue;
     const valuePerKg = weight > 0 ? totalValue / weight : 0;
 
     return {
@@ -298,6 +308,9 @@ export default function FreightCalculator() {
       advValue,
       tollValue,
       unloadingValue,
+      emptyKmPickupValue,
+      emptyKmDeliveryValue,
+      emptyKmTotalValue,
       taxInfo,
       taxValue,
       tollExempt,
@@ -345,6 +358,9 @@ export default function FreightCalculator() {
             advRate: route.advRate,
             advValue: calc.advValue.toString(),
             unloadingValue: route.unloadingValue || undefined,
+            emptyKmPickupValue: calc.emptyKmPickupValue.toString(),
+            emptyKmDeliveryValue: calc.emptyKmDeliveryValue.toString(),
+            emptyKmTotalValue: calc.emptyKmTotalValue.toString(),
             totalValue: calc.totalValue.toString(),
           };
         }),
@@ -1051,14 +1067,7 @@ export default function FreightCalculator() {
                     <Label>Adicional KM Vazia</Label>
                     <div className="flex items-center gap-2 min-h-9 px-3 py-2 rounded-md border bg-muted/50">
                       <span className="font-medium">
-                        {formatCurrency(
-                          (route.emptyKmPickupType === "unit"
-                            ? (parseFloat(route.emptyKmPickup) || 0) * (parseFloat(route.emptyKmPickupRate) || 0)
-                            : parseFloat(route.emptyKmPickupFlat) || 0) +
-                          (route.emptyKmDeliveryType === "unit"
-                            ? (parseFloat(route.emptyKmDelivery) || 0) * (parseFloat(route.emptyKmDeliveryRate) || 0)
-                            : parseFloat(route.emptyKmDeliveryFlat) || 0)
-                        )}
+                        {formatCurrency(calc?.emptyKmTotalValue || 0)}
                       </span>
                     </div>
                   </div>
