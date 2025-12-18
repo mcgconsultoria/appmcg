@@ -31,9 +31,13 @@ import { db } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
-  // User operations (required for Replit Auth)
+  // User operations
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserBySessionToken(token: string): Promise<User | undefined>;
+  createUserWithPassword(userData: Partial<UpsertUser>): Promise<User>;
+  updateUserSessionToken(userId: string, token: string | null): Promise<void>;
 
   // Company operations
   getCompany(id: number): Promise<Company | undefined>;
@@ -106,6 +110,28 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async getUserBySessionToken(token: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.activeSessionToken, token));
+    return user;
+  }
+
+  async createUserWithPassword(userData: Partial<UpsertUser>): Promise<User> {
+    const [user] = await db.insert(users).values(userData as UpsertUser).returning();
+    return user;
+  }
+
+  async updateUserSessionToken(userId: string, token: string | null): Promise<void> {
+    await db
+      .update(users)
+      .set({ activeSessionToken: token, updatedAt: new Date() })
+      .where(eq(users.id, userId));
   }
 
   // Company operations

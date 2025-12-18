@@ -8,6 +8,8 @@ import { useAuth } from "@/hooks/useAuth";
 import CookieConsent from "@/components/CookieConsent";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/Landing";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import Clients from "@/pages/Clients";
 import Pipeline from "@/pages/Pipeline";
@@ -20,6 +22,7 @@ import Settings from "@/pages/Settings";
 import Pricing from "@/pages/Pricing";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
+import Subscription from "@/pages/Subscription";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -42,6 +45,8 @@ function Router() {
       <Route path="/planos" component={Pricing} />
       <Route path="/privacidade" component={Privacy} />
       <Route path="/termos" component={Terms} />
+      <Route path="/login" component={Login} />
+      <Route path="/registro" component={Register} />
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
@@ -54,6 +59,7 @@ function Router() {
           <Route path="/financeiro" component={Financial} />
           <Route path="/marketing" component={Marketing} />
           <Route path="/configuracoes" component={Settings} />
+          <Route path="/assinatura" component={Subscription} />
         </>
       )}
       <Route component={NotFound} />

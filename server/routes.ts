@@ -1,7 +1,8 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth } from "./replitAuth";
+import { registerUser, loginUser, validateSession, logoutUser } from "./customAuth";
 import {
   insertClientSchema,
   insertChecklistSchema,
@@ -9,27 +10,121 @@ import {
   insertFreightCalculationSchema,
   insertStorageCalculationSchema,
   insertFinancialAccountSchema,
+  registerSchema,
+  loginSchema,
 } from "@shared/schema";
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
+
+const SESSION_COOKIE_NAME = "mcg_session";
+const SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+
+async function customAuthMiddleware(req: Request, res: Response, next: NextFunction) {
+  const sessionToken = req.cookies?.[SESSION_COOKIE_NAME];
+  
+  if (sessionToken) {
+    const user = await validateSession(sessionToken);
+    if (user) {
+      req.user = user;
+    } else {
+      res.clearCookie(SESSION_COOKIE_NAME);
+    }
+  }
+  next();
+}
+
+function isAuthenticated(req: Request, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({ message: "Não autorizado" });
+  }
+  next();
+}
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  // Auth middleware
+  app.use(customAuthMiddleware);
+  
   await setupAuth(app);
 
-  // Auth routes
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const parsed = registerSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados inválidos", errors: parsed.error.errors });
+      }
+
+      const result = await registerUser(parsed.data);
+      if ('error' in result) {
+        return res.status(400).json({ message: result.error });
+      }
+
+      res.cookie(SESSION_COOKIE_NAME, result.sessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: SESSION_MAX_AGE,
+        path: '/',
+      });
+
+      const { password, ...userWithoutPassword } = result.user;
+      res.status(201).json({ user: userWithoutPassword });
+    } catch (error) {
+      console.error("Error registering user:", error);
+      res.status(500).json({ message: "Erro ao criar conta" });
+    }
+  });
+
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const parsed = loginSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados inválidos", errors: parsed.error.errors });
+      }
+
+      const result = await loginUser(parsed.data);
+      if ('error' in result) {
+        return res.status(401).json({ message: result.error });
+      }
+
+      res.cookie(SESSION_COOKIE_NAME, result.sessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: SESSION_MAX_AGE,
+        path: '/',
+      });
+
+      const { password, ...userWithoutPassword } = result.user;
+      res.json({ user: userWithoutPassword });
+    } catch (error) {
+      console.error("Error logging in:", error);
+      res.status(500).json({ message: "Erro ao fazer login" });
+    }
+  });
+
+  app.post('/api/auth/logout', isAuthenticated, async (req: any, res) => {
+    try {
+      await logoutUser(req.user.id);
+      res.clearCookie(SESSION_COOKIE_NAME);
+      res.json({ message: "Logout realizado com sucesso" });
+    } catch (error) {
+      console.error("Error logging out:", error);
+      res.status(500).json({ message: "Erro ao fazer logout" });
+    }
+  });
+
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.userId || req.user?.claims?.sub;
-      if (!userId) {
-        return res.status(401).json({ message: "User not found in session" });
-      }
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      res.json(user);
+      const { password, ...userWithoutPassword } = req.user;
+      res.json(userWithoutPassword);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -350,8 +445,7 @@ export async function registerRoutes(
   app.post("/api/stripe/checkout", isAuthenticated, async (req: any, res) => {
     try {
       const { stripeService } = await import("./stripeService");
-      const userId = req.user?.userId || req.user?.claims?.sub;
-      const user = await storage.getUser(userId);
+      const user = req.user;
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -390,15 +484,14 @@ export async function registerRoutes(
   app.post("/api/stripe/portal", isAuthenticated, async (req: any, res) => {
     try {
       const { stripeService } = await import("./stripeService");
-      const userId = req.user?.userId || req.user?.claims?.sub;
-      const user = await storage.getUser(userId);
+      const user = req.user;
       if (!user?.stripeCustomerId) {
         return res.status(400).json({ message: "No subscription found" });
       }
 
       const session = await stripeService.createCustomerPortalSession(
         user.stripeCustomerId,
-        `${req.protocol}://${req.get("host")}/configuracoes`
+        `${req.protocol}://${req.get("host")}/assinatura`
       );
 
       res.json({ url: session.url });
@@ -410,8 +503,7 @@ export async function registerRoutes(
 
   app.get("/api/subscription", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.userId || req.user?.claims?.sub;
-      const user = await storage.getUser(userId);
+      const user = req.user;
       if (!user?.stripeSubscriptionId) {
         return res.json({ subscription: null, status: user?.subscriptionStatus || "free" });
       }
