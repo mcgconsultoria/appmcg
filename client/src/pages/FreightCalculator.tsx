@@ -98,10 +98,14 @@ interface RouteData {
   emptyKmPickupRate: string;
   emptyKmPickupFlat: string;
   emptyKmPickupType: "unit" | "flat";
+  emptyKmPickupState: string;
+  emptyKmPickupCity: string;
   emptyKmDelivery: string;
   emptyKmDeliveryRate: string;
   emptyKmDeliveryFlat: string;
   emptyKmDeliveryType: "unit" | "flat";
+  emptyKmDeliveryState: string;
+  emptyKmDeliveryCity: string;
 }
 
 const createEmptyRoute = (): RouteData => ({
@@ -135,10 +139,14 @@ const createEmptyRoute = (): RouteData => ({
   emptyKmPickupRate: "",
   emptyKmPickupFlat: "",
   emptyKmPickupType: "unit",
+  emptyKmPickupState: "",
+  emptyKmPickupCity: "",
   emptyKmDelivery: "",
   emptyKmDeliveryRate: "",
   emptyKmDeliveryFlat: "",
   emptyKmDeliveryType: "unit",
+  emptyKmDeliveryState: "",
+  emptyKmDeliveryCity: "",
 });
 
 interface ProposalData {
@@ -906,7 +914,51 @@ export default function FreightCalculator() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3 p-4 border rounded-md">
-                    <Label className="font-medium">KM Vazia - Coleta</Label>
+                    <Label className="font-medium">KM Vazia - Coleta (de onde vem o veiculo)</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label className="text-xs">Estado</Label>
+                        <Select
+                          value={route.emptyKmPickupState}
+                          onValueChange={(value) => {
+                            updateRoute(route.id, "emptyKmPickupState", value);
+                            updateRoute(route.id, "emptyKmPickupCity", "");
+                          }}
+                        >
+                          <SelectTrigger data-testid={`select-empty-pickup-state-${index}`}>
+                            <SelectValue placeholder="UF" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {brazilStates.map((state) => (
+                              <SelectItem key={state.uf} value={state.uf}>
+                                {state.uf} - {state.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs">Cidade</Label>
+                        <Select
+                          value={route.emptyKmPickupCity}
+                          onValueChange={(value) =>
+                            updateRoute(route.id, "emptyKmPickupCity", value)
+                          }
+                          disabled={!route.emptyKmPickupState}
+                        >
+                          <SelectTrigger data-testid={`select-empty-pickup-city-${index}`}>
+                            <SelectValue placeholder={route.emptyKmPickupState ? "Selecione" : "Selecione o estado"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getCitiesByState(route.emptyKmPickupState).map((city) => (
+                              <SelectItem key={city} value={city}>
+                                {city}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
                         <Label htmlFor={`emptyKmPickup-${route.id}`} className="text-xs">KM</Label>
@@ -976,7 +1028,51 @@ export default function FreightCalculator() {
                     )}
                   </div>
                   <div className="space-y-3 p-4 border rounded-md">
-                    <Label className="font-medium">KM Vazia - Entrega</Label>
+                    <Label className="font-medium">KM Vazia - Entrega (para onde vai o veiculo)</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label className="text-xs">Estado</Label>
+                        <Select
+                          value={route.emptyKmDeliveryState}
+                          onValueChange={(value) => {
+                            updateRoute(route.id, "emptyKmDeliveryState", value);
+                            updateRoute(route.id, "emptyKmDeliveryCity", "");
+                          }}
+                        >
+                          <SelectTrigger data-testid={`select-empty-delivery-state-${index}`}>
+                            <SelectValue placeholder="UF" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {brazilStates.map((state) => (
+                              <SelectItem key={state.uf} value={state.uf}>
+                                {state.uf} - {state.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs">Cidade</Label>
+                        <Select
+                          value={route.emptyKmDeliveryCity}
+                          onValueChange={(value) =>
+                            updateRoute(route.id, "emptyKmDeliveryCity", value)
+                          }
+                          disabled={!route.emptyKmDeliveryState}
+                        >
+                          <SelectTrigger data-testid={`select-empty-delivery-city-${index}`}>
+                            <SelectValue placeholder={route.emptyKmDeliveryState ? "Selecione" : "Selecione o estado"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getCitiesByState(route.emptyKmDeliveryState).map((city) => (
+                              <SelectItem key={city} value={city}>
+                                {city}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
                         <Label htmlFor={`emptyKmDelivery-${route.id}`} className="text-xs">KM</Label>
