@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useLocation } from "wouter";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { validateDocument, formatDocument } from "@/lib/documentValidation";
 import {
   Select,
   SelectContent,
@@ -191,15 +192,51 @@ const initialProposalData: ProposalData = {
   notes: "",
 };
 
+interface DocErrors {
+  [key: string]: string;
+}
+
 export default function FreightCalculator() {
   const [routes, setRoutes] = useState<RouteData[]>([createEmptyRoute()]);
   const [proposalData, setProposalData] = useState<ProposalData>(initialProposalData);
   const [showProposalDialog, setShowProposalDialog] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [docErrors, setDocErrors] = useState<DocErrors>({});
   const { toast } = useToast();
   const { isAuthenticated, user } = useAuth();
   const [, setLocation] = useLocation();
+
+  const updateDocField = useCallback((routeId: string, field: "originDoc" | "destinationDoc", docType: "cpf" | "cnpj", value: string) => {
+    const formatted = formatDocument(docType, value);
+    const validation = validateDocument(docType, formatted);
+    const errorKey = `${routeId}-${field}`;
+    
+    setDocErrors(prev => ({
+      ...prev,
+      [errorKey]: validation.message
+    }));
+    
+    setRoutes(prev => prev.map(route => 
+      route.id === routeId ? { ...route, [field]: formatted } : route
+    ));
+  }, []);
+
+  const updateClientDoc = useCallback((value: string) => {
+    const formatted = formatDocument(proposalData.clientDocType, value);
+    const validation = validateDocument(proposalData.clientDocType, formatted);
+    
+    setDocErrors(prev => ({
+      ...prev,
+      clientDoc: validation.message
+    }));
+    
+    setProposalData(prev => ({ ...prev, clientDoc: formatted }));
+  }, [proposalData.clientDocType]);
+
+  const hasDocErrors = useMemo(() => {
+    return Object.values(docErrors).some(error => error !== "");
+  }, [docErrors]);
 
   const { data: clients } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
@@ -267,6 +304,12 @@ export default function FreightCalculator() {
   const removeRoute = (routeId: string) => {
     if (routes.length > 1) {
       setRoutes((prev) => prev.filter((route) => route.id !== routeId));
+      setDocErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[`${routeId}-originDoc`];
+        delete newErrors[`${routeId}-destinationDoc`];
+        return newErrors;
+      });
     }
   };
 
@@ -494,6 +537,7 @@ export default function FreightCalculator() {
     setRoutes([createEmptyRoute()]);
     setProposalData(initialProposalData);
     setSelectedClientId("");
+    setDocErrors({});
   };
 
   const handleClientSelect = (clientId: string) => {
@@ -625,9 +669,12 @@ export default function FreightCalculator() {
                         <div className="flex gap-2">
                           <Select
                             value={route.originDocType}
-                            onValueChange={(value) =>
-                              updateRoute(route.id, "originDocType", value as "cpf" | "cnpj")
-                            }
+                            onValueChange={(value) => {
+                              updateRoute(route.id, "originDocType", value as "cpf" | "cnpj");
+                              if (route.originDoc) {
+                                updateDocField(route.id, "originDoc", value as "cpf" | "cnpj", route.originDoc);
+                              }
+                            }}
                           >
                             <SelectTrigger className="w-24" data-testid={`select-origin-doctype-${index}`}>
                               <SelectValue />
@@ -642,11 +689,15 @@ export default function FreightCalculator() {
                             placeholder={route.originDocType === "cpf" ? "000.000.000-00" : "00.000.000/0000-00"}
                             value={route.originDoc}
                             onChange={(e) =>
-                              updateRoute(route.id, "originDoc", e.target.value)
+                              updateDocField(route.id, "originDoc", route.originDocType, e.target.value)
                             }
+                            className={docErrors[`${route.id}-originDoc`] ? "border-destructive" : ""}
                             data-testid={`input-origin-doc-${index}`}
                           />
                         </div>
+                        {docErrors[`${route.id}-originDoc`] && (
+                          <p className="text-xs text-destructive">{docErrors[`${route.id}-originDoc`]}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -714,9 +765,12 @@ export default function FreightCalculator() {
                         <div className="flex gap-2">
                           <Select
                             value={route.destinationDocType}
-                            onValueChange={(value) =>
-                              updateRoute(route.id, "destinationDocType", value as "cpf" | "cnpj")
-                            }
+                            onValueChange={(value) => {
+                              updateRoute(route.id, "destinationDocType", value as "cpf" | "cnpj");
+                              if (route.destinationDoc) {
+                                updateDocField(route.id, "destinationDoc", value as "cpf" | "cnpj", route.destinationDoc);
+                              }
+                            }}
                           >
                             <SelectTrigger className="w-24" data-testid={`select-destination-doctype-${index}`}>
                               <SelectValue />
@@ -731,11 +785,15 @@ export default function FreightCalculator() {
                             placeholder={route.destinationDocType === "cpf" ? "000.000.000-00" : "00.000.000/0000-00"}
                             value={route.destinationDoc}
                             onChange={(e) =>
-                              updateRoute(route.id, "destinationDoc", e.target.value)
+                              updateDocField(route.id, "destinationDoc", route.destinationDocType, e.target.value)
                             }
+                            className={docErrors[`${route.id}-destinationDoc`] ? "border-destructive" : ""}
                             data-testid={`input-destination-doc-${index}`}
                           />
                         </div>
+                        {docErrors[`${route.id}-destinationDoc`] && (
+                          <p className="text-xs text-destructive">{docErrors[`${route.id}-destinationDoc`]}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1797,12 +1855,18 @@ export default function FreightCalculator() {
                       <div className="flex gap-2">
                         <Select
                           value={proposalData.clientDocType}
-                          onValueChange={(value) =>
+                          onValueChange={(value) => {
                             setProposalData((prev) => ({
                               ...prev,
                               clientDocType: value as "cpf" | "cnpj",
-                            }))
-                          }
+                            }));
+                            if (proposalData.clientDoc) {
+                              const formatted = formatDocument(value as "cpf" | "cnpj", proposalData.clientDoc);
+                              const validation = validateDocument(value as "cpf" | "cnpj", formatted);
+                              setDocErrors(prev => ({ ...prev, clientDoc: validation.message }));
+                              setProposalData(prev => ({ ...prev, clientDoc: formatted }));
+                            }
+                          }}
                         >
                           <SelectTrigger className="w-24" data-testid="select-client-doctype">
                             <SelectValue />
@@ -1815,16 +1879,15 @@ export default function FreightCalculator() {
                         <Input
                           id="clientDoc"
                           value={proposalData.clientDoc}
-                          onChange={(e) =>
-                            setProposalData((prev) => ({
-                              ...prev,
-                              clientDoc: e.target.value,
-                            }))
-                          }
+                          onChange={(e) => updateClientDoc(e.target.value)}
                           placeholder={proposalData.clientDocType === "cpf" ? "000.000.000-00" : "00.000.000/0000-00"}
+                          className={docErrors.clientDoc ? "border-destructive" : ""}
                           data-testid="input-client-doc"
                         />
                       </div>
+                      {docErrors.clientDoc && (
+                        <p className="text-xs text-destructive">{docErrors.clientDoc}</p>
+                      )}
                     </div>
 
                     <Separator />
@@ -1914,7 +1977,7 @@ export default function FreightCalculator() {
                       onClick={() =>
                         saveMutation.mutate({ routes, proposal: proposalData })
                       }
-                      disabled={saveMutation.isPending || !proposalData.clientName}
+                      disabled={saveMutation.isPending || !proposalData.clientName || hasDocErrors}
                       data-testid="button-save-proposal"
                     >
                       <Save className="h-4 w-4 mr-2" />
