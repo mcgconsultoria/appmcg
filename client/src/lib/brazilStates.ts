@@ -71,6 +71,30 @@ export const packagingTypes = [
   { value: "tanque", label: "Tanque" },
 ];
 
+export const vehicleTypes = [
+  { value: "3_4", label: "3/4", axles: 2, capacityKg: 4000, description: "Veículo leve urbano" },
+  { value: "van", label: "Van", axles: 2, capacityKg: 1500, description: "Van de carga" },
+  { value: "toco", label: "Toco", axles: 2, capacityKg: 8000, description: "Caminhão toco" },
+  { value: "truck", label: "Truck", axles: 3, capacityKg: 14000, description: "Caminhão truck" },
+  { value: "bitruck", label: "Bitruck", axles: 4, capacityKg: 19000, description: "Caminhão bitruck" },
+  { value: "carreta", label: "Carreta", axles: 5, capacityKg: 27000, description: "Carreta simples" },
+  { value: "carreta_ls", label: "Carreta LS", axles: 6, capacityKg: 33000, description: "Carreta LS" },
+  { value: "bitrem", label: "Bitrem", axles: 7, capacityKg: 41000, description: "Bitrem" },
+  { value: "rodotrem", label: "Rodotrem", axles: 9, capacityKg: 57000, description: "Rodotrem" },
+];
+
+export const bodyTypes = [
+  { value: "sider", label: "Sider", description: "Carroceria com lonas laterais" },
+  { value: "bau_seco", label: "Baú Seco", description: "Baú fechado sem refrigeração" },
+  { value: "bau_refrigerado", label: "Baú Refrigerado", description: "Baú com sistema de refrigeração" },
+  { value: "gaiola", label: "Gaiola", description: "Carroceria aberta tipo gaiola" },
+  { value: "tanque", label: "Tanque", description: "Para transporte de líquidos" },
+  { value: "container", label: "Container", description: "Para containers marítimos" },
+  { value: "graneleiro", label: "Graneleiro", description: "Para grãos e granéis sólidos" },
+  { value: "cegonha", label: "Cegonha", description: "Para transporte de veículos" },
+  { value: "prancha", label: "Prancha", description: "Para cargas especiais/pesadas" },
+];
+
 export const vehicleAxles = [
   { value: 2, label: "2 eixos (Toco)" },
   { value: 3, label: "3 eixos (Truck)" },
@@ -80,6 +104,20 @@ export const vehicleAxles = [
   { value: 7, label: "7 eixos (Bitrem)" },
   { value: 9, label: "9 eixos (Rodotrem)" },
 ];
+
+export function suggestVehicleByWeight(weightKg: number): typeof vehicleTypes[0] | null {
+  const sortedVehicles = [...vehicleTypes].sort((a, b) => a.capacityKg - b.capacityKg);
+  for (const vehicle of sortedVehicles) {
+    if (vehicle.capacityKg >= weightKg) {
+      return vehicle;
+    }
+  }
+  return sortedVehicles[sortedVehicles.length - 1];
+}
+
+export function getVehicleByType(type: string): typeof vehicleTypes[0] | undefined {
+  return vehicleTypes.find(v => v.value === type);
+}
 
 export const anttCoefficients: Record<string, Record<number, { ccd: number; cc: number }>> = {
   granel_solido: {

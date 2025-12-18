@@ -50,13 +50,18 @@ import {
   productTypes,
   packagingTypes,
   vehicleAxles,
+  vehicleTypes,
+  bodyTypes,
   glpModels,
   formatCurrency,
   calculateAnttMinFreight,
   getTaxInfo,
   isTollExemptFromIcms,
   getRouteType,
+  suggestVehicleByWeight,
+  getVehicleByType,
 } from "@/lib/brazilStates";
+import { getCitiesByState } from "@/lib/brazilCities";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -67,14 +72,19 @@ interface RouteData {
   operationName: string;
   originCity: string;
   originState: string;
+  originCnpj: string;
   destinationCity: string;
   destinationState: string;
+  destinationCnpj: string;
   distanceKm: string;
   productType: string;
   packagingType: string;
   weight: string;
   cargoValue: string;
+  vehicleType: string;
   vehicleAxles: number;
+  bodyType: string;
+  suggestedVehicle: string;
   useAnttMinFreight: boolean;
   freightValue: string;
   tollValue: string;
@@ -84,6 +94,14 @@ interface RouteData {
   glpModel: string;
   glpQuantity: string;
   unitFreight: string;
+  emptyKmPickup: string;
+  emptyKmPickupRate: string;
+  emptyKmPickupFlat: string;
+  emptyKmPickupType: "unit" | "flat";
+  emptyKmDelivery: string;
+  emptyKmDeliveryRate: string;
+  emptyKmDeliveryFlat: string;
+  emptyKmDeliveryType: "unit" | "flat";
 }
 
 const createEmptyRoute = (): RouteData => ({
@@ -91,14 +109,19 @@ const createEmptyRoute = (): RouteData => ({
   operationName: "",
   originCity: "",
   originState: "",
+  originCnpj: "",
   destinationCity: "",
   destinationState: "",
+  destinationCnpj: "",
   distanceKm: "",
   productType: "carga_geral",
   packagingType: "pallet",
   weight: "",
   cargoValue: "",
+  vehicleType: "carreta",
   vehicleAxles: 5,
+  bodyType: "sider",
+  suggestedVehicle: "",
   useAnttMinFreight: false,
   freightValue: "",
   tollValue: "",
@@ -108,6 +131,14 @@ const createEmptyRoute = (): RouteData => ({
   glpModel: "",
   glpQuantity: "",
   unitFreight: "",
+  emptyKmPickup: "",
+  emptyKmPickupRate: "",
+  emptyKmPickupFlat: "",
+  emptyKmPickupType: "unit",
+  emptyKmDelivery: "",
+  emptyKmDeliveryRate: "",
+  emptyKmDeliveryFlat: "",
+  emptyKmDeliveryType: "unit",
 });
 
 interface ProposalData {
@@ -411,14 +442,15 @@ export default function FreightCalculator() {
                       <MapPin className="h-4 w-4" />
                       Origem
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div className="space-y-2">
                         <Label htmlFor={`originState-${route.id}`}>Estado</Label>
                         <Select
                           value={route.originState}
-                          onValueChange={(value) =>
-                            updateRoute(route.id, "originState", value)
-                          }
+                          onValueChange={(value) => {
+                            updateRoute(route.id, "originState", value);
+                            updateRoute(route.id, "originCity", "");
+                          }}
                         >
                           <SelectTrigger
                             id={`originState-${route.id}`}
@@ -437,14 +469,38 @@ export default function FreightCalculator() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor={`originCity-${route.id}`}>Cidade</Label>
-                        <Input
-                          id={`originCity-${route.id}`}
-                          placeholder="Cidade de origem"
+                        <Select
                           value={route.originCity}
-                          onChange={(e) =>
-                            updateRoute(route.id, "originCity", e.target.value)
+                          onValueChange={(value) =>
+                            updateRoute(route.id, "originCity", value)
                           }
-                          data-testid={`input-origin-city-${index}`}
+                          disabled={!route.originState}
+                        >
+                          <SelectTrigger
+                            id={`originCity-${route.id}`}
+                            data-testid={`select-origin-city-${index}`}
+                          >
+                            <SelectValue placeholder={route.originState ? "Selecione" : "Selecione o estado"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getCitiesByState(route.originState).map((city) => (
+                              <SelectItem key={city} value={city}>
+                                {city}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`originCnpj-${route.id}`}>CNPJ (opcional)</Label>
+                        <Input
+                          id={`originCnpj-${route.id}`}
+                          placeholder="00.000.000/0000-00"
+                          value={route.originCnpj}
+                          onChange={(e) =>
+                            updateRoute(route.id, "originCnpj", e.target.value)
+                          }
+                          data-testid={`input-origin-cnpj-${index}`}
                         />
                       </div>
                     </div>
@@ -455,16 +511,17 @@ export default function FreightCalculator() {
                       <MapPin className="h-4 w-4" />
                       Destino
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div className="space-y-2">
                         <Label htmlFor={`destinationState-${route.id}`}>
                           Estado
                         </Label>
                         <Select
                           value={route.destinationState}
-                          onValueChange={(value) =>
-                            updateRoute(route.id, "destinationState", value)
-                          }
+                          onValueChange={(value) => {
+                            updateRoute(route.id, "destinationState", value);
+                            updateRoute(route.id, "destinationCity", "");
+                          }}
                         >
                           <SelectTrigger
                             id={`destinationState-${route.id}`}
@@ -485,18 +542,45 @@ export default function FreightCalculator() {
                         <Label htmlFor={`destinationCity-${route.id}`}>
                           Cidade
                         </Label>
-                        <Input
-                          id={`destinationCity-${route.id}`}
-                          placeholder="Cidade de destino"
+                        <Select
                           value={route.destinationCity}
-                          onChange={(e) =>
-                            updateRoute(route.id, "destinationCity", e.target.value)
+                          onValueChange={(value) =>
+                            updateRoute(route.id, "destinationCity", value)
                           }
-                          data-testid={`input-destination-city-${index}`}
+                          disabled={!route.destinationState}
+                        >
+                          <SelectTrigger
+                            id={`destinationCity-${route.id}`}
+                            data-testid={`select-destination-city-${index}`}
+                          >
+                            <SelectValue placeholder={route.destinationState ? "Selecione" : "Selecione o estado"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getCitiesByState(route.destinationState).map((city) => (
+                              <SelectItem key={city} value={city}>
+                                {city}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`destinationCnpj-${route.id}`}>
+                          CNPJ (opcional)
+                        </Label>
+                        <Input
+                          id={`destinationCnpj-${route.id}`}
+                          placeholder="00.000.000/0000-00"
+                          value={route.destinationCnpj}
+                          onChange={(e) =>
+                            updateRoute(route.id, "destinationCnpj", e.target.value)
+                          }
+                          data-testid={`input-destination-cnpj-${index}`}
                         />
                       </div>
                     </div>
                   </div>
+
                 </div>
 
                 {calc?.tollExempt && route.originState === "PR" && (
@@ -688,11 +772,40 @@ export default function FreightCalculator() {
                 <Separator />
 
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <Calculator className="h-4 w-4" />
-                  Calculo do Frete
+                  <Truck className="h-4 w-4" />
+                  Veiculo e Rota
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`vehicleType-${route.id}`}>
+                      Tipo de Veiculo
+                    </Label>
+                    <Select
+                      value={route.vehicleType}
+                      onValueChange={(value) => {
+                        const vehicle = getVehicleByType(value);
+                        updateRoute(route.id, "vehicleType", value);
+                        if (vehicle) {
+                          updateRoute(route.id, "vehicleAxles", vehicle.axles);
+                        }
+                      }}
+                    >
+                      <SelectTrigger
+                        id={`vehicleType-${route.id}`}
+                        data-testid={`select-vehicle-type-${index}`}
+                      >
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {vehicleTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label} ({type.capacityKg.toLocaleString()}kg)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor={`vehicleAxles-${route.id}`}>
                       Eixos do Veiculo
@@ -719,6 +832,31 @@ export default function FreightCalculator() {
                     </Select>
                   </div>
                   <div className="space-y-2">
+                    <Label htmlFor={`bodyType-${route.id}`}>
+                      Tipo de Carroceria
+                    </Label>
+                    <Select
+                      value={route.bodyType}
+                      onValueChange={(value) =>
+                        updateRoute(route.id, "bodyType", value)
+                      }
+                    >
+                      <SelectTrigger
+                        id={`bodyType-${route.id}`}
+                        data-testid={`select-body-type-${index}`}
+                      >
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {bodyTypes.map((type) => (
+                          <SelectItem key={type.value} value={type.value}>
+                            {type.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor={`distanceKm-${route.id}`}>Distancia (km)</Label>
                     <Input
                       id={`distanceKm-${route.id}`}
@@ -733,11 +871,194 @@ export default function FreightCalculator() {
                       data-testid={`input-distance-${index}`}
                     />
                   </div>
+                </div>
+
+                {parseFloat(route.weight) > 0 && (() => {
+                  const suggested = suggestVehicleByWeight(parseFloat(route.weight));
+                  if (suggested && suggested.value !== route.vehicleType) {
+                    return (
+                      <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950 rounded-md text-sm">
+                        <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                        <p className="text-amber-700 dark:text-amber-300">
+                          <strong>Sugestao:</strong> Para {parseFloat(route.weight).toLocaleString()}kg, recomendamos usar <strong>{suggested.label}</strong> (capacidade: {suggested.capacityKg.toLocaleString()}kg).
+                        </p>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3 p-4 border rounded-md">
+                    <Label className="font-medium">KM Vazia - Coleta</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label htmlFor={`emptyKmPickup-${route.id}`} className="text-xs">KM</Label>
+                        <Input
+                          id={`emptyKmPickup-${route.id}`}
+                          type="number"
+                          step="1"
+                          min="0"
+                          placeholder="0"
+                          value={route.emptyKmPickup}
+                          onChange={(e) =>
+                            updateRoute(route.id, "emptyKmPickup", e.target.value)
+                          }
+                          data-testid={`input-empty-km-pickup-${index}`}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs">Tipo de Cobranca</Label>
+                        <Select
+                          value={route.emptyKmPickupType}
+                          onValueChange={(value: "unit" | "flat") =>
+                            updateRoute(route.id, "emptyKmPickupType", value)
+                          }
+                        >
+                          <SelectTrigger data-testid={`select-empty-pickup-type-${index}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="unit">Por KM</SelectItem>
+                            <SelectItem value="flat">Valor Fixo</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    {route.emptyKmPickupType === "unit" ? (
+                      <div className="space-y-2">
+                        <Label htmlFor={`emptyKmPickupRate-${route.id}`} className="text-xs">Valor por KM (R$)</Label>
+                        <Input
+                          id={`emptyKmPickupRate-${route.id}`}
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0,00"
+                          value={route.emptyKmPickupRate}
+                          onChange={(e) =>
+                            updateRoute(route.id, "emptyKmPickupRate", e.target.value)
+                          }
+                          data-testid={`input-empty-pickup-rate-${index}`}
+                        />
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Label htmlFor={`emptyKmPickupFlat-${route.id}`} className="text-xs">Valor Fixo (R$)</Label>
+                        <Input
+                          id={`emptyKmPickupFlat-${route.id}`}
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0,00"
+                          value={route.emptyKmPickupFlat}
+                          onChange={(e) =>
+                            updateRoute(route.id, "emptyKmPickupFlat", e.target.value)
+                          }
+                          data-testid={`input-empty-pickup-flat-${index}`}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-3 p-4 border rounded-md">
+                    <Label className="font-medium">KM Vazia - Entrega</Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label htmlFor={`emptyKmDelivery-${route.id}`} className="text-xs">KM</Label>
+                        <Input
+                          id={`emptyKmDelivery-${route.id}`}
+                          type="number"
+                          step="1"
+                          min="0"
+                          placeholder="0"
+                          value={route.emptyKmDelivery}
+                          onChange={(e) =>
+                            updateRoute(route.id, "emptyKmDelivery", e.target.value)
+                          }
+                          data-testid={`input-empty-km-delivery-${index}`}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs">Tipo de Cobranca</Label>
+                        <Select
+                          value={route.emptyKmDeliveryType}
+                          onValueChange={(value: "unit" | "flat") =>
+                            updateRoute(route.id, "emptyKmDeliveryType", value)
+                          }
+                        >
+                          <SelectTrigger data-testid={`select-empty-delivery-type-${index}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="unit">Por KM</SelectItem>
+                            <SelectItem value="flat">Valor Fixo</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    {route.emptyKmDeliveryType === "unit" ? (
+                      <div className="space-y-2">
+                        <Label htmlFor={`emptyKmDeliveryRate-${route.id}`} className="text-xs">Valor por KM (R$)</Label>
+                        <Input
+                          id={`emptyKmDeliveryRate-${route.id}`}
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0,00"
+                          value={route.emptyKmDeliveryRate}
+                          onChange={(e) =>
+                            updateRoute(route.id, "emptyKmDeliveryRate", e.target.value)
+                          }
+                          data-testid={`input-empty-delivery-rate-${index}`}
+                        />
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Label htmlFor={`emptyKmDeliveryFlat-${route.id}`} className="text-xs">Valor Fixo (R$)</Label>
+                        <Input
+                          id={`emptyKmDeliveryFlat-${route.id}`}
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="0,00"
+                          value={route.emptyKmDeliveryFlat}
+                          onChange={(e) =>
+                            updateRoute(route.id, "emptyKmDeliveryFlat", e.target.value)
+                          }
+                          data-testid={`input-empty-delivery-flat-${index}`}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Calculator className="h-4 w-4" />
+                  Calculo do Frete
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Frete Minimo ANTT</Label>
                     <div className="flex items-center gap-2 min-h-9 px-3 py-2 rounded-md border bg-muted/50">
                       <span className="font-medium">
                         {formatCurrency(calc?.anttMinFreight || 0)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Adicional KM Vazia</Label>
+                    <div className="flex items-center gap-2 min-h-9 px-3 py-2 rounded-md border bg-muted/50">
+                      <span className="font-medium">
+                        {formatCurrency(
+                          (route.emptyKmPickupType === "unit"
+                            ? (parseFloat(route.emptyKmPickup) || 0) * (parseFloat(route.emptyKmPickupRate) || 0)
+                            : parseFloat(route.emptyKmPickupFlat) || 0) +
+                          (route.emptyKmDeliveryType === "unit"
+                            ? (parseFloat(route.emptyKmDelivery) || 0) * (parseFloat(route.emptyKmDeliveryRate) || 0)
+                            : parseFloat(route.emptyKmDeliveryFlat) || 0)
+                        )}
                       </span>
                     </div>
                   </div>
