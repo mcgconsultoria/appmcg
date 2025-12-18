@@ -770,5 +770,50 @@ export async function registerRoutes(
     }
   });
 
+  // Quota management routes
+  app.get("/api/calculations/quota", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user;
+      const isPaid = user.subscriptionStatus === "active" || user.subscriptionStatus === "trialing";
+      
+      res.json({
+        remaining: isPaid ? null : (user.freeCalculationsRemaining ?? 3),
+        used: user.totalCalculationsUsed ?? 0,
+        unlimited: isPaid,
+        subscriptionStatus: user.subscriptionStatus,
+      });
+    } catch (error) {
+      console.error("Error fetching quota:", error);
+      res.status(500).json({ message: "Failed to fetch quota" });
+    }
+  });
+
+  app.post("/api/calculations/use", isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user;
+      const isPaid = user.subscriptionStatus === "active" || user.subscriptionStatus === "trialing";
+      
+      if (!isPaid && (user.freeCalculationsRemaining ?? 3) <= 0) {
+        return res.status(402).json({ 
+          message: "Sem cálculos gratuitos restantes",
+          requiresUpgrade: true,
+        });
+      }
+      
+      await storage.useCalculation(user.id);
+      
+      const updatedRemaining = isPaid ? null : Math.max(0, (user.freeCalculationsRemaining ?? 3) - 1);
+      
+      res.json({
+        success: true,
+        remaining: updatedRemaining,
+        unlimited: isPaid,
+      });
+    } catch (error) {
+      console.error("Error using calculation:", error);
+      res.status(500).json({ message: "Failed to use calculation" });
+    }
+  });
+
   return httpServer;
 }

@@ -112,6 +112,9 @@ export interface IStorage {
   // Client operation operations
   getClientOperations(clientId: number): Promise<ClientOperation[]>;
   createClientOperation(operation: InsertClientOperation): Promise<ClientOperation>;
+
+  // Quota operations
+  useCalculation(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -449,6 +452,19 @@ export class DatabaseStorage implements IStorage {
   async createClientOperation(operation: InsertClientOperation): Promise<ClientOperation> {
     const [newOperation] = await db.insert(clientOperations).values(operation).returning();
     return newOperation;
+  }
+
+  // Quota operations
+  async useCalculation(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        freeCalculationsRemaining: sql`GREATEST(0, COALESCE(free_calculations_remaining, 3) - 1)`,
+        totalCalculationsUsed: sql`COALESCE(total_calculations_used, 0) + 1`,
+        lastCalculationAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
   }
 }
 

@@ -44,6 +44,9 @@ export const users = pgTable("users", {
   activeSessionToken: varchar("active_session_token"),
   lgpdConsentAt: timestamp("lgpd_consent_at"),
   cookieConsentAt: timestamp("cookie_consent_at"),
+  freeCalculationsRemaining: integer("free_calculations_remaining").default(3),
+  totalCalculationsUsed: integer("total_calculations_used").default(0),
+  lastCalculationAt: timestamp("last_calculation_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

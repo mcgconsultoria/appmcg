@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useLocation } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
+  Alert,
+  AlertDescription,
+} from "@/components/ui/alert";
+import {
   Calculator,
   RotateCcw,
   Save,
@@ -36,7 +41,10 @@ import {
   Truck,
   Package,
   MapPin,
+  UserPlus,
+  Crown,
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import {
   brazilStates,
   productTypes,
@@ -119,15 +127,62 @@ export default function FreightCalculator() {
   const [routes, setRoutes] = useState<RouteData[]>([createEmptyRoute()]);
   const [proposalData, setProposalData] = useState<ProposalData>(initialProposalData);
   const [showProposalDialog, setShowProposalDialog] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const { toast } = useToast();
+  const { isAuthenticated, user } = useAuth();
+  const [, setLocation] = useLocation();
 
   const { data: clients } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
     retry: false,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000,
+    enabled: isAuthenticated,
   });
+
+  const { data: quota } = useQuery<{ remaining: number | null; unlimited: boolean }>({
+    queryKey: ["/api/calculations/quota"],
+    retry: false,
+    refetchOnWindowFocus: false,
+    enabled: isAuthenticated,
+  });
+
+  const useCalculationMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/calculations/use");
+      if (!res.ok) {
+        const data = await res.json();
+        if (data.requiresUpgrade) {
+          throw new Error("UPGRADE_REQUIRED");
+        }
+        throw new Error(data.message);
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/calculations/quota"] });
+    },
+  });
+
+  const handleSendProposal = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Cadastro necessario",
+        description: "Para enviar propostas, voce precisa criar uma conta gratuita.",
+        variant: "default",
+      });
+      setLocation("/registro");
+      return;
+    }
+
+    if (!quota?.unlimited && quota?.remaining !== null && quota?.remaining <= 0) {
+      setShowUpgradeDialog(true);
+      return;
+    }
+
+    setShowProposalDialog(true);
+  };
 
   const updateRoute = (routeId: string, field: keyof RouteData, value: any) => {
     setRoutes((prev) =>
@@ -802,11 +857,23 @@ export default function FreightCalculator() {
                   {formatCurrency(totalProposalValue)}
                 </p>
               </div>
+              {!isAuthenticated ? (
+                <Button onClick={handleSendProposal} disabled={!canCalculate} data-testid="button-create-proposal">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Cadastre-se para Enviar Proposta
+                </Button>
+              ) : (
+              <>
               <Dialog open={showProposalDialog} onOpenChange={setShowProposalDialog}>
                 <DialogTrigger asChild>
-                  <Button disabled={!canCalculate} data-testid="button-create-proposal">
+                  <Button onClick={handleSendProposal} disabled={!canCalculate} data-testid="button-create-proposal">
                     <FileDown className="h-4 w-4 mr-2" />
                     Criar Proposta Comercial
+                    {quota?.remaining !== null && !quota?.unlimited && (
+                      <Badge variant="secondary" className="ml-2">
+                        {quota?.remaining} gratuitos
+                      </Badge>
+                    )}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-lg">
@@ -998,6 +1065,8 @@ export default function FreightCalculator() {
                   </DialogFooter>
                 </DialogContent>
               </Dialog>
+              </>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -1035,6 +1104,44 @@ export default function FreightCalculator() {
             </p>
           </CardContent>
         </Card>
+
+        <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Crown className="h-5 w-5 text-yellow-500" />
+                Calculos Gratuitos Esgotados
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-muted-foreground">
+                Voce utilizou todos os seus calculos gratuitos. Para continuar
+                enviando propostas e acessar recursos avancados, escolha um de
+                nossos planos.
+              </p>
+              <div className="bg-muted p-4 rounded-md space-y-2">
+                <h4 className="font-semibold">Com um plano voce tem acesso a:</h4>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>Calculos ilimitados de frete e armazenagem</li>
+                  <li>CRM completo para gestao de clientes</li>
+                  <li>Pipeline de vendas</li>
+                  <li>Checklists operacionais</li>
+                  <li>Gestao financeira</li>
+                  <li>Materiais de marketing</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setShowUpgradeDialog(false)}>
+                Voltar
+              </Button>
+              <Button onClick={() => setLocation("/planos")} data-testid="button-view-plans">
+                <Crown className="h-4 w-4 mr-2" />
+                Ver Planos
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );
