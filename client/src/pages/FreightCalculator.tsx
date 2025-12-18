@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useLocation } from "wouter";
 import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -252,6 +252,110 @@ export default function FreightCalculator() {
     refetchOnWindowFocus: false,
     enabled: isAuthenticated,
   });
+
+  const { data: routeApiStatus } = useQuery<{ configured: boolean; provider: string | null }>({
+    queryKey: ["/api/route-calculation/status"],
+    retry: false,
+    staleTime: 60 * 1000,
+  });
+
+  const [loadingRouteCalc, setLoadingRouteCalc] = useState<Record<string, boolean>>({});
+
+  const fetchRouteData = useCallback(async (routeData: RouteData) => {
+    if (!routeApiStatus?.configured) return;
+    if (!routeData.originCity || !routeData.originState || !routeData.destinationCity || !routeData.destinationState) return;
+    
+    setLoadingRouteCalc(prev => ({ ...prev, [routeData.id]: true }));
+    
+    try {
+      const res = await apiRequest("POST", "/api/route-calculation", {
+        originCity: routeData.originCity,
+        originState: routeData.originState,
+        destinationCity: routeData.destinationCity,
+        destinationState: routeData.destinationState,
+        vehicleType: routeData.vehicleType,
+        vehicleAxles: routeData.vehicleAxles,
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setRoutes(prev => prev.map(r => 
+          r.id === routeData.id 
+            ? { 
+                ...r, 
+                distanceKm: data.distanceKm?.toString() || r.distanceKm,
+                tollValue: data.tollValue?.toString() || r.tollValue,
+              } 
+            : r
+        ));
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        if (res.status !== 503) {
+          toast({
+            title: "Erro ao calcular rota",
+            description: errorData.message || "Nao foi possivel obter dados da rota",
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching route data:", error);
+    } finally {
+      setLoadingRouteCalc(prev => ({ ...prev, [routeData.id]: false }));
+    }
+  }, [routeApiStatus?.configured, toast]);
+
+  const [routeLocationKeys, setRouteLocationKeys] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    routes.forEach(route => {
+      const locationKey = `${route.originCity}-${route.originState}-${route.destinationCity}-${route.destinationState}`;
+      const prevLocationKey = routeLocationKeys[route.id];
+      
+      if (route.originCity && route.originState && route.destinationCity && route.destinationState) {
+        if (locationKey !== prevLocationKey) {
+          setRouteLocationKeys(prev => ({ ...prev, [route.id]: locationKey }));
+          if (!loadingRouteCalc[route.id]) {
+            fetchRouteData(route);
+          }
+        }
+      }
+    });
+  }, [routes, routeApiStatus?.configured, fetchRouteData]);
+
+  const handleVehicleChange = useCallback((routeId: string, newVehicleType: string, newAxles: number) => {
+    setRoutes(prev => {
+      const newRoutes = prev.map(r => 
+        r.id === routeId 
+          ? { ...r, vehicleType: newVehicleType, vehicleAxles: newAxles } 
+          : r
+      );
+      
+      const updatedRoute = newRoutes.find(r => r.id === routeId);
+      if (routeApiStatus?.configured && updatedRoute?.originCity && updatedRoute?.destinationCity) {
+        setTimeout(() => fetchRouteData(updatedRoute), 0);
+      }
+      
+      return newRoutes;
+    });
+  }, [routeApiStatus?.configured, fetchRouteData]);
+
+  const handleAxlesChange = useCallback((routeId: string, newAxles: number) => {
+    setRoutes(prev => {
+      const newRoutes = prev.map(r => 
+        r.id === routeId 
+          ? { ...r, vehicleAxles: newAxles } 
+          : r
+      );
+      
+      const updatedRoute = newRoutes.find(r => r.id === routeId);
+      if (routeApiStatus?.configured && updatedRoute?.originCity && updatedRoute?.destinationCity) {
+        setTimeout(() => fetchRouteData(updatedRoute), 0);
+      }
+      
+      return newRoutes;
+    });
+  }, [routeApiStatus?.configured, fetchRouteData]);
 
   const useCalculationMutation = useMutation({
     mutationFn: async () => {
@@ -801,20 +905,39 @@ export default function FreightCalculator() {
 
                 <div className="space-y-2">
                   <Label htmlFor={`distanceKm-${route.id}`}>Distancia da Rota (km)</Label>
-                  <Input
-                    id={`distanceKm-${route.id}`}
-                    type="number"
-                    step="1"
-                    min="0"
-                    placeholder="Informe a distancia em km"
-                    value={route.distanceKm}
-                    onChange={(e) =>
-                      updateRoute(route.id, "distanceKm", e.target.value)
-                    }
-                    data-testid={`input-distance-${index}`}
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      id={`distanceKm-${route.id}`}
+                      type="number"
+                      step="1"
+                      min="0"
+                      placeholder={loadingRouteCalc[route.id] ? "Calculando..." : "Informe a distancia em km"}
+                      value={route.distanceKm}
+                      onChange={(e) =>
+                        updateRoute(route.id, "distanceKm", e.target.value)
+                      }
+                      disabled={loadingRouteCalc[route.id]}
+                      data-testid={`input-distance-${index}`}
+                    />
+                    {routeApiStatus?.configured && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => fetchRouteData(route)}
+                        disabled={loadingRouteCalc[route.id] || !route.originCity || !route.destinationCity}
+                        title="Recalcular rota"
+                        data-testid={`button-recalculate-route-${index}`}
+                      >
+                        <RotateCcw className={`h-4 w-4 ${loadingRouteCalc[route.id] ? "animate-spin" : ""}`} />
+                      </Button>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    Distancia entre origem e destino. Futuramente sera calculado automaticamente.
+                    {routeApiStatus?.configured 
+                      ? `Calculado automaticamente via ${routeApiStatus.provider}. Altere manualmente se necessario.`
+                      : "Configure ROTAS_BRASIL_TOKEN nas configuracoes para calculo automatico."
+                    }
                   </p>
                 </div>
 
@@ -1020,10 +1143,7 @@ export default function FreightCalculator() {
                       value={route.vehicleType}
                       onValueChange={(value) => {
                         const vehicle = getVehicleByType(value);
-                        updateRoute(route.id, "vehicleType", value);
-                        if (vehicle) {
-                          updateRoute(route.id, "vehicleAxles", vehicle.axles);
-                        }
+                        handleVehicleChange(route.id, value, vehicle?.axles || route.vehicleAxles);
                       }}
                     >
                       <SelectTrigger
@@ -1047,9 +1167,9 @@ export default function FreightCalculator() {
                     </Label>
                     <Select
                       value={route.vehicleAxles.toString()}
-                      onValueChange={(value) =>
-                        updateRoute(route.id, "vehicleAxles", parseInt(value))
-                      }
+                      onValueChange={(value) => {
+                        handleAxlesChange(route.id, parseInt(value));
+                      }}
                     >
                       <SelectTrigger
                         id={`vehicleAxles-${route.id}`}
@@ -1595,13 +1715,19 @@ export default function FreightCalculator() {
                       type="number"
                       step="0.01"
                       min="0"
-                      placeholder="0,00"
+                      placeholder={loadingRouteCalc[route.id] ? "Calculando..." : "0,00"}
                       value={route.tollValue}
                       onChange={(e) =>
                         updateRoute(route.id, "tollValue", e.target.value)
                       }
+                      disabled={loadingRouteCalc[route.id]}
                       data-testid={`input-toll-value-${index}`}
                     />
+                    {routeApiStatus?.configured && (
+                      <p className="text-xs text-muted-foreground">
+                        Calculado por {route.vehicleAxles} eixos
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor={`unloadingValue-${route.id}`}>

@@ -287,6 +287,92 @@ export async function registerRoutes(
     }
   });
 
+  // Route calculation API (Rotas Brasil integration)
+  app.post("/api/route-calculation", async (req, res) => {
+    try {
+      const { originCity, originState, destinationCity, destinationState, vehicleType, vehicleAxles } = req.body;
+      
+      if (!originCity || !originState || !destinationCity || !destinationState) {
+        return res.status(400).json({ message: "Origem e destino sao obrigatorios" });
+      }
+      
+      const token = process.env.ROTAS_BRASIL_TOKEN;
+      
+      if (!token) {
+        return res.status(503).json({ 
+          message: "API de rotas nao configurada",
+          configured: false,
+          hint: "Configure ROTAS_BRASIL_TOKEN para habilitar calculo automatico"
+        });
+      }
+      
+      const origin = `${originCity},${originState}`;
+      const destination = `${destinationCity},${destinationState}`;
+      const pontos = `${origin};${destination}`;
+      
+      const vehicleMap: Record<string, string> = {
+        vuc: "caminhao",
+        toco: "caminhao",
+        truck: "caminhao",
+        carreta: "caminhao",
+        bitrem: "caminhao",
+        rodotrem: "caminhao",
+        van: "auto",
+        fiorino: "auto",
+      };
+      
+      const veiculo = vehicleMap[vehicleType] || "caminhao";
+      const eixos = vehicleAxles || 2;
+      
+      const apiUrl = new URL("https://rotasbrasil.com.br/apiRotas/enderecos/");
+      apiUrl.searchParams.append("Token", token);
+      apiUrl.searchParams.append("pontos", pontos);
+      apiUrl.searchParams.append("veiculo", veiculo);
+      apiUrl.searchParams.append("eixos", eixos.toString());
+      
+      const response = await fetch(apiUrl.toString());
+      
+      if (!response.ok) {
+        console.error("Rotas Brasil API error:", response.status, response.statusText);
+        return res.status(502).json({ 
+          message: "Erro ao consultar API de rotas",
+          configured: true,
+        });
+      }
+      
+      const data = await response.json();
+      
+      if (data.erro || !data.rotas || data.rotas.length === 0) {
+        return res.status(404).json({ 
+          message: "Rota nao encontrada",
+          configured: true,
+        });
+      }
+      
+      const route = data.rotas[0];
+      
+      res.json({
+        configured: true,
+        distanceKm: route.distancia || 0,
+        tollValue: route.valorPedagio || 0,
+        duration: route.duracao || "",
+        tolls: route.pedagios || [],
+      });
+    } catch (error) {
+      console.error("Error calculating route:", error);
+      res.status(500).json({ message: "Erro ao calcular rota" });
+    }
+  });
+
+  // Check if route API is configured
+  app.get("/api/route-calculation/status", async (req, res) => {
+    const token = process.env.ROTAS_BRASIL_TOKEN;
+    res.json({
+      configured: !!token,
+      provider: token ? "Rotas Brasil" : null,
+    });
+  });
+
   // Freight calculation routes
   app.get("/api/freight-calculations", isAuthenticated, async (req, res) => {
     try {
