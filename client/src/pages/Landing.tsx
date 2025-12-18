@@ -25,31 +25,37 @@ const features = [
     icon: ClipboardCheck,
     title: "Checklist Completo",
     description: "15 departamentos com questões estruturadas para diagnóstico completo da operação",
+    href: "/login",
   },
   {
     icon: Calculator,
     title: "Calculadoras",
     description: "Cálculo preciso de frete e armazenagem com ICMS, GRIS, ADV e impostos",
+    href: "/calculadora-frete",
   },
   {
     icon: Users,
     title: "CRM Integrado",
     description: "Gestão completa de clientes com pipeline visual e acompanhamento de propostas",
+    href: "/login",
   },
   {
     icon: BarChart3,
     title: "Dashboard Gerencial",
     description: "Visualização em tempo real dos indicadores da sua operação comercial",
+    href: "/login",
   },
   {
     icon: TrendingUp,
     title: "Módulo Financeiro",
     description: "Controle de contas a pagar e receber com gestão de encargos contábeis",
+    href: "/login",
   },
   {
     icon: Shield,
     title: "Multi-empresas",
     description: "Arquitetura segura com isolamento completo de dados entre empresas",
+    href: "/planos",
   },
 ];
 
@@ -209,15 +215,17 @@ export default function Landing() {
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {features.map((feature) => (
-                <Card key={feature.title} className="hover-elevate">
-                  <CardContent className="p-6">
-                    <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                      <feature.icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
-                  </CardContent>
-                </Card>
+                <Link key={feature.title} href={feature.href}>
+                  <Card className="hover-elevate cursor-pointer h-full">
+                    <CardContent className="p-6">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                        <feature.icon className="h-6 w-6 text-primary" />
+                      </div>
+                      <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                      <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           </div>
@@ -231,12 +239,12 @@ export default function Landing() {
             <p className="text-primary-foreground/80 max-w-2xl mx-auto mb-8">
               Comece agora e tenha acesso ao sistema completo de gestão para empresas de logística
             </p>
-            <a href="/api/login">
+            <Link href="/login">
               <Button size="lg" variant="secondary" className="gap-2" data-testid="button-cta-start">
                 Acessar o sistema
                 <ArrowRight className="h-4 w-4" />
               </Button>
-            </a>
+            </Link>
           </div>
         </section>
 
