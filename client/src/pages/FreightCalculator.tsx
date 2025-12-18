@@ -67,6 +67,12 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Client } from "@shared/schema";
 
+interface AdditionalCharge {
+  id: string;
+  description: string;
+  value: string;
+}
+
 interface RouteData {
   id: string;
   operationName: string;
@@ -106,6 +112,8 @@ interface RouteData {
   emptyKmDeliveryType: "unit" | "flat";
   emptyKmDeliveryState: string;
   emptyKmDeliveryCity: string;
+  pickupExtras: AdditionalCharge[];
+  deliveryExtras: AdditionalCharge[];
 }
 
 const createEmptyRoute = (): RouteData => ({
@@ -147,6 +155,14 @@ const createEmptyRoute = (): RouteData => ({
   emptyKmDeliveryType: "unit",
   emptyKmDeliveryState: "",
   emptyKmDeliveryCity: "",
+  pickupExtras: [],
+  deliveryExtras: [],
+});
+
+const createEmptyAdditional = (): AdditionalCharge => ({
+  id: crypto.randomUUID(),
+  description: "",
+  value: "",
 });
 
 interface ProposalData {
@@ -248,6 +264,76 @@ export default function FreightCalculator() {
     }
   };
 
+  const addPickupExtra = (routeId: string) => {
+    setRoutes((prev) =>
+      prev.map((route) =>
+        route.id === routeId
+          ? { ...route, pickupExtras: [...(route.pickupExtras || []), createEmptyAdditional()] }
+          : route
+      )
+    );
+  };
+
+  const removePickupExtra = (routeId: string, extraId: string) => {
+    setRoutes((prev) =>
+      prev.map((route) =>
+        route.id === routeId
+          ? { ...route, pickupExtras: (route.pickupExtras || []).filter((e) => e.id !== extraId) }
+          : route
+      )
+    );
+  };
+
+  const updatePickupExtra = (routeId: string, extraId: string, field: keyof AdditionalCharge, value: string) => {
+    setRoutes((prev) =>
+      prev.map((route) =>
+        route.id === routeId
+          ? {
+              ...route,
+              pickupExtras: (route.pickupExtras || []).map((e) =>
+                e.id === extraId ? { ...e, [field]: value } : e
+              ),
+            }
+          : route
+      )
+    );
+  };
+
+  const addDeliveryExtra = (routeId: string) => {
+    setRoutes((prev) =>
+      prev.map((route) =>
+        route.id === routeId
+          ? { ...route, deliveryExtras: [...(route.deliveryExtras || []), createEmptyAdditional()] }
+          : route
+      )
+    );
+  };
+
+  const removeDeliveryExtra = (routeId: string, extraId: string) => {
+    setRoutes((prev) =>
+      prev.map((route) =>
+        route.id === routeId
+          ? { ...route, deliveryExtras: (route.deliveryExtras || []).filter((e) => e.id !== extraId) }
+          : route
+      )
+    );
+  };
+
+  const updateDeliveryExtra = (routeId: string, extraId: string, field: keyof AdditionalCharge, value: string) => {
+    setRoutes((prev) =>
+      prev.map((route) =>
+        route.id === routeId
+          ? {
+              ...route,
+              deliveryExtras: (route.deliveryExtras || []).map((e) =>
+                e.id === extraId ? { ...e, [field]: value } : e
+              ),
+            }
+          : route
+      )
+    );
+  };
+
   const calculateRouteValues = (route: RouteData) => {
     const distanceKm = parseFloat(route.distanceKm) || 0;
     const cargoValue = parseFloat(route.cargoValue) || 0;
@@ -266,6 +352,10 @@ export default function FreightCalculator() {
       : parseFloat(route.emptyKmDeliveryFlat) || 0;
 
     const emptyKmTotalValue = emptyKmPickupValue + emptyKmDeliveryValue;
+
+    const pickupExtrasTotal = (route.pickupExtras || []).reduce((sum, extra) => sum + (parseFloat(extra.value) || 0), 0);
+    const deliveryExtrasTotal = (route.deliveryExtras || []).reduce((sum, extra) => sum + (parseFloat(extra.value) || 0), 0);
+    const extrasTotal = pickupExtrasTotal + deliveryExtrasTotal;
 
     const anttMinFreight = calculateAnttMinFreight(
       distanceKm,
@@ -296,7 +386,7 @@ export default function FreightCalculator() {
 
     const tollExempt = isTollExemptFromIcms(route.originState);
 
-    let baseForTax = freightValue + grisValue + advValue + unloadingValue + emptyKmTotalValue;
+    let baseForTax = freightValue + grisValue + advValue + unloadingValue + emptyKmTotalValue + extrasTotal;
     if (!tollExempt && routeType !== "municipal") {
       baseForTax += tollValue;
     }
@@ -306,7 +396,7 @@ export default function FreightCalculator() {
         ? baseForTax / (1 - taxInfo.rate / 100) - baseForTax
         : baseForTax * (taxInfo.rate / 100);
 
-    const totalValue = freightValue + grisValue + advValue + tollValue + unloadingValue + emptyKmTotalValue + taxValue;
+    const totalValue = freightValue + grisValue + advValue + tollValue + unloadingValue + emptyKmTotalValue + extrasTotal + taxValue;
     const valuePerKg = weight > 0 ? totalValue / weight : 0;
 
     return {
@@ -319,6 +409,9 @@ export default function FreightCalculator() {
       emptyKmPickupValue,
       emptyKmDeliveryValue,
       emptyKmTotalValue,
+      pickupExtrasTotal,
+      deliveryExtrasTotal,
+      extrasTotal,
       taxInfo,
       taxValue,
       tollExempt,
@@ -369,6 +462,11 @@ export default function FreightCalculator() {
             emptyKmPickupValue: calc.emptyKmPickupValue.toString(),
             emptyKmDeliveryValue: calc.emptyKmDeliveryValue.toString(),
             emptyKmTotalValue: calc.emptyKmTotalValue.toString(),
+            pickupExtras: route.pickupExtras || [],
+            deliveryExtras: route.deliveryExtras || [],
+            pickupExtrasTotal: calc.pickupExtrasTotal.toString(),
+            deliveryExtrasTotal: calc.deliveryExtrasTotal.toString(),
+            extrasTotal: calc.extrasTotal.toString(),
             totalValue: calc.totalValue.toString(),
           };
         }),
@@ -604,7 +702,25 @@ export default function FreightCalculator() {
                       </div>
                     </div>
                   </div>
+                </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor={`distanceKm-${route.id}`}>Distancia da Rota (km)</Label>
+                  <Input
+                    id={`distanceKm-${route.id}`}
+                    type="number"
+                    step="1"
+                    min="0"
+                    placeholder="Informe a distancia em km"
+                    value={route.distanceKm}
+                    onChange={(e) =>
+                      updateRoute(route.id, "distanceKm", e.target.value)
+                    }
+                    data-testid={`input-distance-${index}`}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Distancia entre origem e destino. Futuramente sera calculado automaticamente.
+                  </p>
                 </div>
 
                 {calc?.tollExempt && route.originState === "PR" && (
@@ -880,21 +996,6 @@ export default function FreightCalculator() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`distanceKm-${route.id}`}>Distancia (km)</Label>
-                    <Input
-                      id={`distanceKm-${route.id}`}
-                      type="number"
-                      step="1"
-                      min="0"
-                      placeholder="0"
-                      value={route.distanceKm}
-                      onChange={(e) =>
-                        updateRoute(route.id, "distanceKm", e.target.value)
-                      }
-                      data-testid={`input-distance-${index}`}
-                    />
-                  </div>
                 </div>
 
                 {parseFloat(route.weight) > 0 && (() => {
@@ -1145,6 +1246,136 @@ export default function FreightCalculator() {
 
                 <Separator />
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3 p-4 border rounded-md">
+                    <div className="flex items-center justify-between">
+                      <Label className="font-medium">Adicionais de Coleta</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addPickupExtra(route.id)}
+                        data-testid={`button-add-pickup-extra-${index}`}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Adicionar
+                      </Button>
+                    </div>
+                    {(route.pickupExtras || []).length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Nenhum adicional de coleta</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {(route.pickupExtras || []).map((extra, extraIndex) => (
+                          <div key={extra.id} className="flex items-center gap-2">
+                            <Input
+                              placeholder="Descricao"
+                              value={extra.description}
+                              onChange={(e) =>
+                                updatePickupExtra(route.id, extra.id, "description", e.target.value)
+                              }
+                              className="flex-1"
+                              data-testid={`input-pickup-extra-desc-${index}-${extraIndex}`}
+                            />
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="Valor"
+                              value={extra.value}
+                              onChange={(e) =>
+                                updatePickupExtra(route.id, extra.id, "value", e.target.value)
+                              }
+                              className="w-32"
+                              data-testid={`input-pickup-extra-value-${index}-${extraIndex}`}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removePickupExtra(route.id, extra.id)}
+                              data-testid={`button-remove-pickup-extra-${index}-${extraIndex}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        {(route.pickupExtras || []).length > 0 && (
+                          <div className="flex justify-end pt-2 border-t">
+                            <span className="text-sm font-medium">
+                              Total: {formatCurrency(calc?.pickupExtrasTotal || 0)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-3 p-4 border rounded-md">
+                    <div className="flex items-center justify-between">
+                      <Label className="font-medium">Adicionais de Entrega</Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addDeliveryExtra(route.id)}
+                        data-testid={`button-add-delivery-extra-${index}`}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Adicionar
+                      </Button>
+                    </div>
+                    {(route.deliveryExtras || []).length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Nenhum adicional de entrega</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {(route.deliveryExtras || []).map((extra, extraIndex) => (
+                          <div key={extra.id} className="flex items-center gap-2">
+                            <Input
+                              placeholder="Descricao"
+                              value={extra.description}
+                              onChange={(e) =>
+                                updateDeliveryExtra(route.id, extra.id, "description", e.target.value)
+                              }
+                              className="flex-1"
+                              data-testid={`input-delivery-extra-desc-${index}-${extraIndex}`}
+                            />
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="Valor"
+                              value={extra.value}
+                              onChange={(e) =>
+                                updateDeliveryExtra(route.id, extra.id, "value", e.target.value)
+                              }
+                              className="w-32"
+                              data-testid={`input-delivery-extra-value-${index}-${extraIndex}`}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => removeDeliveryExtra(route.id, extra.id)}
+                              data-testid={`button-remove-delivery-extra-${index}-${extraIndex}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        {(route.deliveryExtras || []).length > 0 && (
+                          <div className="flex justify-end pt-2 border-t">
+                            <span className="text-sm font-medium">
+                              Total: {formatCurrency(calc?.deliveryExtrasTotal || 0)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <Separator />
+
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                   <Calculator className="h-4 w-4" />
                   Calculo do Frete
@@ -1164,6 +1395,14 @@ export default function FreightCalculator() {
                     <div className="flex items-center gap-2 min-h-9 px-3 py-2 rounded-md border bg-muted/50">
                       <span className="font-medium">
                         {formatCurrency(calc?.emptyKmTotalValue || 0)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Total Adicionais</Label>
+                    <div className="flex items-center gap-2 min-h-9 px-3 py-2 rounded-md border bg-muted/50">
+                      <span className="font-medium">
+                        {formatCurrency(calc?.extrasTotal || 0)}
                       </span>
                     </div>
                   </div>
