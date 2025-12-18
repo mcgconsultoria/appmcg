@@ -12,12 +12,13 @@ import {
   insertFinancialAccountSchema,
   registerSchema,
   loginSchema,
+  type User,
 } from "@shared/schema";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
+      user?: User;
     }
   }
 }
@@ -513,6 +514,259 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching subscription:", error);
       res.status(500).json({ message: "Failed to fetch subscription" });
+    }
+  });
+
+  // Commercial proposals routes
+  app.get("/api/commercial-proposals", isAuthenticated, async (req: any, res) => {
+    try {
+      const proposals = await storage.getCommercialProposals(req.user.companyId || 1);
+      res.json(proposals);
+    } catch (error) {
+      console.error("Error fetching proposals:", error);
+      res.status(500).json({ message: "Failed to fetch proposals" });
+    }
+  });
+
+  app.get("/api/commercial-proposals/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const proposal = await storage.getCommercialProposal(id);
+      if (!proposal) {
+        return res.status(404).json({ message: "Proposal not found" });
+      }
+      if (proposal.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const routes = await storage.getProposalRoutes(id);
+      res.json({ ...proposal, routes });
+    } catch (error) {
+      console.error("Error fetching proposal:", error);
+      res.status(500).json({ message: "Failed to fetch proposal" });
+    }
+  });
+
+  app.post("/api/commercial-proposals", isAuthenticated, async (req: any, res) => {
+    try {
+      const { routes, ...proposalData } = req.body;
+      
+      const proposalNumber = await storage.generateProposalNumber();
+      const validUntil = new Date();
+      validUntil.setDate(validUntil.getDate() + (proposalData.validityDays || 15));
+      
+      const proposal = await storage.createCommercialProposal({
+        companyId: req.user.companyId || 1,
+        clientId: proposalData.clientId || null,
+        proposalNumber,
+        clientName: proposalData.clientName,
+        clientEmail: proposalData.clientEmail,
+        clientPhone: proposalData.clientPhone,
+        clientCnpj: proposalData.clientCnpj,
+        status: "draft",
+        validUntil,
+        contractType: proposalData.contractType,
+        notes: proposalData.notes,
+        totalValue: proposalData.totalValue,
+      });
+
+      if (routes && routes.length > 0) {
+        for (const route of routes) {
+          await storage.createProposalRoute({
+            proposalId: proposal.id,
+            originCity: route.originCity,
+            originState: route.originState,
+            destinationCity: route.destinationCity,
+            destinationState: route.destinationState,
+            distanceKm: route.distanceKm,
+            productType: route.productType,
+            packagingType: route.packagingType,
+            weight: route.weight,
+            cargoValue: route.cargoValue,
+            vehicleAxles: route.vehicleAxles,
+            anttMinFreight: route.anttMinFreight,
+            freightValue: route.freightValue,
+            tollValue: route.tollValue,
+            tollInIcmsBase: route.tollInIcmsBase,
+            icmsRate: route.icmsRate,
+            icmsValue: route.icmsValue,
+            issRate: route.issRate,
+            issValue: route.issValue,
+            grisRate: route.grisRate,
+            grisValue: route.grisValue,
+            advRate: route.advRate,
+            advValue: route.advValue,
+            unloadingValue: route.unloadingValue,
+            totalValue: route.totalValue,
+            operationName: route.operationName,
+          });
+        }
+      }
+
+      res.status(201).json(proposal);
+    } catch (error) {
+      console.error("Error creating proposal:", error);
+      res.status(500).json({ message: "Failed to create proposal" });
+    }
+  });
+
+  app.patch("/api/commercial-proposals/:id/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const { status } = req.body;
+      
+      const existingProposal = await storage.getCommercialProposal(id);
+      if (!existingProposal) {
+        return res.status(404).json({ message: "Proposal not found" });
+      }
+      if (existingProposal.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const proposal = await storage.updateProposalStatus(id, status);
+      
+      if (status === "approved" && req.body.createOperations) {
+        if (!proposal.clientId) {
+          return res.status(400).json({ message: "Proposal must have a client to create operations" });
+        }
+        
+        const routes = await storage.getProposalRoutes(id);
+        const reviewMonths = proposal.contractType === "1_year" ? 12 : 6;
+        const nextReviewDate = new Date();
+        nextReviewDate.setMonth(nextReviewDate.getMonth() + reviewMonths);
+        
+        for (const route of routes) {
+          await storage.createClientOperation({
+            companyId: proposal.companyId,
+            clientId: proposal.clientId,
+            proposalId: proposal.id,
+            operationName: route.operationName || `${route.originCity}/${route.originState} - ${route.destinationCity}/${route.destinationState}`,
+            originCity: route.originCity,
+            originState: route.originState,
+            destinationCity: route.destinationCity,
+            destinationState: route.destinationState,
+            productType: route.productType,
+            packagingType: route.packagingType,
+            agreedFreight: route.totalValue,
+            contractStartDate: new Date(),
+            nextReviewDate,
+            reviewPeriodMonths: reviewMonths,
+            status: "active",
+          });
+        }
+      }
+      
+      res.json(proposal);
+    } catch (error) {
+      console.error("Error updating proposal status:", error);
+      res.status(500).json({ message: "Failed to update proposal status" });
+    }
+  });
+
+  // Client operations routes
+  app.get("/api/client-operations/:clientId", isAuthenticated, async (req: any, res) => {
+    try {
+      const clientId = parseInt(req.params.clientId);
+      const operations = await storage.getClientOperations(clientId);
+      res.json(operations);
+    } catch (error) {
+      console.error("Error fetching client operations:", error);
+      res.status(500).json({ message: "Failed to fetch client operations" });
+    }
+  });
+
+  // PDF generation for proposals
+  app.get("/api/commercial-proposals/:id/pdf", isAuthenticated, async (req: any, res) => {
+    try {
+      const PDFDocument = (await import("pdfkit")).default;
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const proposal = await storage.getCommercialProposal(id);
+      
+      if (!proposal) {
+        return res.status(404).json({ message: "Proposal not found" });
+      }
+      if (proposal.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const routes = await storage.getProposalRoutes(id);
+      
+      const doc = new PDFDocument({ margin: 50 });
+      
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=proposta-${proposal.proposalNumber}.pdf`
+      );
+      
+      doc.pipe(res);
+      
+      doc.fontSize(20).font("Helvetica-Bold").text("PROPOSTA COMERCIAL", { align: "center" });
+      doc.moveDown();
+      doc.fontSize(14).font("Helvetica").text(`No: ${proposal.proposalNumber}`, { align: "center" });
+      doc.moveDown(2);
+      
+      doc.fontSize(12).font("Helvetica-Bold").text("DADOS DO CLIENTE");
+      doc.fontSize(10).font("Helvetica");
+      doc.text(`Razao Social: ${proposal.clientName || "-"}`);
+      doc.text(`CNPJ: ${proposal.clientCnpj || "-"}`);
+      doc.text(`Email: ${proposal.clientEmail || "-"}`);
+      doc.text(`Telefone: ${proposal.clientPhone || "-"}`);
+      doc.moveDown();
+      
+      doc.fontSize(12).font("Helvetica-Bold").text("VALIDADE E CONDICOES");
+      doc.fontSize(10).font("Helvetica");
+      doc.text(`Data de Emissao: ${new Date(proposal.createdAt!).toLocaleDateString("pt-BR")}`);
+      doc.text(`Valido ate: ${proposal.validUntil ? new Date(proposal.validUntil).toLocaleDateString("pt-BR") : "-"}`);
+      const contractLabel = proposal.contractType === "1_year" ? "Contrato 1 ano" : proposal.contractType === "6_months" ? "Contrato 6 meses" : "Spot (Avulso)";
+      doc.text(`Tipo de Contrato: ${contractLabel}`);
+      doc.moveDown();
+      
+      doc.fontSize(12).font("Helvetica-Bold").text("ROTAS E VALORES");
+      doc.moveDown(0.5);
+      
+      for (let i = 0; i < routes.length; i++) {
+        const route = routes[i];
+        doc.fontSize(11).font("Helvetica-Bold").text(`Rota ${i + 1}: ${route.operationName || `${route.originCity}/${route.originState} - ${route.destinationCity}/${route.destinationState}`}`);
+        doc.fontSize(10).font("Helvetica");
+        doc.text(`  Origem: ${route.originCity}/${route.originState}`);
+        doc.text(`  Destino: ${route.destinationCity}/${route.destinationState}`);
+        if (route.productType) doc.text(`  Tipo de Produto: ${route.productType}`);
+        if (route.packagingType) doc.text(`  Embalagem: ${route.packagingType}`);
+        if (route.weight) doc.text(`  Peso: ${route.weight} kg`);
+        if (route.distanceKm) doc.text(`  Distancia: ${route.distanceKm} km`);
+        doc.text(`  Frete Base: R$ ${parseFloat(String(route.freightValue || 0)).toFixed(2)}`);
+        if (route.tollValue) doc.text(`  Pedagio: R$ ${parseFloat(String(route.tollValue)).toFixed(2)}`);
+        if (route.grisValue) doc.text(`  GRIS: R$ ${parseFloat(String(route.grisValue)).toFixed(2)}`);
+        if (route.advValue) doc.text(`  ADV: R$ ${parseFloat(String(route.advValue)).toFixed(2)}`);
+        const taxType = route.icmsRate ? "ICMS" : "ISS";
+        const taxRate = route.icmsRate || route.issRate || 0;
+        const taxValue = route.icmsValue || route.issValue || 0;
+        doc.text(`  ${taxType} (${taxRate}%): R$ ${parseFloat(String(taxValue)).toFixed(2)}`);
+        doc.fontSize(11).font("Helvetica-Bold").text(`  TOTAL ROTA: R$ ${parseFloat(String(route.totalValue || 0)).toFixed(2)}`);
+        doc.moveDown();
+      }
+      
+      doc.moveDown();
+      doc.fontSize(14).font("Helvetica-Bold").text(`VALOR TOTAL DA PROPOSTA: R$ ${parseFloat(String(proposal.totalValue || 0)).toFixed(2)}`, { align: "right" });
+      doc.moveDown(2);
+      
+      if (proposal.notes) {
+        doc.fontSize(12).font("Helvetica-Bold").text("OBSERVACOES");
+        doc.fontSize(10).font("Helvetica").text(proposal.notes);
+        doc.moveDown();
+      }
+      
+      doc.fontSize(9).font("Helvetica").text("---", { align: "center" });
+      doc.text("MCG Consultoria - Solucoes em Logistica", { align: "center" });
+      doc.text("Este documento foi gerado automaticamente pela plataforma MCG.", { align: "center" });
+      
+      doc.end();
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      res.status(500).json({ message: "Failed to generate PDF" });
     }
   });
 

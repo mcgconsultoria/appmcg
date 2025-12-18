@@ -182,6 +182,94 @@ export const marketingMaterials = pgTable("marketing_materials", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Commercial proposals table
+export const commercialProposals = pgTable("commercial_proposals", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  clientId: integer("client_id"),
+  proposalNumber: varchar("proposal_number", { length: 20 }).notNull().unique(),
+  clientName: varchar("client_name", { length: 255 }),
+  clientEmail: varchar("client_email"),
+  clientPhone: varchar("client_phone", { length: 20 }),
+  clientCnpj: varchar("client_cnpj", { length: 18 }),
+  status: varchar("status").default("draft"), // draft, sent, approved, rejected, expired
+  validUntil: timestamp("valid_until"),
+  approvedAt: timestamp("approved_at"),
+  contractType: varchar("contract_type"), // spot, 6_months, 1_year
+  nextReviewDate: timestamp("next_review_date"),
+  notes: text("notes"),
+  totalValue: decimal("total_value", { precision: 15, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Proposal routes (multiple routes per proposal)
+export const proposalRoutes = pgTable("proposal_routes", {
+  id: serial("id").primaryKey(),
+  proposalId: integer("proposal_id").notNull(),
+  originCity: varchar("origin_city", { length: 100 }).notNull(),
+  originState: varchar("origin_state", { length: 2 }).notNull(),
+  destinationCity: varchar("destination_city", { length: 100 }).notNull(),
+  destinationState: varchar("destination_state", { length: 2 }).notNull(),
+  distanceKm: decimal("distance_km", { precision: 10, scale: 2 }),
+  productType: varchar("product_type", { length: 100 }),
+  packagingType: varchar("packaging_type", { length: 100 }),
+  weight: decimal("weight", { precision: 10, scale: 2 }),
+  cargoValue: decimal("cargo_value", { precision: 15, scale: 2 }),
+  vehicleAxles: integer("vehicle_axles").default(5),
+  anttMinFreight: decimal("antt_min_freight", { precision: 15, scale: 2 }),
+  freightValue: decimal("freight_value", { precision: 15, scale: 2 }),
+  tollValue: decimal("toll_value", { precision: 15, scale: 2 }),
+  tollInIcmsBase: boolean("toll_in_icms_base").default(true),
+  icmsRate: decimal("icms_rate", { precision: 5, scale: 2 }),
+  icmsValue: decimal("icms_value", { precision: 15, scale: 2 }),
+  issRate: decimal("iss_rate", { precision: 5, scale: 2 }),
+  issValue: decimal("iss_value", { precision: 15, scale: 2 }),
+  grisRate: decimal("gris_rate", { precision: 5, scale: 4 }),
+  grisValue: decimal("gris_value", { precision: 15, scale: 2 }),
+  advRate: decimal("adv_rate", { precision: 5, scale: 4 }),
+  advValue: decimal("adv_value", { precision: 15, scale: 2 }),
+  unloadingValue: decimal("unloading_value", { precision: 15, scale: 2 }),
+  totalValue: decimal("total_value", { precision: 15, scale: 2 }),
+  operationName: varchar("operation_name", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Fixed operations (approved proposals become fixed operations)
+export const clientOperations = pgTable("client_operations", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  clientId: integer("client_id").notNull(),
+  proposalId: integer("proposal_id"),
+  operationName: varchar("operation_name", { length: 255 }).notNull(),
+  originCity: varchar("origin_city", { length: 100 }).notNull(),
+  originState: varchar("origin_state", { length: 2 }).notNull(),
+  destinationCity: varchar("destination_city", { length: 100 }).notNull(),
+  destinationState: varchar("destination_state", { length: 2 }).notNull(),
+  productType: varchar("product_type", { length: 100 }),
+  packagingType: varchar("packaging_type", { length: 100 }),
+  agreedFreight: decimal("agreed_freight", { precision: 15, scale: 2 }),
+  contractStartDate: timestamp("contract_start_date"),
+  contractEndDate: timestamp("contract_end_date"),
+  nextReviewDate: timestamp("next_review_date"),
+  reviewPeriodMonths: integer("review_period_months").default(6),
+  status: varchar("status").default("active"), // active, suspended, cancelled
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ANTT freight reference table
+export const anttFreightTable = pgTable("antt_freight_table", {
+  id: serial("id").primaryKey(),
+  operationType: varchar("operation_type", { length: 1 }).notNull(), // A, B, C, D
+  cargoType: varchar("cargo_type", { length: 100 }).notNull(),
+  axles: integer("axles").notNull(),
+  ccd: decimal("ccd", { precision: 10, scale: 4 }).notNull(), // Coeficiente de Custo de Deslocamento (R$/km)
+  cc: decimal("cc", { precision: 10, scale: 2 }).notNull(), // Coeficiente de Carga (R$)
+  validFrom: timestamp("valid_from"),
+  validUntil: timestamp("valid_until"),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one }) => ({
   company: one(companies, {
@@ -273,6 +361,27 @@ export const insertMarketingMaterialSchema = createInsertSchema(marketingMateria
   createdAt: true,
 });
 
+export const insertCommercialProposalSchema = createInsertSchema(commercialProposals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProposalRouteSchema = createInsertSchema(proposalRoutes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertClientOperationSchema = createInsertSchema(clientOperations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAnttFreightTableSchema = createInsertSchema(anttFreightTable).omit({
+  id: true,
+});
+
 // Auth schemas
 export const registerSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -309,3 +418,11 @@ export type FinancialAccount = typeof financialAccounts.$inferSelect;
 export type InsertFinancialAccount = z.infer<typeof insertFinancialAccountSchema>;
 export type MarketingMaterial = typeof marketingMaterials.$inferSelect;
 export type InsertMarketingMaterial = z.infer<typeof insertMarketingMaterialSchema>;
+export type CommercialProposal = typeof commercialProposals.$inferSelect;
+export type InsertCommercialProposal = z.infer<typeof insertCommercialProposalSchema>;
+export type ProposalRoute = typeof proposalRoutes.$inferSelect;
+export type InsertProposalRoute = z.infer<typeof insertProposalRouteSchema>;
+export type ClientOperation = typeof clientOperations.$inferSelect;
+export type InsertClientOperation = z.infer<typeof insertClientOperationSchema>;
+export type AnttFreightTable = typeof anttFreightTable.$inferSelect;
+export type InsertAnttFreightTable = z.infer<typeof insertAnttFreightTableSchema>;

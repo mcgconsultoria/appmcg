@@ -8,6 +8,9 @@ import {
   storageCalculations,
   financialAccounts,
   marketingMaterials,
+  commercialProposals,
+  proposalRoutes,
+  clientOperations,
   type User,
   type UpsertUser,
   type Company,
@@ -26,6 +29,12 @@ import {
   type InsertFinancialAccount,
   type MarketingMaterial,
   type InsertMarketingMaterial,
+  type CommercialProposal,
+  type InsertCommercialProposal,
+  type ProposalRoute,
+  type InsertProposalRoute,
+  type ClientOperation,
+  type InsertClientOperation,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
@@ -88,6 +97,21 @@ export interface IStorage {
   listStripeProducts(active?: boolean, limit?: number, offset?: number): Promise<any[]>;
   listStripeProductsWithPrices(active?: boolean, limit?: number, offset?: number): Promise<any[]>;
   updateUserStripeInfo(userId: string, stripeInfo: { stripeCustomerId?: string; stripeSubscriptionId?: string; subscriptionStatus?: string }): Promise<User | undefined>;
+
+  // Commercial proposal operations
+  getCommercialProposals(companyId: number): Promise<CommercialProposal[]>;
+  getCommercialProposal(id: number): Promise<CommercialProposal | undefined>;
+  createCommercialProposal(proposal: InsertCommercialProposal): Promise<CommercialProposal>;
+  updateProposalStatus(id: number, status: string): Promise<CommercialProposal>;
+  generateProposalNumber(): Promise<string>;
+
+  // Proposal route operations
+  getProposalRoutes(proposalId: number): Promise<ProposalRoute[]>;
+  createProposalRoute(route: InsertProposalRoute): Promise<ProposalRoute>;
+
+  // Client operation operations
+  getClientOperations(clientId: number): Promise<ClientOperation[]>;
+  createClientOperation(operation: InsertClientOperation): Promise<ClientOperation>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -368,6 +392,63 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  // Commercial proposal operations
+  async getCommercialProposals(companyId: number): Promise<CommercialProposal[]> {
+    return db.select().from(commercialProposals).where(eq(commercialProposals.companyId, companyId)).orderBy(desc(commercialProposals.createdAt));
+  }
+
+  async getCommercialProposal(id: number): Promise<CommercialProposal | undefined> {
+    const [proposal] = await db.select().from(commercialProposals).where(eq(commercialProposals.id, id));
+    return proposal;
+  }
+
+  async createCommercialProposal(proposal: InsertCommercialProposal): Promise<CommercialProposal> {
+    const [newProposal] = await db.insert(commercialProposals).values(proposal).returning();
+    return newProposal;
+  }
+
+  async updateProposalStatus(id: number, status: string): Promise<CommercialProposal> {
+    const updateData: any = { status, updatedAt: new Date() };
+    if (status === "approved") {
+      updateData.approvedAt = new Date();
+    }
+    const [updated] = await db
+      .update(commercialProposals)
+      .set(updateData)
+      .where(eq(commercialProposals.id, id))
+      .returning();
+    return updated;
+  }
+
+  async generateProposalNumber(): Promise<string> {
+    const year = new Date().getFullYear();
+    const result = await db.execute(
+      sql`SELECT COUNT(*) as count FROM commercial_proposals WHERE EXTRACT(YEAR FROM created_at) = ${year}`
+    );
+    const count = parseInt(String(result.rows[0]?.count || 0)) + 1;
+    return `MCG-${year}-${count.toString().padStart(5, '0')}`;
+  }
+
+  // Proposal route operations
+  async getProposalRoutes(proposalId: number): Promise<ProposalRoute[]> {
+    return db.select().from(proposalRoutes).where(eq(proposalRoutes.proposalId, proposalId));
+  }
+
+  async createProposalRoute(route: InsertProposalRoute): Promise<ProposalRoute> {
+    const [newRoute] = await db.insert(proposalRoutes).values(route).returning();
+    return newRoute;
+  }
+
+  // Client operation operations
+  async getClientOperations(clientId: number): Promise<ClientOperation[]> {
+    return db.select().from(clientOperations).where(eq(clientOperations.clientId, clientId)).orderBy(desc(clientOperations.createdAt));
+  }
+
+  async createClientOperation(operation: InsertClientOperation): Promise<ClientOperation> {
+    const [newOperation] = await db.insert(clientOperations).values(operation).returning();
+    return newOperation;
   }
 }
 
