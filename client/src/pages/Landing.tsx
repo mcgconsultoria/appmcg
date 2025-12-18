@@ -93,12 +93,15 @@ export default function Landing() {
             </div>
           </div>
           <nav className="hidden md:flex items-center gap-6">
-            <a href="#servicos" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Serviços
-            </a>
-            <a href="#funcionalidades" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Funcionalidades
-            </a>
+            <Link href="/calculadora-frete" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Calculadora Frete
+            </Link>
+            <Link href="/calculadora-armazenagem" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Calculadora Armazenagem
+            </Link>
+            <Link href="/planos" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Planos
+            </Link>
             <a href="#contato" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Contato
             </a>
@@ -130,17 +133,17 @@ export default function Landing() {
               checklists e controle financeiro em uma única plataforma.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <a href="/api/login">
+              <Link href="/calculadora-frete">
                 <Button size="lg" className="gap-2" data-testid="button-start-free">
-                  Começar agora
+                  Calculadora Grátis
                   <ArrowRight className="h-4 w-4" />
                 </Button>
-              </a>
-              <a href="#servicos">
+              </Link>
+              <Link href="/planos">
                 <Button size="lg" variant="outline" data-testid="button-learn-more">
-                  Conhecer serviços
+                  Ver Planos
                 </Button>
-              </a>
+              </Link>
             </div>
             <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
               <div className="text-center">
@@ -316,13 +319,31 @@ export default function Landing() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>Central de Ajuda</li>
                 <li>Contato</li>
-                <li>Termos de Uso</li>
-                <li>Privacidade</li>
+                <li><Link href="/termos" className="hover:text-foreground">Termos de Uso</Link></li>
+                <li><Link href="/privacidade" className="hover:text-foreground">Privacidade</Link></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-border mt-12 pt-8 text-center text-sm text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} MCG Consultoria. Todos os direitos reservados.</p>
+          <div className="border-t border-border mt-12 pt-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <p className="text-sm text-muted-foreground">
+                &copy; {new Date().getFullYear()} MCG Consultoria. Todos os direitos reservados.
+              </p>
+              <div className="flex items-center gap-4 flex-wrap justify-center">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md">
+                  <Shield className="h-4 w-4 text-green-500" />
+                  Pagamento Seguro
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md">
+                  <Shield className="h-4 w-4 text-blue-500" />
+                  LGPD Compliance
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md">
+                  <Shield className="h-4 w-4 text-purple-500" />
+                  SSL/TLS
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </footer>

@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { useAuth } from "@/hooks/useAuth";
+import CookieConsent from "@/components/CookieConsent";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/Landing";
 import Dashboard from "@/pages/Dashboard";
@@ -16,6 +17,9 @@ import StorageCalculator from "@/pages/StorageCalculator";
 import Financial from "@/pages/Financial";
 import Marketing from "@/pages/Marketing";
 import Settings from "@/pages/Settings";
+import Pricing from "@/pages/Pricing";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -33,6 +37,11 @@ function Router() {
 
   return (
     <Switch>
+      <Route path="/calculadora-frete" component={FreightCalculator} />
+      <Route path="/calculadora-armazenagem" component={StorageCalculator} />
+      <Route path="/planos" component={Pricing} />
+      <Route path="/privacidade" component={Privacy} />
+      <Route path="/termos" component={Terms} />
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
@@ -42,8 +51,6 @@ function Router() {
           <Route path="/clientes" component={Clients} />
           <Route path="/pipeline" component={Pipeline} />
           <Route path="/checklist" component={Checklist} />
-          <Route path="/calculadora-frete" component={FreightCalculator} />
-          <Route path="/calculadora-armazenagem" component={StorageCalculator} />
           <Route path="/financeiro" component={Financial} />
           <Route path="/marketing" component={Marketing} />
           <Route path="/configuracoes" component={Settings} />
@@ -61,6 +68,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <CookieConsent />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
