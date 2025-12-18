@@ -78,10 +78,12 @@ interface RouteData {
   operationName: string;
   originCity: string;
   originState: string;
-  originCnpj: string;
+  originDocType: "cpf" | "cnpj";
+  originDoc: string;
   destinationCity: string;
   destinationState: string;
-  destinationCnpj: string;
+  destinationDocType: "cpf" | "cnpj";
+  destinationDoc: string;
   distanceKm: string;
   productType: string;
   packagingType: string;
@@ -121,10 +123,12 @@ const createEmptyRoute = (): RouteData => ({
   operationName: "",
   originCity: "",
   originState: "",
-  originCnpj: "",
+  originDocType: "cnpj",
+  originDoc: "",
   destinationCity: "",
   destinationState: "",
-  destinationCnpj: "",
+  destinationDocType: "cnpj",
+  destinationDoc: "",
   distanceKm: "",
   productType: "carga_geral",
   packagingType: "pallet",
@@ -169,7 +173,8 @@ interface ProposalData {
   clientName: string;
   clientEmail: string;
   clientPhone: string;
-  clientCnpj: string;
+  clientDocType: "cpf" | "cnpj";
+  clientDoc: string;
   validityDays: number;
   contractType: string;
   notes: string;
@@ -179,7 +184,8 @@ const initialProposalData: ProposalData = {
   clientName: "",
   clientEmail: "",
   clientPhone: "",
-  clientCnpj: "",
+  clientDocType: "cnpj",
+  clientDoc: "",
   validityDays: 15,
   contractType: "spot",
   notes: "",
@@ -499,7 +505,8 @@ export default function FreightCalculator() {
         clientName: client.name,
         clientEmail: client.email || "",
         clientPhone: client.phone || "",
-        clientCnpj: client.cnpj || "",
+        clientDocType: client.cnpj && client.cnpj.length <= 14 ? "cpf" : "cnpj",
+        clientDoc: client.cnpj || "",
       }));
     }
   };
@@ -614,16 +621,32 @@ export default function FreightCalculator() {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor={`originCnpj-${route.id}`}>CNPJ (opcional)</Label>
-                        <Input
-                          id={`originCnpj-${route.id}`}
-                          placeholder="00.000.000/0000-00"
-                          value={route.originCnpj}
-                          onChange={(e) =>
-                            updateRoute(route.id, "originCnpj", e.target.value)
-                          }
-                          data-testid={`input-origin-cnpj-${index}`}
-                        />
+                        <Label>CPF/CNPJ (opcional)</Label>
+                        <div className="flex gap-2">
+                          <Select
+                            value={route.originDocType}
+                            onValueChange={(value) =>
+                              updateRoute(route.id, "originDocType", value as "cpf" | "cnpj")
+                            }
+                          >
+                            <SelectTrigger className="w-24" data-testid={`select-origin-doctype-${index}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="cpf">CPF</SelectItem>
+                              <SelectItem value="cnpj">CNPJ</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input
+                            id={`originDoc-${route.id}`}
+                            placeholder={route.originDocType === "cpf" ? "000.000.000-00" : "00.000.000/0000-00"}
+                            value={route.originDoc}
+                            onChange={(e) =>
+                              updateRoute(route.id, "originDoc", e.target.value)
+                            }
+                            data-testid={`input-origin-doc-${index}`}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -687,18 +710,32 @@ export default function FreightCalculator() {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor={`destinationCnpj-${route.id}`}>
-                          CNPJ (opcional)
-                        </Label>
-                        <Input
-                          id={`destinationCnpj-${route.id}`}
-                          placeholder="00.000.000/0000-00"
-                          value={route.destinationCnpj}
-                          onChange={(e) =>
-                            updateRoute(route.id, "destinationCnpj", e.target.value)
-                          }
-                          data-testid={`input-destination-cnpj-${index}`}
-                        />
+                        <Label>CPF/CNPJ (opcional)</Label>
+                        <div className="flex gap-2">
+                          <Select
+                            value={route.destinationDocType}
+                            onValueChange={(value) =>
+                              updateRoute(route.id, "destinationDocType", value as "cpf" | "cnpj")
+                            }
+                          >
+                            <SelectTrigger className="w-24" data-testid={`select-destination-doctype-${index}`}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="cpf">CPF</SelectItem>
+                              <SelectItem value="cnpj">CNPJ</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Input
+                            id={`destinationDoc-${route.id}`}
+                            placeholder={route.destinationDocType === "cpf" ? "000.000.000-00" : "00.000.000/0000-00"}
+                            value={route.destinationDoc}
+                            onChange={(e) =>
+                              updateRoute(route.id, "destinationDoc", e.target.value)
+                            }
+                            data-testid={`input-destination-doc-${index}`}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1756,19 +1793,38 @@ export default function FreightCalculator() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="clientCnpj">CNPJ</Label>
-                      <Input
-                        id="clientCnpj"
-                        value={proposalData.clientCnpj}
-                        onChange={(e) =>
-                          setProposalData((prev) => ({
-                            ...prev,
-                            clientCnpj: e.target.value,
-                          }))
-                        }
-                        placeholder="00.000.000/0000-00"
-                        data-testid="input-client-cnpj"
-                      />
+                      <Label>CPF/CNPJ</Label>
+                      <div className="flex gap-2">
+                        <Select
+                          value={proposalData.clientDocType}
+                          onValueChange={(value) =>
+                            setProposalData((prev) => ({
+                              ...prev,
+                              clientDocType: value as "cpf" | "cnpj",
+                            }))
+                          }
+                        >
+                          <SelectTrigger className="w-24" data-testid="select-client-doctype">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="cpf">CPF</SelectItem>
+                            <SelectItem value="cnpj">CNPJ</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          id="clientDoc"
+                          value={proposalData.clientDoc}
+                          onChange={(e) =>
+                            setProposalData((prev) => ({
+                              ...prev,
+                              clientDoc: e.target.value,
+                            }))
+                          }
+                          placeholder={proposalData.clientDocType === "cpf" ? "000.000.000-00" : "00.000.000/0000-00"}
+                          data-testid="input-client-doc"
+                        />
+                      </div>
                     </div>
 
                     <Separator />
