@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
-import { AppLayout } from "@/components/layout/AppLayout";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -352,7 +352,7 @@ export default function FreightCalculator() {
   );
 
   return (
-    <AppLayout
+    <PublicLayout
       title="Calculadora de Frete"
       subtitle="Calcule fretes com impostos, taxas e tabela ANTT"
     >
@@ -1143,6 +1143,6 @@ export default function FreightCalculator() {
           </DialogContent>
         </Dialog>
       </div>
-    </AppLayout>
+    </PublicLayout>
   );
 }

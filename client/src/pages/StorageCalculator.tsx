@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
-import { AppLayout } from "@/components/layout/AppLayout";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -459,7 +459,7 @@ export default function StorageCalculator() {
   const TypeIcon = selectedType?.icon || Package;
 
   return (
-    <AppLayout title="Calculadora de Armazenagem" subtitle="Calcule custos de armazenagem e movimentacao com base na legislacao brasileira">
+    <PublicLayout title="Calculadora de Armazenagem" subtitle="Calcule custos de armazenagem e movimentacao com base na legislacao brasileira">
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card>
@@ -1002,6 +1002,6 @@ export default function StorageCalculator() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </AppLayout>
+    </PublicLayout>
   );
 }
