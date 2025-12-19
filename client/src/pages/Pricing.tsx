@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, Briefcase, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -259,6 +259,81 @@ export default function Pricing() {
               </Card>
             ))}
           </div>
+        </div>
+
+        <div className="mt-20">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-4" data-testid="text-consulting-title">
+              Serviço de Consultoria
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Acompanhamento especializado para estruturar e expandir sua operação comercial
+            </p>
+          </div>
+
+          <Card className="max-w-4xl mx-auto" data-testid="card-consulting-service">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <Briefcase className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Consultoria Comercial Logística</CardTitle>
+              <CardDescription>
+                Metodologia exclusiva em 4 fases para transformar sua área comercial
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-4 gap-4">
+                <div className="text-center p-4 rounded-md bg-muted/50">
+                  <Badge variant="outline" className="mb-3">1ª Fase</Badge>
+                  <h4 className="font-semibold mb-2">Diagnóstico</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>Escopo</li>
+                    <li>Estruturação In Loco</li>
+                    <li>Acompanhamento On Line</li>
+                  </ul>
+                  <p className="text-xs text-primary mt-3 font-medium">1 mês</p>
+                </div>
+                
+                <div className="text-center p-4 rounded-md bg-muted/50">
+                  <Badge variant="outline" className="mb-3">2ª Fase</Badge>
+                  <h4 className="font-semibold mb-2">Implementação</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>In Loco</li>
+                    <li>On Line</li>
+                  </ul>
+                  <p className="text-xs text-primary mt-3 font-medium">1 mês</p>
+                </div>
+                
+                <div className="text-center p-4 rounded-md bg-muted/50">
+                  <Badge variant="outline" className="mb-3">3ª Fase</Badge>
+                  <h4 className="font-semibold mb-2">Execução & Acompanhamento</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>In Loco</li>
+                    <li>On Line</li>
+                  </ul>
+                  <p className="text-xs text-primary mt-3 font-medium">1 mês</p>
+                </div>
+                
+                <div className="text-center p-4 rounded-md bg-muted/50">
+                  <Badge variant="outline" className="mb-3">4ª Fase</Badge>
+                  <h4 className="font-semibold mb-2">Expansão de Negócios</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>On Line</li>
+                  </ul>
+                  <p className="text-xs text-primary mt-3 font-medium">Contínuo</p>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col gap-4">
+              <Button className="w-full md:w-auto" size="lg" data-testid="button-consulting-contact">
+                Solicitar Proposta
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+              <p className="text-sm text-muted-foreground text-center">
+                Entre em contato para receber uma proposta personalizada para sua empresa
+              </p>
+            </CardFooter>
+          </Card>
         </div>
 
         <div className="mt-16 text-center">
