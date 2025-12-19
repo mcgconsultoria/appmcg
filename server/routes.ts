@@ -1110,6 +1110,287 @@ export async function registerRoutes(
     }
   });
 
+  // Meeting record PDF generation
+  app.get("/api/meeting-records/:id/pdf", isAuthenticated, async (req: any, res) => {
+    try {
+      const PDFDocument = (await import("pdfkit")).default;
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const record = await storage.getMeetingRecord(id);
+      
+      if (!record) {
+        return res.status(404).json({ message: "Meeting record not found" });
+      }
+      if (record.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const actionItems = await storage.getMeetingActionItems(id);
+      const company = await storage.getCompany(userCompanyId);
+      const client = record.clientId ? await storage.getClient(record.clientId) : null;
+      
+      const doc = new PDFDocument({ margin: 50 });
+      
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=ata-${id}-${new Date().toISOString().split("T")[0]}.pdf`
+      );
+      
+      doc.pipe(res);
+      
+      // Header with company logo if available
+      if (company?.logo) {
+        try {
+          const base64Data = company.logo.split(",")[1] || company.logo;
+          const logoBuffer = Buffer.from(base64Data, "base64");
+          doc.image(logoBuffer, 50, 45, { width: 80 });
+          doc.moveDown(3);
+        } catch (e) {
+          // Skip logo if error
+        }
+      }
+      
+      // Title
+      doc.fontSize(20).font("Helvetica-Bold").text("ATA DE REUNIAO", { align: "center" });
+      doc.moveDown();
+      
+      // Meeting info
+      doc.fontSize(14).font("Helvetica-Bold").text(record.title);
+      doc.fontSize(10).font("Helvetica");
+      doc.text(`Data: ${record.meetingDate ? new Date(record.meetingDate).toLocaleDateString("pt-BR") : "-"}`);
+      if (client) doc.text(`Cliente: ${client.name}`);
+      doc.moveDown();
+      
+      // Participants
+      if (record.participants) {
+        doc.fontSize(12).font("Helvetica-Bold").text("Participantes:");
+        doc.fontSize(10).font("Helvetica");
+        try {
+          const participants = JSON.parse(record.participants);
+          participants.forEach((p: { name: string; email: string }) => {
+            doc.text(`  - ${p.name}${p.email ? ` (${p.email})` : ""}`);
+          });
+        } catch {
+          doc.text(`  ${record.participants}`);
+        }
+        doc.moveDown();
+      }
+      
+      // Objectives
+      const selectedObjectives = (record as any).selectedObjectives;
+      if (selectedObjectives) {
+        doc.fontSize(12).font("Helvetica-Bold").text("Objetivos:");
+        doc.fontSize(10).font("Helvetica");
+        try {
+          const objectives = JSON.parse(selectedObjectives);
+          objectives.forEach((obj: string) => {
+            doc.text(`  - ${obj}`);
+          });
+        } catch {
+          doc.text(`  ${selectedObjectives}`);
+        }
+        doc.moveDown();
+      }
+      
+      // Summary
+      if (record.summary) {
+        doc.fontSize(12).font("Helvetica-Bold").text("Resumo / Pauta:");
+        doc.fontSize(10).font("Helvetica").text(record.summary);
+        doc.moveDown();
+      }
+      
+      // Decisions
+      if (record.decisions) {
+        doc.fontSize(12).font("Helvetica-Bold").text("Decisoes Tomadas:");
+        doc.fontSize(10).font("Helvetica").text(record.decisions);
+        doc.moveDown();
+      }
+      
+      // Action Items
+      if (actionItems.length > 0) {
+        doc.fontSize(12).font("Helvetica-Bold").text("Plano de Acao:");
+        doc.fontSize(10).font("Helvetica");
+        actionItems.forEach((item, index) => {
+          doc.text(`  ${index + 1}. ${item.description}`);
+          doc.text(`     Responsavel: ${item.responsible || "-"} | Prazo: ${item.dueDate ? new Date(item.dueDate).toLocaleDateString("pt-BR") : "-"}`);
+        });
+        doc.moveDown();
+      }
+      
+      // Next Steps
+      if (record.nextSteps) {
+        doc.fontSize(12).font("Helvetica-Bold").text("Proximos Passos:");
+        doc.fontSize(10).font("Helvetica").text(record.nextSteps);
+        doc.moveDown();
+      }
+      
+      // Footer
+      doc.fontSize(8).text(`Gerado em ${new Date().toLocaleString("pt-BR")}`, { align: "right" });
+      
+      doc.end();
+    } catch (error) {
+      console.error("Error generating meeting record PDF:", error);
+      res.status(500).json({ message: "Failed to generate PDF" });
+    }
+  });
+
+  // Send meeting record by email (requires email service configuration)
+  app.post("/api/meeting-records/:id/send-email", isAuthenticated, async (req: any, res) => {
+    try {
+      const { emailService } = await import("./emailService");
+      const PDFDocument = (await import("pdfkit")).default;
+      
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const record = await storage.getMeetingRecord(id);
+      
+      if (!record) {
+        return res.status(404).json({ message: "Meeting record not found" });
+      }
+      if (record.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      // Check if email service is configured
+      if (!emailService.isConfigured()) {
+        return res.status(503).json({ 
+          message: "Servico de email nao configurado. Configure RESEND_API_KEY para habilitar o envio de emails.",
+          emailServiceNotConfigured: true 
+        });
+      }
+      
+      // Parse participants to get emails
+      let emails: string[] = [];
+      try {
+        const participants = JSON.parse(record.participants || "[]");
+        emails = participants.filter((p: { email: string }) => p.email).map((p: { email: string }) => p.email);
+      } catch {
+        // No valid participants
+      }
+      
+      if (emails.length === 0) {
+        return res.status(400).json({ message: "Nenhum participante com email cadastrado" });
+      }
+      
+      // Generate PDF buffer
+      const actionItems = await storage.getMeetingActionItems(id);
+      const company = await storage.getCompany(userCompanyId);
+      const client = record.clientId ? await storage.getClient(record.clientId) : null;
+      
+      const doc = new PDFDocument({ margin: 50 });
+      const chunks: Buffer[] = [];
+      
+      doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+      
+      const pdfPromise = new Promise<Buffer>((resolve) => {
+        doc.on("end", () => resolve(Buffer.concat(chunks)));
+      });
+      
+      // Build PDF content
+      if (company?.logo) {
+        try {
+          const base64Data = company.logo.split(",")[1] || company.logo;
+          const logoBuffer = Buffer.from(base64Data, "base64");
+          doc.image(logoBuffer, 50, 45, { width: 80 });
+          doc.moveDown(3);
+        } catch { /* skip logo */ }
+      }
+      
+      doc.fontSize(20).font("Helvetica-Bold").text("ATA DE REUNIAO", { align: "center" });
+      doc.moveDown();
+      doc.fontSize(14).font("Helvetica-Bold").text(record.title);
+      doc.fontSize(10).font("Helvetica");
+      doc.text(`Data: ${record.meetingDate ? new Date(record.meetingDate).toLocaleDateString("pt-BR") : "-"}`);
+      if (client) doc.text(`Cliente: ${client.name}`);
+      doc.moveDown();
+      
+      if (record.participants) {
+        doc.fontSize(12).font("Helvetica-Bold").text("Participantes:");
+        doc.fontSize(10).font("Helvetica");
+        try {
+          const participants = JSON.parse(record.participants);
+          participants.forEach((p: { name: string; email: string }) => {
+            doc.text(`  - ${p.name}${p.email ? ` (${p.email})` : ""}`);
+          });
+        } catch {
+          doc.text(`  ${record.participants}`);
+        }
+        doc.moveDown();
+      }
+      
+      if (record.summary) {
+        doc.fontSize(12).font("Helvetica-Bold").text("Resumo / Pauta:");
+        doc.fontSize(10).font("Helvetica").text(record.summary);
+        doc.moveDown();
+      }
+      
+      if (record.decisions) {
+        doc.fontSize(12).font("Helvetica-Bold").text("Decisoes Tomadas:");
+        doc.fontSize(10).font("Helvetica").text(record.decisions);
+        doc.moveDown();
+      }
+      
+      if (actionItems.length > 0) {
+        doc.fontSize(12).font("Helvetica-Bold").text("Plano de Acao:");
+        doc.fontSize(10).font("Helvetica");
+        actionItems.forEach((item, index) => {
+          doc.text(`  ${index + 1}. ${item.description}`);
+          doc.text(`     Responsavel: ${item.responsible || "-"} | Prazo: ${item.dueDate ? new Date(item.dueDate).toLocaleDateString("pt-BR") : "-"}`);
+        });
+        doc.moveDown();
+      }
+      
+      if (record.nextSteps) {
+        doc.fontSize(12).font("Helvetica-Bold").text("Proximos Passos:");
+        doc.fontSize(10).font("Helvetica").text(record.nextSteps);
+        doc.moveDown();
+      }
+      
+      doc.fontSize(8).text(`Gerado em ${new Date().toLocaleString("pt-BR")}`, { align: "right" });
+      doc.end();
+      
+      const pdfBuffer = await pdfPromise;
+      
+      // Send email with PDF attachment
+      const result = await emailService.send({
+        to: emails,
+        subject: `Ata de Reuniao: ${record.title}`,
+        html: `
+          <h2>Ata de Reuniao</h2>
+          <p><strong>Titulo:</strong> ${record.title}</p>
+          <p><strong>Data:</strong> ${record.meetingDate ? new Date(record.meetingDate).toLocaleDateString("pt-BR") : "-"}</p>
+          ${client ? `<p><strong>Cliente:</strong> ${client.name}</p>` : ""}
+          <p>Segue em anexo a ata completa em formato PDF.</p>
+          <br/>
+          <p><em>Este email foi enviado automaticamente pelo MCG Consultoria.</em></p>
+        `,
+        attachments: [{
+          filename: `ata-${id}-${new Date().toISOString().split("T")[0]}.pdf`,
+          content: pdfBuffer,
+        }],
+      });
+      
+      if (result.success) {
+        await storage.updateMeetingRecord(id, { status: "sent" });
+        res.json({ 
+          success: true, 
+          message: `Ata enviada com sucesso para ${emails.length} participante(s)`,
+          recipients: emails 
+        });
+      } else {
+        res.status(500).json({ 
+          success: false, 
+          message: result.message,
+          error: result.error 
+        });
+      }
+    } catch (error) {
+      console.error("Error sending meeting record email:", error);
+      res.status(500).json({ message: "Failed to send email" });
+    }
+  });
+
   // Meeting action items routes
   app.get("/api/meeting-records/:id/action-items", isAuthenticated, async (req: any, res) => {
     try {

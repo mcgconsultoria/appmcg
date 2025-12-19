@@ -103,6 +103,17 @@ MCG Consultoria is a commercial management platform for logistics, filling the g
 - **Endpoint Ready**: POST /api/route-calculation (code implemented, waiting for API token)
 - **Note**: System works fully in manual mode without API configured
 
+### Email Service (Resend/SendGrid)
+- **Status**: Pending configuration
+- **Purpose**: Send meeting records (Ata) as PDF to participants, task reminders 1 day before due date
+- **Features ready**:
+  - PDF generation with company logo (using PDFKit)
+  - Participants with name and email stored in meeting records
+  - Tasks have assignedEmail field for reminder delivery
+  - Action items auto-create tasks when due date is set
+- **To activate**: Configure Resend or SendGrid integration via Replit Connectors
+- **Alternative**: Set RESEND_API_KEY or SENDGRID_API_KEY secret manually
+
 ### KMM ERP Integration (Grupo NStech)
 - **Status**: Pending formal partnership agreement
 - **Purpose**: Full integration between MCG (commercial/CRM) and KMM (operational/WMS/TMS)

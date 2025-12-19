@@ -687,14 +687,48 @@ export default function MeetingRecords() {
                                 <div><strong>Data:</strong> {record.meetingDate ? format(new Date(record.meetingDate), "dd/MM/yyyy") : "-"}</div>
                                 <div><strong>Tipo:</strong> {meetingTypes.find(t => t.value === record.meetingType)?.label}</div>
                                 <div><strong>Cliente:</strong> {getClientName(record.clientId)}</div>
-                                <div><strong>Participantes:</strong> {record.participants || "-"}</div>
-                              </div>
-                              {record.objectives && (
-                                <div className="mb-4">
-                                  <h3 className="font-semibold mb-1">Objetivos</h3>
-                                  <p className="text-sm whitespace-pre-wrap">{record.objectives}</p>
+                                <div>
+                                  <strong>Participantes:</strong>
+                                  {(() => {
+                                    try {
+                                      const parsed = JSON.parse(record.participants || "[]");
+                                      if (Array.isArray(parsed) && parsed.length > 0) {
+                                        return parsed.map((p: {name: string, email: string}, i: number) => (
+                                          <span key={i}> {p.name}{p.email ? ` (${p.email})` : ""}{i < parsed.length - 1 ? "," : ""}</span>
+                                        ));
+                                      }
+                                      return " -";
+                                    } catch {
+                                      return ` ${record.participants || "-"}`;
+                                    }
+                                  })()}
                                 </div>
-                              )}
+                              </div>
+                              {(() => {
+                                try {
+                                  const objectives = JSON.parse((record as any).selectedObjectives || "[]");
+                                  if (Array.isArray(objectives) && objectives.length > 0) {
+                                    return (
+                                      <div className="mb-4">
+                                        <h3 className="font-semibold mb-1">Objetivos</h3>
+                                        <ul className="text-sm list-disc list-inside">
+                                          {objectives.map((obj: string, i: number) => (
+                                            <li key={i}>{obj}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    );
+                                  }
+                                  return null;
+                                } catch {
+                                  return record.objectives ? (
+                                    <div className="mb-4">
+                                      <h3 className="font-semibold mb-1">Objetivos</h3>
+                                      <p className="text-sm whitespace-pre-wrap">{record.objectives}</p>
+                                    </div>
+                                  ) : null;
+                                }
+                              })()}
                               {record.summary && (
                                 <div className="mb-4">
                                   <h3 className="font-semibold mb-1">Resumo / Pauta</h3>
@@ -715,9 +749,44 @@ export default function MeetingRecords() {
                               )}
                             </div>
                             <div className="flex justify-end gap-2 print:hidden">
+                              <Button 
+                                variant="outline" 
+                                onClick={() => {
+                                  window.open(`/api/meeting-records/${record.id}/pdf`, "_blank");
+                                }}
+                              >
+                                <Download className="h-4 w-4 mr-2" />
+                                Baixar PDF
+                              </Button>
                               <Button variant="outline" onClick={() => window.print()}>
                                 <Download className="h-4 w-4 mr-2" />
-                                Imprimir / PDF
+                                Imprimir
+                              </Button>
+                              <Button 
+                                variant="default"
+                                onClick={async () => {
+                                  try {
+                                    const res = await apiRequest("POST", `/api/meeting-records/${record.id}/send-email`);
+                                    const data = await res.json();
+                                    if (data.emailServiceNotConfigured) {
+                                      toast({ 
+                                        title: "Servico de email nao configurado", 
+                                        description: "Configure o RESEND_API_KEY ou SENDGRID_API_KEY para enviar emails.",
+                                        variant: "destructive" 
+                                      });
+                                    } else {
+                                      toast({ title: data.message });
+                                      queryClient.invalidateQueries({ queryKey: ["/api/meeting-records"] });
+                                    }
+                                  } catch (error: any) {
+                                    const message = error?.message || "Erro ao enviar email";
+                                    toast({ title: message, variant: "destructive" });
+                                  }
+                                }}
+                                data-testid={`button-send-email-${record.id}`}
+                              >
+                                <Mail className="h-4 w-4 mr-2" />
+                                Enviar por Email
                               </Button>
                             </div>
                           </DialogContent>
