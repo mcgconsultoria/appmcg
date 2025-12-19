@@ -28,6 +28,7 @@ import CalendarPage from "@/pages/CalendarPage";
 import TasksPage from "@/pages/TasksPage";
 import ProjectsPage from "@/pages/ProjectsPage";
 import RFI from "@/pages/RFI";
+import BrandKit from "@/pages/BrandKit";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -70,6 +71,7 @@ function Router() {
           <Route path="/marketing" component={Marketing} />
           <Route path="/configuracoes" component={Settings} />
           <Route path="/assinatura" component={Subscription} />
+          <Route path="/kit-marca" component={BrandKit} />
         </>
       )}
       <Route component={NotFound} />

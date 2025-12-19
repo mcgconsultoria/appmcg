@@ -23,12 +23,13 @@ import {
   FileText,
   Settings,
   LogOut,
-  Truck,
   FileEdit,
   Calendar,
   ListTodo,
   FolderKanban,
+  Palette,
 } from "lucide-react";
+import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
@@ -105,6 +106,11 @@ const managementMenuItems = [
     url: "/marketing",
     icon: FileText,
   },
+  {
+    title: "Kit da Marca",
+    url: "/kit-marca",
+    icon: Palette,
+  },
 ];
 
 export function AppSidebar() {
@@ -122,9 +128,11 @@ export function AppSidebar() {
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <Link href="/dashboard">
           <div className="flex items-center gap-3 cursor-pointer">
-            <div className="w-10 h-10 rounded-md bg-sidebar-primary flex items-center justify-center">
-              <Truck className="h-6 w-6 text-sidebar-primary-foreground" />
-            </div>
+            <img 
+              src={logoMcg} 
+              alt="MCG Consultoria" 
+              className="h-10 w-10 object-contain"
+            />
             <div className="flex flex-col">
               <span className="font-bold text-lg leading-tight">MCG</span>
               <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>

@@ -62,6 +62,26 @@ export async function registerRoutes(
   
   await setupAuth(app);
 
+  app.get('/api/brand-kit/manual', isAuthenticated, async (req, res) => {
+    try {
+      const fs = await import('fs');
+      const path = await import('path');
+      const manualPath = path.join(process.cwd(), 'attached_assets', 'MCG_Manual_Identidade_Visual.md');
+      
+      if (!fs.existsSync(manualPath)) {
+        return res.status(404).json({ message: "Manual não encontrado" });
+      }
+      
+      const content = fs.readFileSync(manualPath, 'utf-8');
+      res.setHeader('Content-Type', 'text/markdown');
+      res.setHeader('Content-Disposition', 'attachment; filename="MCG_Manual_Identidade_Visual.md"');
+      res.send(content);
+    } catch (error) {
+      console.error("Error serving brand manual:", error);
+      res.status(500).json({ message: "Erro ao baixar manual" });
+    }
+  });
+
   app.post('/api/auth/register', async (req, res) => {
     try {
       const parsed = registerSchema.safeParse(req.body);
