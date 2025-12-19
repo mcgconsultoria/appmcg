@@ -33,6 +33,7 @@ import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
 
 const mainMenuItems = [
   {
@@ -233,12 +234,17 @@ export function AppSidebar() {
           <Button
             variant="ghost"
             size="icon"
-            asChild
             data-testid="button-logout"
+            onClick={async () => {
+              try {
+                await apiRequest("POST", "/api/auth/logout");
+                window.location.href = "/";
+              } catch (error) {
+                window.location.href = "/";
+              }
+            }}
           >
-            <a href="/api/logout">
-              <LogOut className="h-4 w-4" />
-            </a>
+            <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </SidebarFooter>

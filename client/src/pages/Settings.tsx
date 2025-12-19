@@ -301,8 +301,19 @@ export default function Settings() {
             </div>
             <Separator />
             <div>
-              <Button variant="destructive" asChild data-testid="button-logout-settings">
-                <a href="/api/logout">Sair da Conta</a>
+              <Button 
+                variant="destructive" 
+                data-testid="button-logout-settings"
+                onClick={async () => {
+                  try {
+                    await apiRequest("POST", "/api/auth/logout");
+                    window.location.href = "/";
+                  } catch (error) {
+                    window.location.href = "/";
+                  }
+                }}
+              >
+                Sair da Conta
               </Button>
             </div>
           </CardContent>
