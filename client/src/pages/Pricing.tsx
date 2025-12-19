@@ -164,6 +164,10 @@ export default function Pricing() {
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Comece gratuitamente com nossas calculadoras e faça upgrade quando precisar de mais recursos
           </p>
+          <div className="mt-4 inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-md text-sm font-medium">
+            <Check className="h-4 w-4" />
+            15 dias grátis para testar - cancele a qualquer momento sem custo
+          </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
@@ -213,19 +217,24 @@ export default function Pricing() {
                     Começar Grátis
                   </Button>
                 ) : (
-                  <Button
-                    className="w-full"
-                    variant={plan.popular ? "default" : "outline"}
-                    onClick={() => handleSubscribe(plan.priceId)}
-                    disabled={checkoutMutation.isPending}
-                    data-testid={`button-plan-${index}`}
-                  >
-                    {checkoutMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      "Assinar Agora"
-                    )}
-                  </Button>
+                  <div className="w-full space-y-2">
+                    <Button
+                      className="w-full"
+                      variant={plan.popular ? "default" : "outline"}
+                      onClick={() => handleSubscribe(plan.priceId)}
+                      disabled={checkoutMutation.isPending}
+                      data-testid={`button-plan-${index}`}
+                    >
+                      {checkoutMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Testar 15 dias grátis"
+                      )}
+                    </Button>
+                    <p className="text-xs text-muted-foreground text-center">
+                      Cobrança inicia no 16º dia
+                    </p>
+                  </div>
                 )}
               </CardFooter>
             </Card>

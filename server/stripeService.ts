@@ -30,6 +30,10 @@ export class StripeService {
       cancel_url: cancelUrl,
       locale: 'pt-BR',
       allow_promotion_codes: true,
+      payment_method_collection: 'always',
+      subscription_data: {
+        trial_period_days: 15,
+      },
     });
   }
 
