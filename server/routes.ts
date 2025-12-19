@@ -10,6 +10,8 @@ import {
   insertFreightCalculationSchema,
   insertStorageCalculationSchema,
   insertFinancialAccountSchema,
+  insertMeetingRecordSchema,
+  insertMeetingActionItemSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -913,6 +915,164 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error using calculation:", error);
       res.status(500).json({ message: "Failed to use calculation" });
+    }
+  });
+
+  // Meeting records routes (Ata Plano de Acao)
+  app.get("/api/meeting-records", isAuthenticated, async (req: any, res) => {
+    try {
+      const companyId = req.user.companyId || 1;
+      const records = await storage.getMeetingRecords(companyId);
+      res.json(records);
+    } catch (error) {
+      console.error("Error fetching meeting records:", error);
+      res.status(500).json({ message: "Failed to fetch meeting records" });
+    }
+  });
+
+  app.get("/api/meeting-records/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const record = await storage.getMeetingRecord(id);
+      if (!record) {
+        return res.status(404).json({ message: "Meeting record not found" });
+      }
+      if (record.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const actionItems = await storage.getMeetingActionItems(id);
+      res.json({ ...record, actionItems });
+    } catch (error) {
+      console.error("Error fetching meeting record:", error);
+      res.status(500).json({ message: "Failed to fetch meeting record" });
+    }
+  });
+
+  app.post("/api/meeting-records", isAuthenticated, async (req: any, res) => {
+    try {
+      const parsed = insertMeetingRecordSchema.safeParse({
+        ...req.body,
+        companyId: req.user.companyId || 1,
+        userId: req.user.id,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid meeting record data", errors: parsed.error.errors });
+      }
+      const record = await storage.createMeetingRecord(parsed.data);
+      res.status(201).json(record);
+    } catch (error) {
+      console.error("Error creating meeting record:", error);
+      res.status(500).json({ message: "Failed to create meeting record" });
+    }
+  });
+
+  app.patch("/api/meeting-records/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const existingRecord = await storage.getMeetingRecord(id);
+      if (!existingRecord) {
+        return res.status(404).json({ message: "Meeting record not found" });
+      }
+      if (existingRecord.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const record = await storage.updateMeetingRecord(id, req.body);
+      res.json(record);
+    } catch (error) {
+      console.error("Error updating meeting record:", error);
+      res.status(500).json({ message: "Failed to update meeting record" });
+    }
+  });
+
+  app.delete("/api/meeting-records/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const existingRecord = await storage.getMeetingRecord(id);
+      if (!existingRecord) {
+        return res.status(404).json({ message: "Meeting record not found" });
+      }
+      if (existingRecord.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      await storage.deleteMeetingRecord(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting meeting record:", error);
+      res.status(500).json({ message: "Failed to delete meeting record" });
+    }
+  });
+
+  // Meeting action items routes
+  app.get("/api/meeting-records/:id/action-items", isAuthenticated, async (req: any, res) => {
+    try {
+      const meetingRecordId = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const record = await storage.getMeetingRecord(meetingRecordId);
+      if (!record) {
+        return res.status(404).json({ message: "Meeting record not found" });
+      }
+      if (record.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const items = await storage.getMeetingActionItems(meetingRecordId);
+      res.json(items);
+    } catch (error) {
+      console.error("Error fetching meeting action items:", error);
+      res.status(500).json({ message: "Failed to fetch meeting action items" });
+    }
+  });
+
+  app.post("/api/meeting-records/:id/action-items", isAuthenticated, async (req: any, res) => {
+    try {
+      const meetingRecordId = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const record = await storage.getMeetingRecord(meetingRecordId);
+      if (!record) {
+        return res.status(404).json({ message: "Meeting record not found" });
+      }
+      if (record.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const parsed = insertMeetingActionItemSchema.safeParse({
+        ...req.body,
+        meetingRecordId,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid action item data", errors: parsed.error.errors });
+      }
+      const item = await storage.createMeetingActionItem(parsed.data);
+      res.status(201).json(item);
+    } catch (error) {
+      console.error("Error creating meeting action item:", error);
+      res.status(500).json({ message: "Failed to create meeting action item" });
+    }
+  });
+
+  app.patch("/api/meeting-action-items/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const item = await storage.updateMeetingActionItem(id, req.body);
+      if (!item) {
+        return res.status(404).json({ message: "Action item not found" });
+      }
+      res.json(item);
+    } catch (error) {
+      console.error("Error updating meeting action item:", error);
+      res.status(500).json({ message: "Failed to update meeting action item" });
+    }
+  });
+
+  app.delete("/api/meeting-action-items/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteMeetingActionItem(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting meeting action item:", error);
+      res.status(500).json({ message: "Failed to delete meeting action item" });
     }
   });
 

@@ -23,6 +23,10 @@ import Pricing from "@/pages/Pricing";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
 import Subscription from "@/pages/Subscription";
+import MeetingRecords from "@/pages/MeetingRecords";
+import CalendarPage from "@/pages/CalendarPage";
+import TasksPage from "@/pages/TasksPage";
+import ProjectsPage from "@/pages/ProjectsPage";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -55,7 +59,11 @@ function Router() {
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/clientes" component={Clients} />
           <Route path="/pipeline" component={Pipeline} />
+          <Route path="/calendario" component={CalendarPage} />
+          <Route path="/atas" component={MeetingRecords} />
           <Route path="/checklist" component={Checklist} />
+          <Route path="/tarefas" component={TasksPage} />
+          <Route path="/projetos" component={ProjectsPage} />
           <Route path="/financeiro" component={Financial} />
           <Route path="/marketing" component={Marketing} />
           <Route path="/configuracoes" component={Settings} />

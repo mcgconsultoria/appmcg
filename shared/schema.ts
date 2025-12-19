@@ -273,6 +273,104 @@ export const anttFreightTable = pgTable("antt_freight_table", {
   validUntil: timestamp("valid_until"),
 });
 
+// Meeting Records (Ata Plano de Acao)
+export const meetingRecords = pgTable("meeting_records", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  clientId: integer("client_id"),
+  userId: varchar("user_id"),
+  title: varchar("title", { length: 255 }).notNull(),
+  meetingType: varchar("meeting_type", { length: 50 }).default("client"), // client, internal, strategic
+  meetingDate: timestamp("meeting_date").notNull(),
+  participants: text("participants"),
+  summary: text("summary"),
+  objectives: text("objectives"),
+  decisions: text("decisions"),
+  nextSteps: text("next_steps"),
+  nextReviewDate: timestamp("next_review_date"),
+  pipelineStage: varchar("pipeline_stage", { length: 50 }),
+  status: varchar("status").default("draft"), // draft, finalized, sent
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Meeting Action Items (Itens do Plano de Acao)
+export const meetingActionItems = pgTable("meeting_action_items", {
+  id: serial("id").primaryKey(),
+  meetingRecordId: integer("meeting_record_id").notNull(),
+  description: text("description").notNull(),
+  responsible: varchar("responsible", { length: 255 }),
+  responsibleUserId: varchar("responsible_user_id"),
+  dueDate: timestamp("due_date"),
+  priority: varchar("priority", { length: 20 }).default("medium"), // low, medium, high, urgent
+  status: varchar("status").default("pending"), // pending, in_progress, completed, cancelled
+  completedAt: timestamp("completed_at"),
+  notes: text("notes"),
+  orderIndex: integer("order_index").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Commercial Events (Calendario Comercial)
+export const commercialEvents = pgTable("commercial_events", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  clientId: integer("client_id"),
+  userId: varchar("user_id"),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  eventType: varchar("event_type", { length: 50 }).default("meeting"), // meeting, call, visit, followup, deadline, reminder
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  allDay: boolean("all_day").default(false),
+  location: varchar("location", { length: 255 }),
+  pipelineStage: varchar("pipeline_stage", { length: 50 }),
+  meetingRecordId: integer("meeting_record_id"),
+  recurrence: varchar("recurrence", { length: 50 }), // none, daily, weekly, monthly
+  status: varchar("status").default("scheduled"), // scheduled, completed, cancelled
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Projects
+export const projects = pgTable("projects", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  clientId: integer("client_id"),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  status: varchar("status").default("active"), // active, paused, completed, cancelled
+  priority: varchar("priority", { length: 20 }).default("medium"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  progress: integer("progress").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Tasks
+export const tasks = pgTable("tasks", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  projectId: integer("project_id"),
+  clientId: integer("client_id"),
+  meetingRecordId: integer("meeting_record_id"),
+  actionItemId: integer("action_item_id"),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  assignedTo: varchar("assigned_to"),
+  assignedUserId: varchar("assigned_user_id"),
+  priority: varchar("priority", { length: 20 }).default("medium"),
+  status: varchar("status").default("todo"), // todo, in_progress, review, done
+  dueDate: timestamp("due_date"),
+  completedAt: timestamp("completed_at"),
+  estimatedHours: decimal("estimated_hours", { precision: 5, scale: 2 }),
+  actualHours: decimal("actual_hours", { precision: 5, scale: 2 }),
+  tags: text("tags"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one }) => ({
   company: one(companies, {
@@ -385,6 +483,35 @@ export const insertAnttFreightTableSchema = createInsertSchema(anttFreightTable)
   id: true,
 });
 
+export const insertMeetingRecordSchema = createInsertSchema(meetingRecords).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMeetingActionItemSchema = createInsertSchema(meetingActionItems).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCommercialEventSchema = createInsertSchema(commercialEvents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProjectSchema = createInsertSchema(projects).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTaskSchema = createInsertSchema(tasks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Auth schemas
 export const registerSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -429,3 +556,13 @@ export type ClientOperation = typeof clientOperations.$inferSelect;
 export type InsertClientOperation = z.infer<typeof insertClientOperationSchema>;
 export type AnttFreightTable = typeof anttFreightTable.$inferSelect;
 export type InsertAnttFreightTable = z.infer<typeof insertAnttFreightTableSchema>;
+export type MeetingRecord = typeof meetingRecords.$inferSelect;
+export type InsertMeetingRecord = z.infer<typeof insertMeetingRecordSchema>;
+export type MeetingActionItem = typeof meetingActionItems.$inferSelect;
+export type InsertMeetingActionItem = z.infer<typeof insertMeetingActionItemSchema>;
+export type CommercialEvent = typeof commercialEvents.$inferSelect;
+export type InsertCommercialEvent = z.infer<typeof insertCommercialEventSchema>;
+export type Project = typeof projects.$inferSelect;
+export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type Task = typeof tasks.$inferSelect;
+export type InsertTask = z.infer<typeof insertTaskSchema>;

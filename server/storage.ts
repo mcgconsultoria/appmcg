@@ -11,6 +11,8 @@ import {
   commercialProposals,
   proposalRoutes,
   clientOperations,
+  meetingRecords,
+  meetingActionItems,
   type User,
   type UpsertUser,
   type Company,
@@ -35,6 +37,10 @@ import {
   type InsertProposalRoute,
   type ClientOperation,
   type InsertClientOperation,
+  type MeetingRecord,
+  type InsertMeetingRecord,
+  type MeetingActionItem,
+  type InsertMeetingActionItem,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
@@ -112,6 +118,19 @@ export interface IStorage {
   // Client operation operations
   getClientOperations(clientId: number): Promise<ClientOperation[]>;
   createClientOperation(operation: InsertClientOperation): Promise<ClientOperation>;
+
+  // Meeting record operations
+  getMeetingRecords(companyId: number): Promise<MeetingRecord[]>;
+  getMeetingRecord(id: number): Promise<MeetingRecord | undefined>;
+  createMeetingRecord(record: InsertMeetingRecord): Promise<MeetingRecord>;
+  updateMeetingRecord(id: number, record: Partial<InsertMeetingRecord>): Promise<MeetingRecord | undefined>;
+  deleteMeetingRecord(id: number): Promise<boolean>;
+
+  // Meeting action item operations
+  getMeetingActionItems(meetingRecordId: number): Promise<MeetingActionItem[]>;
+  createMeetingActionItem(item: InsertMeetingActionItem): Promise<MeetingActionItem>;
+  updateMeetingActionItem(id: number, item: Partial<InsertMeetingActionItem>): Promise<MeetingActionItem | undefined>;
+  deleteMeetingActionItem(id: number): Promise<boolean>;
 
   // Quota operations
   useCalculation(userId: string): Promise<void>;
@@ -452,6 +471,60 @@ export class DatabaseStorage implements IStorage {
   async createClientOperation(operation: InsertClientOperation): Promise<ClientOperation> {
     const [newOperation] = await db.insert(clientOperations).values(operation).returning();
     return newOperation;
+  }
+
+  // Meeting record operations
+  async getMeetingRecords(companyId: number): Promise<MeetingRecord[]> {
+    return db.select().from(meetingRecords).where(eq(meetingRecords.companyId, companyId)).orderBy(desc(meetingRecords.meetingDate));
+  }
+
+  async getMeetingRecord(id: number): Promise<MeetingRecord | undefined> {
+    const [record] = await db.select().from(meetingRecords).where(eq(meetingRecords.id, id));
+    return record;
+  }
+
+  async createMeetingRecord(record: InsertMeetingRecord): Promise<MeetingRecord> {
+    const [newRecord] = await db.insert(meetingRecords).values(record).returning();
+    return newRecord;
+  }
+
+  async updateMeetingRecord(id: number, record: Partial<InsertMeetingRecord>): Promise<MeetingRecord | undefined> {
+    const [updated] = await db
+      .update(meetingRecords)
+      .set({ ...record, updatedAt: new Date() })
+      .where(eq(meetingRecords.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteMeetingRecord(id: number): Promise<boolean> {
+    await db.delete(meetingActionItems).where(eq(meetingActionItems.meetingRecordId, id));
+    await db.delete(meetingRecords).where(eq(meetingRecords.id, id));
+    return true;
+  }
+
+  // Meeting action item operations
+  async getMeetingActionItems(meetingRecordId: number): Promise<MeetingActionItem[]> {
+    return db.select().from(meetingActionItems).where(eq(meetingActionItems.meetingRecordId, meetingRecordId)).orderBy(meetingActionItems.orderIndex);
+  }
+
+  async createMeetingActionItem(item: InsertMeetingActionItem): Promise<MeetingActionItem> {
+    const [newItem] = await db.insert(meetingActionItems).values(item).returning();
+    return newItem;
+  }
+
+  async updateMeetingActionItem(id: number, item: Partial<InsertMeetingActionItem>): Promise<MeetingActionItem | undefined> {
+    const [updated] = await db
+      .update(meetingActionItems)
+      .set(item)
+      .where(eq(meetingActionItems.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteMeetingActionItem(id: number): Promise<boolean> {
+    await db.delete(meetingActionItems).where(eq(meetingActionItems.id, id));
+    return true;
   }
 
   // Quota operations

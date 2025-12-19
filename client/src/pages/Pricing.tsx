@@ -24,48 +24,76 @@ interface Product {
 const defaultPlans = [
   {
     name: "Gratuito",
-    description: "Acesso às calculadoras de frete e armazenagem",
+    description: "Acesso as calculadoras de frete e armazenagem",
     price: 0,
     interval: "sempre",
     features: [
       "Calculadora de Frete com ICMS",
       "Calculadora de Armazenagem",
-      "Acesso ilimitado às calculadoras",
+      "3 calculos gratuitos",
     ],
     popular: false,
     priceId: null,
   },
   {
     name: "Profissional",
-    description: "Todas as ferramentas para gestão completa",
+    description: "Todas as ferramentas para gestao comercial completa",
     price: 297,
-    interval: "mês",
+    interval: "mes",
     features: [
       "Tudo do plano Gratuito",
+      "Calculos ilimitados",
       "CRM de Clientes",
       "Pipeline de Vendas (Kanban)",
       "Checklists de 15 Departamentos",
-      "Gestão Financeira",
-      "Materiais de Marketing",
+      "Calendario Comercial",
+      "Ata Plano de Acao",
+      "Gestao Financeira",
       "Suporte por email",
     ],
     popular: true,
     priceId: null,
   },
   {
-    name: "Empresarial",
-    description: "Para operações em grande escala",
+    name: "Corporativo",
+    description: "Para operacoes em grande escala",
     price: 597,
-    interval: "mês",
+    interval: "mes",
     features: [
       "Tudo do plano Profissional",
-      "Multi-usuários (até 10)",
-      "Relatórios avançados",
-      "Integrações personalizadas",
-      "Suporte prioritário",
+      "Multi-usuarios (ate 10)",
+      "Gestao de Tarefas e Projetos",
+      "Indicadores e Curva ABC",
+      "Modulo de Marketing",
+      "Integracoes personalizadas",
+      "Suporte prioritario",
       "Treinamento dedicado",
     ],
     popular: false,
+    priceId: null,
+  },
+];
+
+const individualProducts = [
+  {
+    name: "Calculadora de Frete",
+    description: "Calculo de frete com ICMS para 27 estados",
+    price: 47,
+    interval: "mes",
+    priceId: null,
+  },
+  {
+    name: "Calculadora de Armazenagem",
+    description: "Calculo completo de custos de armazenagem",
+    price: 47,
+    interval: "mes",
+    priceId: null,
+  },
+  {
+    name: "Checklist Operacional",
+    description: "Checklists para 15 departamentos de logistica",
+    price: 97,
+    interval: "mes",
     priceId: null,
   },
 ];
@@ -190,21 +218,64 @@ export default function Pricing() {
           ))}
         </div>
 
+        <div className="mt-20">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold mb-4" data-testid="text-products-title">
+              Produtos Avulsos
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Precisa apenas de uma ferramenta especifica? Adquira individualmente
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {individualProducts.map((product, index) => (
+              <Card key={index} className="flex flex-col" data-testid={`card-product-${index}`}>
+                <CardHeader>
+                  <CardTitle className="text-xl" data-testid={`text-product-name-${index}`}>
+                    {product.name}
+                  </CardTitle>
+                  <CardDescription>{product.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1">
+                  <div>
+                    <span className="text-3xl font-bold" data-testid={`text-product-price-${index}`}>
+                      R$ {product.price}
+                    </span>
+                    <span className="text-muted-foreground">/{product.interval}</span>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => handleSubscribe(product.priceId)}
+                    disabled={checkoutMutation.isPending || !product.priceId}
+                    data-testid={`button-product-${index}`}
+                  >
+                    {!product.priceId ? "Em Breve" : "Adquirir"}
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </div>
+
         <div className="mt-16 text-center">
           <h2 className="text-2xl font-semibold mb-4">Pagamento Seguro</h2>
           <p className="text-muted-foreground mb-6">
-            Todos os pagamentos são processados de forma segura pelo Stripe.
-            Aceitamos cartões de crédito, PIX e boleto bancário.
+            Todos os pagamentos sao processados de forma segura pelo Stripe.
+            Aceitamos cartoes de credito, PIX e boleto bancario.
           </p>
           <div className="flex justify-center gap-4 flex-wrap">
             <Badge variant="outline" className="px-4 py-2">
-              Cartão de Crédito
+              Cartao de Credito
             </Badge>
             <Badge variant="outline" className="px-4 py-2">
               PIX
             </Badge>
             <Badge variant="outline" className="px-4 py-2">
-              Boleto Bancário
+              Boleto Bancario
             </Badge>
           </div>
         </div>

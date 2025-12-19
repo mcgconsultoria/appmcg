@@ -23,6 +23,10 @@ import {
   Settings,
   LogOut,
   Truck,
+  FileEdit,
+  Calendar,
+  ListTodo,
+  FolderKanban,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -45,9 +49,29 @@ const mainMenuItems = [
     icon: Kanban,
   },
   {
+    title: "Calendario",
+    url: "/calendario",
+    icon: Calendar,
+  },
+  {
+    title: "Ata Plano de Acao",
+    url: "/atas",
+    icon: FileEdit,
+  },
+  {
     title: "Checklist",
     url: "/checklist",
     icon: ClipboardCheck,
+  },
+  {
+    title: "Tarefas",
+    url: "/tarefas",
+    icon: ListTodo,
+  },
+  {
+    title: "Projetos",
+    url: "/projetos",
+    icon: FolderKanban,
   },
 ];
 
