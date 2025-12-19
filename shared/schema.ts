@@ -61,6 +61,7 @@ export const companies = pgTable("companies", {
   address: text("address"),
   city: varchar("city", { length: 100 }),
   state: varchar("state", { length: 2 }),
+  logo: text("logo"),
   subscriptionStatus: varchar("subscription_status").default("trial"),
   subscriptionEndDate: timestamp("subscription_end_date"),
   createdAt: timestamp("created_at").defaultNow(),

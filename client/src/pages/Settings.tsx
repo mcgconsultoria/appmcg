@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,11 +9,71 @@ import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/components/ThemeProvider";
-import { User, Bell, Shield, Palette, Building2 } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { User, Bell, Shield, Palette, Building2, Upload, Loader2 } from "lucide-react";
+import type { Company } from "@shared/schema";
 
 export default function Settings() {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [companyForm, setCompanyForm] = useState({
+    name: "",
+    cnpj: "",
+    logo: "",
+  });
+
+  const { data: company, isLoading: isLoadingCompany } = useQuery<Company>({
+    queryKey: ["/api/company"],
+  });
+
+  useEffect(() => {
+    if (company) {
+      setCompanyForm({
+        name: company.name || "",
+        cnpj: company.cnpj || "",
+        logo: company.logo || "",
+      });
+    }
+  }, [company]);
+
+  const updateCompanyMutation = useMutation({
+    mutationFn: async (data: Partial<Company>) => {
+      const res = await apiRequest("PATCH", "/api/company", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/company"] });
+      toast({ title: "Empresa atualizada com sucesso" });
+    },
+    onError: () => {
+      toast({ title: "Erro ao atualizar empresa", variant: "destructive" });
+    },
+  });
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 500000) {
+        toast({ title: "Imagem muito grande. Maximo 500KB.", variant: "destructive" });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        setCompanyForm(prev => ({ ...prev, logo: base64 }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveCompany = () => {
+    updateCompanyMutation.mutate(companyForm);
+  };
 
   const getInitials = (firstName?: string | null, lastName?: string | null) => {
     const first = firstName?.charAt(0) || "";
@@ -86,28 +147,70 @@ export default function Settings() {
               <Building2 className="h-5 w-5" />
               Empresa
             </CardTitle>
-            <CardDescription>Informações da sua empresa</CardDescription>
+            <CardDescription>Informacoes da sua empresa e logotipo para documentos</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="companyName">Nome da Empresa</Label>
-                <Input
-                  id="companyName"
-                  placeholder="Nome da empresa"
-                  data-testid="input-company-name"
+          <CardContent className="space-y-6">
+            <div className="flex items-start gap-6">
+              <div className="flex flex-col items-center gap-2">
+                <div className="h-24 w-24 rounded-lg border-2 border-dashed flex items-center justify-center bg-muted/50 overflow-hidden">
+                  {companyForm.logo ? (
+                    <img src={companyForm.logo} alt="Logo" className="h-full w-full object-contain" />
+                  ) : (
+                    <Building2 className="h-8 w-8 text-muted-foreground" />
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  className="hidden"
+                  data-testid="input-company-logo"
                 />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  data-testid="button-upload-logo"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Enviar Logo
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">Max 500KB</p>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="cnpj">CNPJ</Label>
-                <Input
-                  id="cnpj"
-                  placeholder="00.000.000/0000-00"
-                  data-testid="input-company-cnpj"
-                />
+              <div className="flex-1 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="companyName">Nome da Empresa</Label>
+                    <Input
+                      id="companyName"
+                      placeholder="Nome da empresa"
+                      value={companyForm.name}
+                      onChange={(e) => setCompanyForm(prev => ({ ...prev, name: e.target.value }))}
+                      data-testid="input-company-name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="cnpj">CNPJ</Label>
+                    <Input
+                      id="cnpj"
+                      placeholder="00.000.000/0000-00"
+                      value={companyForm.cnpj}
+                      onChange={(e) => setCompanyForm(prev => ({ ...prev, cnpj: e.target.value }))}
+                      data-testid="input-company-cnpj"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
-            <Button data-testid="button-save-company">Salvar Alterações</Button>
+            <Button 
+              onClick={handleSaveCompany} 
+              disabled={updateCompanyMutation.isPending}
+              data-testid="button-save-company"
+            >
+              {updateCompanyMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Salvar Alteracoes
+            </Button>
           </CardContent>
         </Card>
 

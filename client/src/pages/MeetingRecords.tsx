@@ -34,7 +34,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Plus, FileEdit, Trash2, Eye, Download, Loader2, Users, Calendar, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { MeetingRecord, MeetingActionItem, Client } from "@shared/schema";
+import type { MeetingRecord, MeetingActionItem, Client, Company } from "@shared/schema";
 
 const meetingTypes = [
   { value: "client", label: "Reuniao com Cliente" },
@@ -101,6 +101,10 @@ export default function MeetingRecords() {
 
   const { data: clients } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
+  });
+
+  const { data: company } = useQuery<Company>({
+    queryKey: ["/api/company"],
   });
 
   const createMutation = useMutation({
@@ -515,6 +519,71 @@ export default function MeetingRecords() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              data-testid={`button-view-meeting-${record.id}`}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto print:max-w-none print:max-h-none">
+                            <div className="print:p-8" id={`print-ata-${record.id}`}>
+                              <div className="flex items-start justify-between mb-6 pb-4 border-b">
+                                {company?.logo ? (
+                                  <img src={company.logo} alt="Logo" className="h-16 w-auto object-contain" />
+                                ) : (
+                                  <div className="h-16 w-16 rounded bg-muted flex items-center justify-center">
+                                    <Users className="h-8 w-8 text-muted-foreground" />
+                                  </div>
+                                )}
+                                <div className="text-right">
+                                  <h2 className="text-xl font-bold">{company?.name || "MCG Consultoria"}</h2>
+                                  <p className="text-sm text-muted-foreground">{company?.cnpj}</p>
+                                </div>
+                              </div>
+                              <h1 className="text-2xl font-bold mb-2">{record.title}</h1>
+                              <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                                <div><strong>Data:</strong> {record.meetingDate ? format(new Date(record.meetingDate), "dd/MM/yyyy") : "-"}</div>
+                                <div><strong>Tipo:</strong> {meetingTypes.find(t => t.value === record.meetingType)?.label}</div>
+                                <div><strong>Cliente:</strong> {getClientName(record.clientId)}</div>
+                                <div><strong>Participantes:</strong> {record.participants || "-"}</div>
+                              </div>
+                              {record.objectives && (
+                                <div className="mb-4">
+                                  <h3 className="font-semibold mb-1">Objetivos</h3>
+                                  <p className="text-sm whitespace-pre-wrap">{record.objectives}</p>
+                                </div>
+                              )}
+                              {record.summary && (
+                                <div className="mb-4">
+                                  <h3 className="font-semibold mb-1">Resumo / Pauta</h3>
+                                  <p className="text-sm whitespace-pre-wrap">{record.summary}</p>
+                                </div>
+                              )}
+                              {record.decisions && (
+                                <div className="mb-4">
+                                  <h3 className="font-semibold mb-1">Decisoes Tomadas</h3>
+                                  <p className="text-sm whitespace-pre-wrap">{record.decisions}</p>
+                                </div>
+                              )}
+                              {record.nextSteps && (
+                                <div className="mb-4">
+                                  <h3 className="font-semibold mb-1">Proximos Passos</h3>
+                                  <p className="text-sm whitespace-pre-wrap">{record.nextSteps}</p>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex justify-end gap-2 print:hidden">
+                              <Button variant="outline" onClick={() => window.print()}>
+                                <Download className="h-4 w-4 mr-2" />
+                                Imprimir / PDF
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                         <Button
                           variant="ghost"
                           size="icon"

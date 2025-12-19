@@ -201,6 +201,35 @@ export async function registerRoutes(
     }
   });
 
+  // Company routes
+  app.get("/api/company", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const company = await storage.getCompany(userCompanyId);
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      res.json(company);
+    } catch (error) {
+      console.error("Error fetching company:", error);
+      res.status(500).json({ message: "Failed to fetch company" });
+    }
+  });
+
+  app.patch("/api/company", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const company = await storage.updateCompany(userCompanyId, req.body);
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      res.json(company);
+    } catch (error) {
+      console.error("Error updating company:", error);
+      res.status(500).json({ message: "Failed to update company" });
+    }
+  });
+
   // Checklist routes
   app.get("/api/checklists", isAuthenticated, async (req, res) => {
     try {
