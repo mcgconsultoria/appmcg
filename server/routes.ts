@@ -218,7 +218,13 @@ export async function registerRoutes(
 
   app.patch("/api/company", isAuthenticated, async (req: any, res) => {
     try {
+      // Use user's companyId or default to 1 for single-tenant MVP
       const userCompanyId = req.user.companyId || 1;
+      
+      // Security: Verify user has access to this company
+      if (req.user.companyId && req.user.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
       
       // Validate and sanitize allowed fields
       const allowedFields = ["name", "cnpj", "email", "phone", "address", "city", "state", "logo"];
