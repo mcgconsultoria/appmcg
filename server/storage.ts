@@ -55,7 +55,7 @@ import {
   type InsertTask,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and, gte, lt, ne } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -170,6 +170,8 @@ export interface IStorage {
   createTask(task: InsertTask): Promise<Task>;
   updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined>;
   deleteTask(id: number): Promise<boolean>;
+  getTasksDueTomorrow(startDate: Date, endDate: Date): Promise<Task[]>;
+  markTaskReminderSent(id: number): Promise<void>;
 
   // Quota operations
   useCalculation(userId: string): Promise<void>;
@@ -673,6 +675,21 @@ export class DatabaseStorage implements IStorage {
   async deleteTask(id: number): Promise<boolean> {
     await db.delete(tasks).where(eq(tasks.id, id));
     return true;
+  }
+
+  async getTasksDueTomorrow(startDate: Date, endDate: Date): Promise<Task[]> {
+    return db.select().from(tasks).where(
+      and(
+        gte(tasks.dueDate, startDate),
+        lt(tasks.dueDate, endDate),
+        ne(tasks.status, "completed"),
+        eq(tasks.reminderSent, false)
+      )
+    );
+  }
+
+  async markTaskReminderSent(id: number): Promise<void> {
+    await db.update(tasks).set({ reminderSent: true }).where(eq(tasks.id, id));
   }
 
   // Quota operations

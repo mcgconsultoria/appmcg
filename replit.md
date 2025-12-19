@@ -43,8 +43,15 @@ Preferred communication style: Simple, everyday language.
 
 ### New Modules (Phase 2)
 - **Meeting Records (Ata Plano de Acao)**: Document meetings with action items, participants, decisions, and next steps. Full CRUD with action item tracking.
+  - Selectable meeting objectives (Visita Comercial, Apresentacao Indicadores, Visita Operacional) with custom objective creation
+  - Structured participants with name + email fields (JSON format)
+  - Auto-create tasks from action items with due dates
+  - PDF generation with company logo and full meeting details
+  - Send meeting record via email with PDF attachment
 - **Calendar (Calendario Comercial)**: Weekly commercial calendar with events linked to clients. Event types include meetings, calls, visits, proposals, and follow-ups.
 - **Tasks**: Task management with priorities (low/medium/high/urgent), due dates, assignees, and project assignment. Checkbox toggle for completion.
+  - Email reminders sent 1 day before due date (when email configured)
+  - Linked to meeting action items with assignedEmail field
 - **Projects**: Project management with status tracking (planning/active/on hold/completed), date ranges, and progress calculation based on linked tasks.
 
 ### Dashboard Indicators
@@ -103,16 +110,22 @@ MCG Consultoria is a commercial management platform for logistics, filling the g
 - **Endpoint Ready**: POST /api/route-calculation (code implemented, waiting for API token)
 - **Note**: System works fully in manual mode without API configured
 
-### Email Service (Resend/SendGrid)
-- **Status**: Pending configuration
+### Email Service (Resend)
+- **Status**: Fully implemented, pending API key configuration
 - **Purpose**: Send meeting records (Ata) as PDF to participants, task reminders 1 day before due date
-- **Features ready**:
+- **Implementation**:
+  - `server/emailService.ts`: Resend wrapper with attachment support
+  - `server/reminderService.ts`: Background service for daily task reminders
   - PDF generation with company logo (using PDFKit)
-  - Participants with name and email stored in meeting records
+  - Structured participants with name and email fields
   - Tasks have assignedEmail field for reminder delivery
   - Action items auto-create tasks when due date is set
-- **To activate**: Configure Resend or SendGrid integration via Replit Connectors
-- **Alternative**: Set RESEND_API_KEY or SENDGRID_API_KEY secret manually
+- **Features**:
+  - Download meeting record as PDF
+  - Send meeting record via email to all participants with PDF attachment
+  - Automatic email reminders 1 day before task due date
+- **To activate**: Set RESEND_API_KEY secret
+- **Note**: System fully functional without email configured; email buttons will show configuration message
 
 ### KMM ERP Integration (Grupo NStech)
 - **Status**: Pending formal partnership agreement

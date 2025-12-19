@@ -176,8 +176,16 @@ app.use((req, res, next) => {
       host: "0.0.0.0",
       reusePort: true,
     },
-    () => {
+    async () => {
       log(`serving on port ${port}`);
+      
+      // Start reminder service for task email notifications
+      try {
+        const { startReminderService } = await import("./reminderService");
+        startReminderService();
+      } catch (err) {
+        console.error("Failed to start reminder service:", err);
+      }
     },
   );
 })();

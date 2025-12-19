@@ -53,7 +53,7 @@ class EmailService {
         html: options.html,
         attachments: options.attachments?.map((a) => ({
           filename: a.filename,
-          content: a.content,
+          content: a.content.toString("base64"),
         })),
       });
 
