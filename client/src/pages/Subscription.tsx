@@ -75,7 +75,7 @@ const planNames: Record<string, string> = {
 function getStatusBadge(status: string | null | undefined) {
   switch (status) {
     case "active":
-      return <Badge variant="default" className="bg-green-500"><CheckCircle className="w-3 h-3 mr-1" />Ativo</Badge>;
+      return <Badge variant="default" className="bg-emerald-600 dark:bg-emerald-500"><CheckCircle className="w-3 h-3 mr-1" />Ativo</Badge>;
     case "trialing":
       return <Badge variant="secondary"><AlertCircle className="w-3 h-3 mr-1" />Período de Teste</Badge>;
     case "past_due":

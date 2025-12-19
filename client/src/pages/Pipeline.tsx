@@ -29,11 +29,11 @@ import type { Client } from "@shared/schema";
 import { Link } from "wouter";
 
 const pipelineStages = [
-  { id: "lead", label: "Leads", color: "bg-blue-500", description: "Novos contatos" },
-  { id: "contact", label: "Contato", color: "bg-yellow-500", description: "Em primeiro contato" },
-  { id: "proposal", label: "Proposta", color: "bg-purple-500", description: "Proposta enviada" },
-  { id: "negotiation", label: "Negociação", color: "bg-orange-500", description: "Em negociação" },
-  { id: "closed", label: "Fechado", color: "bg-green-500", description: "Cliente conquistado" },
+  { id: "lead", label: "Leads", color: "bg-sky-600 dark:bg-sky-500", description: "Novos contatos" },
+  { id: "contact", label: "Contato", color: "bg-primary", description: "Em primeiro contato" },
+  { id: "proposal", label: "Proposta", color: "bg-violet-600 dark:bg-violet-500", description: "Proposta enviada" },
+  { id: "negotiation", label: "Negociação", color: "bg-amber-600 dark:bg-amber-500", description: "Em negociação" },
+  { id: "closed", label: "Fechado", color: "bg-emerald-600 dark:bg-emerald-500", description: "Cliente conquistado" },
 ];
 
 interface MoveDialogData {
@@ -126,7 +126,7 @@ export default function Pipeline() {
                           <div className={`w-3 h-3 rounded-full ${stage.color}`} />
                           <CardTitle className="text-base">{stage.label}</CardTitle>
                         </div>
-                        <Badge variant="secondary" size="sm">
+                        <Badge variant="secondary">
                           {stageClients.length}
                         </Badge>
                       </div>

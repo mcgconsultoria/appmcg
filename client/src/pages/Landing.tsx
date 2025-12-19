@@ -339,15 +339,15 @@ export default function Landing() {
               </p>
               <div className="flex items-center gap-4 flex-wrap justify-center">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md">
-                  <Shield className="h-4 w-4 text-green-500" />
+                  <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   Pagamento Seguro
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md">
-                  <Shield className="h-4 w-4 text-blue-500" />
+                  <Shield className="h-4 w-4 text-primary" />
                   LGPD Compliance
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md">
-                  <Shield className="h-4 w-4 text-purple-500" />
+                  <Shield className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                   SSL/TLS
                 </div>
               </div>

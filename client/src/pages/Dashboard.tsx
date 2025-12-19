@@ -45,7 +45,7 @@ function StatCard({ title, value, change, icon, variant = "default" }: StatCardP
           {change !== undefined && (
             <div className={`flex items-center gap-1 text-sm ${
               isPositive 
-                ? variant === "primary" ? "text-primary-foreground" : "text-green-600 dark:text-green-400" 
+                ? variant === "primary" ? "text-primary-foreground" : "text-emerald-600 dark:text-emerald-400" 
                 : "text-red-600 dark:text-red-400"
             }`}>
               {isPositive ? (
@@ -69,11 +69,11 @@ function StatCard({ title, value, change, icon, variant = "default" }: StatCardP
 }
 
 const pipelineStages = [
-  { id: "lead", label: "Leads", color: "bg-blue-500" },
-  { id: "contact", label: "Contato", color: "bg-yellow-500" },
-  { id: "proposal", label: "Proposta", color: "bg-purple-500" },
-  { id: "negotiation", label: "Negociação", color: "bg-orange-500" },
-  { id: "closed", label: "Fechado", color: "bg-green-500" },
+  { id: "lead", label: "Leads", color: "bg-sky-600 dark:bg-sky-500" },
+  { id: "contact", label: "Contato", color: "bg-primary" },
+  { id: "proposal", label: "Proposta", color: "bg-violet-600 dark:bg-violet-500" },
+  { id: "negotiation", label: "Negociação", color: "bg-amber-600 dark:bg-amber-500" },
+  { id: "closed", label: "Fechado", color: "bg-emerald-600 dark:bg-emerald-500" },
 ];
 
 export default function Dashboard() {
@@ -198,7 +198,7 @@ export default function Dashboard() {
                           {client.segment || "Sem segmento"} - {client.city}/{client.state}
                         </p>
                       </div>
-                      <Badge variant="secondary" size="sm">
+                      <Badge variant="secondary">
                         {pipelineStages.find(s => s.id === client.pipelineStage)?.label || "Lead"}
                       </Badge>
                     </div>
@@ -284,10 +284,10 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
-                      <ArrowUpRight className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                      <ArrowUpRight className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">A Receber</p>
@@ -397,8 +397,8 @@ export default function Dashboard() {
               {abcData.map((item) => (
                 <div key={item.class} className="p-4 rounded-lg border text-center">
                   <div className={`text-3xl font-bold mb-2 ${
-                    item.class === "A" ? "text-green-600 dark:text-green-400" :
-                    item.class === "B" ? "text-yellow-600 dark:text-yellow-400" :
+                    item.class === "A" ? "text-emerald-600 dark:text-emerald-400" :
+                    item.class === "B" ? "text-amber-600 dark:text-amber-400" :
                     "text-muted-foreground"
                   }`}>
                     Classe {item.class}

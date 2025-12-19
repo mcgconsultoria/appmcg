@@ -971,7 +971,7 @@ export default function StorageCalculator() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Crown className="h-5 w-5 text-yellow-500" />
+              <Crown className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               Limite de Calculos Gratuitos Atingido
             </DialogTitle>
           </DialogHeader>

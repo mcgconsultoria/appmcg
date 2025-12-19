@@ -30,12 +30,12 @@ import type { CommercialEvent, Client } from "@shared/schema";
 import { ClientCombobox } from "@/components/ClientCombobox";
 
 const eventTypes = [
-  { value: "meeting", label: "Reuniao", color: "bg-blue-500" },
-  { value: "call", label: "Ligacao", color: "bg-green-500" },
-  { value: "visit", label: "Visita", color: "bg-purple-500" },
-  { value: "proposal", label: "Proposta", color: "bg-orange-500" },
-  { value: "followup", label: "Follow-up", color: "bg-yellow-500" },
-  { value: "other", label: "Outro", color: "bg-gray-500" },
+  { value: "meeting", label: "Reuniao", color: "bg-primary" },
+  { value: "call", label: "Ligacao", color: "bg-emerald-600 dark:bg-emerald-500" },
+  { value: "visit", label: "Visita", color: "bg-violet-600 dark:bg-violet-500" },
+  { value: "proposal", label: "Proposta", color: "bg-amber-600 dark:bg-amber-500" },
+  { value: "followup", label: "Follow-up", color: "bg-sky-600 dark:bg-sky-500" },
+  { value: "other", label: "Outro", color: "bg-muted-foreground" },
 ];
 
 const statusColors: Record<string, string> = {

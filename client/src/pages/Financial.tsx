@@ -251,12 +251,12 @@ export default function Financial() {
           <Card>
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <ArrowUpRight className="h-6 w-6 text-green-600 dark:text-green-400" />
+                <div className="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <ArrowUpRight className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">A Receber</p>
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
                     {formatCurrency(totalReceivables)}
                   </p>
                 </div>
@@ -291,7 +291,7 @@ export default function Financial() {
                   <p
                     className={`text-2xl font-bold ${
                       balance >= 0
-                        ? "text-green-600 dark:text-green-400"
+                        ? "text-emerald-600 dark:text-emerald-400"
                         : "text-red-600 dark:text-red-400"
                     }`}
                   >
@@ -383,7 +383,6 @@ export default function Financial() {
                             <TableCell>
                               <Badge
                                 variant={getStatusBadgeVariant(account.status || "")}
-                                size="sm"
                               >
                                 {statusOptions.find((s) => s.value === account.status)?.label ||
                                   "Pendente"}
