@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ChevronsUpDown, Plus, Loader2 } from "lucide-react";
+import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,18 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { ClientFormDialog } from "@/components/ClientFormDialog";
 import type { Client } from "@shared/schema";
 
 interface ClientComboboxProps {
@@ -52,51 +41,16 @@ export function ClientCombobox({
 }: ClientComboboxProps) {
   const [open, setOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [newClientName, setNewClientName] = useState("");
-  const [newClientEmail, setNewClientEmail] = useState("");
-  const [newClientPhone, setNewClientPhone] = useState("");
-  const { toast } = useToast();
 
   const selectedClient = clients.find((c) => c.id.toString() === value);
-
-  const createClientMutation = useMutation({
-    mutationFn: async (data: { name: string; email?: string; phone?: string }) => {
-      const response = await apiRequest("POST", "/api/clients", {
-        ...data,
-        companyId: 1,
-      });
-      return response.json();
-    },
-    onSuccess: (newClient: Client) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
-      onValueChange(newClient.id.toString());
-      setDialogOpen(false);
-      setNewClientName("");
-      setNewClientEmail("");
-      setNewClientPhone("");
-      toast({ title: "Cliente criado com sucesso!" });
-    },
-    onError: () => {
-      toast({ title: "Erro ao criar cliente", variant: "destructive" });
-    },
-  });
 
   const handleAddClient = () => {
     setOpen(false);
     setDialogOpen(true);
   };
 
-  const handleCreateClient = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newClientName.trim()) {
-      toast({ title: "Nome é obrigatório", variant: "destructive" });
-      return;
-    }
-    createClientMutation.mutate({
-      name: newClientName.trim(),
-      email: newClientEmail.trim() || undefined,
-      phone: newClientPhone.trim() || undefined,
-    });
+  const handleClientCreated = (newClient: Client) => {
+    onValueChange(newClient.id.toString());
   };
 
   return (
@@ -183,70 +137,11 @@ export function ClientCombobox({
         </PopoverContent>
       </Popover>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Novo Cliente</DialogTitle>
-            <DialogDescription>
-              Cadastre rapidamente um novo cliente
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleCreateClient} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="clientName">Nome / Razao Social *</Label>
-              <Input
-                id="clientName"
-                value={newClientName}
-                onChange={(e) => setNewClientName(e.target.value)}
-                placeholder="Nome do cliente"
-                required
-                data-testid="input-quick-client-name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="clientEmail">Email</Label>
-              <Input
-                id="clientEmail"
-                type="email"
-                value={newClientEmail}
-                onChange={(e) => setNewClientEmail(e.target.value)}
-                placeholder="email@exemplo.com"
-                data-testid="input-quick-client-email"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="clientPhone">Telefone</Label>
-              <Input
-                id="clientPhone"
-                value={newClientPhone}
-                onChange={(e) => setNewClientPhone(e.target.value)}
-                placeholder="(00) 00000-0000"
-                data-testid="input-quick-client-phone"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setDialogOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                disabled={createClientMutation.isPending}
-                data-testid="button-save-quick-client"
-              >
-                {createClientMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Salvar"
-                )}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <ClientFormDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSuccess={handleClientCreated}
+      />
     </>
   );
 }
