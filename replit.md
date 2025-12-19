@@ -90,3 +90,21 @@ MCG Consultoria is a commercial management platform for logistics, filling the g
 - **Environment Variable**: QUALP_ACCESS_TOKEN (to be configured after partnership)
 - **Endpoint Ready**: POST /api/route-calculation (code implemented, waiting for API token)
 - **Note**: System works fully in manual mode without API configured
+
+### KMM ERP Integration (Grupo NStech)
+- **Status**: Pending formal partnership agreement
+- **Purpose**: Full integration between MCG (commercial/CRM) and KMM (operational/WMS/TMS)
+- **Requirements for integration**:
+  1. Official API documentation from NStech (partner access)
+  2. Formal partnership contract authorizing integration
+  3. Developer credentials and sandbox environment
+  4. Data mapping agreement (which fields sync between systems)
+- **Potential sync entities**:
+  - Clients (MCG) <-> Customers (KMM)
+  - Commercial Proposals (MCG) <-> Transport Orders (KMM)
+  - Freight Calculations (MCG) <-> Freight Quotes (KMM)
+  - Client Operations (MCG) <-> Service Types (KMM)
+  - Financial Accounts (MCG) <-> Billing (KMM)
+- **Architecture ready**: REST APIs and multi-company structure already support future integration
+- **Legal note**: Integration must only proceed after formal authorization from NStech to avoid any legal issues
+- **Focus**: Primary integration target, as KMM clients (carriers and logistics operators) are MCG's main audience
