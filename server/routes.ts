@@ -1217,7 +1217,9 @@ export async function registerRoutes(
         try {
           const participants = JSON.parse(record.participants);
           participants.forEach((p: { name: string; email: string }) => {
-            doc.text(`  - ${p.name}${p.email ? ` (${p.email})` : ""}`);
+            const displayName = p.name || p.email || "-";
+            const displayEmail = p.email && p.name ? ` (${p.email})` : "";
+            doc.text(`  - ${displayName}${displayEmail}`);
           });
         } catch {
           doc.text(`  ${record.participants}`);
@@ -1359,7 +1361,9 @@ export async function registerRoutes(
         try {
           const participants = JSON.parse(record.participants);
           participants.forEach((p: { name: string; email: string }) => {
-            doc.text(`  - ${p.name}${p.email ? ` (${p.email})` : ""}`);
+            const displayName = p.name || p.email || "-";
+            const displayEmail = p.email && p.name ? ` (${p.email})` : "";
+            doc.text(`  - ${displayName}${displayEmail}`);
           });
         } catch {
           doc.text(`  ${record.participants}`);

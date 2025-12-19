@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ChevronsUpDown, Search } from "lucide-react";
+import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useLocation } from "wouter";
 import type { Client } from "@shared/schema";
 
 interface ClientComboboxProps {
@@ -25,6 +26,7 @@ interface ClientComboboxProps {
   allowNone?: boolean;
   disabled?: boolean;
   "data-testid"?: string;
+  showAddButton?: boolean;
 }
 
 export function ClientCombobox({
@@ -35,10 +37,17 @@ export function ClientCombobox({
   allowNone = true,
   disabled = false,
   "data-testid": testId,
+  showAddButton = true,
 }: ClientComboboxProps) {
   const [open, setOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   const selectedClient = clients.find((c) => c.id.toString() === value);
+
+  const handleAddClient = () => {
+    setOpen(false);
+    setLocation("/clientes");
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -59,7 +68,23 @@ export function ClientCombobox({
         <Command>
           <CommandInput placeholder="Buscar cliente..." />
           <CommandList>
-            <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
+            <CommandEmpty>
+              <div className="flex flex-col items-center gap-2 py-2">
+                <span>Nenhum cliente encontrado.</span>
+                {showAddButton && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAddClient}
+                    className="gap-1"
+                    data-testid="button-add-client-from-combobox"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Cadastrar Cliente
+                  </Button>
+                )}
+              </div>
+            </CommandEmpty>
             <CommandGroup>
               {allowNone && (
                 <CommandItem
