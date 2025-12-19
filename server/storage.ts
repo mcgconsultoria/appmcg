@@ -17,6 +17,7 @@ import {
   commercialEvents,
   projects,
   tasks,
+  rfis,
   type User,
   type UpsertUser,
   type Company,
@@ -53,6 +54,8 @@ import {
   type InsertProject,
   type Task,
   type InsertTask,
+  type Rfi,
+  type InsertRfi,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, ne } from "drizzle-orm";
@@ -175,6 +178,13 @@ export interface IStorage {
 
   // Quota operations
   useCalculation(userId: string): Promise<void>;
+
+  // RFI operations
+  getRfis(companyId: number): Promise<Rfi[]>;
+  getRfi(id: number): Promise<Rfi | undefined>;
+  createRfi(rfi: InsertRfi): Promise<Rfi>;
+  updateRfi(id: number, rfi: Partial<InsertRfi>): Promise<Rfi | undefined>;
+  deleteRfi(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -703,6 +713,35 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
+  }
+
+  // RFI operations
+  async getRfis(companyId: number): Promise<Rfi[]> {
+    return db.select().from(rfis).where(eq(rfis.companyId, companyId)).orderBy(desc(rfis.createdAt));
+  }
+
+  async getRfi(id: number): Promise<Rfi | undefined> {
+    const [rfi] = await db.select().from(rfis).where(eq(rfis.id, id));
+    return rfi;
+  }
+
+  async createRfi(rfi: InsertRfi): Promise<Rfi> {
+    const [newRfi] = await db.insert(rfis).values(rfi).returning();
+    return newRfi;
+  }
+
+  async updateRfi(id: number, rfi: Partial<InsertRfi>): Promise<Rfi | undefined> {
+    const [updated] = await db
+      .update(rfis)
+      .set({ ...rfi, updatedAt: new Date() })
+      .where(eq(rfis.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteRfi(id: number): Promise<boolean> {
+    await db.delete(rfis).where(eq(rfis.id, id));
+    return true;
   }
 }
 

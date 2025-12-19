@@ -16,6 +16,7 @@ import {
   insertCommercialEventSchema,
   insertProjectSchema,
   insertTaskSchema,
+  insertRfiSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -1823,6 +1824,92 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting task:", error);
       res.status(500).json({ message: "Failed to delete task" });
+    }
+  });
+
+  // RFI routes
+  app.get("/api/rfis", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const rfis = await storage.getRfis(userCompanyId);
+      res.json(rfis);
+    } catch (error) {
+      console.error("Error fetching RFIs:", error);
+      res.status(500).json({ message: "Failed to fetch RFIs" });
+    }
+  });
+
+  app.get("/api/rfis/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const rfi = await storage.getRfi(id);
+      if (!rfi) {
+        return res.status(404).json({ message: "RFI not found" });
+      }
+      if (rfi.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      res.json(rfi);
+    } catch (error) {
+      console.error("Error fetching RFI:", error);
+      res.status(500).json({ message: "Failed to fetch RFI" });
+    }
+  });
+
+  app.post("/api/rfis", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const parsed = insertRfiSchema.safeParse({
+        ...req.body,
+        companyId: userCompanyId,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid RFI data", errors: parsed.error.errors });
+      }
+      const rfi = await storage.createRfi(parsed.data);
+      res.status(201).json(rfi);
+    } catch (error) {
+      console.error("Error creating RFI:", error);
+      res.status(500).json({ message: "Failed to create RFI" });
+    }
+  });
+
+  app.patch("/api/rfis/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const existingRfi = await storage.getRfi(id);
+      if (!existingRfi) {
+        return res.status(404).json({ message: "RFI not found" });
+      }
+      if (existingRfi.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const rfi = await storage.updateRfi(id, req.body);
+      res.json(rfi);
+    } catch (error) {
+      console.error("Error updating RFI:", error);
+      res.status(500).json({ message: "Failed to update RFI" });
+    }
+  });
+
+  app.delete("/api/rfis/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const existingRfi = await storage.getRfi(id);
+      if (!existingRfi) {
+        return res.status(404).json({ message: "RFI not found" });
+      }
+      if (existingRfi.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      await storage.deleteRfi(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting RFI:", error);
+      res.status(500).json({ message: "Failed to delete RFI" });
     }
   });
 

@@ -39,7 +39,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Page Structure
 - **Public Pages**: Landing, Login, Register, Pricing, Privacy, Terms, Calculators (Freight/Storage)
-- **Authenticated Pages**: Dashboard, Clients, Pipeline, Calendar, Meeting Records (Ata), Checklist, Tasks, Projects, Financial, Marketing, Settings, Subscription
+- **Authenticated Pages**: Dashboard, Clients, Pipeline, Calendar, Meeting Records (Ata), Checklist, RFI, Tasks, Projects, Financial, Marketing, Settings, Subscription
 
 ### New Modules (Phase 2)
 - **Meeting Records (Ata Plano de Acao)**: Document meetings with action items, participants, decisions, and next steps. Full CRUD with action item tracking.
@@ -53,6 +53,18 @@ Preferred communication style: Simple, everyday language.
   - Email reminders sent 1 day before due date (when email configured)
   - Linked to meeting action items with assignedEmail field
 - **Projects**: Project management with status tracking (planning/active/on hold/completed), date ranges, and progress calculation based on linked tasks.
+- **RFI (Request for Information)**: Company technical profile for participation in BIDs and logistics bids.
+  - Comprehensive company data: Razão Social, CNPJ/CPF, address, contacts
+  - Annual revenue by year (faturamento anual)
+  - Units/branches with contact details
+  - Main suppliers, competitors, and clients
+  - Regional coverage (27 Brazilian states)
+  - Regional details: deadlines, average values, volumes by region
+  - Operational requirements: third-party permissions, vehicle types, XML availability, payment terms
+  - Scope of operation: market segments, transportation modes, cargo types, operation types
+  - Fleet information: vehicle types, quantities, average age
+  - Status tracking: draft, completed, submitted
+  - Uses JSONB fields for flexible complex data structures (unidades, fornecedores, frota, etc.)
 
 ### Dashboard Indicators
 - **ABC Curve Analysis**: Client classification following Pareto principle (80/20 rule)

@@ -27,6 +27,7 @@ import MeetingRecords from "@/pages/MeetingRecords";
 import CalendarPage from "@/pages/CalendarPage";
 import TasksPage from "@/pages/TasksPage";
 import ProjectsPage from "@/pages/ProjectsPage";
+import RFI from "@/pages/RFI";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -62,6 +63,7 @@ function Router() {
           <Route path="/calendario" component={CalendarPage} />
           <Route path="/atas" component={MeetingRecords} />
           <Route path="/checklist" component={Checklist} />
+          <Route path="/rfi" component={RFI} />
           <Route path="/tarefas" component={TasksPage} />
           <Route path="/projetos" component={ProjectsPage} />
           <Route path="/financeiro" component={Financial} />

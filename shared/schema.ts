@@ -389,6 +389,82 @@ export const tasks = pgTable("tasks", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// RFI (Request for Information) - Company technical profile for bids
+export const rfis = pgTable("rfis", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  
+  // Basic Company Data
+  razaoSocial: varchar("razao_social", { length: 255 }).notNull(),
+  nomeFantasia: varchar("nome_fantasia", { length: 255 }),
+  cnpj: varchar("cnpj", { length: 18 }),
+  endereco: text("endereco"),
+  bairro: varchar("bairro", { length: 100 }),
+  cep: varchar("cep", { length: 10 }),
+  cidade: varchar("cidade", { length: 100 }),
+  estado: varchar("estado", { length: 2 }),
+  contato: varchar("contato", { length: 255 }),
+  telefone: varchar("telefone", { length: 20 }),
+  email: varchar("email"),
+  site: varchar("site"),
+  ramoAtividade: varchar("ramo_atividade", { length: 100 }),
+  inicioAtividades: varchar("inicio_atividades", { length: 10 }),
+  
+  // Financial Data (annual revenue by year)
+  faturamentoAnual: jsonb("faturamento_anual"), // { "2022": 1000000, "2023": 1200000, etc }
+  
+  // Units/Branches
+  unidades: jsonb("unidades"), // [{ local, endereco, telefone, contato }]
+  
+  // Suppliers
+  fornecedores: jsonb("fornecedores"), // [{ nome, ramoAtuacao }]
+  
+  // Competitors
+  concorrentes: jsonb("concorrentes"), // [{ nome }]
+  
+  // Main Clients
+  principaisClientes: jsonb("principais_clientes"), // [{ nome, percentualFaturamento, segmento }]
+  
+  // Product/Service Description
+  linhaProdutos: text("linha_produtos"),
+  frequenciaColeta: text("frequencia_coleta"),
+  procedimentosEmbarque: text("procedimentos_embarque"),
+  
+  // Regional Coverage (states served)
+  coberturaRegional: jsonb("cobertura_regional"), // { sul: [], sudeste: [], etc }
+  
+  // Regional Details (deadlines, values, volumes by region)
+  detalhesRegionais: jsonb("detalhes_regionais"), // [{ regiao, prazo, valorMedio, volumeMedio }]
+  
+  // Operational Requirements
+  permiteTerceirizacao: boolean("permite_terceirizacao"),
+  tiposVeiculos: jsonb("tipos_veiculos"), // { climatizado: true, seco: true }
+  perfilVeiculos: jsonb("perfil_veiculos"), // { "3/4": true, toco: true, truck: true, carreta: true }
+  disponibilizaXml: boolean("disponibiliza_xml"),
+  prazoPagamento: varchar("prazo_pagamento", { length: 20 }),
+  
+  // Scope of Operation
+  segmentosAtuacao: jsonb("segmentos_atuacao"), // { alimentosBebidas: true, automobilistica: true, etc }
+  modaisAtuacao: jsonb("modais_atuacao"), // { aereo: true, rodoviario: true, etc }
+  tiposAcondicionamento: jsonb("tipos_acondicionamento"), // { seca: true, perigosa: true, etc }
+  tiposOperacao: jsonb("tipos_operacao"), // { transferencia: true, distribuicaoUrbana: true, etc }
+  
+  // Fleet Information
+  frota: jsonb("frota"), // [{ tipoVeiculo, quantidade, idadeMedia }]
+  
+  // Contact responsible for filling
+  responsavelPreenchimento: varchar("responsavel_preenchimento", { length: 255 }),
+  cargoResponsavel: varchar("cargo_responsavel", { length: 100 }),
+  telefoneResponsavel: varchar("telefone_responsavel", { length: 20 }),
+  emailResponsavel: varchar("email_responsavel"),
+  
+  // Status and metadata
+  status: varchar("status").default("draft"), // draft, completed, submitted
+  observacoes: text("observacoes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ one }) => ({
   company: one(companies, {
@@ -535,6 +611,12 @@ export const insertTaskSchema = createInsertSchema(tasks).omit({
   updatedAt: true,
 });
 
+export const insertRfiSchema = createInsertSchema(rfis).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Auth schemas
 export const registerSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -591,3 +673,5 @@ export type Project = typeof projects.$inferSelect;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
+export type Rfi = typeof rfis.$inferSelect;
+export type InsertRfi = z.infer<typeof insertRfiSchema>;

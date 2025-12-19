@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   Users,
   ClipboardCheck,
+  ClipboardList,
   Calculator,
   Warehouse,
   DollarSign,
@@ -62,6 +63,11 @@ const mainMenuItems = [
     title: "Checklist",
     url: "/checklist",
     icon: ClipboardCheck,
+  },
+  {
+    title: "RFI",
+    url: "/rfi",
+    icon: ClipboardList,
   },
   {
     title: "Tarefas",
