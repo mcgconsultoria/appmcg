@@ -214,23 +214,32 @@ www.mcgconsultoria.com.br
 ## 8. Arquivos Disponiveis
 
 ### 8.1 Logos
-- `logo_mcg_principal.png` - Logo principal (fundo preto)
-- `logo_mcg_invertido.png` - Logo invertido (fundo branco)
-- `logo_mcg_mono_branco.png` - Logo monocromatico branco
-- `logo_mcg_mono_preto.png` - Logo monocromatico preto
-- `logo_mcg.svg` - Versao vetorial
+- `logo_mcg_principal.png` - Logo principal (fundo preto) **[DISPONIVEL]**
+
+**Versoes a criar:**
+- Logo invertido (fundo branco)
+- Logo monocromatico branco/preto
+- Versao vetorial SVG
 
 ### 8.2 Paleta de Cores
-- `mcg_paleta_cores.ase` - Adobe Swatch Exchange
-- `mcg_paleta_cores.css` - Variaveis CSS
+As cores estao implementadas no arquivo `client/src/index.css` do aplicativo.
+
+**Variaveis CSS principais:**
+```css
+--primary: 200 85% 45%;        /* MCG Blue */
+--background: 0 0% 98%;        /* MCG White */
+--sidebar: 0 0% 6%;            /* MCG Black */
+```
 
 ### 8.3 Fontes
-- Links para Google Fonts (licenca aberta)
+- Inter: https://fonts.google.com/specimen/Inter
+- IBM Plex Sans: https://fonts.google.com/specimen/IBM+Plex+Sans
+- JetBrains Mono: https://fonts.google.com/specimen/JetBrains+Mono
 
-### 8.4 Templates
-- `mcg_template_apresentacao.pptx`
-- `mcg_template_documento.docx`
-- `mcg_assinatura_email.html`
+### 8.4 Templates (A desenvolver)
+- Template de apresentacao PowerPoint
+- Template de documento Word
+- Assinatura de email HTML
 
 ---
 
