@@ -91,8 +91,22 @@ const individualProducts = [
   },
   {
     name: "Checklist Operacional",
-    description: "Checklists para 15 departamentos de logistica",
+    description: "Checklists para 19 departamentos de logistica",
     price: 97,
+    interval: "mes",
+    priceId: null,
+  },
+  {
+    name: "Ata Plano de Ação",
+    description: "Registro de reuniões com itens de ação e PDF",
+    price: 47,
+    interval: "mes",
+    priceId: null,
+  },
+  {
+    name: "RFI",
+    description: "Perfil técnico da empresa para participação em BIDs",
+    price: 47,
     interval: "mes",
     priceId: null,
   },
