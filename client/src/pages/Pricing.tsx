@@ -1,10 +1,17 @@
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Check, Loader2, Briefcase, ArrowRight } from "lucide-react";
+import { Check, Loader2, Briefcase, ArrowRight, Lock, Percent } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface Price {
   id: string;
@@ -112,8 +119,63 @@ const individualProducts = [
   },
 ];
 
+const consultingPhases = [
+  {
+    id: "diagnostico",
+    name: "Diagnóstico",
+    badge: "1ª Fase",
+    duration: "1 mês",
+    description: "Escopo, Estruturação In Loco, Acompanhamento On Line",
+    price: 5000,
+    requiresDiagnostico: false,
+    isExpansao: false,
+  },
+  {
+    id: "implementacao",
+    name: "Implementação",
+    badge: "2ª Fase",
+    duration: "1 mês",
+    description: "In Loco, On Line",
+    price: 5000,
+    requiresDiagnostico: true,
+    isExpansao: false,
+  },
+  {
+    id: "execucao",
+    name: "Execução",
+    badge: "3ª Fase",
+    duration: "1 mês",
+    description: "In Loco, On Line",
+    price: 5000,
+    requiresDiagnostico: true,
+    isExpansao: false,
+  },
+  {
+    id: "expansao",
+    name: "Expansão",
+    badge: "4ª Fase",
+    duration: "Contínuo",
+    description: "On Line + Comissão sobre negócios fechados",
+    price: 2000,
+    commission: 5,
+    requiresDiagnostico: false,
+    isExpansao: true,
+  },
+];
+
 export default function Pricing() {
   const { isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  
+  const [consultingDialogOpen, setConsultingDialogOpen] = useState(false);
+  const [selectedPhases, setSelectedPhases] = useState<string[]>([]);
+  const [consultingForm, setConsultingForm] = useState({
+    companyName: "",
+    contactName: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
 
   const { data: productsData } = useQuery<{ data: Product[] }>({
     queryKey: ["/api/stripe/products"],
@@ -130,6 +192,86 @@ export default function Pricing() {
       }
     },
   });
+
+  const togglePhase = (phaseId: string) => {
+    const phase = consultingPhases.find(p => p.id === phaseId);
+    if (!phase) return;
+
+    if (phase.requiresDiagnostico && !selectedPhases.includes("diagnostico")) {
+      toast({
+        title: "Fase não disponível",
+        description: "Selecione primeiro a fase de Diagnóstico para habilitar esta fase.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSelectedPhases(prev => {
+      if (prev.includes(phaseId)) {
+        if (phaseId === "diagnostico") {
+          return prev.filter(id => id === "expansao" || id === "diagnostico").filter(id => id !== "diagnostico");
+        }
+        return prev.filter(id => id !== phaseId);
+      }
+      return [...prev, phaseId];
+    });
+  };
+
+  const calculateTotal = () => {
+    let total = 0;
+    let hasCommission = false;
+    let commissionPercent = 0;
+
+    selectedPhases.forEach(phaseId => {
+      const phase = consultingPhases.find(p => p.id === phaseId);
+      if (phase) {
+        total += phase.price;
+        if (phase.isExpansao && phase.commission) {
+          hasCommission = true;
+          commissionPercent = phase.commission;
+        }
+      }
+    });
+
+    return { total, hasCommission, commissionPercent };
+  };
+
+  const handleSubmitProposal = () => {
+    if (selectedPhases.length === 0) {
+      toast({
+        title: "Selecione ao menos uma fase",
+        description: "Escolha as fases de consultoria desejadas.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!consultingForm.companyName || !consultingForm.contactName || !consultingForm.email) {
+      toast({
+        title: "Preencha os campos obrigatórios",
+        description: "Nome da empresa, contato e email são obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { total, hasCommission, commissionPercent } = calculateTotal();
+    
+    toast({
+      title: "Proposta enviada com sucesso!",
+      description: `Entraremos em contato em breve. Total estimado: R$ ${total.toLocaleString('pt-BR')}${hasCommission ? ` + ${commissionPercent}% sobre negócios fechados` : ''}`,
+    });
+
+    setConsultingDialogOpen(false);
+    setSelectedPhases([]);
+    setConsultingForm({
+      companyName: "",
+      contactName: "",
+      email: "",
+      phone: "",
+      message: "",
+    });
+  };
 
   const plans = productsData?.data?.length
     ? productsData.data.map((product, index) => ({
@@ -379,16 +521,192 @@ export default function Pricing() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
-              <Button className="w-full md:w-auto" size="lg" data-testid="button-consulting-contact">
+              <Button 
+                className="w-full md:w-auto" 
+                size="lg" 
+                data-testid="button-consulting-contact"
+                onClick={() => setConsultingDialogOpen(true)}
+              >
                 Solicitar Proposta
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
               <p className="text-sm text-muted-foreground text-center">
-                Entre em contato para receber uma proposta personalizada para sua empresa
+                Selecione as fases desejadas e receba uma proposta personalizada
               </p>
             </CardFooter>
           </Card>
         </div>
+
+        <Dialog open={consultingDialogOpen} onOpenChange={setConsultingDialogOpen}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Solicitar Proposta de Consultoria</DialogTitle>
+              <DialogDescription>
+                Selecione as fases desejadas e preencha seus dados para receber uma proposta personalizada
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              <div>
+                <Label className="text-base font-semibold mb-4 block">Selecione as Fases</Label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {consultingPhases.map((phase) => {
+                    const isSelected = selectedPhases.includes(phase.id);
+                    const isLocked = phase.requiresDiagnostico && !selectedPhases.includes("diagnostico");
+                    
+                    return (
+                      <div
+                        key={phase.id}
+                        onClick={() => !isLocked && togglePhase(phase.id)}
+                        className={`
+                          relative p-4 rounded-md border-2 cursor-pointer transition-all
+                          ${isSelected 
+                            ? "border-primary bg-primary/5" 
+                            : isLocked 
+                              ? "border-muted bg-muted/30 cursor-not-allowed opacity-60" 
+                              : "border-border hover:border-primary/50"
+                          }
+                        `}
+                        data-testid={`phase-${phase.id}`}
+                      >
+                        {isLocked && (
+                          <div className="absolute top-2 right-2">
+                            <Lock className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex items-start gap-3">
+                          <Checkbox 
+                            checked={isSelected}
+                            disabled={isLocked}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <Badge variant="outline" className="mb-2 text-xs">
+                              {phase.badge}
+                            </Badge>
+                            <h4 className="font-semibold text-sm">{phase.name}</h4>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {phase.description}
+                            </p>
+                            <div className="mt-2 flex items-center gap-1">
+                              <span className="text-sm font-bold">
+                                R$ {phase.price.toLocaleString('pt-BR')}
+                              </span>
+                              {phase.isExpansao && phase.commission && (
+                                <span className="text-xs text-primary flex items-center gap-1">
+                                  <Percent className="h-3 w-3" />
+                                  +{phase.commission}%
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">{phase.duration}</p>
+                          </div>
+                        </div>
+                        {isLocked && (
+                          <p className="text-xs text-destructive mt-2">
+                            Requer Diagnóstico
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {selectedPhases.length > 0 && (
+                  <div className="mt-4 p-4 bg-muted/50 rounded-md">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Total Estimado:</span>
+                      <div className="text-right">
+                        <span className="text-xl font-bold">
+                          R$ {calculateTotal().total.toLocaleString('pt-BR')}
+                        </span>
+                        {calculateTotal().hasCommission && (
+                          <span className="text-sm text-primary block">
+                            + {calculateTotal().commissionPercent}% sobre negócios fechados
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t pt-6">
+                <Label className="text-base font-semibold mb-4 block">Dados para Contato</Label>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="companyName">Nome da Empresa *</Label>
+                    <Input
+                      id="companyName"
+                      value={consultingForm.companyName}
+                      onChange={(e) => setConsultingForm(prev => ({ ...prev, companyName: e.target.value }))}
+                      placeholder="Sua Empresa Ltda"
+                      data-testid="input-company-name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="contactName">Nome do Contato *</Label>
+                    <Input
+                      id="contactName"
+                      value={consultingForm.contactName}
+                      onChange={(e) => setConsultingForm(prev => ({ ...prev, contactName: e.target.value }))}
+                      placeholder="João Silva"
+                      data-testid="input-contact-name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={consultingForm.email}
+                      onChange={(e) => setConsultingForm(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="contato@empresa.com.br"
+                      data-testid="input-email"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Telefone</Label>
+                    <Input
+                      id="phone"
+                      value={consultingForm.phone}
+                      onChange={(e) => setConsultingForm(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="(11) 99999-9999"
+                      data-testid="input-phone"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2 mt-4">
+                  <Label htmlFor="message">Mensagem Adicional</Label>
+                  <Textarea
+                    id="message"
+                    value={consultingForm.message}
+                    onChange={(e) => setConsultingForm(prev => ({ ...prev, message: e.target.value }))}
+                    placeholder="Conte-nos sobre sua empresa e suas necessidades..."
+                    rows={3}
+                    data-testid="input-message"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setConsultingDialogOpen(false)}
+                data-testid="button-cancel-proposal"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleSubmitProposal}
+                data-testid="button-submit-proposal"
+              >
+                Enviar Solicitação
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <div className="mt-16 text-center">
           <h2 className="text-2xl font-semibold mb-4">Pagamento Seguro</h2>
