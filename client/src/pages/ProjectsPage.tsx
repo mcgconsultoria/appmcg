@@ -27,7 +27,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Plus, FolderKanban, Trash2, Edit2, Loader2, Calendar, CheckCircle2, Clock, ListTodo } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { Project, Task } from "@shared/schema";
+import type { Project, Task, Client } from "@shared/schema";
+import { ClientCombobox } from "@/components/ClientCombobox";
 
 const statusOptions = [
   { value: "planning", label: "Planejamento", color: "secondary" },
@@ -57,6 +58,10 @@ export default function ProjectsPage() {
 
   const { data: tasks } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
+  });
+
+  const { data: clients } = useQuery<Client[]>({
+    queryKey: ["/api/clients"],
   });
 
   const createMutation = useMutation({
@@ -261,6 +266,18 @@ export default function ProjectsPage() {
                     data-testid="input-end-date"
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="clientId">Cliente (opcional)</Label>
+                <ClientCombobox
+                  clients={clients || []}
+                  value={formData.clientId}
+                  onValueChange={(value) => setFormData({ ...formData, clientId: value })}
+                  placeholder="Buscar cliente..."
+                  allowNone={true}
+                  data-testid="select-client"
+                />
               </div>
 
               <div className="flex justify-end gap-2">

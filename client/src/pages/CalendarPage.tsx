@@ -27,6 +27,7 @@ import { Plus, Calendar, Trash2, Edit2, Loader2, Clock, MapPin, Users } from "lu
 import { format, startOfWeek, addDays, isSameDay, parseISO, getWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { CommercialEvent, Client } from "@shared/schema";
+import { ClientCombobox } from "@/components/ClientCombobox";
 
 const eventTypes = [
   { value: "meeting", label: "Reuniao", color: "bg-blue-500" },
@@ -276,22 +277,14 @@ export default function CalendarPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="clientId">Cliente</Label>
-                  <Select
+                  <ClientCombobox
+                    clients={clients || []}
                     value={formData.clientId}
                     onValueChange={(value) => setFormData({ ...formData, clientId: value })}
-                  >
-                    <SelectTrigger data-testid="select-client">
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Nenhum</SelectItem>
-                      {clients?.map((client) => (
-                        <SelectItem key={client.id} value={client.id.toString()}>
-                          {client.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Buscar cliente..."
+                    allowNone={true}
+                    data-testid="select-client"
+                  />
                 </div>
               </div>
 

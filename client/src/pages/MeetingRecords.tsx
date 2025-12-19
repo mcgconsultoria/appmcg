@@ -35,6 +35,7 @@ import { Plus, FileEdit, Trash2, Eye, Download, Loader2, Users, Calendar, CheckC
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { MeetingRecord, MeetingActionItem, Client, Company } from "@shared/schema";
+import { ClientCombobox } from "@/components/ClientCombobox";
 
 const meetingTypes = [
   { value: "client", label: "Reuniao com Cliente" },
@@ -315,22 +316,14 @@ export default function MeetingRecords() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="clientId">Cliente (opcional)</Label>
-                  <Select
+                  <ClientCombobox
+                    clients={clients || []}
                     value={formData.clientId}
                     onValueChange={(value) => setFormData({ ...formData, clientId: value })}
-                  >
-                    <SelectTrigger data-testid="select-client">
-                      <SelectValue placeholder="Selecione um cliente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Nenhum</SelectItem>
-                      {clients?.map((client) => (
-                        <SelectItem key={client.id} value={client.id.toString()}>
-                          {client.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Buscar cliente..."
+                    allowNone={true}
+                    data-testid="select-client"
+                  />
                 </div>
               </div>
 
