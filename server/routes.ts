@@ -1056,9 +1056,10 @@ export async function registerRoutes(
 
   app.post("/api/meeting-records", isAuthenticated, async (req: any, res) => {
     try {
+      const userCompanyId = req.user.companyId || 1;
       const body = {
         ...req.body,
-        companyId: req.user.companyId || 1,
+        companyId: userCompanyId,
         userId: req.user.id,
         meetingDate: req.body.meetingDate ? new Date(req.body.meetingDate) : undefined,
         nextReviewDate: req.body.nextReviewDate ? new Date(req.body.nextReviewDate) : undefined,
@@ -1068,6 +1069,40 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Invalid meeting record data", errors: parsed.error.errors });
       }
       const record = await storage.createMeetingRecord(parsed.data);
+      
+      // Create calendar event for meeting date
+      if (record.meetingDate) {
+        await storage.createCommercialEvent({
+          companyId: userCompanyId,
+          clientId: record.clientId,
+          userId: req.user.id,
+          title: `Reuniao: ${record.title}`,
+          description: record.summary || "",
+          eventType: "meeting",
+          startDate: record.meetingDate,
+          allDay: true,
+          location: (record as any).meetingLocation || "",
+          meetingRecordId: record.id,
+          status: "scheduled",
+        });
+      }
+      
+      // Create calendar event for next review date
+      if (record.nextReviewDate) {
+        await storage.createCommercialEvent({
+          companyId: userCompanyId,
+          clientId: record.clientId,
+          userId: req.user.id,
+          title: `Revisao: ${record.title}`,
+          description: `Proxima revisao da ata: ${record.title}`,
+          eventType: "followup",
+          startDate: record.nextReviewDate,
+          allDay: true,
+          meetingRecordId: record.id,
+          status: "scheduled",
+        });
+      }
+      
       res.status(201).json(record);
     } catch (error) {
       console.error("Error creating meeting record:", error);
@@ -1462,6 +1497,19 @@ export async function registerRoutes(
         };
         const task = await storage.createTask(taskData);
         await storage.updateMeetingActionItem(item.id, { linkedTaskId: task.id });
+        
+        // Create calendar event for task due date
+        await storage.createCommercialEvent({
+          companyId: userCompanyId,
+          clientId: record.clientId,
+          userId: req.user.id,
+          title: `Tarefa: ${item.description}`,
+          description: `Responsavel: ${item.responsible || "-"}\nAta: ${record.title}`,
+          eventType: "deadline",
+          startDate: item.dueDate,
+          allDay: true,
+          status: "scheduled",
+        });
       }
       
       res.status(201).json(item);
