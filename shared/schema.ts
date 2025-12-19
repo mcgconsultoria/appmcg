@@ -92,7 +92,7 @@ export const clients = pgTable("clients", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Checklists table
+// Checklists table - Enhanced structure with client profile
 export const checklists = pgTable("checklists", {
   id: serial("id").primaryKey(),
   companyId: integer("company_id").notNull(),
@@ -100,15 +100,105 @@ export const checklists = pgTable("checklists", {
   name: varchar("name", { length: 255 }).notNull(),
   segment: varchar("segment", { length: 100 }),
   status: varchar("status").default("in_progress"),
+  
+  // Capa/Perfil do Cliente
+  clienteNome: varchar("cliente_nome", { length: 255 }),
+  clienteCnpj: varchar("cliente_cnpj", { length: 18 }),
+  focalPointNome: varchar("focal_point_nome", { length: 255 }),
+  focalPointEmail: varchar("focal_point_email", { length: 255 }),
+  focalPointCelular: varchar("focal_point_celular", { length: 20 }),
+  focalPointRegiao: varchar("focal_point_regiao", { length: 100 }),
+  
+  // História e Perfil
+  historia: text("historia"),
+  localizacao: text("localizacao"),
+  segmentoDetalhado: text("segmento_detalhado"),
+  produto: text("produto"),
+  numeros: text("numeros"),
+  noticias: text("noticias"),
+  
+  // Contatos
+  site: varchar("site", { length: 255 }),
+  linkedIn: varchar("linkedin", { length: 255 }),
+  emailComercial: varchar("email_comercial", { length: 255 }),
+  contatoComercial: text("contato_comercial"),
+  
+  // Abrangência
+  abrangenciaNacional: boolean("abrangencia_nacional").default(false),
+  abrangenciaRegional: boolean("abrangencia_regional").default(false),
+  abrangenciaInternacional: boolean("abrangencia_internacional").default(false),
+  
+  // Market Share
+  marketShare: text("market_share"),
+  posicaoMercado: text("posicao_mercado"),
+  
+  // Oportunidades
+  oportunidades: jsonb("oportunidades").$type<string[]>(),
+  
+  // Pipeline Overview
+  pipelineSegmento: varchar("pipeline_segmento", { length: 100 }),
+  pipelineProduto: varchar("pipeline_produto", { length: 255 }),
+  pipelineVolume: varchar("pipeline_volume", { length: 100 }),
+  pipelineTarget: decimal("pipeline_target", { precision: 15, scale: 2 }),
+  
+  // Contatos do Cliente (por setor)
+  contatosCliente: jsonb("contatos_cliente").$type<{
+    nome: string;
+    celular: string;
+    email: string;
+    setor: string;
+    aniversario: string;
+    funcao: string;
+  }[]>(),
+  
+  // Portais e Senhas
+  portaisSenhas: jsonb("portais_senhas").$type<{
+    portal: string;
+    link: string;
+    login: string;
+    observacao: string;
+  }[]>(),
+  
   completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Checklist items table
+// Checklist sections table - Each department/section with responsible party
+export const checklistSections = pgTable("checklist_sections", {
+  id: serial("id").primaryKey(),
+  checklistId: integer("checklist_id").notNull(),
+  sectionKey: varchar("section_key", { length: 50 }).notNull(),
+  sectionName: varchar("section_name", { length: 100 }).notNull(),
+  
+  // Responsável
+  responsavelNome: varchar("responsavel_nome", { length: 255 }),
+  responsavelEmail: varchar("responsavel_email", { length: 255 }),
+  dataRecebimento: timestamp("data_recebimento"),
+  dataRetorno: timestamp("data_retorno"),
+  
+  // Parecer
+  isPerfil: boolean("is_perfil"),
+  parecer: text("parecer"),
+  
+  // Documentos
+  documentosAtualizados: boolean("documentos_atualizados").default(false),
+  documentosObservacao: text("documentos_observacao"),
+  
+  // Status da seção
+  status: varchar("status").default("pending"),
+  progress: integer("progress").default(0),
+  
+  orderIndex: integer("order_index").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Checklist items table - Questions within sections
 export const checklistItems = pgTable("checklist_items", {
   id: serial("id").primaryKey(),
   checklistId: integer("checklist_id").notNull(),
+  sectionId: integer("section_id"),
   department: varchar("department", { length: 100 }).notNull(),
   question: text("question").notNull(),
   answer: text("answer"),
@@ -501,6 +591,15 @@ export const checklistsRelations = relations(checklists, ({ one, many }) => ({
     fields: [checklists.clientId],
     references: [clients.id],
   }),
+  sections: many(checklistSections),
+  items: many(checklistItems),
+}));
+
+export const checklistSectionsRelations = relations(checklistSections, ({ one, many }) => ({
+  checklist: one(checklists, {
+    fields: [checklistSections.checklistId],
+    references: [checklists.id],
+  }),
   items: many(checklistItems),
 }));
 
@@ -508,6 +607,10 @@ export const checklistItemsRelations = relations(checklistItems, ({ one }) => ({
   checklist: one(checklists, {
     fields: [checklistItems.checklistId],
     references: [checklists.id],
+  }),
+  section: one(checklistSections, {
+    fields: [checklistItems.sectionId],
+    references: [checklistSections.id],
   }),
 }));
 
@@ -525,6 +628,12 @@ export const insertClientSchema = createInsertSchema(clients).omit({
 });
 
 export const insertChecklistSchema = createInsertSchema(checklists).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertChecklistSectionSchema = createInsertSchema(checklistSections).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -643,6 +752,8 @@ export type Client = typeof clients.$inferSelect;
 export type InsertClient = z.infer<typeof insertClientSchema>;
 export type Checklist = typeof checklists.$inferSelect;
 export type InsertChecklist = z.infer<typeof insertChecklistSchema>;
+export type ChecklistSection = typeof checklistSections.$inferSelect;
+export type InsertChecklistSection = z.infer<typeof insertChecklistSectionSchema>;
 export type ChecklistItem = typeof checklistItems.$inferSelect;
 export type InsertChecklistItem = z.infer<typeof insertChecklistItemSchema>;
 export type FreightCalculation = typeof freightCalculations.$inferSelect;

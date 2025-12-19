@@ -275,7 +275,13 @@ export async function registerRoutes(
 
   app.post("/api/checklists", isAuthenticated, async (req, res) => {
     try {
-      const parsed = insertChecklistSchema.safeParse(req.body);
+      const user = req.user as any;
+      const userCompanyId = user?.companyId || 1;
+      
+      const parsed = insertChecklistSchema.safeParse({
+        ...req.body,
+        companyId: userCompanyId,
+      });
       if (!parsed.success) {
         return res.status(400).json({ message: "Invalid checklist data", errors: parsed.error.errors });
       }

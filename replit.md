@@ -53,6 +53,18 @@ Preferred communication style: Simple, everyday language.
   - Email reminders sent 1 day before due date (when email configured)
   - Linked to meeting action items with assignedEmail field
 - **Projects**: Project management with status tracking (planning/active/on hold/completed), date ranges, and progress calculation based on linked tasks.
+- **Checklist (Enhanced)**: Complete client diagnostic tool with 18 sections following commercial workflow.
+  - **Capa/Perfil do Cliente**: Client profile with 5 tabs (Dados, História, Mercado, Contatos, Portais)
+    - Client data, CNPJ, Focal Point (internal commercial responsible)
+    - Company history, location, segment, products, numbers, news
+    - Market share, position, opportunities (BID, Cotação, Projetos, Spot)
+    - Pipeline overview (segment, product, volume, target)
+    - Client contacts by sector with birthdays
+    - Portals and passwords for client systems
+  - **18 Sections**: Comercial, Direção, Qualidade, Planejamento, Financeiro, Op. Transporte, Op. Distribuição, Op. Armazenagem, GRISCO, T.I, Compras, Contábil/Fiscal, RH, Jurídico, Cliente em Teste, Boas Vindas, Relacionamento
+  - **Responsável com Parecer**: Each section has responsible party with dates, "É Perfil?" decision, and written opinion
+  - Progress tracking per section and overall
+  - Links to CRM clients for auto-fill
 - **RFI (Request for Information)**: Company technical profile for participation in BIDs and logistics bids.
   - Comprehensive company data: Razão Social, CNPJ/CPF, address, contacts
   - Annual revenue by year (faturamento anual)
