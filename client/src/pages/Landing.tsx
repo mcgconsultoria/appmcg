@@ -18,6 +18,7 @@ import {
   Mail,
   MapPin,
 } from "lucide-react";
+import { SiFacebook, SiInstagram, SiLinkedin, SiWhatsapp, SiGoogle } from "react-icons/si";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
 const features = [
@@ -337,6 +338,50 @@ export default function Landing() {
               <p className="text-sm text-muted-foreground">
                 &copy; {new Date().getFullYear()} MCG Consultoria. Todos os direitos reservados.
               </p>
+              
+              <div className="flex items-center gap-3">
+                <a
+                  href="https://www.facebook.com/mcgconsultoriacomercial"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-md bg-muted/50 flex items-center justify-center hover-elevate"
+                  data-testid="link-facebook"
+                  aria-label="Facebook"
+                >
+                  <SiFacebook className="h-4 w-4 text-muted-foreground" />
+                </a>
+                <a
+                  href="https://www.instagram.com/mcgconsultoriacomercial"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-md bg-muted/50 flex items-center justify-center hover-elevate"
+                  data-testid="link-instagram"
+                  aria-label="Instagram"
+                >
+                  <SiInstagram className="h-4 w-4 text-muted-foreground" />
+                </a>
+                <a
+                  href="https://www.linkedin.com/company/mcgconsultoriacomercial"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-md bg-muted/50 flex items-center justify-center hover-elevate"
+                  data-testid="link-linkedin"
+                  aria-label="LinkedIn"
+                >
+                  <SiLinkedin className="h-4 w-4 text-muted-foreground" />
+                </a>
+                <a
+                  href="https://www.google.com/maps/place/MCG+Consultoria"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-md bg-muted/50 flex items-center justify-center hover-elevate"
+                  data-testid="link-google"
+                  aria-label="Google Meu Negócio"
+                >
+                  <SiGoogle className="h-4 w-4 text-muted-foreground" />
+                </a>
+              </div>
+
               <div className="flex items-center gap-4 flex-wrap justify-center">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md">
                   <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
