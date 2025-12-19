@@ -66,3 +66,27 @@ Preferred communication style: Simple, everyday language.
 - ICMS tax rates for all 27 Brazilian states
 - Portuguese language throughout UI
 - LGPD (Brazilian data protection law) compliance with cookie consent
+
+## Business Context
+
+### Vision
+MCG Consultoria is a commercial management platform for logistics, filling the gap between operational ERPs (WMS/TMS) and commercial/sales needs. Created by experienced logistics professionals who understand the pain points between commercial and operational areas.
+
+### Strategic Partnership - Grupo NStech
+- **KMM**: ERP for logistics (WMS/TMS) - MCG created the first CRM prototype for KMM
+- **QualP**: Route calculation API (distance, tolls, freight tables) - owned by NStech
+- **Goal**: Full integration with KMM ecosystem, with potential reseller partnership for QualP API
+
+### Target Market
+- Logistics companies (both operators and service providers)
+- Industries with logistics operations
+- Commercial teams in logistics sector
+
+## Pending Integrations
+
+### QualP API (Grupo NStech)
+- **Status**: Pending partnership negotiation
+- **Purpose**: Automatic calculation of distance and tolls in freight calculator
+- **Environment Variable**: QUALP_ACCESS_TOKEN (to be configured after partnership)
+- **Endpoint Ready**: POST /api/route-calculation (code implemented, waiting for API token)
+- **Note**: System works fully in manual mode without API configured
