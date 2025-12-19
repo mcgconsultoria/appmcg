@@ -242,8 +242,8 @@ export default function Pricing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {individualProducts.map((product, index) => (
+          <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-6">
+            {individualProducts.slice(0, 2).map((product, index) => (
               <Card key={index} className="flex flex-col" data-testid={`card-product-${index}`}>
                 <CardHeader>
                   <CardTitle className="text-xl" data-testid={`text-product-name-${index}`}>
@@ -266,6 +266,37 @@ export default function Pricing() {
                     onClick={() => handleSubscribe(product.priceId)}
                     disabled={checkoutMutation.isPending || !product.priceId}
                     data-testid={`button-product-${index}`}
+                  >
+                    {!product.priceId ? "Em Breve" : "Adquirir"}
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {individualProducts.slice(2).map((product, index) => (
+              <Card key={index + 2} className="flex flex-col" data-testid={`card-product-${index + 2}`}>
+                <CardHeader>
+                  <CardTitle className="text-xl" data-testid={`text-product-name-${index + 2}`}>
+                    {product.name}
+                  </CardTitle>
+                  <CardDescription>{product.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1">
+                  <div>
+                    <span className="text-3xl font-bold" data-testid={`text-product-price-${index + 2}`}>
+                      R$ {product.price}
+                    </span>
+                    <span className="text-muted-foreground">/{product.interval}</span>
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => handleSubscribe(product.priceId)}
+                    disabled={checkoutMutation.isPending || !product.priceId}
+                    data-testid={`button-product-${index + 2}`}
                   >
                     {!product.priceId ? "Em Breve" : "Adquirir"}
                   </Button>
