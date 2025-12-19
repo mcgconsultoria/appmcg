@@ -1167,6 +1167,11 @@ export async function registerRoutes(
       doc.fontSize(14).font("Helvetica-Bold").text(record.title);
       doc.fontSize(10).font("Helvetica");
       doc.text(`Data: ${record.meetingDate ? new Date(record.meetingDate).toLocaleDateString("pt-BR") : "-"}`);
+      const meetingMode = (record as any).meetingMode || "presencial";
+      doc.text(`Modalidade: ${meetingMode === "online" ? "Online" : "Presencial"}`);
+      if (meetingMode === "presencial" && (record as any).meetingLocation) {
+        doc.text(`Local: ${(record as any).meetingLocation}`);
+      }
       if (client) doc.text(`Cliente: ${client.name}`);
       doc.moveDown();
       

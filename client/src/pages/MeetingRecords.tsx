@@ -56,6 +56,11 @@ const meetingTypes = [
   { value: "strategic", label: "Planejamento Estrategico" },
 ];
 
+const meetingModes = [
+  { value: "presencial", label: "Presencial" },
+  { value: "online", label: "Online" },
+];
+
 const statusLabels: Record<string, string> = {
   draft: "Rascunho",
   finalized: "Finalizada",
@@ -91,6 +96,8 @@ export default function MeetingRecords() {
   const [formData, setFormData] = useState({
     title: "",
     meetingType: "client",
+    meetingMode: "presencial",
+    meetingLocation: "",
     meetingDate: new Date().toISOString().split("T")[0],
     clientId: "",
     summary: "",
@@ -230,6 +237,8 @@ export default function MeetingRecords() {
     setFormData({
       title: "",
       meetingType: "client",
+      meetingMode: "presencial",
+      meetingLocation: "",
       meetingDate: new Date().toISOString().split("T")[0],
       clientId: "",
       summary: "",
@@ -289,6 +298,8 @@ export default function MeetingRecords() {
     setFormData({
       title: record.title,
       meetingType: record.meetingType || "client",
+      meetingMode: (record as any).meetingMode || "presencial",
+      meetingLocation: (record as any).meetingLocation || "",
       meetingDate: record.meetingDate ? new Date(record.meetingDate).toISOString().split("T")[0] : "",
       clientId: record.clientId?.toString() || "",
       summary: record.summary || "",
@@ -385,6 +396,36 @@ export default function MeetingRecords() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="meetingMode">Modalidade</Label>
+                  <Select
+                    value={formData.meetingMode}
+                    onValueChange={(value) => setFormData({ ...formData, meetingMode: value })}
+                  >
+                    <SelectTrigger data-testid="select-meeting-mode">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {meetingModes.map((mode) => (
+                        <SelectItem key={mode.value} value={mode.value}>
+                          {mode.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {formData.meetingMode === "presencial" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="meetingLocation">Local da Reuniao</Label>
+                    <Input
+                      id="meetingLocation"
+                      value={formData.meetingLocation}
+                      onChange={(e) => setFormData({ ...formData, meetingLocation: e.target.value })}
+                      placeholder="Ex: Escritorio central, Sala de reunioes 3"
+                      data-testid="input-meeting-location"
+                    />
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="meetingDate">Data da Reuniao</Label>
                   <Input
@@ -686,6 +727,10 @@ export default function MeetingRecords() {
                               <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
                                 <div><strong>Data:</strong> {record.meetingDate ? format(new Date(record.meetingDate), "dd/MM/yyyy") : "-"}</div>
                                 <div><strong>Tipo:</strong> {meetingTypes.find(t => t.value === record.meetingType)?.label}</div>
+                                <div><strong>Modalidade:</strong> {meetingModes.find(m => m.value === (record as any).meetingMode)?.label || "Presencial"}</div>
+                                {(record as any).meetingMode === "presencial" && (record as any).meetingLocation && (
+                                  <div><strong>Local:</strong> {(record as any).meetingLocation}</div>
+                                )}
                                 <div><strong>Cliente:</strong> {getClientName(record.clientId)}</div>
                                 <div>
                                   <strong>Participantes:</strong>

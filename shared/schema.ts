@@ -292,6 +292,8 @@ export const meetingRecords = pgTable("meeting_records", {
   userId: varchar("user_id"),
   title: varchar("title", { length: 255 }).notNull(),
   meetingType: varchar("meeting_type", { length: 50 }).default("client"), // client, internal, strategic
+  meetingMode: varchar("meeting_mode", { length: 20 }).default("presencial"), // online, presencial
+  meetingLocation: text("meeting_location"), // Local da reuniao se presencial
   meetingDate: timestamp("meeting_date").notNull(),
   participants: text("participants"), // JSON array: [{name: string, email: string}]
   summary: text("summary"),
