@@ -88,6 +88,7 @@ const sections = [
   { id: "compras", label: "Compras", icon: Package, group: "areas" },
   { id: "contabil", label: "Contábil/Fiscal", icon: FileText, group: "areas" },
   { id: "rh", label: "RH", icon: Users, group: "areas" },
+  { id: "marketing", label: "Marketing", icon: BarChart3, group: "areas" },
   { id: "juridico", label: "Jurídico", icon: Gavel, group: "areas" },
   { id: "teste", label: "Cliente em Teste", icon: ClipboardList, group: "final" },
   { id: "onboarding", label: "Boas Vindas", icon: PartyPopper, group: "final" },
@@ -188,6 +189,15 @@ const sectionQuestions: Record<string, { id: string; question: string }[]> = {
     { id: "rh3", question: "Ficha de motoristas atualizada?" },
     { id: "rh4", question: "Treinamentos necessários?" },
     { id: "rh5", question: "Escala de trabalho definida?" },
+  ],
+  marketing: [
+    { id: "mkt1", question: "Estratégia de divulgação definida?" },
+    { id: "mkt2", question: "Material institucional preparado?" },
+    { id: "mkt3", question: "Apresentação comercial atualizada?" },
+    { id: "mkt4", question: "Cases de sucesso documentados?" },
+    { id: "mkt5", question: "Redes sociais configuradas?" },
+    { id: "mkt6", question: "Site/Landing page do cliente?" },
+    { id: "mkt7", question: "Comunicação visual alinhada?" },
   ],
   juridico: [
     { id: "jur1", question: "Análise de contrato realizada?" },
