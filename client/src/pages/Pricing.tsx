@@ -91,7 +91,7 @@ const individualProducts = [
   },
   {
     name: "Checklist Operacional",
-    description: "Checklists para 19 departamentos de logistica",
+    description: "Checklists para 20 departamentos de logistica",
     price: 97,
     interval: "mes",
     priceId: null,

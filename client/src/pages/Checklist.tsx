@@ -88,6 +88,7 @@ const sections = [
   { id: "compras", label: "Compras", icon: Package, group: "areas" },
   { id: "contabil", label: "Contábil/Fiscal", icon: FileText, group: "areas" },
   { id: "rh", label: "RH", icon: Users, group: "areas" },
+  { id: "motoristas", label: "Motoristas", icon: Truck, group: "areas" },
   { id: "marketing", label: "Marketing", icon: BarChart3, group: "areas" },
   { id: "juridico", label: "Jurídico", icon: Gavel, group: "areas" },
   { id: "teste", label: "Cliente em Teste", icon: ClipboardList, group: "final" },
@@ -186,9 +187,18 @@ const sectionQuestions: Record<string, { id: string; question: string }[]> = {
   rh: [
     { id: "rh1", question: "Jornada de trabalho definida?" },
     { id: "rh2", question: "Qualificação de pessoas identificada?" },
-    { id: "rh3", question: "Ficha de motoristas atualizada?" },
+    { id: "rh3", question: "Ficha de funcionários atualizada?" },
     { id: "rh4", question: "Treinamentos necessários?" },
     { id: "rh5", question: "Escala de trabalho definida?" },
+  ],
+  motoristas: [
+    { id: "mot1", question: "Cadastro de motoristas atualizado?" },
+    { id: "mot2", question: "CNH válida e categorizada?" },
+    { id: "mot3", question: "Exames médicos em dia?" },
+    { id: "mot4", question: "Curso MOPP realizado (se aplicável)?" },
+    { id: "mot5", question: "Ficha de conduta atualizada?" },
+    { id: "mot6", question: "Treinamento de direção defensiva?" },
+    { id: "mot7", question: "Consulta de multas e pontuação?" },
   ],
   marketing: [
     { id: "mkt1", question: "Estratégia de divulgação definida?" },
