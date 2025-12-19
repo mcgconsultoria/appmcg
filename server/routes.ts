@@ -1435,10 +1435,12 @@ export async function registerRoutes(
       if (record.companyId !== userCompanyId) {
         return res.status(403).json({ message: "Access denied" });
       }
-      const parsed = insertMeetingActionItemSchema.safeParse({
+      const body = {
         ...req.body,
         meetingRecordId,
-      });
+        dueDate: req.body.dueDate ? new Date(req.body.dueDate) : undefined,
+      };
+      const parsed = insertMeetingActionItemSchema.safeParse(body);
       if (!parsed.success) {
         return res.status(400).json({ message: "Invalid action item data", errors: parsed.error.errors });
       }
