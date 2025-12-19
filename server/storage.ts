@@ -13,6 +13,7 @@ import {
   clientOperations,
   meetingRecords,
   meetingActionItems,
+  meetingObjectives,
   commercialEvents,
   projects,
   tasks,
@@ -42,6 +43,8 @@ import {
   type InsertClientOperation,
   type MeetingRecord,
   type InsertMeetingRecord,
+  type MeetingObjective,
+  type InsertMeetingObjective,
   type MeetingActionItem,
   type InsertMeetingActionItem,
   type CommercialEvent,
@@ -127,6 +130,11 @@ export interface IStorage {
   // Client operation operations
   getClientOperations(clientId: number): Promise<ClientOperation[]>;
   createClientOperation(operation: InsertClientOperation): Promise<ClientOperation>;
+
+  // Meeting objectives catalog
+  getMeetingObjectives(companyId: number): Promise<MeetingObjective[]>;
+  createMeetingObjective(objective: InsertMeetingObjective): Promise<MeetingObjective>;
+  deleteMeetingObjective(id: number): Promise<boolean>;
 
   // Meeting record operations
   getMeetingRecords(companyId: number): Promise<MeetingRecord[]>;
@@ -502,6 +510,23 @@ export class DatabaseStorage implements IStorage {
   async createClientOperation(operation: InsertClientOperation): Promise<ClientOperation> {
     const [newOperation] = await db.insert(clientOperations).values(operation).returning();
     return newOperation;
+  }
+
+  // Meeting objectives catalog
+  async getMeetingObjectives(companyId: number): Promise<MeetingObjective[]> {
+    return db.select().from(meetingObjectives)
+      .where(eq(meetingObjectives.companyId, companyId))
+      .orderBy(meetingObjectives.label);
+  }
+
+  async createMeetingObjective(objective: InsertMeetingObjective): Promise<MeetingObjective> {
+    const [newObjective] = await db.insert(meetingObjectives).values(objective).returning();
+    return newObjective;
+  }
+
+  async deleteMeetingObjective(id: number): Promise<boolean> {
+    await db.delete(meetingObjectives).where(eq(meetingObjectives.id, id));
+    return true;
   }
 
   // Meeting record operations

@@ -34,8 +34,21 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Plus, FileEdit, Trash2, Eye, Download, Loader2, Users, Calendar, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { MeetingRecord, MeetingActionItem, Client, Company } from "@shared/schema";
+import type { MeetingRecord, MeetingActionItem, Client, Company, MeetingObjective } from "@shared/schema";
 import { ClientCombobox } from "@/components/ClientCombobox";
+import { Checkbox } from "@/components/ui/checkbox";
+import { X, Mail } from "lucide-react";
+
+interface Participant {
+  name: string;
+  email: string;
+}
+
+const defaultObjectives = [
+  "Visita Comercial",
+  "Apresentacao Indicadores",
+  "Visita Operacional",
+];
 
 const meetingTypes = [
   { value: "client", label: "Reuniao com Cliente" },
@@ -80,8 +93,6 @@ export default function MeetingRecords() {
     meetingType: "client",
     meetingDate: new Date().toISOString().split("T")[0],
     clientId: "",
-    participants: "",
-    objectives: "",
     summary: "",
     decisions: "",
     nextSteps: "",
@@ -89,9 +100,14 @@ export default function MeetingRecords() {
     pipelineStage: "",
   });
 
+  const [selectedObjectives, setSelectedObjectives] = useState<string[]>([]);
+  const [newObjective, setNewObjective] = useState("");
+  const [participants, setParticipants] = useState<Participant[]>([{ name: "", email: "" }]);
+
   const [actionItems, setActionItems] = useState<Array<{
     description: string;
     responsible: string;
+    responsibleEmail: string;
     dueDate: string;
     priority: string;
   }>>([]);
@@ -107,6 +123,55 @@ export default function MeetingRecords() {
   const { data: company } = useQuery<Company>({
     queryKey: ["/api/company"],
   });
+
+  const { data: meetingObjectivesData } = useQuery<MeetingObjective[]>({
+    queryKey: ["/api/meeting-objectives"],
+  });
+
+  const availableObjectives = [
+    ...defaultObjectives,
+    ...(meetingObjectivesData?.filter(o => o.isCustom).map(o => o.label) || []),
+  ];
+
+  const createObjectiveMutation = useMutation({
+    mutationFn: async (label: string) => {
+      const res = await apiRequest("POST", "/api/meeting-objectives", { label });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/meeting-objectives"] });
+    },
+  });
+
+  const addParticipant = () => {
+    setParticipants([...participants, { name: "", email: "" }]);
+  };
+
+  const removeParticipant = (index: number) => {
+    setParticipants(participants.filter((_, i) => i !== index));
+  };
+
+  const updateParticipant = (index: number, field: keyof Participant, value: string) => {
+    const updated = [...participants];
+    updated[index][field] = value;
+    setParticipants(updated);
+  };
+
+  const handleAddObjective = () => {
+    if (newObjective.trim() && !availableObjectives.includes(newObjective.trim())) {
+      createObjectiveMutation.mutate(newObjective.trim());
+      setSelectedObjectives([...selectedObjectives, newObjective.trim()]);
+      setNewObjective("");
+    }
+  };
+
+  const toggleObjective = (objective: string) => {
+    if (selectedObjectives.includes(objective)) {
+      setSelectedObjectives(selectedObjectives.filter(o => o !== objective));
+    } else {
+      setSelectedObjectives([...selectedObjectives, objective]);
+    }
+  };
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -167,14 +232,14 @@ export default function MeetingRecords() {
       meetingType: "client",
       meetingDate: new Date().toISOString().split("T")[0],
       clientId: "",
-      participants: "",
-      objectives: "",
       summary: "",
       decisions: "",
       nextSteps: "",
       nextReviewDate: "",
       pipelineStage: "",
     });
+    setSelectedObjectives([]);
+    setParticipants([{ name: "", email: "" }]);
     setActionItems([]);
     setSelectedRecord(null);
     setIsViewMode(false);
@@ -183,12 +248,16 @@ export default function MeetingRecords() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    const validParticipants = participants.filter(p => p.name.trim() || p.email.trim());
+    
     const payload = {
       ...formData,
       companyId: 1,
       meetingDate: new Date(formData.meetingDate).toISOString(),
       clientId: formData.clientId && formData.clientId !== "none" ? parseInt(formData.clientId) : null,
       nextReviewDate: formData.nextReviewDate ? new Date(formData.nextReviewDate).toISOString() : null,
+      participants: JSON.stringify(validParticipants),
+      selectedObjectives: JSON.stringify(selectedObjectives),
     };
 
     if (selectedRecord) {
@@ -201,7 +270,7 @@ export default function MeetingRecords() {
   const addActionItem = () => {
     setActionItems([
       ...actionItems,
-      { description: "", responsible: "", dueDate: "", priority: "medium" },
+      { description: "", responsible: "", responsibleEmail: "", dueDate: "", priority: "medium" },
     ]);
   };
 
@@ -222,14 +291,27 @@ export default function MeetingRecords() {
       meetingType: record.meetingType || "client",
       meetingDate: record.meetingDate ? new Date(record.meetingDate).toISOString().split("T")[0] : "",
       clientId: record.clientId?.toString() || "",
-      participants: record.participants || "",
-      objectives: record.objectives || "",
       summary: record.summary || "",
       decisions: record.decisions || "",
       nextSteps: record.nextSteps || "",
       nextReviewDate: record.nextReviewDate ? new Date(record.nextReviewDate).toISOString().split("T")[0] : "",
       pipelineStage: record.pipelineStage || "",
     });
+    
+    try {
+      const parsedParticipants = record.participants ? JSON.parse(record.participants) : [];
+      setParticipants(parsedParticipants.length > 0 ? parsedParticipants : [{ name: "", email: "" }]);
+    } catch {
+      setParticipants([{ name: record.participants || "", email: "" }]);
+    }
+    
+    try {
+      const parsedObjectives = (record as any).selectedObjectives ? JSON.parse((record as any).selectedObjectives) : [];
+      setSelectedObjectives(parsedObjectives);
+    } catch {
+      setSelectedObjectives([]);
+    }
+    
     setIsViewMode(false);
     setIsDialogOpen(true);
   };
@@ -327,27 +409,81 @@ export default function MeetingRecords() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="participants">Participantes</Label>
-                <Input
-                  id="participants"
-                  value={formData.participants}
-                  onChange={(e) => setFormData({ ...formData, participants: e.target.value })}
-                  placeholder="Nomes dos participantes separados por virgula"
-                  data-testid="input-participants"
-                />
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <Label>Participantes</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={addParticipant} data-testid="button-add-participant">
+                    <Plus className="h-4 w-4 mr-1" />
+                    Adicionar Participante
+                  </Button>
+                </div>
+                {participants.map((participant, index) => (
+                  <div key={index} className="flex gap-2 items-center">
+                    <Input
+                      placeholder="Nome"
+                      value={participant.name}
+                      onChange={(e) => updateParticipant(index, "name", e.target.value)}
+                      className="flex-1"
+                      data-testid={`input-participant-name-${index}`}
+                    />
+                    <Input
+                      placeholder="Email"
+                      type="email"
+                      value={participant.email}
+                      onChange={(e) => updateParticipant(index, "email", e.target.value)}
+                      className="flex-1"
+                      data-testid={`input-participant-email-${index}`}
+                    />
+                    {participants.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeParticipant(index)}
+                        data-testid={`button-remove-participant-${index}`}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="objectives">Objetivos da Reuniao</Label>
-                <Textarea
-                  id="objectives"
-                  value={formData.objectives}
-                  onChange={(e) => setFormData({ ...formData, objectives: e.target.value })}
-                  placeholder="Quais eram os objetivos desta reuniao?"
-                  rows={3}
-                  data-testid="input-objectives"
-                />
+              <div className="space-y-3">
+                <Label>Objetivos da Reuniao</Label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  {availableObjectives.map((objective) => (
+                    <div key={objective} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`objective-${objective}`}
+                        checked={selectedObjectives.includes(objective)}
+                        onCheckedChange={() => toggleObjective(objective)}
+                        data-testid={`checkbox-objective-${objective.replace(/\s/g, "-")}`}
+                      />
+                      <label htmlFor={`objective-${objective}`} className="text-sm cursor-pointer">
+                        {objective}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Adicionar novo objetivo..."
+                    value={newObjective}
+                    onChange={(e) => setNewObjective(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddObjective())}
+                    data-testid="input-new-objective"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={handleAddObjective}
+                    disabled={!newObjective.trim()}
+                    data-testid="button-add-objective"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -384,7 +520,7 @@ export default function MeetingRecords() {
                 </div>
                 {actionItems.map((item, index) => (
                   <Card key={index} className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
                       <div className="md:col-span-2">
                         <Input
                           placeholder="Descricao da acao"
@@ -399,6 +535,15 @@ export default function MeetingRecords() {
                           value={item.responsible}
                           onChange={(e) => updateActionItem(index, "responsible", e.target.value)}
                           data-testid={`input-action-responsible-${index}`}
+                        />
+                      </div>
+                      <div>
+                        <Input
+                          placeholder="Email"
+                          type="email"
+                          value={item.responsibleEmail}
+                          onChange={(e) => updateActionItem(index, "responsibleEmail", e.target.value)}
+                          data-testid={`input-action-email-${index}`}
                         />
                       </div>
                       <div className="flex gap-2">

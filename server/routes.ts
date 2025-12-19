@@ -11,6 +11,7 @@ import {
   insertStorageCalculationSchema,
   insertFinancialAccountSchema,
   insertMeetingRecordSchema,
+  insertMeetingObjectiveSchema,
   insertMeetingActionItemSchema,
   insertCommercialEventSchema,
   insertProjectSchema,
@@ -980,6 +981,48 @@ export async function registerRoutes(
     }
   });
 
+  // Meeting objectives routes (catalog)
+  app.get("/api/meeting-objectives", isAuthenticated, async (req: any, res) => {
+    try {
+      const companyId = req.user.companyId || 1;
+      const objectives = await storage.getMeetingObjectives(companyId);
+      res.json(objectives);
+    } catch (error) {
+      console.error("Error fetching meeting objectives:", error);
+      res.status(500).json({ message: "Failed to fetch meeting objectives" });
+    }
+  });
+
+  app.post("/api/meeting-objectives", isAuthenticated, async (req: any, res) => {
+    try {
+      const companyId = req.user.companyId || 1;
+      const parsed = insertMeetingObjectiveSchema.safeParse({
+        ...req.body,
+        companyId,
+        isCustom: true,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid objective data", errors: parsed.error.errors });
+      }
+      const objective = await storage.createMeetingObjective(parsed.data);
+      res.status(201).json(objective);
+    } catch (error) {
+      console.error("Error creating meeting objective:", error);
+      res.status(500).json({ message: "Failed to create meeting objective" });
+    }
+  });
+
+  app.delete("/api/meeting-objectives/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteMeetingObjective(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting meeting objective:", error);
+      res.status(500).json({ message: "Failed to delete meeting objective" });
+    }
+  });
+
   // Meeting records routes (Ata Plano de Acao)
   app.get("/api/meeting-records", isAuthenticated, async (req: any, res) => {
     try {
@@ -1106,6 +1149,25 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Invalid action item data", errors: parsed.error.errors });
       }
       const item = await storage.createMeetingActionItem(parsed.data);
+      
+      if (item.dueDate) {
+        const taskData = {
+          companyId: userCompanyId,
+          clientId: record.clientId,
+          meetingRecordId: meetingRecordId,
+          actionItemId: item.id,
+          title: item.description,
+          description: `Acao da ata: ${record.title}`,
+          assignedTo: item.responsible,
+          assignedEmail: item.responsibleEmail,
+          priority: item.priority || "medium",
+          status: "todo",
+          dueDate: item.dueDate,
+        };
+        const task = await storage.createTask(taskData);
+        await storage.updateMeetingActionItem(item.id, { linkedTaskId: task.id });
+      }
+      
       res.status(201).json(item);
     } catch (error) {
       console.error("Error creating meeting action item:", error);

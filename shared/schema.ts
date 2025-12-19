@@ -274,6 +274,16 @@ export const anttFreightTable = pgTable("antt_freight_table", {
   validUntil: timestamp("valid_until"),
 });
 
+// Meeting Objectives Catalog
+export const meetingObjectives = pgTable("meeting_objectives", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  label: varchar("label", { length: 255 }).notNull(),
+  isCustom: boolean("is_custom").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Meeting Records (Ata Plano de Acao)
 export const meetingRecords = pgTable("meeting_records", {
   id: serial("id").primaryKey(),
@@ -283,9 +293,10 @@ export const meetingRecords = pgTable("meeting_records", {
   title: varchar("title", { length: 255 }).notNull(),
   meetingType: varchar("meeting_type", { length: 50 }).default("client"), // client, internal, strategic
   meetingDate: timestamp("meeting_date").notNull(),
-  participants: text("participants"),
+  participants: text("participants"), // JSON array: [{name: string, email: string}]
   summary: text("summary"),
-  objectives: text("objectives"),
+  objectives: text("objectives"), // Legacy text field
+  selectedObjectives: text("selected_objectives"), // JSON array of objective labels
   decisions: text("decisions"),
   nextSteps: text("next_steps"),
   nextReviewDate: timestamp("next_review_date"),
@@ -301,6 +312,7 @@ export const meetingActionItems = pgTable("meeting_action_items", {
   meetingRecordId: integer("meeting_record_id").notNull(),
   description: text("description").notNull(),
   responsible: varchar("responsible", { length: 255 }),
+  responsibleEmail: varchar("responsible_email", { length: 255 }),
   responsibleUserId: varchar("responsible_user_id"),
   dueDate: timestamp("due_date"),
   priority: varchar("priority", { length: 20 }).default("medium"), // low, medium, high, urgent
@@ -308,6 +320,7 @@ export const meetingActionItems = pgTable("meeting_action_items", {
   completedAt: timestamp("completed_at"),
   notes: text("notes"),
   orderIndex: integer("order_index").default(0),
+  linkedTaskId: integer("linked_task_id"), // Link to auto-created task
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -360,6 +373,7 @@ export const tasks = pgTable("tasks", {
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
   assignedTo: varchar("assigned_to"),
+  assignedEmail: varchar("assigned_email", { length: 255 }),
   assignedUserId: varchar("assigned_user_id"),
   priority: varchar("priority", { length: 20 }).default("medium"),
   status: varchar("status").default("todo"), // todo, in_progress, review, done
@@ -368,6 +382,7 @@ export const tasks = pgTable("tasks", {
   estimatedHours: decimal("estimated_hours", { precision: 5, scale: 2 }),
   actualHours: decimal("actual_hours", { precision: 5, scale: 2 }),
   tags: text("tags"),
+  reminderSent: boolean("reminder_sent").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -484,6 +499,11 @@ export const insertAnttFreightTableSchema = createInsertSchema(anttFreightTable)
   id: true,
 });
 
+export const insertMeetingObjectiveSchema = createInsertSchema(meetingObjectives).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertMeetingRecordSchema = createInsertSchema(meetingRecords).omit({
   id: true,
   createdAt: true,
@@ -559,6 +579,8 @@ export type AnttFreightTable = typeof anttFreightTable.$inferSelect;
 export type InsertAnttFreightTable = z.infer<typeof insertAnttFreightTableSchema>;
 export type MeetingRecord = typeof meetingRecords.$inferSelect;
 export type InsertMeetingRecord = z.infer<typeof insertMeetingRecordSchema>;
+export type MeetingObjective = typeof meetingObjectives.$inferSelect;
+export type InsertMeetingObjective = z.infer<typeof insertMeetingObjectiveSchema>;
 export type MeetingActionItem = typeof meetingActionItems.$inferSelect;
 export type InsertMeetingActionItem = z.infer<typeof insertMeetingActionItemSchema>;
 export type CommercialEvent = typeof commercialEvents.$inferSelect;
