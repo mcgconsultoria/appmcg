@@ -14,6 +14,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { User, Bell, Shield, Palette, Building2, Upload, Loader2 } from "lucide-react";
 import type { Company } from "@shared/schema";
+import { TaxIdField } from "@/components/TaxIdField";
 
 export default function Settings() {
   const { user } = useAuth();
@@ -191,12 +192,10 @@ export default function Settings() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="cnpj">CNPJ</Label>
-                    <Input
-                      id="cnpj"
-                      placeholder="00.000.000/0000-00"
+                    <TaxIdField
                       value={companyForm.cnpj}
-                      onChange={(e) => setCompanyForm(prev => ({ ...prev, cnpj: e.target.value }))}
+                      onChange={(value) => setCompanyForm(prev => ({ ...prev, cnpj: value }))}
+                      label="CPF/CNPJ"
                       data-testid="input-company-cnpj"
                     />
                   </div>

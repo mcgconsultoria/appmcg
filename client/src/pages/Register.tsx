@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Truck, Eye, EyeOff, Loader2 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { TaxIdField } from "@/components/TaxIdField";
 
 const registerSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -184,12 +185,12 @@ export default function Register() {
                     name="cnpj"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>CNPJ</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="00.000.000/0000-00"
+                          <TaxIdField
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            label="CPF/CNPJ"
                             data-testid="input-cnpj"
-                            {...field}
                           />
                         </FormControl>
                         <FormMessage />

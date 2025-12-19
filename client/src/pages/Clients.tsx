@@ -62,6 +62,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { TaxIdField } from "@/components/TaxIdField";
 
 const clientFormSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -335,9 +336,13 @@ export default function Clients() {
                       name="cnpj"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>CNPJ</FormLabel>
                           <FormControl>
-                            <Input {...field} placeholder="00.000.000/0000-00" data-testid="input-client-cnpj" />
+                            <TaxIdField
+                              value={field.value || ""}
+                              onChange={field.onChange}
+                              label="CPF/CNPJ"
+                              data-testid="input-client-cnpj"
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

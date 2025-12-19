@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { TaxIdField } from "@/components/TaxIdField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -262,9 +263,13 @@ export function ClientFormDialog({
                 name="cnpj"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>CNPJ</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="00.000.000/0000-00" data-testid="input-client-cnpj" />
+                      <TaxIdField
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                        label="CPF/CNPJ"
+                        data-testid="input-client-cnpj"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
