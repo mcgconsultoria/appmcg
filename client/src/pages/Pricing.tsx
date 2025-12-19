@@ -12,6 +12,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { ClientCombobox } from "@/components/ClientCombobox";
+import type { Client } from "@shared/schema";
 
 interface Price {
   id: string;
@@ -169,8 +171,8 @@ export default function Pricing() {
   
   const [consultingDialogOpen, setConsultingDialogOpen] = useState(false);
   const [selectedPhases, setSelectedPhases] = useState<string[]>([]);
+  const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [consultingForm, setConsultingForm] = useState({
-    companyName: "",
     contactName: "",
     email: "",
     phone: "",
@@ -179,6 +181,11 @@ export default function Pricing() {
 
   const { data: productsData } = useQuery<{ data: Product[] }>({
     queryKey: ["/api/stripe/products"],
+  });
+
+  const { data: clients } = useQuery<Client[]>({
+    queryKey: ["/api/clients"],
+    enabled: isAuthenticated,
   });
 
   const checkoutMutation = useMutation({
@@ -246,16 +253,17 @@ export default function Pricing() {
       return;
     }
 
-    if (!consultingForm.companyName || !consultingForm.contactName || !consultingForm.email) {
+    if (!selectedClientId || !consultingForm.contactName || !consultingForm.email) {
       toast({
         title: "Preencha os campos obrigatórios",
-        description: "Nome da empresa, contato e email são obrigatórios.",
+        description: "Cliente, contato e email são obrigatórios.",
         variant: "destructive",
       });
       return;
     }
 
     const { total, hasCommission, commissionPercent } = calculateTotal();
+    const selectedClient = clients?.find(c => c.id.toString() === selectedClientId);
     
     toast({
       title: "Proposta enviada com sucesso!",
@@ -264,8 +272,8 @@ export default function Pricing() {
 
     setConsultingDialogOpen(false);
     setSelectedPhases([]);
+    setSelectedClientId("");
     setConsultingForm({
-      companyName: "",
       contactName: "",
       email: "",
       phone: "",
@@ -632,16 +640,28 @@ export default function Pricing() {
               </div>
 
               <div className="border-t pt-6">
+                <Label className="text-base font-semibold mb-4 block">Detalhes das Fases</Label>
+                <div className="space-y-3 text-sm text-muted-foreground bg-muted/30 p-4 rounded-md">
+                  <p><strong className="text-foreground">Diagnóstico:</strong> [Aguardando descrição]</p>
+                  <p><strong className="text-foreground">Implementação:</strong> [Aguardando descrição]</p>
+                  <p><strong className="text-foreground">Execução:</strong> [Aguardando descrição]</p>
+                  <p><strong className="text-foreground">Expansão:</strong> [Aguardando descrição] + comissão sobre negócios fechados</p>
+                </div>
+              </div>
+
+              <div className="border-t pt-6">
                 <Label className="text-base font-semibold mb-4 block">Dados para Contato</Label>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="companyName">Nome da Empresa *</Label>
-                    <Input
-                      id="companyName"
-                      value={consultingForm.companyName}
-                      onChange={(e) => setConsultingForm(prev => ({ ...prev, companyName: e.target.value }))}
-                      placeholder="Sua Empresa Ltda"
-                      data-testid="input-company-name"
+                    <Label>Cliente *</Label>
+                    <ClientCombobox
+                      clients={clients || []}
+                      value={selectedClientId}
+                      onValueChange={setSelectedClientId}
+                      placeholder="Buscar ou cadastrar cliente..."
+                      allowNone={false}
+                      showAddButton={true}
+                      data-testid="select-client"
                     />
                   </div>
                   <div className="space-y-2">
