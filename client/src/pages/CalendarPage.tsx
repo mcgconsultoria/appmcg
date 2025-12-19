@@ -24,7 +24,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Plus, Calendar, Trash2, Edit2, Loader2, Clock, MapPin, Users } from "lucide-react";
-import { format, startOfWeek, addDays, isSameDay, parseISO } from "date-fns";
+import { format, startOfWeek, addDays, isSameDay, parseISO, getWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { CommercialEvent, Client } from "@shared/schema";
 
@@ -377,7 +377,7 @@ export default function CalendarPage() {
               {"<"}
             </Button>
             <CardTitle className="text-lg">
-              {format(currentWeekStart, "dd MMM", { locale: ptBR })} - {format(addDays(currentWeekStart, 6), "dd MMM yyyy", { locale: ptBR })}
+              Semana {getWeek(currentWeekStart, { weekStartsOn: 1 })} - {format(currentWeekStart, "dd MMM", { locale: ptBR })} a {format(addDays(currentWeekStart, 6), "dd MMM yyyy", { locale: ptBR })}
             </CardTitle>
             <Button variant="outline" size="icon" onClick={() => navigateWeek(1)} data-testid="button-next-week">
               <span className="sr-only">Proxima semana</span>
