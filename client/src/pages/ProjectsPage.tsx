@@ -276,6 +276,7 @@ export default function ProjectsPage() {
                   onValueChange={(value) => setFormData({ ...formData, clientId: value })}
                   placeholder="Buscar cliente..."
                   allowNone={true}
+                  showAddButton={true}
                   data-testid="select-client"
                 />
               </div>

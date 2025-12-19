@@ -445,6 +445,7 @@ export default function MeetingRecords() {
                     onValueChange={(value) => setFormData({ ...formData, clientId: value })}
                     placeholder="Buscar cliente..."
                     allowNone={true}
+                    showAddButton={true}
                     data-testid="select-client"
                   />
                 </div>

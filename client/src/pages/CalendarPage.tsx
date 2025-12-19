@@ -175,7 +175,7 @@ export default function CalendarPage() {
       clientId: event.clientId?.toString() || "",
       location: event.location || "",
       description: event.description || "",
-      pipelineStageId: event.pipelineStageId?.toString() || "",
+      pipelineStageId: event.pipelineStage?.toString() || "",
     });
     setIsDialogOpen(true);
   };
@@ -283,6 +283,7 @@ export default function CalendarPage() {
                     onValueChange={(value) => setFormData({ ...formData, clientId: value })}
                     placeholder="Buscar cliente..."
                     allowNone={true}
+                    showAddButton={true}
                     data-testid="select-client"
                   />
                 </div>
