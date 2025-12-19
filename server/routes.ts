@@ -1056,11 +1056,14 @@ export async function registerRoutes(
 
   app.post("/api/meeting-records", isAuthenticated, async (req: any, res) => {
     try {
-      const parsed = insertMeetingRecordSchema.safeParse({
+      const body = {
         ...req.body,
         companyId: req.user.companyId || 1,
         userId: req.user.id,
-      });
+        meetingDate: req.body.meetingDate ? new Date(req.body.meetingDate) : undefined,
+        nextReviewDate: req.body.nextReviewDate ? new Date(req.body.nextReviewDate) : undefined,
+      };
+      const parsed = insertMeetingRecordSchema.safeParse(body);
       if (!parsed.success) {
         return res.status(400).json({ message: "Invalid meeting record data", errors: parsed.error.errors });
       }
@@ -1083,7 +1086,12 @@ export async function registerRoutes(
       if (existingRecord.companyId !== userCompanyId) {
         return res.status(403).json({ message: "Access denied" });
       }
-      const record = await storage.updateMeetingRecord(id, req.body);
+      const body = {
+        ...req.body,
+        meetingDate: req.body.meetingDate ? new Date(req.body.meetingDate) : undefined,
+        nextReviewDate: req.body.nextReviewDate ? new Date(req.body.nextReviewDate) : undefined,
+      };
+      const record = await storage.updateMeetingRecord(id, body);
       res.json(record);
     } catch (error) {
       console.error("Error updating meeting record:", error);
