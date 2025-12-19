@@ -182,7 +182,7 @@ export default function MeetingRecords() {
       ...formData,
       companyId: 1,
       meetingDate: new Date(formData.meetingDate).toISOString(),
-      clientId: formData.clientId ? parseInt(formData.clientId) : null,
+      clientId: formData.clientId && formData.clientId !== "none" ? parseInt(formData.clientId) : null,
       nextReviewDate: formData.nextReviewDate ? new Date(formData.nextReviewDate).toISOString() : null,
     };
 
@@ -319,7 +319,7 @@ export default function MeetingRecords() {
                       <SelectValue placeholder="Selecione um cliente" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Nenhum</SelectItem>
+                      <SelectItem value="none">Nenhum</SelectItem>
                       {clients?.map((client) => (
                         <SelectItem key={client.id} value={client.id.toString()}>
                           {client.name}

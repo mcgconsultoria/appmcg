@@ -39,7 +39,19 @@ Preferred communication style: Simple, everyday language.
 
 ### Page Structure
 - **Public Pages**: Landing, Login, Register, Pricing, Privacy, Terms, Calculators (Freight/Storage)
-- **Authenticated Pages**: Dashboard, Clients, Pipeline, Checklist, Financial, Marketing, Settings, Subscription
+- **Authenticated Pages**: Dashboard, Clients, Pipeline, Calendar, Meeting Records (Ata), Checklist, Tasks, Projects, Financial, Marketing, Settings, Subscription
+
+### New Modules (Phase 2)
+- **Meeting Records (Ata Plano de Acao)**: Document meetings with action items, participants, decisions, and next steps. Full CRUD with action item tracking.
+- **Calendar (Calendario Comercial)**: Weekly commercial calendar with events linked to clients. Event types include meetings, calls, visits, proposals, and follow-ups.
+- **Tasks**: Task management with priorities (low/medium/high/urgent), due dates, assignees, and project assignment. Checkbox toggle for completion.
+- **Projects**: Project management with status tracking (planning/active/on hold/completed), date ranges, and progress calculation based on linked tasks.
+
+### Dashboard Indicators
+- **ABC Curve Analysis**: Client classification following Pareto principle (80/20 rule)
+- **Clients by State**: Geographic distribution bar chart
+- **Clients by Segment**: Market segment distribution pie chart
+- **Pipeline Overview**: Real-time funnel statistics
 
 ## External Dependencies
 

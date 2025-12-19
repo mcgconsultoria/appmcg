@@ -12,6 +12,9 @@ import {
   insertFinancialAccountSchema,
   insertMeetingRecordSchema,
   insertMeetingActionItemSchema,
+  insertCommercialEventSchema,
+  insertProjectSchema,
+  insertTaskSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -1073,6 +1076,284 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting meeting action item:", error);
       res.status(500).json({ message: "Failed to delete meeting action item" });
+    }
+  });
+
+  // Commercial events routes
+  app.get("/api/commercial-events", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const events = await storage.getCommercialEvents(userCompanyId);
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching commercial events:", error);
+      res.status(500).json({ message: "Failed to fetch commercial events" });
+    }
+  });
+
+  app.get("/api/commercial-events/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const event = await storage.getCommercialEvent(id);
+      if (!event) {
+        return res.status(404).json({ message: "Commercial event not found" });
+      }
+      if (event.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      res.json(event);
+    } catch (error) {
+      console.error("Error fetching commercial event:", error);
+      res.status(500).json({ message: "Failed to fetch commercial event" });
+    }
+  });
+
+  app.post("/api/commercial-events", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const parsed = insertCommercialEventSchema.safeParse({
+        ...req.body,
+        companyId: userCompanyId,
+        userId: req.user.id,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid commercial event data", errors: parsed.error.errors });
+      }
+      const event = await storage.createCommercialEvent(parsed.data);
+      res.status(201).json(event);
+    } catch (error) {
+      console.error("Error creating commercial event:", error);
+      res.status(500).json({ message: "Failed to create commercial event" });
+    }
+  });
+
+  app.patch("/api/commercial-events/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const existingEvent = await storage.getCommercialEvent(id);
+      if (!existingEvent) {
+        return res.status(404).json({ message: "Commercial event not found" });
+      }
+      if (existingEvent.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const event = await storage.updateCommercialEvent(id, req.body);
+      res.json(event);
+    } catch (error) {
+      console.error("Error updating commercial event:", error);
+      res.status(500).json({ message: "Failed to update commercial event" });
+    }
+  });
+
+  app.delete("/api/commercial-events/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const existingEvent = await storage.getCommercialEvent(id);
+      if (!existingEvent) {
+        return res.status(404).json({ message: "Commercial event not found" });
+      }
+      if (existingEvent.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      await storage.deleteCommercialEvent(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting commercial event:", error);
+      res.status(500).json({ message: "Failed to delete commercial event" });
+    }
+  });
+
+  // Projects routes
+  app.get("/api/projects", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const projects = await storage.getProjects(userCompanyId);
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+      res.status(500).json({ message: "Failed to fetch projects" });
+    }
+  });
+
+  app.get("/api/projects/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const project = await storage.getProject(id);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      if (project.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      res.json(project);
+    } catch (error) {
+      console.error("Error fetching project:", error);
+      res.status(500).json({ message: "Failed to fetch project" });
+    }
+  });
+
+  app.post("/api/projects", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const parsed = insertProjectSchema.safeParse({
+        ...req.body,
+        companyId: userCompanyId,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid project data", errors: parsed.error.errors });
+      }
+      const project = await storage.createProject(parsed.data);
+      res.status(201).json(project);
+    } catch (error) {
+      console.error("Error creating project:", error);
+      res.status(500).json({ message: "Failed to create project" });
+    }
+  });
+
+  app.patch("/api/projects/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const existingProject = await storage.getProject(id);
+      if (!existingProject) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      if (existingProject.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const project = await storage.updateProject(id, req.body);
+      res.json(project);
+    } catch (error) {
+      console.error("Error updating project:", error);
+      res.status(500).json({ message: "Failed to update project" });
+    }
+  });
+
+  app.delete("/api/projects/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const existingProject = await storage.getProject(id);
+      if (!existingProject) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      if (existingProject.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      await storage.deleteProject(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      res.status(500).json({ message: "Failed to delete project" });
+    }
+  });
+
+  // Tasks routes
+  app.get("/api/tasks", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const tasks = await storage.getTasks(userCompanyId);
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      res.status(500).json({ message: "Failed to fetch tasks" });
+    }
+  });
+
+  app.get("/api/projects/:id/tasks", isAuthenticated, async (req: any, res) => {
+    try {
+      const projectId = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const project = await storage.getProject(projectId);
+      if (!project) {
+        return res.status(404).json({ message: "Project not found" });
+      }
+      if (project.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const tasks = await storage.getTasksByProject(projectId);
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching project tasks:", error);
+      res.status(500).json({ message: "Failed to fetch project tasks" });
+    }
+  });
+
+  app.get("/api/tasks/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const task = await storage.getTask(id);
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      if (task.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      res.json(task);
+    } catch (error) {
+      console.error("Error fetching task:", error);
+      res.status(500).json({ message: "Failed to fetch task" });
+    }
+  });
+
+  app.post("/api/tasks", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const parsed = insertTaskSchema.safeParse({
+        ...req.body,
+        companyId: userCompanyId,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid task data", errors: parsed.error.errors });
+      }
+      const task = await storage.createTask(parsed.data);
+      res.status(201).json(task);
+    } catch (error) {
+      console.error("Error creating task:", error);
+      res.status(500).json({ message: "Failed to create task" });
+    }
+  });
+
+  app.patch("/api/tasks/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const existingTask = await storage.getTask(id);
+      if (!existingTask) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      if (existingTask.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const task = await storage.updateTask(id, req.body);
+      res.json(task);
+    } catch (error) {
+      console.error("Error updating task:", error);
+      res.status(500).json({ message: "Failed to update task" });
+    }
+  });
+
+  app.delete("/api/tasks/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const existingTask = await storage.getTask(id);
+      if (!existingTask) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+      if (existingTask.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      await storage.deleteTask(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      res.status(500).json({ message: "Failed to delete task" });
     }
   });
 

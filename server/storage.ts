@@ -13,6 +13,9 @@ import {
   clientOperations,
   meetingRecords,
   meetingActionItems,
+  commercialEvents,
+  projects,
+  tasks,
   type User,
   type UpsertUser,
   type Company,
@@ -41,6 +44,12 @@ import {
   type InsertMeetingRecord,
   type MeetingActionItem,
   type InsertMeetingActionItem,
+  type CommercialEvent,
+  type InsertCommercialEvent,
+  type Project,
+  type InsertProject,
+  type Task,
+  type InsertTask,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
@@ -131,6 +140,28 @@ export interface IStorage {
   createMeetingActionItem(item: InsertMeetingActionItem): Promise<MeetingActionItem>;
   updateMeetingActionItem(id: number, item: Partial<InsertMeetingActionItem>): Promise<MeetingActionItem | undefined>;
   deleteMeetingActionItem(id: number): Promise<boolean>;
+
+  // Commercial event operations
+  getCommercialEvents(companyId: number): Promise<CommercialEvent[]>;
+  getCommercialEvent(id: number): Promise<CommercialEvent | undefined>;
+  createCommercialEvent(event: InsertCommercialEvent): Promise<CommercialEvent>;
+  updateCommercialEvent(id: number, event: Partial<InsertCommercialEvent>): Promise<CommercialEvent | undefined>;
+  deleteCommercialEvent(id: number): Promise<boolean>;
+
+  // Project operations
+  getProjects(companyId: number): Promise<Project[]>;
+  getProject(id: number): Promise<Project | undefined>;
+  createProject(project: InsertProject): Promise<Project>;
+  updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined>;
+  deleteProject(id: number): Promise<boolean>;
+
+  // Task operations
+  getTasks(companyId: number): Promise<Task[]>;
+  getTasksByProject(projectId: number): Promise<Task[]>;
+  getTask(id: number): Promise<Task | undefined>;
+  createTask(task: InsertTask): Promise<Task>;
+  updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined>;
+  deleteTask(id: number): Promise<boolean>;
 
   // Quota operations
   useCalculation(userId: string): Promise<void>;
@@ -524,6 +555,98 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMeetingActionItem(id: number): Promise<boolean> {
     await db.delete(meetingActionItems).where(eq(meetingActionItems.id, id));
+    return true;
+  }
+
+  // Commercial event operations
+  async getCommercialEvents(companyId: number): Promise<CommercialEvent[]> {
+    return db.select().from(commercialEvents).where(eq(commercialEvents.companyId, companyId)).orderBy(desc(commercialEvents.startDate));
+  }
+
+  async getCommercialEvent(id: number): Promise<CommercialEvent | undefined> {
+    const [event] = await db.select().from(commercialEvents).where(eq(commercialEvents.id, id));
+    return event;
+  }
+
+  async createCommercialEvent(event: InsertCommercialEvent): Promise<CommercialEvent> {
+    const [newEvent] = await db.insert(commercialEvents).values(event).returning();
+    return newEvent;
+  }
+
+  async updateCommercialEvent(id: number, event: Partial<InsertCommercialEvent>): Promise<CommercialEvent | undefined> {
+    const [updated] = await db
+      .update(commercialEvents)
+      .set({ ...event, updatedAt: new Date() })
+      .where(eq(commercialEvents.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCommercialEvent(id: number): Promise<boolean> {
+    await db.delete(commercialEvents).where(eq(commercialEvents.id, id));
+    return true;
+  }
+
+  // Project operations
+  async getProjects(companyId: number): Promise<Project[]> {
+    return db.select().from(projects).where(eq(projects.companyId, companyId)).orderBy(desc(projects.createdAt));
+  }
+
+  async getProject(id: number): Promise<Project | undefined> {
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return project;
+  }
+
+  async createProject(project: InsertProject): Promise<Project> {
+    const [newProject] = await db.insert(projects).values(project).returning();
+    return newProject;
+  }
+
+  async updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined> {
+    const [updated] = await db
+      .update(projects)
+      .set({ ...project, updatedAt: new Date() })
+      .where(eq(projects.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteProject(id: number): Promise<boolean> {
+    await db.delete(tasks).where(eq(tasks.projectId, id));
+    await db.delete(projects).where(eq(projects.id, id));
+    return true;
+  }
+
+  // Task operations
+  async getTasks(companyId: number): Promise<Task[]> {
+    return db.select().from(tasks).where(eq(tasks.companyId, companyId)).orderBy(desc(tasks.createdAt));
+  }
+
+  async getTasksByProject(projectId: number): Promise<Task[]> {
+    return db.select().from(tasks).where(eq(tasks.projectId, projectId)).orderBy(desc(tasks.createdAt));
+  }
+
+  async getTask(id: number): Promise<Task | undefined> {
+    const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
+    return task;
+  }
+
+  async createTask(task: InsertTask): Promise<Task> {
+    const [newTask] = await db.insert(tasks).values(task).returning();
+    return newTask;
+  }
+
+  async updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined> {
+    const [updated] = await db
+      .update(tasks)
+      .set({ ...task, updatedAt: new Date() })
+      .where(eq(tasks.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteTask(id: number): Promise<boolean> {
+    await db.delete(tasks).where(eq(tasks.id, id));
     return true;
   }
 

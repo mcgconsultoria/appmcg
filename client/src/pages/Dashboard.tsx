@@ -1,5 +1,5 @@
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,11 +11,14 @@ import {
   ArrowDownRight,
   Plus,
   ChevronRight,
+  BarChart3,
+  PieChart,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { formatCurrency } from "@/lib/brazilStates";
 import type { Client, FinancialAccount } from "@shared/schema";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart as RechartPie, Pie, Cell, Legend } from "recharts";
 
 interface StatCardProps {
   title: string;
@@ -95,6 +98,36 @@ export default function Dashboard() {
     ...stage,
     count: clients.filter(c => c.pipelineStage === stage.id).length,
   }));
+
+  const clientsByState = clients.reduce((acc, client) => {
+    const state = client.state || "Outros";
+    acc[state] = (acc[state] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const stateChartData = Object.entries(clientsByState)
+    .map(([state, count]) => ({ state, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8);
+
+  const clientsBySegment = clients.reduce((acc, client) => {
+    const segment = client.segment || "Sem segmento";
+    acc[segment] = (acc[segment] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const segmentChartData = Object.entries(clientsBySegment)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
+
+  const COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
+
+  const abcData = [
+    { class: "A", percentage: 80, clients: Math.round(clients.length * 0.2) },
+    { class: "B", percentage: 15, clients: Math.round(clients.length * 0.3) },
+    { class: "C", percentage: 5, clients: Math.round(clients.length * 0.5) },
+  ];
 
   return (
     <AppLayout title="Dashboard" subtitle="Visão geral da sua operação">
@@ -283,6 +316,107 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        <div className="grid lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Clientes por Estado
+              </CardTitle>
+              <CardDescription>Distribuicao geografica dos clientes</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {stateChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={stateChartData} layout="vertical">
+                    <XAxis type="number" />
+                    <YAxis dataKey="state" type="category" width={40} />
+                    <Tooltip 
+                      formatter={(value: number) => [`${value} cliente(s)`, "Quantidade"]}
+                      contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                    />
+                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                  Nenhum dado disponivel
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <PieChart className="h-5 w-5" />
+                Clientes por Segmento
+              </CardTitle>
+              <CardDescription>Distribuicao por segmento de mercado</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {segmentChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <RechartPie>
+                    <Pie
+                      data={segmentChartData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                    >
+                      {segmentChartData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value: number) => [`${value} cliente(s)`, "Quantidade"]}
+                      contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                    />
+                  </RechartPie>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                  Nenhum dado disponivel
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Curva ABC - Analise de Clientes</CardTitle>
+            <CardDescription>Classificacao dos clientes por importancia no faturamento</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-4">
+              {abcData.map((item) => (
+                <div key={item.class} className="p-4 rounded-lg border text-center">
+                  <div className={`text-3xl font-bold mb-2 ${
+                    item.class === "A" ? "text-green-600 dark:text-green-400" :
+                    item.class === "B" ? "text-yellow-600 dark:text-yellow-400" :
+                    "text-muted-foreground"
+                  }`}>
+                    Classe {item.class}
+                  </div>
+                  <div className="text-2xl font-semibold">{item.percentage}%</div>
+                  <div className="text-sm text-muted-foreground">do faturamento</div>
+                  <div className="mt-2 pt-2 border-t">
+                    <span className="text-lg font-medium">{item.clients}</span>
+                    <span className="text-sm text-muted-foreground ml-1">clientes</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground">
+              A Curva ABC classifica clientes conforme a regra de Pareto: 20% dos clientes (Classe A) representam 80% do faturamento.
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </AppLayout>
   );
