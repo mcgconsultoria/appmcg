@@ -287,7 +287,7 @@ export async function registerRoutes(
     }
   });
 
-  // Route calculation API (Rotas Brasil integration)
+  // Route calculation API (QualP integration)
   app.post("/api/route-calculation", async (req, res) => {
     try {
       const { originCity, originState, destinationCity, destinationState, vehicleType, vehicleAxles } = req.body;
@@ -296,19 +296,18 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Origem e destino sao obrigatorios" });
       }
       
-      const token = process.env.ROTAS_BRASIL_TOKEN;
+      const token = process.env.QUALP_ACCESS_TOKEN;
       
       if (!token) {
         return res.status(503).json({ 
           message: "API de rotas nao configurada",
           configured: false,
-          hint: "Configure ROTAS_BRASIL_TOKEN para habilitar calculo automatico"
+          hint: "Configure QUALP_ACCESS_TOKEN para habilitar calculo automatico"
         });
       }
       
-      const origin = `${originCity},${originState}`;
-      const destination = `${destinationCity},${destinationState}`;
-      const pontos = `${origin};${destination}`;
+      const origin = `${originCity}, ${originState}`;
+      const destination = `${destinationCity}, ${destinationState}`;
       
       const vehicleMap: Record<string, string> = {
         vuc: "caminhao",
@@ -324,16 +323,28 @@ export async function registerRoutes(
       const veiculo = vehicleMap[vehicleType] || "caminhao";
       const eixos = vehicleAxles || 2;
       
-      const apiUrl = new URL("https://rotasbrasil.com.br/apiRotas/enderecos/");
-      apiUrl.searchParams.append("Token", token);
-      apiUrl.searchParams.append("pontos", pontos);
-      apiUrl.searchParams.append("veiculo", veiculo);
-      apiUrl.searchParams.append("eixos", eixos.toString());
-      
-      const response = await fetch(apiUrl.toString());
+      const response = await fetch("https://api.qualp.com.br/rotas/v4/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Access-Token": token,
+        },
+        body: JSON.stringify({
+          locations: [origin, destination],
+          vehicleType: veiculo,
+          vehicleAxis: eixos,
+          showFreightTable: true,
+          freightTableCategory: "A",
+          freightTableLoad: "geral",
+          freightTableAxis: "all",
+        }),
+      });
       
       if (!response.ok) {
-        console.error("Rotas Brasil API error:", response.status, response.statusText);
+        console.error("QualP API error:", response.status, response.statusText);
+        const errorBody = await response.text().catch(() => "");
+        console.error("QualP API error body:", errorBody);
         return res.status(502).json({ 
           message: "Erro ao consultar API de rotas",
           configured: true,
@@ -342,21 +353,25 @@ export async function registerRoutes(
       
       const data = await response.json();
       
-      if (data.erro || !data.rotas || data.rotas.length === 0) {
+      if (!data || data.error) {
         return res.status(404).json({ 
-          message: "Rota nao encontrada",
+          message: data?.error || "Rota nao encontrada",
           configured: true,
         });
       }
       
-      const route = data.rotas[0];
+      let totalTolls = 0;
+      if (data.tolls && Array.isArray(data.tolls)) {
+        totalTolls = data.tolls.reduce((sum: number, toll: any) => sum + (toll.tariff || 0), 0);
+      }
       
       res.json({
         configured: true,
-        distanceKm: route.distancia || 0,
-        tollValue: route.valorPedagio || 0,
-        duration: route.duracao || "",
-        tolls: route.pedagios || [],
+        distanceKm: data.distance || 0,
+        tollValue: totalTolls,
+        duration: data.duration || "",
+        tolls: data.tolls || [],
+        freightTable: data.freight_table || null,
       });
     } catch (error) {
       console.error("Error calculating route:", error);
@@ -366,10 +381,10 @@ export async function registerRoutes(
 
   // Check if route API is configured
   app.get("/api/route-calculation/status", async (req, res) => {
-    const token = process.env.ROTAS_BRASIL_TOKEN;
+    const token = process.env.QUALP_ACCESS_TOKEN;
     res.json({
       configured: !!token,
-      provider: token ? "Rotas Brasil" : null,
+      provider: token ? "QualP" : null,
     });
   });
 
