@@ -306,7 +306,7 @@ export default function Pricing() {
                 
                 <div className="text-center p-4 rounded-md bg-muted/50">
                   <Badge variant="outline" className="mb-3">3ª Fase</Badge>
-                  <h4 className="font-semibold mb-2">Execução & Acompanhamento</h4>
+                  <h4 className="font-semibold mb-2">Execução</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>In Loco</li>
                     <li>On Line</li>
@@ -316,7 +316,7 @@ export default function Pricing() {
                 
                 <div className="text-center p-4 rounded-md bg-muted/50">
                   <Badge variant="outline" className="mb-3">4ª Fase</Badge>
-                  <h4 className="font-semibold mb-2">Expansão de Negócios</h4>
+                  <h4 className="font-semibold mb-2">Expansão</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>On Line</li>
                   </ul>
