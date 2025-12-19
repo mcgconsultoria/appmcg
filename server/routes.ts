@@ -219,7 +219,31 @@ export async function registerRoutes(
   app.patch("/api/company", isAuthenticated, async (req: any, res) => {
     try {
       const userCompanyId = req.user.companyId || 1;
-      const company = await storage.updateCompany(userCompanyId, req.body);
+      
+      // Validate and sanitize allowed fields
+      const allowedFields = ["name", "cnpj", "email", "phone", "address", "city", "state", "logo"];
+      const sanitizedData: Record<string, any> = {};
+      
+      for (const field of allowedFields) {
+        if (req.body[field] !== undefined) {
+          sanitizedData[field] = req.body[field];
+        }
+      }
+      
+      // Validate logo if provided
+      if (sanitizedData.logo) {
+        // Check if it's a valid data URL
+        if (!sanitizedData.logo.startsWith("data:image/")) {
+          return res.status(400).json({ message: "Logo must be a valid image data URL" });
+        }
+        // Check size limit (500KB encoded ~ 700KB base64)
+        const maxLogoSize = 750000; // ~500KB image becomes ~700KB base64
+        if (sanitizedData.logo.length > maxLogoSize) {
+          return res.status(400).json({ message: "Logo too large. Maximum size is 500KB" });
+        }
+      }
+      
+      const company = await storage.updateCompany(userCompanyId, sanitizedData);
       if (!company) {
         return res.status(404).json({ message: "Company not found" });
       }
