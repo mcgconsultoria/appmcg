@@ -33,6 +33,7 @@ import {
   UserCog,
   HeadphonesIcon,
   BarChart3,
+  UserRound,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,11 @@ const mainMenuItems = [
     title: "Clientes",
     url: "/clientes",
     icon: Users,
+  },
+  {
+    title: "Vendedores",
+    url: "/vendedores",
+    icon: UserRound,
   },
   {
     title: "Pipeline",

@@ -32,6 +32,7 @@ import BrandKit from "@/pages/BrandKit";
 import AdminCliente from "@/pages/AdminCliente";
 import Support from "@/pages/Support";
 import Reports from "@/pages/Reports";
+import Vendedores from "@/pages/Vendedores";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminComercial from "@/pages/admin/AdminComercial";
 import AdminProjetos from "@/pages/admin/AdminProjetos";
@@ -90,6 +91,7 @@ function Router() {
           <Route path="/" component={Dashboard} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/clientes" component={Clients} />
+          <Route path="/vendedores" component={Vendedores} />
           <Route path="/pipeline" component={Pipeline} />
           <Route path="/calendario" component={CalendarPage} />
           <Route path="/atas" component={MeetingRecords} />
