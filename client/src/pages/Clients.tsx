@@ -636,7 +636,7 @@ export default function Clients() {
                             : "-"}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={getStatusBadgeVariant(client.status || "")} size="sm">
+                          <Badge variant={getStatusBadgeVariant(client.status || "")}>
                             {statusOptions.find((s) => s.value === client.status)?.label || "Prospecto"}
                           </Badge>
                         </TableCell>

@@ -44,24 +44,33 @@ export function TaxIdField({
 }: TaxIdFieldProps) {
   const [internalDocType, setInternalDocType] = useState<DocumentType>(() => {
     if (value) {
-      return detectDocumentType(value);
+      const digits = value.replace(/\D/g, "");
+      // Only auto-detect on initial load when value has full length
+      if (digits.length === 11) return "cpf";
+      if (digits.length === 14) return "cnpj";
     }
     return "cnpj";
   });
   const [validationError, setValidationError] = useState<string>("");
+  const [userSelected, setUserSelected] = useState(false);
 
+  // Only auto-detect when editing existing data (not while typing)
   useEffect(() => {
-    if (value && !externalDocType) {
-      const detected = detectDocumentType(value);
-      if (detected !== internalDocType) {
-        setInternalDocType(detected);
+    if (value && !externalDocType && !userSelected) {
+      const digits = value.replace(/\D/g, "");
+      // Only switch if value has complete length (editing existing)
+      if (digits.length === 11 && internalDocType !== "cpf") {
+        setInternalDocType("cpf");
+      } else if (digits.length === 14 && internalDocType !== "cnpj") {
+        setInternalDocType("cnpj");
       }
     }
-  }, [value, externalDocType, internalDocType]);
+  }, []);
 
   const docType = externalDocType ?? internalDocType;
 
   const handleDocTypeChange = (newType: DocumentType) => {
+    setUserSelected(true);
     if (onDocumentTypeChange) {
       onDocumentTypeChange(newType);
     } else {
