@@ -7,12 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/components/ThemeProvider";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { User, Bell, Shield, Palette, Building2, Upload, Loader2 } from "lucide-react";
+import { User, Bell, Shield, Palette, Building2, Upload, Loader2, Search, CheckCircle2 } from "lucide-react";
 import type { Company } from "@shared/schema";
 import { TaxIdField } from "@/components/TaxIdField";
 
@@ -21,10 +22,16 @@ export default function Settings() {
   const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cnpjLoading, setCnpjLoading] = useState(false);
+  const [cnpjFound, setCnpjFound] = useState(false);
   
   const [companyForm, setCompanyForm] = useState({
     name: "",
+    nomeFantasia: "",
     cnpj: "",
+    inscricaoEstadual: "",
+    inscricaoEstadualIsento: false,
+    inscricaoMunicipal: "",
     logo: "",
   });
 
@@ -36,11 +43,42 @@ export default function Settings() {
     if (company) {
       setCompanyForm({
         name: company.name || "",
+        nomeFantasia: company.nomeFantasia || "",
         cnpj: company.cnpj || "",
+        inscricaoEstadual: company.inscricaoEstadual || "",
+        inscricaoEstadualIsento: company.inscricaoEstadualIsento || false,
+        inscricaoMunicipal: company.inscricaoMunicipal || "",
         logo: company.logo || "",
       });
     }
   }, [company]);
+
+  const handleCnpjLookup = async () => {
+    const cleanCnpj = companyForm.cnpj.replace(/[^\d]/g, "");
+    if (cleanCnpj.length !== 14) return;
+
+    setCnpjLoading(true);
+    setCnpjFound(false);
+    try {
+      const response = await fetch(`/api/cnpj/${cleanCnpj}`);
+      if (response.ok) {
+        const data = await response.json();
+        setCompanyForm(prev => ({
+          ...prev,
+          name: data.razao_social || prev.name,
+          nomeFantasia: data.nome_fantasia || prev.nomeFantasia,
+        }));
+        setCnpjFound(true);
+        toast({ title: "Dados encontrados na Receita Federal" });
+      } else {
+        toast({ title: "CNPJ nao encontrado", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Erro ao consultar CNPJ", variant: "destructive" });
+    } finally {
+      setCnpjLoading(false);
+    }
+  };
 
   const updateCompanyMutation = useMutation({
     mutationFn: async (data: Partial<Company>) => {
@@ -180,9 +218,83 @@ export default function Settings() {
                 <p className="text-xs text-muted-foreground text-center">Max 500KB</p>
               </div>
               <div className="flex-1 space-y-4">
+                <div className="space-y-2">
+                  <Label>CNPJ/CPF</Label>
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <TaxIdField
+                        value={companyForm.cnpj}
+                        onChange={(value) => {
+                          setCompanyForm(prev => ({ ...prev, cnpj: value }));
+                          setCnpjFound(false);
+                        }}
+                        label=""
+                        data-testid="input-company-cnpj"
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleCnpjLookup}
+                      disabled={cnpjLoading || !companyForm.cnpj || companyForm.cnpj.replace(/[^\d]/g, "").length !== 14}
+                      data-testid="button-company-cnpj-lookup"
+                    >
+                      {cnpjLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : cnpjFound ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Search className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Digite o CNPJ e clique na lupa para buscar dados automaticamente</p>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="companyName">Nome da Empresa</Label>
+                    <Label htmlFor="ie">Inscricao Estadual (I.E.)</Label>
+                    <Input
+                      id="ie"
+                      placeholder={companyForm.inscricaoEstadualIsento ? "ISENTO" : "Inscricao Estadual"}
+                      disabled={companyForm.inscricaoEstadualIsento}
+                      value={companyForm.inscricaoEstadualIsento ? "" : companyForm.inscricaoEstadual}
+                      onChange={(e) => setCompanyForm(prev => ({ ...prev, inscricaoEstadual: e.target.value }))}
+                      data-testid="input-company-ie"
+                    />
+                    <div className="flex items-center gap-2 mt-1">
+                      <Checkbox
+                        id="company-ie-isento"
+                        checked={companyForm.inscricaoEstadualIsento}
+                        onCheckedChange={(checked) => {
+                          setCompanyForm(prev => ({
+                            ...prev,
+                            inscricaoEstadualIsento: !!checked,
+                            inscricaoEstadual: checked ? "" : prev.inscricaoEstadual
+                          }));
+                        }}
+                        data-testid="checkbox-company-ie-isento"
+                      />
+                      <label htmlFor="company-ie-isento" className="text-xs text-muted-foreground cursor-pointer">
+                        Isento
+                      </label>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="im">Inscricao Municipal (I.M.)</Label>
+                    <Input
+                      id="im"
+                      placeholder="Inscricao Municipal"
+                      value={companyForm.inscricaoMunicipal}
+                      onChange={(e) => setCompanyForm(prev => ({ ...prev, inscricaoMunicipal: e.target.value }))}
+                      data-testid="input-company-im"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="companyName">Razao Social</Label>
                     <Input
                       id="companyName"
                       placeholder="Nome da empresa"
@@ -192,11 +304,13 @@ export default function Settings() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <TaxIdField
-                      value={companyForm.cnpj}
-                      onChange={(value) => setCompanyForm(prev => ({ ...prev, cnpj: value }))}
-                      label="CPF/CNPJ"
-                      data-testid="input-company-cnpj"
+                    <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
+                    <Input
+                      id="nomeFantasia"
+                      placeholder="Nome fantasia"
+                      value={companyForm.nomeFantasia}
+                      onChange={(e) => setCompanyForm(prev => ({ ...prev, nomeFantasia: e.target.value }))}
+                      data-testid="input-company-nome-fantasia"
                     />
                   </div>
                 </div>

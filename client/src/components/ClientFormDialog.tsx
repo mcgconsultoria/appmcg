@@ -1,13 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search, CheckCircle2 } from "lucide-react";
 import { TaxIdField } from "@/components/TaxIdField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -39,6 +40,9 @@ const clientFormSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   tradeName: z.string().optional(),
   cnpj: z.string().optional(),
+  inscricaoEstadual: z.string().optional(),
+  inscricaoEstadualIsento: z.boolean().optional().default(false),
+  inscricaoMunicipal: z.string().optional(),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
   phone: z.string().optional(),
   address: z.string().optional(),
@@ -96,12 +100,18 @@ export function ClientFormDialog({
 }: ClientFormDialogProps) {
   const { toast } = useToast();
 
+  const [cnpjLoading, setCnpjLoading] = useState(false);
+  const [cnpjFound, setCnpjFound] = useState(false);
+
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientFormSchema),
     defaultValues: {
       name: "",
       tradeName: "",
       cnpj: "",
+      inscricaoEstadual: "",
+      inscricaoEstadualIsento: false,
+      inscricaoMunicipal: "",
       email: "",
       phone: "",
       address: "",
@@ -118,12 +128,45 @@ export function ClientFormDialog({
     },
   });
 
+  const watchIEIsento = form.watch("inscricaoEstadualIsento");
+
+  const handleCnpjLookup = async (cnpj: string) => {
+    const cleanCnpj = cnpj.replace(/[^\d]/g, "");
+    if (cleanCnpj.length !== 14) return;
+
+    setCnpjLoading(true);
+    setCnpjFound(false);
+    try {
+      const response = await fetch(`/api/cnpj/${cleanCnpj}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.razao_social) {
+          form.setValue("name", data.razao_social);
+        }
+        if (data.nome_fantasia) {
+          form.setValue("tradeName", data.nome_fantasia);
+        }
+        setCnpjFound(true);
+        toast({ title: "Dados encontrados na Receita Federal" });
+      } else {
+        toast({ title: "CNPJ nao encontrado", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Erro ao consultar CNPJ", variant: "destructive" });
+    } finally {
+      setCnpjLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (open && editingClient) {
       form.reset({
         name: editingClient.name,
         tradeName: editingClient.tradeName || "",
         cnpj: editingClient.cnpj || "",
+        inscricaoEstadual: editingClient.inscricaoEstadual || "",
+        inscricaoEstadualIsento: editingClient.inscricaoEstadualIsento || false,
+        inscricaoMunicipal: editingClient.inscricaoMunicipal || "",
         email: editingClient.email || "",
         phone: editingClient.phone || "",
         address: editingClient.address || "",
@@ -138,11 +181,15 @@ export function ClientFormDialog({
         estimatedValue: editingClient.estimatedValue?.toString() || "",
         notes: editingClient.notes || "",
       });
+      setCnpjFound(false);
     } else if (open && !editingClient) {
       form.reset({
         name: "",
         tradeName: "",
         cnpj: "",
+        inscricaoEstadual: "",
+        inscricaoEstadualIsento: false,
+        inscricaoMunicipal: "",
         email: "",
         phone: "",
         address: "",
@@ -157,6 +204,7 @@ export function ClientFormDialog({
         estimatedValue: "",
         notes: "",
       });
+      setCnpjFound(false);
     }
   }, [open, editingClient, form]);
 
@@ -231,13 +279,106 @@ export function ClientFormDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="cnpj"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CNPJ/CPF</FormLabel>
+                  <div className="flex gap-2">
+                    <FormControl className="flex-1">
+                      <TaxIdField
+                        value={field.value || ""}
+                        onChange={(value) => {
+                          field.onChange(value);
+                          setCnpjFound(false);
+                        }}
+                        label=""
+                        data-testid="input-client-cnpj"
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleCnpjLookup(field.value || "")}
+                      disabled={cnpjLoading || !field.value || field.value.replace(/[^\d]/g, "").length !== 14}
+                      data-testid="button-client-cnpj-lookup"
+                    >
+                      {cnpjLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : cnpjFound ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Search className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Digite o CNPJ e clique na lupa para buscar dados automaticamente</p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="inscricaoEstadual"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Inscricao Estadual (I.E.)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={watchIEIsento ? "ISENTO" : "Inscricao Estadual"}
+                        disabled={watchIEIsento}
+                        data-testid="input-client-ie"
+                        {...field}
+                        value={watchIEIsento ? "" : field.value}
+                      />
+                    </FormControl>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Checkbox
+                        id="client-ie-isento"
+                        checked={form.watch("inscricaoEstadualIsento")}
+                        onCheckedChange={(checked) => {
+                          form.setValue("inscricaoEstadualIsento", !!checked);
+                          if (checked) form.setValue("inscricaoEstadual", "");
+                        }}
+                        data-testid="checkbox-client-ie-isento"
+                      />
+                      <label htmlFor="client-ie-isento" className="text-xs text-muted-foreground cursor-pointer">
+                        Isento
+                      </label>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="inscricaoMunicipal"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Inscricao Municipal (I.M.)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Inscricao Municipal"
+                        data-testid="input-client-im"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Razão Social *</FormLabel>
+                    <FormLabel>Razao Social *</FormLabel>
                     <FormControl>
                       <Input {...field} data-testid="input-client-name" />
                     </FormControl>
@@ -258,23 +399,9 @@ export function ClientFormDialog({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="cnpj"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <TaxIdField
-                        value={field.value || ""}
-                        onChange={field.onChange}
-                        label="CPF/CNPJ"
-                        data-testid="input-client-cnpj"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="segment"

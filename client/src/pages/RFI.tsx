@@ -40,6 +40,7 @@ import {
   Edit,
   CheckCircle2,
   Clock,
+  Search,
 } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -234,6 +235,35 @@ export default function RFI() {
   const [selectedRfi, setSelectedRfi] = useState<Rfi | null>(null);
   const [formData, setFormData] = useState<RfiFormData>(emptyFormData);
   const [activeTab, setActiveTab] = useState("dados");
+  const [cnpjLoading, setCnpjLoading] = useState(false);
+  const [cnpjFound, setCnpjFound] = useState(false);
+
+  const handleCnpjLookup = async () => {
+    const cleanCnpj = formData.cnpj.replace(/[^\d]/g, "");
+    if (cleanCnpj.length !== 14) return;
+
+    setCnpjLoading(true);
+    setCnpjFound(false);
+    try {
+      const response = await fetch(`/api/cnpj/${cleanCnpj}`);
+      if (response.ok) {
+        const data = await response.json();
+        setFormData(prev => ({
+          ...prev,
+          razaoSocial: data.razao_social || prev.razaoSocial,
+          nomeFantasia: data.nome_fantasia || prev.nomeFantasia,
+        }));
+        setCnpjFound(true);
+        toast({ title: "Dados encontrados na Receita Federal" });
+      } else {
+        toast({ title: "CNPJ nao encontrado", variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Erro ao consultar CNPJ", variant: "destructive" });
+    } finally {
+      setCnpjLoading(false);
+    }
+  };
 
   const { data: rfis = [], isLoading } = useQuery<Rfi[]>({
     queryKey: ["/api/rfis"],
@@ -559,13 +589,45 @@ export default function RFI() {
                       <Building2 className="w-4 h-4" />
                       Dados Cadastrais
                     </h3>
+                    <div className="space-y-2">
+                      <Label>CNPJ/CPF</Label>
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <TaxIdField
+                            value={formData.cnpj}
+                            onChange={(value) => {
+                              setFormData(prev => ({ ...prev, cnpj: value }));
+                              setCnpjFound(false);
+                            }}
+                            label=""
+                            data-testid="input-rfi-cnpj"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleCnpjLookup}
+                          disabled={cnpjLoading || !formData.cnpj || formData.cnpj.replace(/[^\d]/g, "").length !== 14}
+                          data-testid="button-rfi-cnpj-lookup"
+                        >
+                          {cnpjLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : cnpjFound ? (
+                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Search className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Digite o CNPJ e clique na lupa para buscar dados automaticamente</p>
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Razão Social *</Label>
+                        <Label>Razao Social *</Label>
                         <Input
                           value={formData.razaoSocial}
                           onChange={(e) => setFormData(prev => ({ ...prev, razaoSocial: e.target.value }))}
-                          placeholder="Razão Social da empresa"
+                          placeholder="Razao Social da empresa"
                           data-testid="input-razao-social"
                         />
                       </div>
@@ -580,12 +642,6 @@ export default function RFI() {
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
-                      <TaxIdField
-                        value={formData.cnpj}
-                        onChange={(value) => setFormData(prev => ({ ...prev, cnpj: value }))}
-                        label="CPF/CNPJ"
-                        data-testid="input-rfi-cnpj"
-                      />
                       <div className="space-y-2">
                         <Label>Ramo de Atividade</Label>
                         <Input
@@ -595,10 +651,8 @@ export default function RFI() {
                           data-testid="input-ramo-atividade"
                         />
                       </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Início das Atividades</Label>
+                        <Label>Inicio das Atividades</Label>
                         <Input
                           value={formData.inicioAtividades}
                           onChange={(e) => setFormData(prev => ({ ...prev, inicioAtividades: e.target.value }))}
@@ -606,6 +660,8 @@ export default function RFI() {
                           data-testid="input-inicio-atividades"
                         />
                       </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Site</Label>
                         <Input
