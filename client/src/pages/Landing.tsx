@@ -15,7 +15,7 @@ import {
   TrendingUp,
   Mail,
 } from "lucide-react";
-import { SiFacebook, SiInstagram, SiLinkedin, SiWhatsapp, SiGoogle } from "react-icons/si";
+import { SiFacebook, SiInstagram, SiLinkedin, SiWhatsapp, SiGoogle, SiYoutube } from "react-icons/si";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import logoMcg from "@assets/logo_mcg_principal.png";
 
@@ -277,6 +277,17 @@ export default function Landing() {
                     <p className="text-sm text-muted-foreground">comercial@mcgconsultoria.com.br</p>
                   </CardContent>
                 </Card>
+              </a>
+            </div>
+            <div className="text-center mt-8">
+              <p className="text-lg font-semibold mb-4">PodBlog MCG</p>
+              <a 
+                href="https://www.youtube.com/@mcgconsultoriacomercial" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-600 hover-elevate"
+              >
+                <SiYoutube className="h-6 w-6 text-white" />
               </a>
             </div>
           </div>
