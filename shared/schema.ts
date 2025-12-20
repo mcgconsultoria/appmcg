@@ -766,6 +766,247 @@ export const insertMarketSegmentSchema = createInsertSchema(marketSegments).omit
   createdAt: true,
 });
 
+// ============================================
+// ADMIN MCG TABLES
+// ============================================
+
+// Admin Leads - MCG's potential clients for platform/consulting
+export const adminLeads = pgTable("admin_leads", {
+  id: serial("id").primaryKey(),
+  companyName: varchar("company_name", { length: 255 }).notNull(),
+  tradeName: varchar("trade_name", { length: 255 }),
+  cnpj: varchar("cnpj", { length: 18 }),
+  contactName: varchar("contact_name", { length: 255 }),
+  contactEmail: varchar("contact_email"),
+  contactPhone: varchar("contact_phone", { length: 20 }),
+  city: varchar("city", { length: 100 }),
+  state: varchar("state", { length: 2 }),
+  segment: varchar("segment", { length: 100 }),
+  source: varchar("source", { length: 100 }), // Website, Indicação, LinkedIn, etc
+  interest: varchar("interest", { length: 100 }), // Assinatura, Consultoria, Ambos
+  stage: varchar("stage").default("lead"), // lead, qualified, proposal, negotiation, closed_won, closed_lost
+  estimatedValue: decimal("estimated_value", { precision: 15, scale: 2 }),
+  probability: integer("probability").default(0),
+  notes: text("notes"),
+  nextFollowUp: timestamp("next_follow_up"),
+  assignedTo: varchar("assigned_to", { length: 255 }),
+  lostReason: varchar("lost_reason", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Admin Proposals - MCG's proposals for services
+export const adminProposals = pgTable("admin_proposals", {
+  id: serial("id").primaryKey(),
+  leadId: integer("lead_id"),
+  proposalNumber: varchar("proposal_number", { length: 50 }),
+  title: varchar("title", { length: 255 }).notNull(),
+  clientName: varchar("client_name", { length: 255 }),
+  serviceType: varchar("service_type", { length: 100 }), // Assinatura, Diagnóstico, Implementação, Execução, Expansão
+  description: text("description"),
+  value: decimal("value", { precision: 15, scale: 2 }),
+  discount: decimal("discount", { precision: 5, scale: 2 }),
+  finalValue: decimal("final_value", { precision: 15, scale: 2 }),
+  validUntil: timestamp("valid_until"),
+  status: varchar("status").default("draft"), // draft, sent, accepted, rejected, expired
+  sentAt: timestamp("sent_at"),
+  acceptedAt: timestamp("accepted_at"),
+  rejectedReason: varchar("rejected_reason", { length: 255 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Admin Contracts - MCG's contracts
+export const adminContracts = pgTable("admin_contracts", {
+  id: serial("id").primaryKey(),
+  proposalId: integer("proposal_id"),
+  leadId: integer("lead_id"),
+  contractNumber: varchar("contract_number", { length: 50 }),
+  clientName: varchar("client_name", { length: 255 }).notNull(),
+  clientCnpj: varchar("client_cnpj", { length: 18 }),
+  serviceType: varchar("service_type", { length: 100 }),
+  description: text("description"),
+  value: decimal("value", { precision: 15, scale: 2 }),
+  paymentTerms: varchar("payment_terms", { length: 100 }),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  status: varchar("status").default("active"), // active, completed, cancelled, suspended
+  signedAt: timestamp("signed_at"),
+  signedBy: varchar("signed_by", { length: 255 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Admin Projects - MCG's consulting projects
+export const adminProjects = pgTable("admin_projects", {
+  id: serial("id").primaryKey(),
+  contractId: integer("contract_id"),
+  leadId: integer("lead_id"),
+  name: varchar("name", { length: 255 }).notNull(),
+  clientName: varchar("client_name", { length: 255 }),
+  projectType: varchar("project_type", { length: 100 }), // Diagnóstico, Implementação, Execução, Expansão
+  description: text("description"),
+  startDate: timestamp("start_date"),
+  targetEndDate: timestamp("target_end_date"),
+  actualEndDate: timestamp("actual_end_date"),
+  status: varchar("status").default("planning"), // planning, active, on_hold, completed, cancelled
+  progress: integer("progress").default(0),
+  value: decimal("value", { precision: 15, scale: 2 }),
+  assignedTo: varchar("assigned_to", { length: 255 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Admin Project Phases - Phases within consulting projects
+export const adminProjectPhases = pgTable("admin_project_phases", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  orderIndex: integer("order_index").default(0),
+  startDate: timestamp("start_date"),
+  targetEndDate: timestamp("target_end_date"),
+  actualEndDate: timestamp("actual_end_date"),
+  status: varchar("status").default("pending"), // pending, in_progress, completed, blocked
+  progress: integer("progress").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Admin Project Deliverables - Deliverables for each phase
+export const adminProjectDeliverables = pgTable("admin_project_deliverables", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  phaseId: integer("phase_id"),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  dueDate: timestamp("due_date"),
+  completedAt: timestamp("completed_at"),
+  status: varchar("status").default("pending"), // pending, in_progress, completed, approved
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Admin Partnerships - MCG's partnerships
+export const adminPartnerships = pgTable("admin_partnerships", {
+  id: serial("id").primaryKey(),
+  partnerName: varchar("partner_name", { length: 255 }).notNull(),
+  partnerType: varchar("partner_type", { length: 100 }), // Tecnologia, Sindicato, Escola, Revenda
+  contactName: varchar("contact_name", { length: 255 }),
+  contactEmail: varchar("contact_email"),
+  contactPhone: varchar("contact_phone", { length: 20 }),
+  website: varchar("website", { length: 255 }),
+  description: text("description"),
+  benefits: text("benefits"),
+  status: varchar("status").default("prospecting"), // prospecting, negotiating, active, paused, ended
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  ownerName: varchar("owner_name", { length: 255 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Admin Posts - Blog/Content management
+export const adminPosts = pgTable("admin_posts", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }),
+  content: text("content"),
+  excerpt: text("excerpt"),
+  category: varchar("category", { length: 100 }),
+  tags: jsonb("tags").$type<string[]>(),
+  targetAudience: jsonb("target_audience").$type<string[]>(), // Transportadores, Embarcadores, Operadores, etc
+  featuredImage: text("featured_image"),
+  status: varchar("status").default("draft"), // draft, scheduled, published, archived
+  publishAt: timestamp("publish_at"),
+  publishedAt: timestamp("published_at"),
+  authorName: varchar("author_name", { length: 255 }),
+  views: integer("views").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Admin Financial Records - MCG's financial tracking
+export const adminFinancialRecords = pgTable("admin_financial_records", {
+  id: serial("id").primaryKey(),
+  type: varchar("type", { length: 50 }).notNull(), // receita, despesa
+  category: varchar("category", { length: 100 }), // Assinatura, Consultoria, Salários, Impostos, etc
+  subcategory: varchar("subcategory", { length: 100 }),
+  description: varchar("description", { length: 255 }),
+  clientName: varchar("client_name", { length: 255 }),
+  contractId: integer("contract_id"),
+  value: decimal("value", { precision: 15, scale: 2 }).notNull(),
+  dueDate: timestamp("due_date"),
+  paidAt: timestamp("paid_at"),
+  status: varchar("status").default("pending"), // pending, paid, overdue, cancelled
+  paymentMethod: varchar("payment_method", { length: 100 }),
+  nfseNumber: varchar("nfse_number", { length: 50 }),
+  nfseIssuedAt: timestamp("nfse_issued_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert schemas for admin tables
+export const insertAdminLeadSchema = createInsertSchema(adminLeads).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAdminProposalSchema = createInsertSchema(adminProposals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAdminContractSchema = createInsertSchema(adminContracts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAdminProjectSchema = createInsertSchema(adminProjects).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAdminProjectPhaseSchema = createInsertSchema(adminProjectPhases).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAdminProjectDeliverableSchema = createInsertSchema(adminProjectDeliverables).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAdminPartnershipSchema = createInsertSchema(adminPartnerships).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAdminPostSchema = createInsertSchema(adminPosts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertAdminFinancialRecordSchema = createInsertSchema(adminFinancialRecords).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Auth schemas
 export const registerSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -836,3 +1077,23 @@ export type BusinessType = typeof businessTypes.$inferSelect;
 export type InsertBusinessType = z.infer<typeof insertBusinessTypeSchema>;
 export type MarketSegment = typeof marketSegments.$inferSelect;
 export type InsertMarketSegment = z.infer<typeof insertMarketSegmentSchema>;
+
+// Admin MCG Types
+export type AdminLead = typeof adminLeads.$inferSelect;
+export type InsertAdminLead = z.infer<typeof insertAdminLeadSchema>;
+export type AdminProposal = typeof adminProposals.$inferSelect;
+export type InsertAdminProposal = z.infer<typeof insertAdminProposalSchema>;
+export type AdminContract = typeof adminContracts.$inferSelect;
+export type InsertAdminContract = z.infer<typeof insertAdminContractSchema>;
+export type AdminProject = typeof adminProjects.$inferSelect;
+export type InsertAdminProject = z.infer<typeof insertAdminProjectSchema>;
+export type AdminProjectPhase = typeof adminProjectPhases.$inferSelect;
+export type InsertAdminProjectPhase = z.infer<typeof insertAdminProjectPhaseSchema>;
+export type AdminProjectDeliverable = typeof adminProjectDeliverables.$inferSelect;
+export type InsertAdminProjectDeliverable = z.infer<typeof insertAdminProjectDeliverableSchema>;
+export type AdminPartnership = typeof adminPartnerships.$inferSelect;
+export type InsertAdminPartnership = z.infer<typeof insertAdminPartnershipSchema>;
+export type AdminPost = typeof adminPosts.$inferSelect;
+export type InsertAdminPost = z.infer<typeof insertAdminPostSchema>;
+export type AdminFinancialRecord = typeof adminFinancialRecords.$inferSelect;
+export type InsertAdminFinancialRecord = z.infer<typeof insertAdminFinancialRecordSchema>;

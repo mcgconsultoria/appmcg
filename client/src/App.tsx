@@ -29,6 +29,12 @@ import TasksPage from "@/pages/TasksPage";
 import ProjectsPage from "@/pages/ProjectsPage";
 import RFI from "@/pages/RFI";
 import BrandKit from "@/pages/BrandKit";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminComercial from "@/pages/admin/AdminComercial";
+import AdminProjetos from "@/pages/admin/AdminProjetos";
+import AdminFinanceiro from "@/pages/admin/AdminFinanceiro";
+import AdminParcerias from "@/pages/admin/AdminParcerias";
+import AdminConteudo from "@/pages/admin/AdminConteudo";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -72,6 +78,12 @@ function Router() {
           <Route path="/configuracoes" component={Settings} />
           <Route path="/assinatura" component={Subscription} />
           <Route path="/kit-marca" component={BrandKit} />
+          <Route path="/admin" component={AdminDashboard} />
+          <Route path="/admin/comercial" component={AdminComercial} />
+          <Route path="/admin/projetos" component={AdminProjetos} />
+          <Route path="/admin/financeiro" component={AdminFinanceiro} />
+          <Route path="/admin/parcerias" component={AdminParcerias} />
+          <Route path="/admin/conteudo" component={AdminConteudo} />
         </>
       )}
       <Route component={NotFound} />

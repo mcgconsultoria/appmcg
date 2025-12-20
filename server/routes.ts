@@ -17,6 +17,15 @@ import {
   insertProjectSchema,
   insertTaskSchema,
   insertRfiSchema,
+  insertAdminLeadSchema,
+  insertAdminProposalSchema,
+  insertAdminContractSchema,
+  insertAdminProjectSchema,
+  insertAdminProjectPhaseSchema,
+  insertAdminProjectDeliverableSchema,
+  insertAdminPartnershipSchema,
+  insertAdminPostSchema,
+  insertAdminFinancialRecordSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -50,6 +59,16 @@ async function customAuthMiddleware(req: Request, res: Response, next: NextFunct
 function isAuthenticated(req: Request, res: Response, next: NextFunction) {
   if (!req.user) {
     return res.status(401).json({ message: "Não autorizado" });
+  }
+  next();
+}
+
+function isAdmin(req: Request, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({ message: "Não autorizado" });
+  }
+  if (req.user.role !== 'admin' && req.user.role !== 'admin_mcg') {
+    return res.status(403).json({ message: "Acesso restrito a administradores MCG" });
   }
   next();
 }
@@ -2041,6 +2060,559 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting RFI:", error);
       res.status(500).json({ message: "Failed to delete RFI" });
+    }
+  });
+
+  // ============================================
+  // ADMIN MCG ROUTES
+  // ============================================
+
+  // Admin Dashboard
+  app.get("/api/admin/dashboard", isAdmin, async (req: any, res) => {
+    try {
+      const stats = await storage.getAdminDashboardStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching admin dashboard:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard data" });
+    }
+  });
+
+  // Admin Leads
+  app.get("/api/admin/leads", isAdmin, async (req: any, res) => {
+    try {
+      const leads = await storage.getAdminLeads();
+      res.json(leads);
+    } catch (error) {
+      console.error("Error fetching admin leads:", error);
+      res.status(500).json({ message: "Failed to fetch leads" });
+    }
+  });
+
+  app.get("/api/admin/leads/:id", isAdmin, async (req: any, res) => {
+    try {
+      const lead = await storage.getAdminLead(parseInt(req.params.id));
+      if (!lead) return res.status(404).json({ message: "Lead not found" });
+      res.json(lead);
+    } catch (error) {
+      console.error("Error fetching admin lead:", error);
+      res.status(500).json({ message: "Failed to fetch lead" });
+    }
+  });
+
+  app.post("/api/admin/leads", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminLeadSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const lead = await storage.createAdminLead(parsed.data);
+      res.status(201).json(lead);
+    } catch (error) {
+      console.error("Error creating admin lead:", error);
+      res.status(500).json({ message: "Failed to create lead" });
+    }
+  });
+
+  app.patch("/api/admin/leads/:id", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminLeadSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const lead = await storage.updateAdminLead(parseInt(req.params.id), parsed.data);
+      if (!lead) return res.status(404).json({ message: "Lead not found" });
+      res.json(lead);
+    } catch (error) {
+      console.error("Error updating admin lead:", error);
+      res.status(500).json({ message: "Failed to update lead" });
+    }
+  });
+
+  app.delete("/api/admin/leads/:id", isAdmin, async (req: any, res) => {
+    try {
+      await storage.deleteAdminLead(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting admin lead:", error);
+      res.status(500).json({ message: "Failed to delete lead" });
+    }
+  });
+
+  // Admin Proposals
+  app.get("/api/admin/proposals", isAdmin, async (req: any, res) => {
+    try {
+      const proposals = await storage.getAdminProposals();
+      res.json(proposals);
+    } catch (error) {
+      console.error("Error fetching admin proposals:", error);
+      res.status(500).json({ message: "Failed to fetch proposals" });
+    }
+  });
+
+  app.get("/api/admin/proposals/:id", isAdmin, async (req: any, res) => {
+    try {
+      const proposal = await storage.getAdminProposal(parseInt(req.params.id));
+      if (!proposal) return res.status(404).json({ message: "Proposal not found" });
+      res.json(proposal);
+    } catch (error) {
+      console.error("Error fetching admin proposal:", error);
+      res.status(500).json({ message: "Failed to fetch proposal" });
+    }
+  });
+
+  app.post("/api/admin/proposals", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminProposalSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const proposal = await storage.createAdminProposal(parsed.data);
+      res.status(201).json(proposal);
+    } catch (error) {
+      console.error("Error creating admin proposal:", error);
+      res.status(500).json({ message: "Failed to create proposal" });
+    }
+  });
+
+  app.patch("/api/admin/proposals/:id", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminProposalSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const proposal = await storage.updateAdminProposal(parseInt(req.params.id), parsed.data);
+      if (!proposal) return res.status(404).json({ message: "Proposal not found" });
+      res.json(proposal);
+    } catch (error) {
+      console.error("Error updating admin proposal:", error);
+      res.status(500).json({ message: "Failed to update proposal" });
+    }
+  });
+
+  app.delete("/api/admin/proposals/:id", isAdmin, async (req: any, res) => {
+    try {
+      await storage.deleteAdminProposal(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting admin proposal:", error);
+      res.status(500).json({ message: "Failed to delete proposal" });
+    }
+  });
+
+  // Admin Contracts
+  app.get("/api/admin/contracts", isAdmin, async (req: any, res) => {
+    try {
+      const contracts = await storage.getAdminContracts();
+      res.json(contracts);
+    } catch (error) {
+      console.error("Error fetching admin contracts:", error);
+      res.status(500).json({ message: "Failed to fetch contracts" });
+    }
+  });
+
+  app.get("/api/admin/contracts/:id", isAdmin, async (req: any, res) => {
+    try {
+      const contract = await storage.getAdminContract(parseInt(req.params.id));
+      if (!contract) return res.status(404).json({ message: "Contract not found" });
+      res.json(contract);
+    } catch (error) {
+      console.error("Error fetching admin contract:", error);
+      res.status(500).json({ message: "Failed to fetch contract" });
+    }
+  });
+
+  app.post("/api/admin/contracts", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminContractSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const contract = await storage.createAdminContract(parsed.data);
+      res.status(201).json(contract);
+    } catch (error) {
+      console.error("Error creating admin contract:", error);
+      res.status(500).json({ message: "Failed to create contract" });
+    }
+  });
+
+  app.patch("/api/admin/contracts/:id", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminContractSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const contract = await storage.updateAdminContract(parseInt(req.params.id), parsed.data);
+      if (!contract) return res.status(404).json({ message: "Contract not found" });
+      res.json(contract);
+    } catch (error) {
+      console.error("Error updating admin contract:", error);
+      res.status(500).json({ message: "Failed to update contract" });
+    }
+  });
+
+  app.delete("/api/admin/contracts/:id", isAdmin, async (req: any, res) => {
+    try {
+      await storage.deleteAdminContract(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting admin contract:", error);
+      res.status(500).json({ message: "Failed to delete contract" });
+    }
+  });
+
+  // Admin Projects
+  app.get("/api/admin/projects", isAdmin, async (req: any, res) => {
+    try {
+      const projects = await storage.getAdminProjects();
+      res.json(projects);
+    } catch (error) {
+      console.error("Error fetching admin projects:", error);
+      res.status(500).json({ message: "Failed to fetch projects" });
+    }
+  });
+
+  app.get("/api/admin/projects/:id", isAdmin, async (req: any, res) => {
+    try {
+      const project = await storage.getAdminProject(parseInt(req.params.id));
+      if (!project) return res.status(404).json({ message: "Project not found" });
+      res.json(project);
+    } catch (error) {
+      console.error("Error fetching admin project:", error);
+      res.status(500).json({ message: "Failed to fetch project" });
+    }
+  });
+
+  app.post("/api/admin/projects", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminProjectSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const project = await storage.createAdminProject(parsed.data);
+      res.status(201).json(project);
+    } catch (error) {
+      console.error("Error creating admin project:", error);
+      res.status(500).json({ message: "Failed to create project" });
+    }
+  });
+
+  app.patch("/api/admin/projects/:id", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminProjectSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const project = await storage.updateAdminProject(parseInt(req.params.id), parsed.data);
+      if (!project) return res.status(404).json({ message: "Project not found" });
+      res.json(project);
+    } catch (error) {
+      console.error("Error updating admin project:", error);
+      res.status(500).json({ message: "Failed to update project" });
+    }
+  });
+
+  app.delete("/api/admin/projects/:id", isAdmin, async (req: any, res) => {
+    try {
+      await storage.deleteAdminProject(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting admin project:", error);
+      res.status(500).json({ message: "Failed to delete project" });
+    }
+  });
+
+  // Admin Project Phases
+  app.get("/api/admin/projects/:projectId/phases", isAdmin, async (req: any, res) => {
+    try {
+      const phases = await storage.getAdminProjectPhases(parseInt(req.params.projectId));
+      res.json(phases);
+    } catch (error) {
+      console.error("Error fetching admin project phases:", error);
+      res.status(500).json({ message: "Failed to fetch phases" });
+    }
+  });
+
+  app.post("/api/admin/project-phases", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminProjectPhaseSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const phase = await storage.createAdminProjectPhase(parsed.data);
+      res.status(201).json(phase);
+    } catch (error) {
+      console.error("Error creating admin project phase:", error);
+      res.status(500).json({ message: "Failed to create phase" });
+    }
+  });
+
+  app.patch("/api/admin/project-phases/:id", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminProjectPhaseSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const phase = await storage.updateAdminProjectPhase(parseInt(req.params.id), parsed.data);
+      if (!phase) return res.status(404).json({ message: "Phase not found" });
+      res.json(phase);
+    } catch (error) {
+      console.error("Error updating admin project phase:", error);
+      res.status(500).json({ message: "Failed to update phase" });
+    }
+  });
+
+  app.delete("/api/admin/project-phases/:id", isAdmin, async (req: any, res) => {
+    try {
+      await storage.deleteAdminProjectPhase(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting admin project phase:", error);
+      res.status(500).json({ message: "Failed to delete phase" });
+    }
+  });
+
+  // Admin Project Deliverables
+  app.get("/api/admin/projects/:projectId/deliverables", isAdmin, async (req: any, res) => {
+    try {
+      const deliverables = await storage.getAdminProjectDeliverables(parseInt(req.params.projectId));
+      res.json(deliverables);
+    } catch (error) {
+      console.error("Error fetching admin project deliverables:", error);
+      res.status(500).json({ message: "Failed to fetch deliverables" });
+    }
+  });
+
+  app.post("/api/admin/project-deliverables", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminProjectDeliverableSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const deliverable = await storage.createAdminProjectDeliverable(parsed.data);
+      res.status(201).json(deliverable);
+    } catch (error) {
+      console.error("Error creating admin project deliverable:", error);
+      res.status(500).json({ message: "Failed to create deliverable" });
+    }
+  });
+
+  app.patch("/api/admin/project-deliverables/:id", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminProjectDeliverableSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const deliverable = await storage.updateAdminProjectDeliverable(parseInt(req.params.id), parsed.data);
+      if (!deliverable) return res.status(404).json({ message: "Deliverable not found" });
+      res.json(deliverable);
+    } catch (error) {
+      console.error("Error updating admin project deliverable:", error);
+      res.status(500).json({ message: "Failed to update deliverable" });
+    }
+  });
+
+  app.delete("/api/admin/project-deliverables/:id", isAdmin, async (req: any, res) => {
+    try {
+      await storage.deleteAdminProjectDeliverable(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting admin project deliverable:", error);
+      res.status(500).json({ message: "Failed to delete deliverable" });
+    }
+  });
+
+  // Admin Partnerships
+  app.get("/api/admin/partnerships", isAdmin, async (req: any, res) => {
+    try {
+      const partnerships = await storage.getAdminPartnerships();
+      res.json(partnerships);
+    } catch (error) {
+      console.error("Error fetching admin partnerships:", error);
+      res.status(500).json({ message: "Failed to fetch partnerships" });
+    }
+  });
+
+  app.get("/api/admin/partnerships/:id", isAdmin, async (req: any, res) => {
+    try {
+      const partnership = await storage.getAdminPartnership(parseInt(req.params.id));
+      if (!partnership) return res.status(404).json({ message: "Partnership not found" });
+      res.json(partnership);
+    } catch (error) {
+      console.error("Error fetching admin partnership:", error);
+      res.status(500).json({ message: "Failed to fetch partnership" });
+    }
+  });
+
+  app.post("/api/admin/partnerships", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminPartnershipSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const partnership = await storage.createAdminPartnership(parsed.data);
+      res.status(201).json(partnership);
+    } catch (error) {
+      console.error("Error creating admin partnership:", error);
+      res.status(500).json({ message: "Failed to create partnership" });
+    }
+  });
+
+  app.patch("/api/admin/partnerships/:id", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminPartnershipSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const partnership = await storage.updateAdminPartnership(parseInt(req.params.id), parsed.data);
+      if (!partnership) return res.status(404).json({ message: "Partnership not found" });
+      res.json(partnership);
+    } catch (error) {
+      console.error("Error updating admin partnership:", error);
+      res.status(500).json({ message: "Failed to update partnership" });
+    }
+  });
+
+  app.delete("/api/admin/partnerships/:id", isAdmin, async (req: any, res) => {
+    try {
+      await storage.deleteAdminPartnership(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting admin partnership:", error);
+      res.status(500).json({ message: "Failed to delete partnership" });
+    }
+  });
+
+  // Admin Posts (Blog)
+  app.get("/api/admin/posts", isAdmin, async (req: any, res) => {
+    try {
+      const posts = await storage.getAdminPosts();
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching admin posts:", error);
+      res.status(500).json({ message: "Failed to fetch posts" });
+    }
+  });
+
+  app.get("/api/admin/posts/:id", isAdmin, async (req: any, res) => {
+    try {
+      const post = await storage.getAdminPost(parseInt(req.params.id));
+      if (!post) return res.status(404).json({ message: "Post not found" });
+      res.json(post);
+    } catch (error) {
+      console.error("Error fetching admin post:", error);
+      res.status(500).json({ message: "Failed to fetch post" });
+    }
+  });
+
+  app.post("/api/admin/posts", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminPostSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const post = await storage.createAdminPost(parsed.data);
+      res.status(201).json(post);
+    } catch (error) {
+      console.error("Error creating admin post:", error);
+      res.status(500).json({ message: "Failed to create post" });
+    }
+  });
+
+  app.patch("/api/admin/posts/:id", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminPostSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const post = await storage.updateAdminPost(parseInt(req.params.id), parsed.data);
+      if (!post) return res.status(404).json({ message: "Post not found" });
+      res.json(post);
+    } catch (error) {
+      console.error("Error updating admin post:", error);
+      res.status(500).json({ message: "Failed to update post" });
+    }
+  });
+
+  app.delete("/api/admin/posts/:id", isAdmin, async (req: any, res) => {
+    try {
+      await storage.deleteAdminPost(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting admin post:", error);
+      res.status(500).json({ message: "Failed to delete post" });
+    }
+  });
+
+  // Admin Financial Records
+  app.get("/api/admin/financial", isAdmin, async (req: any, res) => {
+    try {
+      const records = await storage.getAdminFinancialRecords();
+      res.json(records);
+    } catch (error) {
+      console.error("Error fetching admin financial records:", error);
+      res.status(500).json({ message: "Failed to fetch financial records" });
+    }
+  });
+
+  app.get("/api/admin/financial/:id", isAdmin, async (req: any, res) => {
+    try {
+      const record = await storage.getAdminFinancialRecord(parseInt(req.params.id));
+      if (!record) return res.status(404).json({ message: "Record not found" });
+      res.json(record);
+    } catch (error) {
+      console.error("Error fetching admin financial record:", error);
+      res.status(500).json({ message: "Failed to fetch financial record" });
+    }
+  });
+
+  app.post("/api/admin/financial", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminFinancialRecordSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const record = await storage.createAdminFinancialRecord(parsed.data);
+      res.status(201).json(record);
+    } catch (error) {
+      console.error("Error creating admin financial record:", error);
+      res.status(500).json({ message: "Failed to create financial record" });
+    }
+  });
+
+  app.patch("/api/admin/financial/:id", isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertAdminFinancialRecordSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const record = await storage.updateAdminFinancialRecord(parseInt(req.params.id), parsed.data);
+      if (!record) return res.status(404).json({ message: "Record not found" });
+      res.json(record);
+    } catch (error) {
+      console.error("Error updating admin financial record:", error);
+      res.status(500).json({ message: "Failed to update financial record" });
+    }
+  });
+
+  app.delete("/api/admin/financial/:id", isAdmin, async (req: any, res) => {
+    try {
+      await storage.deleteAdminFinancialRecord(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting admin financial record:", error);
+      res.status(500).json({ message: "Failed to delete financial record" });
+    }
+  });
+
+  // Admin Users (list all users for subscription management)
+  app.get("/api/admin/users", isAdmin, async (req: any, res) => {
+    try {
+      const allUsers = await storage.getClients();
+      res.json(allUsers);
+    } catch (error) {
+      console.error("Error fetching users for admin:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
     }
   });
 
