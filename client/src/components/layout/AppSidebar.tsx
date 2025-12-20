@@ -229,7 +229,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Admin Empresa</SidebarGroupLabel>
+          <SidebarGroupLabel>Admin Cliente</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {adminMenuItems.map((item) => {
