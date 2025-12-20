@@ -2,6 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Download, FileImage, FileText, Palette, Type } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
+import { AdminLayout } from "@/components/AdminLayout";
+
+interface BrandKitProps {
+  isAdmin?: boolean;
+}
 
 const colorPalette = [
   { name: "MCG Black", hex: "#0A0A0A", hsl: "0 0% 4%", usage: "Fundo escuro, textos principais" },
@@ -17,7 +22,7 @@ const typography = [
   { name: "JetBrains Mono", usage: "Codigo e dados tecnicos", weights: "400, 500" },
 ];
 
-export default function BrandKit() {
+export default function BrandKit({ isAdmin = false }: BrandKitProps) {
   const handleDownloadLogo = () => {
     const link = document.createElement("a");
     link.href = logoMcg;
@@ -31,7 +36,7 @@ export default function BrandKit() {
     window.open("/api/brand-kit/manual", "_blank");
   };
 
-  return (
+  const content = (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Kit da Marca MCG</h1>
@@ -157,4 +162,10 @@ export default function BrandKit() {
       </div>
     </div>
   );
+
+  if (isAdmin) {
+    return <AdminLayout>{content}</AdminLayout>;
+  }
+
+  return content;
 }

@@ -84,6 +84,9 @@ function Router() {
       <Route path="/admin/conteudo">
         {() => isAuthenticated && isAdmin ? <AdminConteudo /> : <AdminLogin />}
       </Route>
+      <Route path="/admin/kit-marca">
+        {() => isAuthenticated && isAdmin ? <BrandKit isAdmin /> : <AdminLogin />}
+      </Route>
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
@@ -104,7 +107,6 @@ function Router() {
           <Route path="/marketing" component={Marketing} />
           <Route path="/configuracoes" component={Settings} />
           <Route path="/assinatura" component={Subscription} />
-          <Route path="/kit-marca" component={BrandKit} />
           <Route path="/admin-cliente" component={AdminCliente} />
           <Route path="/suporte" component={Support} />
         </>

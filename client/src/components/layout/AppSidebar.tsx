@@ -124,11 +124,6 @@ const managementMenuItems = [
     icon: FileText,
   },
   {
-    title: "Kit da Marca",
-    url: "/kit-marca",
-    icon: Palette,
-  },
-  {
     title: "Meu Plano",
     url: "/assinatura",
     icon: CreditCard,

@@ -27,6 +27,8 @@ import {
   FileText,
   ArrowLeft,
   LogOut,
+  Megaphone,
+  Palette,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 
@@ -60,6 +62,14 @@ const adminMenuItems = [
     title: "Conteudo",
     url: "/admin/conteudo",
     icon: FileText,
+  },
+];
+
+const marketingMenuItems = [
+  {
+    title: "Kit da Marca",
+    url: "/admin/kit-marca",
+    icon: Palette,
   },
 ];
 
@@ -104,6 +114,27 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                       <SidebarMenuButton
                         asChild
                         isActive={location === item.url || (item.url !== "/admin" && location.startsWith(item.url))}
+                      >
+                        <Link href={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>Marketing</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {marketingMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={location === item.url || location.startsWith(item.url)}
                       >
                         <Link href={item.url}>
                           <item.icon className="h-4 w-4" />
