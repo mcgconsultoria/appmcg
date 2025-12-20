@@ -250,8 +250,8 @@ export default function RFI() {
         const data = await response.json();
         setFormData(prev => ({
           ...prev,
-          razaoSocial: data.razao_social || prev.razaoSocial,
-          nomeFantasia: data.nome_fantasia || prev.nomeFantasia,
+          razaoSocial: data.razaoSocial || prev.razaoSocial,
+          nomeFantasia: data.nomeFantasia || prev.nomeFantasia,
         }));
         setCnpjFound(true);
         toast({ title: "Dados encontrados na Receita Federal" });
