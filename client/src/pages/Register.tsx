@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Loader2, Plus } from "lucide-react";
+import { Eye, EyeOff, Loader2, Plus, Search, CheckCircle2 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -23,8 +23,12 @@ const registerSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(8, "Senha deve ter no mínimo 8 caracteres"),
   confirmPassword: z.string(),
-  razaoSocial: z.string().optional(),
   cnpj: z.string().optional(),
+  inscricaoEstadual: z.string().optional(),
+  inscricaoEstadualIsento: z.boolean().optional().default(false),
+  inscricaoMunicipal: z.string().optional(),
+  razaoSocial: z.string().optional(),
+  nomeFantasia: z.string().optional(),
   firstName: z.string().min(1, "Nome é obrigatório"),
   lastName: z.string().optional(),
   tipoEmpresa: z.string().optional(),
@@ -104,6 +108,8 @@ export default function Register() {
   const [newSegmentName, setNewSegmentName] = useState("");
   const [typeDialogOpen, setTypeDialogOpen] = useState(false);
   const [segmentDialogOpen, setSegmentDialogOpen] = useState(false);
+  const [cnpjLoading, setCnpjLoading] = useState(false);
+  const [cnpjFound, setCnpjFound] = useState(false);
 
   const { data: businessTypesFromDb = [] } = useQuery<BusinessType[]>({
     queryKey: ["/api/business-types"],
@@ -129,8 +135,12 @@ export default function Register() {
       email: "",
       password: "",
       confirmPassword: "",
-      razaoSocial: "",
       cnpj: "",
+      inscricaoEstadual: "",
+      inscricaoEstadualIsento: false,
+      inscricaoMunicipal: "",
+      razaoSocial: "",
+      nomeFantasia: "",
       firstName: "",
       lastName: "",
       tipoEmpresa: "",
@@ -142,6 +152,33 @@ export default function Register() {
       acceptTerms: false,
     },
   });
+
+  const watchIEIsento = form.watch("inscricaoEstadualIsento");
+
+  const handleCnpjLookup = async (cnpj: string) => {
+    const cleanCnpj = cnpj.replace(/[^\d]/g, "");
+    if (cleanCnpj.length !== 14) return;
+
+    setCnpjLoading(true);
+    setCnpjFound(false);
+    try {
+      const response = await fetch(`/api/cnpj/${cleanCnpj}`);
+      if (response.ok) {
+        const data = await response.json();
+        form.setValue("razaoSocial", data.razaoSocial || "");
+        form.setValue("nomeFantasia", data.nomeFantasia || "");
+        setCnpjFound(true);
+        toast({
+          title: "CNPJ encontrado",
+          description: `Dados de ${data.razaoSocial} carregados automaticamente`,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao buscar CNPJ:", error);
+    } finally {
+      setCnpjLoading(false);
+    }
+  };
 
   const watchDepartamento = form.watch("departamento");
   const showVendedor = watchDepartamento === "direcao" || watchDepartamento === "comercial";
@@ -231,39 +268,133 @@ export default function Register() {
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="razaoSocial"
+                  name="cnpj"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Razão Social</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Nome da empresa"
-                          data-testid="input-razao-social"
-                          {...field}
-                        />
-                      </FormControl>
+                      <FormLabel>CNPJ/CPF</FormLabel>
+                      <div className="flex gap-2">
+                        <FormControl className="flex-1">
+                          <TaxIdField
+                            value={field.value || ""}
+                            onChange={(value) => {
+                              field.onChange(value);
+                              setCnpjFound(false);
+                            }}
+                            label=""
+                            data-testid="input-cnpj"
+                          />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => handleCnpjLookup(field.value || "")}
+                          disabled={cnpjLoading || !field.value || field.value.replace(/[^\d]/g, "").length !== 14}
+                          data-testid="button-cnpj-lookup"
+                        >
+                          {cnpjLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : cnpjFound ? (
+                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Search className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">Digite o CNPJ e clique na lupa para buscar dados automaticamente</p>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="cnpj"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <TaxIdField
-                          value={field.value || ""}
-                          onChange={field.onChange}
-                          label="CPF/CNPJ"
-                          data-testid="input-cnpj"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="inscricaoEstadual"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Inscricao Estadual (I.E.)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={watchIEIsento ? "ISENTO" : "Inscricao Estadual"}
+                            disabled={watchIEIsento}
+                            data-testid="input-ie"
+                            {...field}
+                            value={watchIEIsento ? "" : field.value}
+                          />
+                        </FormControl>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Checkbox
+                            id="ie-isento"
+                            checked={form.watch("inscricaoEstadualIsento")}
+                            onCheckedChange={(checked) => {
+                              form.setValue("inscricaoEstadualIsento", !!checked);
+                              if (checked) form.setValue("inscricaoEstadual", "");
+                            }}
+                            data-testid="checkbox-ie-isento"
+                          />
+                          <label htmlFor="ie-isento" className="text-xs text-muted-foreground cursor-pointer">
+                            Isento
+                          </label>
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="inscricaoMunicipal"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Inscricao Municipal (I.M.)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Inscricao Municipal"
+                            data-testid="input-im"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="razaoSocial"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Razao Social</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Nome da empresa"
+                            data-testid="input-razao-social"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="nomeFantasia"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nome Fantasia</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Nome fantasia"
+                            data-testid="input-nome-fantasia"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <FormField

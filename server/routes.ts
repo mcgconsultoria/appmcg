@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./replitAuth";
 import { registerUser, loginUser, validateSession, logoutUser } from "./customAuth";
+import { consultarCNPJ } from "./cnpjService";
 import {
   insertClientSchema,
   insertChecklistSchema,
@@ -178,6 +179,23 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // CNPJ lookup (public - needed for registration)
+  app.get('/api/cnpj/:cnpj', async (req, res) => {
+    try {
+      const { cnpj } = req.params;
+      const data = await consultarCNPJ(cnpj);
+      
+      if (!data) {
+        return res.status(404).json({ message: "CNPJ nao encontrado" });
+      }
+      
+      res.json(data);
+    } catch (error: any) {
+      console.error("Erro ao consultar CNPJ:", error);
+      res.status(500).json({ message: error.message || "Erro ao consultar CNPJ" });
     }
   });
 
