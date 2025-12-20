@@ -7,7 +7,6 @@ import {
   ArrowRight,
   BarChart3,
   Users,
-  Truck,
   Target,
   Zap,
   Shield,
@@ -20,6 +19,7 @@ import {
 } from "lucide-react";
 import { SiFacebook, SiInstagram, SiLinkedin, SiWhatsapp, SiGoogle } from "react-icons/si";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import logoMcg from "@assets/logo_mcg_principal.png";
 
 const features = [
   {
@@ -91,9 +91,11 @@ export default function Landing() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center">
-              <Truck className="h-6 w-6 text-primary-foreground" />
-            </div>
+            <img 
+              src={logoMcg} 
+              alt="MCG Consultoria" 
+              className="h-10 w-10 object-contain"
+            />
             <div className="flex flex-col">
               <span className="font-bold text-lg leading-tight">MCG</span>
               <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
@@ -293,9 +295,11 @@ export default function Landing() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center">
-                  <Truck className="h-6 w-6 text-primary-foreground" />
-                </div>
+                <img 
+                  src={logoMcg} 
+                  alt="MCG Consultoria" 
+                  className="h-10 w-10 object-contain"
+                />
                 <div className="flex flex-col">
                   <span className="font-bold text-lg leading-tight">MCG</span>
                   <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
