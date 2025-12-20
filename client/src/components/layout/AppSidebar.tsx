@@ -32,6 +32,7 @@ import {
   Shield,
   UserCog,
   HeadphonesIcon,
+  BarChart3,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -84,6 +85,11 @@ const mainMenuItems = [
     title: "Projetos",
     url: "/projetos",
     icon: FolderKanban,
+  },
+  {
+    title: "Relatorios",
+    url: "/relatorios",
+    icon: BarChart3,
   },
 ];
 

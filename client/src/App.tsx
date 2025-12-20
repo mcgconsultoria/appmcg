@@ -31,6 +31,7 @@ import RFI from "@/pages/RFI";
 import BrandKit from "@/pages/BrandKit";
 import AdminCliente from "@/pages/AdminCliente";
 import Support from "@/pages/Support";
+import Reports from "@/pages/Reports";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminComercial from "@/pages/admin/AdminComercial";
 import AdminProjetos from "@/pages/admin/AdminProjetos";
@@ -96,6 +97,7 @@ function Router() {
           <Route path="/rfi" component={RFI} />
           <Route path="/tarefas" component={TasksPage} />
           <Route path="/projetos" component={ProjectsPage} />
+          <Route path="/relatorios" component={Reports} />
           <Route path="/financeiro" component={Financial} />
           <Route path="/marketing" component={Marketing} />
           <Route path="/configuracoes" component={Settings} />
