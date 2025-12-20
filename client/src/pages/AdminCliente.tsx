@@ -1067,30 +1067,11 @@ export default function AdminCliente() {
             Admin Cliente
           </h1>
           <p className="text-muted-foreground">
-            Gerencie sua equipe e acesse o suporte
+            Gerencie os membros da sua equipe
           </p>
         </div>
 
-        <Tabs defaultValue="equipe" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="equipe" data-testid="tab-equipe">
-              <Users className="h-4 w-4 mr-2" />
-              Equipe
-            </TabsTrigger>
-            <TabsTrigger value="suporte" data-testid="tab-suporte">
-              <HeadphonesIcon className="h-4 w-4 mr-2" />
-              Suporte
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="equipe">
-            <TeamTab />
-          </TabsContent>
-
-          <TabsContent value="suporte">
-            <SupportTab />
-          </TabsContent>
-        </Tabs>
+        <TeamTab />
       </div>
     </AppLayout>
   );

@@ -31,6 +31,7 @@ import {
   CreditCard,
   Shield,
   UserCog,
+  HeadphonesIcon,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -127,6 +128,11 @@ const adminMenuItems = [
     title: "Admin Cliente",
     url: "/admin-cliente",
     icon: UserCog,
+  },
+  {
+    title: "Suporte",
+    url: "/suporte",
+    icon: HeadphonesIcon,
   },
 ];
 

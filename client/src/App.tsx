@@ -30,6 +30,7 @@ import ProjectsPage from "@/pages/ProjectsPage";
 import RFI from "@/pages/RFI";
 import BrandKit from "@/pages/BrandKit";
 import AdminCliente from "@/pages/AdminCliente";
+import Support from "@/pages/Support";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminComercial from "@/pages/admin/AdminComercial";
 import AdminProjetos from "@/pages/admin/AdminProjetos";
@@ -101,6 +102,7 @@ function Router() {
           <Route path="/assinatura" component={Subscription} />
           <Route path="/kit-marca" component={BrandKit} />
           <Route path="/admin-cliente" component={AdminCliente} />
+          <Route path="/suporte" component={Support} />
         </>
       )}
       <Route component={NotFound} />
