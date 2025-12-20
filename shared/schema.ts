@@ -282,17 +282,19 @@ export const commercialProposals = pgTable("commercial_proposals", {
   companyId: integer("company_id").notNull(),
   clientId: integer("client_id"),
   proposalNumber: varchar("proposal_number", { length: 20 }).notNull().unique(),
+  proposalType: varchar("proposal_type", { length: 20 }).default("freight"), // freight, storage, consulting
   clientName: varchar("client_name", { length: 255 }),
   clientEmail: varchar("client_email"),
   clientPhone: varchar("client_phone", { length: 20 }),
   clientCnpj: varchar("client_cnpj", { length: 18 }),
-  status: varchar("status").default("draft"), // draft, sent, approved, rejected, expired
+  status: varchar("status").default("awaiting_approval"), // awaiting_approval, sent, approved, rejected, expired
   validUntil: timestamp("valid_until"),
   approvedAt: timestamp("approved_at"),
   contractType: varchar("contract_type"), // spot, 6_months, 1_year
   nextReviewDate: timestamp("next_review_date"),
   notes: text("notes"),
   totalValue: decimal("total_value", { precision: 15, scale: 2 }),
+  proposalData: jsonb("proposal_data"), // Store proposal-specific data (storage details, consulting phases, etc.)
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -669,6 +671,9 @@ export const insertCommercialProposalSchema = createInsertSchema(commercialPropo
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  proposalType: z.string().optional().default("freight"),
+  proposalData: z.any().optional().nullable(),
 });
 
 export const insertProposalRouteSchema = createInsertSchema(proposalRoutes).omit({

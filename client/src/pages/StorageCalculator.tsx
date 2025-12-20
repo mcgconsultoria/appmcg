@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -45,6 +46,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { ClientCombobox } from "@/components/ClientCombobox";
+import type { Client } from "@shared/schema";
 
 interface StorageFormData {
   area: string;
@@ -328,10 +331,26 @@ const periods = [
   { value: "365", label: "365 dias (1 ano)" },
 ];
 
+interface ProposalData {
+  clientName: string;
+  clientEmail: string;
+  clientPhone: string;
+  validityDays: number;
+  notes: string;
+}
+
 export default function StorageCalculator() {
   const [formData, setFormData] = useState<StorageFormData>(initialFormData);
   const [showProposalDialog, setShowProposalDialog] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [proposalData, setProposalData] = useState<ProposalData>({
+    clientName: "",
+    clientEmail: "",
+    clientPhone: "",
+    validityDays: 15,
+    notes: "",
+  });
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
@@ -340,6 +359,24 @@ export default function StorageCalculator() {
     queryKey: ["/api/calculations/quota"],
     enabled: isAuthenticated,
   });
+
+  const { data: clients } = useQuery<Client[]>({
+    queryKey: ["/api/clients"],
+    enabled: isAuthenticated,
+  });
+
+  const handleClientSelect = (clientId: string) => {
+    setSelectedClientId(clientId);
+    const client = clients?.find(c => c.id.toString() === clientId);
+    if (client) {
+      setProposalData(prev => ({
+        ...prev,
+        clientName: client.name,
+        clientEmail: client.email || "",
+        clientPhone: client.phone || "",
+      }));
+    }
+  };
 
   const useQuotaMutation = useMutation({
     mutationFn: async () => {
@@ -416,24 +453,57 @@ export default function StorageCalculator() {
     mutationFn: async () => {
       const payload = {
         companyId: 1,
-        area: formData.area || undefined,
-        period: parseInt(formData.period) || undefined,
-        productType: formData.storageType || undefined,
-        storageRate: formData.storageRate || undefined,
-        movementRate: formData.movementRate || undefined,
-        handlingValue: calculations.totalHandling.toString(),
+        clientId: selectedClientId ? parseInt(selectedClientId) : undefined,
+        proposalType: "storage",
+        clientName: proposalData.clientName,
+        clientEmail: proposalData.clientEmail,
+        clientPhone: proposalData.clientPhone,
+        validityDays: proposalData.validityDays,
+        notes: proposalData.notes,
         totalValue: calculations.totalValue.toString(),
+        proposalData: {
+          storageCategory: formData.storageCategory,
+          storageType: formData.storageType,
+          storageTypeLabel: selectedType?.label,
+          area: formData.area,
+          period: formData.period,
+          storageRate: formData.storageRate,
+          movementRate: formData.movementRate,
+          quantity: formData.quantity,
+          palletPositions: formData.palletPositions,
+          insuranceRate: formData.insuranceRate,
+          productValue: formData.productValue,
+          calculations: {
+            storageValue: calculations.storageValue,
+            palletValue: calculations.palletValue,
+            movementValue: calculations.movementValue,
+            totalHandling: calculations.totalHandling,
+            insuranceValue: calculations.insuranceValue,
+            subtotal: calculations.subtotal,
+            adminFee: calculations.adminFee,
+            totalValue: calculations.totalValue,
+            monthlyEquivalent: calculations.monthlyEquivalent,
+          },
+        },
       };
-      return apiRequest("POST", "/api/storage-calculations", payload);
+      return apiRequest("POST", "/api/commercial-proposals", payload);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/storage-calculations"] });
-      toast({ title: "Calculo salvo com sucesso!" });
+      queryClient.invalidateQueries({ queryKey: ["/api/commercial-proposals"] });
+      toast({ title: "Proposta de armazenagem criada com sucesso!" });
       setShowProposalDialog(false);
+      setSelectedClientId("");
+      setProposalData({
+        clientName: "",
+        clientEmail: "",
+        clientPhone: "",
+        validityDays: 15,
+        notes: "",
+      });
       useQuotaMutation.mutate();
     },
     onError: () => {
-      toast({ title: "Erro ao salvar calculo", variant: "destructive" });
+      toast({ title: "Erro ao criar proposta", variant: "destructive" });
     },
   });
 
@@ -927,11 +997,86 @@ export default function StorageCalculator() {
       </div>
 
       <Dialog open={showProposalDialog} onOpenChange={setShowProposalDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Salvar Calculo de Armazenagem</DialogTitle>
+            <DialogTitle>Criar Proposta de Armazenagem</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Cliente *</Label>
+              <ClientCombobox
+                clients={clients || []}
+                value={selectedClientId}
+                onValueChange={handleClientSelect}
+                placeholder="Buscar ou cadastrar cliente..."
+                allowNone={false}
+                showAddButton={true}
+                data-testid="select-client"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="clientName">Nome do Cliente</Label>
+                <Input
+                  id="clientName"
+                  value={proposalData.clientName}
+                  onChange={(e) => setProposalData(prev => ({ ...prev, clientName: e.target.value }))}
+                  placeholder="Razao Social"
+                  data-testid="input-client-name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="clientEmail">Email</Label>
+                <Input
+                  id="clientEmail"
+                  type="email"
+                  value={proposalData.clientEmail}
+                  onChange={(e) => setProposalData(prev => ({ ...prev, clientEmail: e.target.value }))}
+                  placeholder="email@empresa.com"
+                  data-testid="input-client-email"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="clientPhone">Telefone</Label>
+                <Input
+                  id="clientPhone"
+                  value={proposalData.clientPhone}
+                  onChange={(e) => setProposalData(prev => ({ ...prev, clientPhone: e.target.value }))}
+                  placeholder="(00) 00000-0000"
+                  data-testid="input-client-phone"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="validityDays">Validade (dias)</Label>
+                <Input
+                  id="validityDays"
+                  type="number"
+                  min="1"
+                  value={proposalData.validityDays}
+                  onChange={(e) => setProposalData(prev => ({ ...prev, validityDays: parseInt(e.target.value) || 15 }))}
+                  data-testid="input-validity-days"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="notes">Observacoes</Label>
+              <Textarea
+                id="notes"
+                value={proposalData.notes}
+                onChange={(e) => setProposalData(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Observacoes adicionais..."
+                rows={2}
+                data-testid="input-notes"
+              />
+            </div>
+
+            <Separator />
+
             <div className="bg-muted p-3 rounded-md space-y-2">
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Tipo:</span>
@@ -957,11 +1102,11 @@ export default function StorageCalculator() {
             </Button>
             <Button
               onClick={() => saveMutation.mutate()}
-              disabled={saveMutation.isPending}
+              disabled={saveMutation.isPending || !proposalData.clientName}
               data-testid="button-confirm-save"
             >
               <Save className="h-4 w-4 mr-2" />
-              {saveMutation.isPending ? "Salvando..." : "Confirmar"}
+              {saveMutation.isPending ? "Salvando..." : "Criar Proposta"}
             </Button>
           </DialogFooter>
         </DialogContent>

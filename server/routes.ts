@@ -752,15 +752,17 @@ export async function registerRoutes(
         companyId: req.user.companyId || 1,
         clientId: proposalData.clientId || null,
         proposalNumber,
+        proposalType: proposalData.proposalType || "freight",
         clientName: proposalData.clientName,
         clientEmail: proposalData.clientEmail,
         clientPhone: proposalData.clientPhone,
         clientCnpj: proposalData.clientCnpj,
-        status: "draft",
+        status: "awaiting_approval",
         validUntil,
         contractType: proposalData.contractType,
         notes: proposalData.notes,
         totalValue: proposalData.totalValue,
+        proposalData: proposalData.proposalData || null,
       });
 
       if (routes && routes.length > 0) {
@@ -884,8 +886,6 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Access denied" });
       }
       
-      const routes = await storage.getProposalRoutes(id);
-      
       const doc = new PDFDocument({ margin: 50 });
       
       res.setHeader("Content-Type", "application/pdf");
@@ -896,7 +896,15 @@ export async function registerRoutes(
       
       doc.pipe(res);
       
-      doc.fontSize(20).font("Helvetica-Bold").text("PROPOSTA COMERCIAL", { align: "center" });
+      // Header based on proposal type
+      const proposalType = (proposal as any).proposalType || "freight";
+      const titleMap: Record<string, string> = {
+        freight: "PROPOSTA COMERCIAL - FRETE",
+        storage: "PROPOSTA COMERCIAL - ARMAZENAGEM",
+        consulting: "PROPOSTA DE CONSULTORIA",
+      };
+      
+      doc.fontSize(20).font("Helvetica-Bold").text(titleMap[proposalType] || "PROPOSTA COMERCIAL", { align: "center" });
       doc.moveDown();
       doc.fontSize(14).font("Helvetica").text(`No: ${proposal.proposalNumber}`, { align: "center" });
       doc.moveDown(2);
@@ -913,37 +921,84 @@ export async function registerRoutes(
       doc.fontSize(10).font("Helvetica");
       doc.text(`Data de Emissao: ${new Date(proposal.createdAt!).toLocaleDateString("pt-BR")}`);
       doc.text(`Valido ate: ${proposal.validUntil ? new Date(proposal.validUntil).toLocaleDateString("pt-BR") : "-"}`);
-      const contractLabel = proposal.contractType === "1_year" ? "Contrato 1 ano" : proposal.contractType === "6_months" ? "Contrato 6 meses" : "Spot (Avulso)";
-      doc.text(`Tipo de Contrato: ${contractLabel}`);
-      doc.moveDown();
       
-      doc.fontSize(12).font("Helvetica-Bold").text("ROTAS E VALORES");
-      doc.moveDown(0.5);
-      
-      for (let i = 0; i < routes.length; i++) {
-        const route = routes[i];
-        doc.fontSize(11).font("Helvetica-Bold").text(`Rota ${i + 1}: ${route.operationName || `${route.originCity}/${route.originState} - ${route.destinationCity}/${route.destinationState}`}`);
+      // Type-specific content
+      if (proposalType === "freight") {
+        const contractLabel = proposal.contractType === "1_year" ? "Contrato 1 ano" : proposal.contractType === "6_months" ? "Contrato 6 meses" : "Spot (Avulso)";
+        doc.text(`Tipo de Contrato: ${contractLabel}`);
+        doc.moveDown();
+        
+        const routes = await storage.getProposalRoutes(id);
+        doc.fontSize(12).font("Helvetica-Bold").text("ROTAS E VALORES");
+        doc.moveDown(0.5);
+        
+        for (let i = 0; i < routes.length; i++) {
+          const route = routes[i];
+          doc.fontSize(11).font("Helvetica-Bold").text(`Rota ${i + 1}: ${route.operationName || `${route.originCity}/${route.originState} - ${route.destinationCity}/${route.destinationState}`}`);
+          doc.fontSize(10).font("Helvetica");
+          doc.text(`  Origem: ${route.originCity}/${route.originState}`);
+          doc.text(`  Destino: ${route.destinationCity}/${route.destinationState}`);
+          if (route.productType) doc.text(`  Tipo de Produto: ${route.productType}`);
+          if (route.packagingType) doc.text(`  Embalagem: ${route.packagingType}`);
+          if (route.weight) doc.text(`  Peso: ${route.weight} kg`);
+          if (route.distanceKm) doc.text(`  Distancia: ${route.distanceKm} km`);
+          doc.text(`  Frete Base: R$ ${parseFloat(String(route.freightValue || 0)).toFixed(2)}`);
+          if (route.tollValue) doc.text(`  Pedagio: R$ ${parseFloat(String(route.tollValue)).toFixed(2)}`);
+          if (route.grisValue) doc.text(`  GRIS: R$ ${parseFloat(String(route.grisValue)).toFixed(2)}`);
+          if (route.advValue) doc.text(`  ADV: R$ ${parseFloat(String(route.advValue)).toFixed(2)}`);
+          const taxType = route.icmsRate ? "ICMS" : "ISS";
+          const taxRate = route.icmsRate || route.issRate || 0;
+          const taxValue = route.icmsValue || route.issValue || 0;
+          doc.text(`  ${taxType} (${taxRate}%): R$ ${parseFloat(String(taxValue)).toFixed(2)}`);
+          doc.fontSize(11).font("Helvetica-Bold").text(`  TOTAL ROTA: R$ ${parseFloat(String(route.totalValue || 0)).toFixed(2)}`);
+          doc.moveDown();
+        }
+      } else if (proposalType === "storage") {
+        doc.moveDown();
+        const data = (proposal as any).proposalData || {};
+        
+        doc.fontSize(12).font("Helvetica-Bold").text("DETALHES DA ARMAZENAGEM");
         doc.fontSize(10).font("Helvetica");
-        doc.text(`  Origem: ${route.originCity}/${route.originState}`);
-        doc.text(`  Destino: ${route.destinationCity}/${route.destinationState}`);
-        if (route.productType) doc.text(`  Tipo de Produto: ${route.productType}`);
-        if (route.packagingType) doc.text(`  Embalagem: ${route.packagingType}`);
-        if (route.weight) doc.text(`  Peso: ${route.weight} kg`);
-        if (route.distanceKm) doc.text(`  Distancia: ${route.distanceKm} km`);
-        doc.text(`  Frete Base: R$ ${parseFloat(String(route.freightValue || 0)).toFixed(2)}`);
-        if (route.tollValue) doc.text(`  Pedagio: R$ ${parseFloat(String(route.tollValue)).toFixed(2)}`);
-        if (route.grisValue) doc.text(`  GRIS: R$ ${parseFloat(String(route.grisValue)).toFixed(2)}`);
-        if (route.advValue) doc.text(`  ADV: R$ ${parseFloat(String(route.advValue)).toFixed(2)}`);
-        const taxType = route.icmsRate ? "ICMS" : "ISS";
-        const taxRate = route.icmsRate || route.issRate || 0;
-        const taxValue = route.icmsValue || route.issValue || 0;
-        doc.text(`  ${taxType} (${taxRate}%): R$ ${parseFloat(String(taxValue)).toFixed(2)}`);
-        doc.fontSize(11).font("Helvetica-Bold").text(`  TOTAL ROTA: R$ ${parseFloat(String(route.totalValue || 0)).toFixed(2)}`);
+        doc.text(`Tipo de Armazenagem: ${data.storageTypeLabel || "-"}`);
+        doc.text(`Area: ${data.area || 0} m²`);
+        doc.text(`Periodo: ${data.period || 0} dias`);
+        doc.text(`Taxa de Armazenagem: R$ ${data.storageRate || 0}/m² por mes`);
+        doc.text(`Taxa de Movimentacao: R$ ${data.movementRate || 0}/m²`);
+        doc.moveDown();
+        
+        if (data.calculations) {
+          doc.fontSize(12).font("Helvetica-Bold").text("COMPOSICAO DE VALORES");
+          doc.fontSize(10).font("Helvetica");
+          doc.text(`Armazenagem: R$ ${parseFloat(String(data.calculations.storageValue || 0)).toFixed(2)}`);
+          doc.text(`Movimentacao: R$ ${parseFloat(String(data.calculations.movementValue || 0)).toFixed(2)}`);
+          doc.text(`Manuseio: R$ ${parseFloat(String(data.calculations.totalHandling || 0)).toFixed(2)}`);
+          doc.text(`Seguro: R$ ${parseFloat(String(data.calculations.insuranceValue || 0)).toFixed(2)}`);
+          doc.text(`Subtotal: R$ ${parseFloat(String(data.calculations.subtotal || 0)).toFixed(2)}`);
+          doc.text(`Taxa Admin (10%): R$ ${parseFloat(String(data.calculations.adminFee || 0)).toFixed(2)}`);
+          doc.moveDown();
+        }
+      } else if (proposalType === "consulting") {
+        doc.moveDown();
+        const data = (proposal as any).proposalData || {};
+        
+        doc.fontSize(12).font("Helvetica-Bold").text("FASES DE CONSULTORIA");
+        doc.fontSize(10).font("Helvetica");
+        
+        if (data.phases && Array.isArray(data.phases)) {
+          for (const phase of data.phases) {
+            doc.text(`- ${phase.name}: R$ ${parseFloat(String(phase.price || 0)).toLocaleString("pt-BR")}${phase.commission ? ` + ${phase.commission}% sobre negocios fechados` : ""}`);
+          }
+        }
+        
+        if (data.contactName) {
+          doc.moveDown();
+          doc.text(`Contato: ${data.contactName}`);
+        }
         doc.moveDown();
       }
       
       doc.moveDown();
-      doc.fontSize(14).font("Helvetica-Bold").text(`VALOR TOTAL DA PROPOSTA: R$ ${parseFloat(String(proposal.totalValue || 0)).toFixed(2)}`, { align: "right" });
+      doc.fontSize(14).font("Helvetica-Bold").text(`VALOR TOTAL DA PROPOSTA: R$ ${parseFloat(String(proposal.totalValue || 0)).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`, { align: "right" });
       doc.moveDown(2);
       
       if (proposal.notes) {

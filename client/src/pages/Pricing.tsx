@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Check, Loader2, Briefcase, ArrowRight, Lock, Percent } from "lucide-react";
+import { Check, Loader2, Briefcase, ArrowRight, Lock, Percent, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ClientCombobox } from "@/components/ClientCombobox";
 import type { Client } from "@shared/schema";
@@ -243,6 +243,60 @@ export default function Pricing() {
     return { total, hasCommission, commissionPercent };
   };
 
+  const consultingProposalMutation = useMutation({
+    mutationFn: async () => {
+      const { total, hasCommission, commissionPercent } = calculateTotal();
+      const selectedClient = clients?.find(c => c.id.toString() === selectedClientId);
+      
+      const payload = {
+        companyId: 1,
+        clientId: selectedClientId ? parseInt(selectedClientId) : undefined,
+        proposalType: "consulting",
+        clientName: selectedClient?.name || "",
+        clientEmail: consultingForm.email,
+        clientPhone: consultingForm.phone,
+        validityDays: 30,
+        notes: consultingForm.message,
+        totalValue: total.toString(),
+        proposalData: {
+          phases: selectedPhases.map(phaseId => {
+            const phase = consultingPhases.find(p => p.id === phaseId);
+            return {
+              id: phaseId,
+              name: phase?.name,
+              price: phase?.price,
+              commission: phase?.commission,
+            };
+          }),
+          contactName: consultingForm.contactName,
+          hasCommission,
+          commissionPercent,
+        },
+      };
+      return apiRequest("POST", "/api/commercial-proposals", payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/commercial-proposals"] });
+      const { total, hasCommission, commissionPercent } = calculateTotal();
+      toast({
+        title: "Proposta de consultoria criada com sucesso!",
+        description: `Total estimado: R$ ${total.toLocaleString('pt-BR')}${hasCommission ? ` + ${commissionPercent}% sobre negócios fechados` : ''}`,
+      });
+      setConsultingDialogOpen(false);
+      setSelectedPhases([]);
+      setSelectedClientId("");
+      setConsultingForm({
+        contactName: "",
+        email: "",
+        phone: "",
+        message: "",
+      });
+    },
+    onError: () => {
+      toast({ title: "Erro ao criar proposta", variant: "destructive" });
+    },
+  });
+
   const handleSubmitProposal = () => {
     if (selectedPhases.length === 0) {
       toast({
@@ -262,23 +316,7 @@ export default function Pricing() {
       return;
     }
 
-    const { total, hasCommission, commissionPercent } = calculateTotal();
-    const selectedClient = clients?.find(c => c.id.toString() === selectedClientId);
-    
-    toast({
-      title: "Proposta enviada com sucesso!",
-      description: `Entraremos em contato em breve. Total estimado: R$ ${total.toLocaleString('pt-BR')}${hasCommission ? ` + ${commissionPercent}% sobre negócios fechados` : ''}`,
-    });
-
-    setConsultingDialogOpen(false);
-    setSelectedPhases([]);
-    setSelectedClientId("");
-    setConsultingForm({
-      contactName: "",
-      email: "",
-      phone: "",
-      message: "",
-    });
+    consultingProposalMutation.mutate();
   };
 
   const plans = productsData?.data?.length
@@ -720,9 +758,11 @@ export default function Pricing() {
               </Button>
               <Button 
                 onClick={handleSubmitProposal}
+                disabled={consultingProposalMutation.isPending}
                 data-testid="button-submit-proposal"
               >
-                Enviar Solicitação
+                <Save className="h-4 w-4 mr-2" />
+                {consultingProposalMutation.isPending ? "Criando..." : "Criar Proposta"}
               </Button>
             </DialogFooter>
           </DialogContent>
