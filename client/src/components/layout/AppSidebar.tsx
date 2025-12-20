@@ -34,6 +34,7 @@ import {
   HeadphonesIcon,
   BarChart3,
   UserRound,
+  Settings2,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -96,6 +97,11 @@ const mainMenuItems = [
     title: "Relatorios",
     url: "/relatorios",
     icon: BarChart3,
+  },
+  {
+    title: "Operacoes",
+    url: "/operacoes",
+    icon: Settings2,
   },
 ];
 

@@ -112,6 +112,7 @@ export const clients = pgTable("clients", {
   contactPhone: varchar("contact_phone", { length: 20 }),
   contactEmail: varchar("contact_email"),
   estimatedValue: decimal("estimated_value", { precision: 15, scale: 2 }),
+  metaValor: decimal("meta_valor", { precision: 15, scale: 2 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

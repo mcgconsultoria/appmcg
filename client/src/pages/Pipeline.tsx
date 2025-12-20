@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Plus, GripVertical, Building2, DollarSign, User, ChevronRight } from "lucide-react";
+import { Plus, GripVertical, Building2, DollarSign, User, ChevronRight, Target, TrendingUp, Clock } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -29,11 +29,11 @@ import type { Client } from "@shared/schema";
 import { Link } from "wouter";
 
 const pipelineStages = [
-  { id: "lead", label: "Leads", color: "bg-sky-600 dark:bg-sky-500", description: "Novos contatos" },
-  { id: "contact", label: "Contato", color: "bg-primary", description: "Em primeiro contato" },
-  { id: "proposal", label: "Proposta", color: "bg-violet-600 dark:bg-violet-500", description: "Proposta enviada" },
-  { id: "negotiation", label: "Negociação", color: "bg-amber-600 dark:bg-amber-500", description: "Em negociação" },
-  { id: "closed", label: "Fechado", color: "bg-emerald-600 dark:bg-emerald-500", description: "Cliente conquistado" },
+  { id: "lead", label: "Leads", color: "bg-sky-600 dark:bg-sky-500", description: "Novos contatos", isPending: false },
+  { id: "contact", label: "Contato", color: "bg-primary", description: "Em primeiro contato", isPending: false },
+  { id: "proposal", label: "Proposta", color: "bg-violet-600 dark:bg-violet-500", description: "Aguardando aprovacao", isPending: true },
+  { id: "negotiation", label: "Negociação", color: "bg-amber-600 dark:bg-amber-500", description: "Em negociacao", isPending: true },
+  { id: "closed", label: "Fechado", color: "bg-emerald-600 dark:bg-emerald-500", description: "Cliente conquistado", isPending: false },
 ];
 
 interface MoveDialogData {
@@ -84,19 +84,85 @@ export default function Pipeline() {
     return stageClients.reduce((sum, c) => sum + Number(c.estimatedValue || 0), 0);
   };
 
+  const getPendingApprovalValue = () => {
+    const pendingStages = pipelineStages.filter(s => s.isPending).map(s => s.id);
+    return clients
+      .filter(c => pendingStages.includes(c.pipelineStage || ""))
+      .reduce((sum, c) => sum + Number(c.estimatedValue || 0), 0);
+  };
+
+  const clientsWithMeta = clients.filter(c => c.metaValor && Number(c.metaValor) > 0);
+  const totalMeta = clientsWithMeta.reduce((sum, c) => sum + Number(c.metaValor || 0), 0);
+  const totalEstimado = clients.reduce((sum, c) => sum + Number(c.estimatedValue || 0), 0);
+  const faltaParaMeta = totalMeta > 0 ? totalMeta - totalEstimado : 0;
+  const pendingValue = getPendingApprovalValue();
+
   return (
     <AppLayout title="Pipeline de Vendas" subtitle="Acompanhe o funil de vendas">
       <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-4 mb-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-md bg-primary/10">
+                  <DollarSign className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Valor Total Pipeline</p>
+                  <p className="text-lg font-bold">{formatCurrency(totalEstimado)}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-md bg-amber-500/10">
+                  <Clock className="h-5 w-5 text-amber-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Aguardando Aprovacao</p>
+                  <p className="text-lg font-bold text-amber-500">{formatCurrency(pendingValue)}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-md bg-blue-500/10">
+                  <Target className="h-5 w-5 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Meta Total</p>
+                  <p className="text-lg font-bold text-blue-500">
+                    {totalMeta > 0 ? formatCurrency(totalMeta) : "Sem metas"}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-md ${totalMeta === 0 ? "bg-muted" : faltaParaMeta > 0 ? "bg-red-500/10" : "bg-green-500/10"}`}>
+                  <TrendingUp className={`h-5 w-5 ${totalMeta === 0 ? "text-muted-foreground" : faltaParaMeta > 0 ? "text-red-500" : "text-green-500"}`} />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Falta para Meta</p>
+                  <p className={`text-lg font-bold ${totalMeta === 0 ? "text-muted-foreground" : faltaParaMeta > 0 ? "text-red-500" : "text-green-500"}`}>
+                    {totalMeta === 0 ? "Defina metas" : faltaParaMeta > 0 ? formatCurrency(faltaParaMeta) : "Atingida!"}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="text-sm text-muted-foreground">
               <span className="font-medium text-foreground">{clients.length}</span> clientes no funil
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Valor total:{" "}
-              <span className="font-medium text-foreground">
-                {formatCurrency(clients.reduce((sum, c) => sum + Number(c.estimatedValue || 0), 0))}
-              </span>
             </div>
           </div>
           <Button asChild>
