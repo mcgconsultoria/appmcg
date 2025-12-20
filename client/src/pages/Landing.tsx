@@ -14,6 +14,7 @@ import {
   ClipboardCheck,
   TrendingUp,
   Mail,
+  Handshake,
 } from "lucide-react";
 import { SiFacebook, SiInstagram, SiLinkedin, SiWhatsapp, SiGoogle, SiYoutube } from "react-icons/si";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -69,6 +70,7 @@ const services = [
       "Plano de ação recomendado",
     ],
     icon: Target,
+    highlighted: false,
   },
   {
     title: "Estruturação de Vendas",
@@ -80,6 +82,19 @@ const services = [
       "Acompanhamento de resultados",
     ],
     icon: Zap,
+    highlighted: false,
+  },
+  {
+    title: "Consultoria Comercial",
+    description: "Acompanhamento especializado para transformar sua operação comercial em logística, com mentoria contínua e suporte estratégico.",
+    features: [
+      "Mentoria executiva personalizada",
+      "Análise de mercado e concorrência",
+      "Estratégias de expansão comercial",
+      "Acompanhamento de metas e KPIs",
+    ],
+    icon: Handshake,
+    highlighted: true,
   },
 ];
 
@@ -182,12 +197,20 @@ export default function Landing() {
                 excelência comercial
               </p>
             </div>
-            <div className="grid lg:grid-cols-2 gap-8">
+            <div className="grid lg:grid-cols-3 gap-8">
               {services.map((service) => (
-                <Card key={service.title} className="overflow-hidden">
+                <Card 
+                  key={service.title} 
+                  className={`overflow-hidden ${service.highlighted ? 'ring-2 ring-primary bg-primary/5' : ''}`}
+                >
+                  {service.highlighted && (
+                    <div className="bg-primary text-primary-foreground text-center py-2 text-sm font-medium">
+                      Destaque
+                    </div>
+                  )}
                   <CardContent className="p-8">
-                    <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center mb-6">
-                      <service.icon className="h-7 w-7 text-primary" />
+                    <div className={`w-14 h-14 rounded-lg flex items-center justify-center mb-6 ${service.highlighted ? 'bg-primary' : 'bg-primary/10'}`}>
+                      <service.icon className={`h-7 w-7 ${service.highlighted ? 'text-primary-foreground' : 'text-primary'}`} />
                     </div>
                     <h3 className="text-2xl font-semibold mb-3">{service.title}</h3>
                     <p className="text-muted-foreground mb-6">{service.description}</p>
