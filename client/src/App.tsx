@@ -35,9 +35,11 @@ import AdminProjetos from "@/pages/admin/AdminProjetos";
 import AdminFinanceiro from "@/pages/admin/AdminFinanceiro";
 import AdminParcerias from "@/pages/admin/AdminParcerias";
 import AdminConteudo from "@/pages/admin/AdminConteudo";
+import AdminLogin from "@/pages/admin/AdminLogin";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+  const isAdmin = user?.role === "admin" || user?.role === "admin_mcg";
 
   if (isLoading) {
     return (
@@ -59,6 +61,25 @@ function Router() {
       <Route path="/termos" component={Terms} />
       <Route path="/login" component={Login} />
       <Route path="/registro" component={Register} />
+      {/* Admin routes - show login if not authenticated or not admin */}
+      <Route path="/admin">
+        {() => isAuthenticated && isAdmin ? <AdminDashboard /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/comercial">
+        {() => isAuthenticated && isAdmin ? <AdminComercial /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/projetos">
+        {() => isAuthenticated && isAdmin ? <AdminProjetos /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/financeiro">
+        {() => isAuthenticated && isAdmin ? <AdminFinanceiro /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/parcerias">
+        {() => isAuthenticated && isAdmin ? <AdminParcerias /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/conteudo">
+        {() => isAuthenticated && isAdmin ? <AdminConteudo /> : <AdminLogin />}
+      </Route>
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
@@ -78,12 +99,6 @@ function Router() {
           <Route path="/configuracoes" component={Settings} />
           <Route path="/assinatura" component={Subscription} />
           <Route path="/kit-marca" component={BrandKit} />
-          <Route path="/admin" component={AdminDashboard} />
-          <Route path="/admin/comercial" component={AdminComercial} />
-          <Route path="/admin/projetos" component={AdminProjetos} />
-          <Route path="/admin/financeiro" component={AdminFinanceiro} />
-          <Route path="/admin/parcerias" component={AdminParcerias} />
-          <Route path="/admin/conteudo" component={AdminConteudo} />
         </>
       )}
       <Route component={NotFound} />
