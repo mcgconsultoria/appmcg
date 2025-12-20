@@ -212,7 +212,7 @@ export default function Support() {
   const WHATSAPP_NUMBER = "5511999999999";
 
   return (
-    <AppLayout>
+    <AppLayout title="Suporte e Contato" subtitle="Abra chamados e entre em contato com nossa equipe">
       <div className="space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

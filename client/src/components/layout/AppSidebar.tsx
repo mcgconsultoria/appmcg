@@ -30,6 +30,8 @@ import {
   Palette,
   CreditCard,
   Shield,
+  UserCog,
+  HeadphonesIcon,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -121,6 +123,19 @@ const managementMenuItems = [
   },
 ];
 
+const adminMenuItems = [
+  {
+    title: "Equipe",
+    url: "/equipe",
+    icon: UserCog,
+  },
+  {
+    title: "Suporte",
+    url: "/suporte",
+    icon: HeadphonesIcon,
+  },
+];
+
 export function AppSidebar() {
   const [location] = useLocation();
   const { user } = useAuth();
@@ -197,6 +212,27 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {managementMenuItems.map((item) => {
+                const isActive = location === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Admin Empresa</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {adminMenuItems.map((item) => {
                 const isActive = location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
