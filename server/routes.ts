@@ -26,6 +26,9 @@ import {
   insertAdminPartnershipSchema,
   insertAdminPostSchema,
   insertAdminFinancialRecordSchema,
+  insertCompanyTeamMemberSchema,
+  insertSupportTicketSchema,
+  insertSupportTicketMessageSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -2613,6 +2616,196 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching users for admin:", error);
       res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // ============================================
+  // CLIENT ADMIN - Company Team Management APIs
+  // ============================================
+
+  // Company Team Members
+  app.get("/api/company-team", isAuthenticated, async (req: any, res) => {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) return res.status(400).json({ message: "Company not found" });
+      const members = await storage.getCompanyTeamMembers(companyId);
+      res.json(members);
+    } catch (error) {
+      console.error("Error fetching team members:", error);
+      res.status(500).json({ message: "Failed to fetch team members" });
+    }
+  });
+
+  app.get("/api/company-team/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const member = await storage.getCompanyTeamMember(parseInt(req.params.id));
+      if (!member) return res.status(404).json({ message: "Member not found" });
+      res.json(member);
+    } catch (error) {
+      console.error("Error fetching team member:", error);
+      res.status(500).json({ message: "Failed to fetch team member" });
+    }
+  });
+
+  app.post("/api/company-team", isAuthenticated, async (req: any, res) => {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) return res.status(400).json({ message: "Company not found" });
+      
+      const parsed = insertCompanyTeamMemberSchema.safeParse({
+        ...req.body,
+        companyId,
+        invitedBy: req.user?.id,
+        invitedAt: new Date(),
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const member = await storage.createCompanyTeamMember(parsed.data);
+      res.status(201).json(member);
+    } catch (error) {
+      console.error("Error creating team member:", error);
+      res.status(500).json({ message: "Failed to create team member" });
+    }
+  });
+
+  app.patch("/api/company-team/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const parsed = insertCompanyTeamMemberSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const member = await storage.updateCompanyTeamMember(parseInt(req.params.id), parsed.data);
+      if (!member) return res.status(404).json({ message: "Member not found" });
+      res.json(member);
+    } catch (error) {
+      console.error("Error updating team member:", error);
+      res.status(500).json({ message: "Failed to update team member" });
+    }
+  });
+
+  app.delete("/api/company-team/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.deleteCompanyTeamMember(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting team member:", error);
+      res.status(500).json({ message: "Failed to delete team member" });
+    }
+  });
+
+  // Support Tickets
+  app.get("/api/support-tickets", isAuthenticated, async (req: any, res) => {
+    try {
+      const companyId = req.user?.companyId;
+      const isAdmin = req.user?.role === 'admin' || req.user?.role === 'admin_mcg';
+      
+      // Admin can see all tickets, regular users only see their company's tickets
+      const tickets = await storage.getSupportTickets(isAdmin ? undefined : companyId);
+      res.json(tickets);
+    } catch (error) {
+      console.error("Error fetching support tickets:", error);
+      res.status(500).json({ message: "Failed to fetch support tickets" });
+    }
+  });
+
+  app.get("/api/support-tickets/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const ticket = await storage.getSupportTicket(parseInt(req.params.id));
+      if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+      res.json(ticket);
+    } catch (error) {
+      console.error("Error fetching support ticket:", error);
+      res.status(500).json({ message: "Failed to fetch support ticket" });
+    }
+  });
+
+  app.post("/api/support-tickets", isAuthenticated, async (req: any, res) => {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) return res.status(400).json({ message: "Company not found" });
+      
+      // Generate ticket number
+      const ticketNumber = `MCG-${Date.now().toString(36).toUpperCase()}`;
+      
+      const parsed = insertSupportTicketSchema.safeParse({
+        ...req.body,
+        companyId,
+        userId: req.user?.id,
+        ticketNumber,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const ticket = await storage.createSupportTicket(parsed.data);
+      res.status(201).json(ticket);
+    } catch (error) {
+      console.error("Error creating support ticket:", error);
+      res.status(500).json({ message: "Failed to create support ticket" });
+    }
+  });
+
+  app.patch("/api/support-tickets/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const parsed = insertSupportTicketSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      
+      // Add resolution timestamps if status changes
+      const updates: any = { ...parsed.data };
+      if (parsed.data.status === 'resolved' && !updates.resolvedAt) {
+        updates.resolvedAt = new Date();
+      }
+      if (parsed.data.status === 'closed' && !updates.closedAt) {
+        updates.closedAt = new Date();
+      }
+      
+      const ticket = await storage.updateSupportTicket(parseInt(req.params.id), updates);
+      if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+      res.json(ticket);
+    } catch (error) {
+      console.error("Error updating support ticket:", error);
+      res.status(500).json({ message: "Failed to update support ticket" });
+    }
+  });
+
+  app.delete("/api/support-tickets/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.deleteSupportTicket(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting support ticket:", error);
+      res.status(500).json({ message: "Failed to delete support ticket" });
+    }
+  });
+
+  // Support Ticket Messages
+  app.get("/api/support-tickets/:ticketId/messages", isAuthenticated, async (req: any, res) => {
+    try {
+      const messages = await storage.getSupportTicketMessages(parseInt(req.params.ticketId));
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching ticket messages:", error);
+      res.status(500).json({ message: "Failed to fetch ticket messages" });
+    }
+  });
+
+  app.post("/api/support-tickets/:ticketId/messages", isAuthenticated, async (req: any, res) => {
+    try {
+      const parsed = insertSupportTicketMessageSchema.safeParse({
+        ...req.body,
+        ticketId: parseInt(req.params.ticketId),
+        userId: req.user?.id,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      const message = await storage.createSupportTicketMessage(parsed.data);
+      res.status(201).json(message);
+    } catch (error) {
+      console.error("Error creating ticket message:", error);
+      res.status(500).json({ message: "Failed to create ticket message" });
     }
   });
 

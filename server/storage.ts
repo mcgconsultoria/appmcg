@@ -89,6 +89,15 @@ import {
   type InsertAdminPost,
   type AdminFinancialRecord,
   type InsertAdminFinancialRecord,
+  companyTeamMembers,
+  supportTickets,
+  supportTicketMessages,
+  type CompanyTeamMember,
+  type InsertCompanyTeamMember,
+  type SupportTicket,
+  type InsertSupportTicket,
+  type SupportTicketMessage,
+  type InsertSupportTicketMessage,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, ne } from "drizzle-orm";
@@ -299,6 +308,30 @@ export interface IStorage {
     activeSubscriptions: number;
     estimatedRevenue: number;
   }>;
+
+  // ============================================
+  // CLIENT ADMIN - Company Team Management
+  // ============================================
+
+  // Company Team Member operations
+  getCompanyTeamMembers(companyId: number): Promise<CompanyTeamMember[]>;
+  getCompanyTeamMember(id: number): Promise<CompanyTeamMember | undefined>;
+  getCompanyTeamMemberByUserId(companyId: number, userId: string): Promise<CompanyTeamMember | undefined>;
+  createCompanyTeamMember(member: InsertCompanyTeamMember): Promise<CompanyTeamMember>;
+  updateCompanyTeamMember(id: number, member: Partial<InsertCompanyTeamMember>): Promise<CompanyTeamMember | undefined>;
+  deleteCompanyTeamMember(id: number): Promise<boolean>;
+
+  // Support Ticket operations
+  getSupportTickets(companyId?: number): Promise<SupportTicket[]>;
+  getSupportTicket(id: number): Promise<SupportTicket | undefined>;
+  getSupportTicketByNumber(ticketNumber: string): Promise<SupportTicket | undefined>;
+  createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
+  updateSupportTicket(id: number, ticket: Partial<InsertSupportTicket>): Promise<SupportTicket | undefined>;
+  deleteSupportTicket(id: number): Promise<boolean>;
+
+  // Support Ticket Message operations
+  getSupportTicketMessages(ticketId: number): Promise<SupportTicketMessage[]>;
+  createSupportTicketMessage(message: InsertSupportTicketMessage): Promise<SupportTicketMessage>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1171,6 +1204,101 @@ export class DatabaseStorage implements IStorage {
       activeSubscriptions: Number(subscriptionsCount?.count || 0),
       estimatedRevenue: Number(revenueSum?.total || 0),
     };
+  }
+
+  // ============================================
+  // CLIENT ADMIN - Company Team Management
+  // ============================================
+
+  // Company Team Member operations
+  async getCompanyTeamMembers(companyId: number): Promise<CompanyTeamMember[]> {
+    return db.select().from(companyTeamMembers)
+      .where(eq(companyTeamMembers.companyId, companyId))
+      .orderBy(desc(companyTeamMembers.createdAt));
+  }
+
+  async getCompanyTeamMember(id: number): Promise<CompanyTeamMember | undefined> {
+    const [member] = await db.select().from(companyTeamMembers).where(eq(companyTeamMembers.id, id));
+    return member;
+  }
+
+  async getCompanyTeamMemberByUserId(companyId: number, userId: string): Promise<CompanyTeamMember | undefined> {
+    const [member] = await db.select().from(companyTeamMembers)
+      .where(and(
+        eq(companyTeamMembers.companyId, companyId),
+        eq(companyTeamMembers.userId, userId)
+      ));
+    return member;
+  }
+
+  async createCompanyTeamMember(member: InsertCompanyTeamMember): Promise<CompanyTeamMember> {
+    const [newMember] = await db.insert(companyTeamMembers).values(member).returning();
+    return newMember;
+  }
+
+  async updateCompanyTeamMember(id: number, member: Partial<InsertCompanyTeamMember>): Promise<CompanyTeamMember | undefined> {
+    const [updated] = await db
+      .update(companyTeamMembers)
+      .set({ ...member, updatedAt: new Date() })
+      .where(eq(companyTeamMembers.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCompanyTeamMember(id: number): Promise<boolean> {
+    await db.delete(companyTeamMembers).where(eq(companyTeamMembers.id, id));
+    return true;
+  }
+
+  // Support Ticket operations
+  async getSupportTickets(companyId?: number): Promise<SupportTicket[]> {
+    if (companyId) {
+      return db.select().from(supportTickets)
+        .where(eq(supportTickets.companyId, companyId))
+        .orderBy(desc(supportTickets.createdAt));
+    }
+    return db.select().from(supportTickets).orderBy(desc(supportTickets.createdAt));
+  }
+
+  async getSupportTicket(id: number): Promise<SupportTicket | undefined> {
+    const [ticket] = await db.select().from(supportTickets).where(eq(supportTickets.id, id));
+    return ticket;
+  }
+
+  async getSupportTicketByNumber(ticketNumber: string): Promise<SupportTicket | undefined> {
+    const [ticket] = await db.select().from(supportTickets).where(eq(supportTickets.ticketNumber, ticketNumber));
+    return ticket;
+  }
+
+  async createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket> {
+    const [newTicket] = await db.insert(supportTickets).values(ticket).returning();
+    return newTicket;
+  }
+
+  async updateSupportTicket(id: number, ticket: Partial<InsertSupportTicket>): Promise<SupportTicket | undefined> {
+    const [updated] = await db
+      .update(supportTickets)
+      .set({ ...ticket, updatedAt: new Date() })
+      .where(eq(supportTickets.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteSupportTicket(id: number): Promise<boolean> {
+    await db.delete(supportTickets).where(eq(supportTickets.id, id));
+    return true;
+  }
+
+  // Support Ticket Message operations
+  async getSupportTicketMessages(ticketId: number): Promise<SupportTicketMessage[]> {
+    return db.select().from(supportTicketMessages)
+      .where(eq(supportTicketMessages.ticketId, ticketId))
+      .orderBy(supportTicketMessages.createdAt);
+  }
+
+  async createSupportTicketMessage(message: InsertSupportTicketMessage): Promise<SupportTicketMessage> {
+    const [newMessage] = await db.insert(supportTicketMessages).values(message).returning();
+    return newMessage;
   }
 }
 
