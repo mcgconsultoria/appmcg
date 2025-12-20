@@ -391,6 +391,16 @@ export default function Landing() {
                 >
                   <SiGoogle className="h-4 w-4 text-muted-foreground" />
                 </a>
+                <a
+                  href="https://www.youtube.com/@mcgconsultoriacomercial"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-md bg-muted/50 flex items-center justify-center hover-elevate"
+                  data-testid="link-youtube"
+                  aria-label="YouTube"
+                >
+                  <SiYoutube className="h-4 w-4 text-muted-foreground" />
+                </a>
               </div>
 
               <div className="flex items-center gap-4 flex-wrap justify-center">
