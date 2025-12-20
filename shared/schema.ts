@@ -1007,6 +1007,74 @@ export const insertAdminFinancialRecordSchema = createInsertSchema(adminFinancia
   updatedAt: true,
 });
 
+// ============================================
+// CLIENT ADMIN - Company Team Management
+// ============================================
+
+// Company team members - users within a company
+export const companyTeamMembers = pgTable("company_team_members", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  role: varchar("role", { length: 50 }).default("member"), // admin, manager, member
+  department: varchar("department", { length: 100 }), // Comercial, Operacao, Financeiro, SAC
+  permissions: jsonb("permissions").$type<string[]>().default([]), // ['crm', 'checklist', 'calculator', 'rfi', 'financial']
+  isActive: boolean("is_active").default(true),
+  invitedBy: varchar("invited_by"),
+  invitedAt: timestamp("invited_at"),
+  joinedAt: timestamp("joined_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Support tickets for client companies
+export const supportTickets = pgTable("support_tickets", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  ticketNumber: varchar("ticket_number", { length: 20 }).notNull(),
+  subject: varchar("subject", { length: 255 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 50 }), // suporte, financeiro, comercial, tecnico
+  priority: varchar("priority", { length: 20 }).default("medium"), // low, medium, high, urgent
+  status: varchar("status", { length: 20 }).default("open"), // open, in_progress, waiting_customer, resolved, closed
+  assignedTo: varchar("assigned_to"), // MCG team member
+  resolution: text("resolution"),
+  resolvedAt: timestamp("resolved_at"),
+  closedAt: timestamp("closed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Support ticket messages
+export const supportTicketMessages = pgTable("support_ticket_messages", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  message: text("message").notNull(),
+  isInternal: boolean("is_internal").default(false), // Internal MCG notes
+  attachments: jsonb("attachments").$type<string[]>().default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Client Admin insert schemas
+export const insertCompanyTeamMemberSchema = createInsertSchema(companyTeamMembers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSupportTicketSchema = createInsertSchema(supportTickets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSupportTicketMessageSchema = createInsertSchema(supportTicketMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Auth schemas
 export const registerSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -1097,3 +1165,11 @@ export type AdminPost = typeof adminPosts.$inferSelect;
 export type InsertAdminPost = z.infer<typeof insertAdminPostSchema>;
 export type AdminFinancialRecord = typeof adminFinancialRecords.$inferSelect;
 export type InsertAdminFinancialRecord = z.infer<typeof insertAdminFinancialRecordSchema>;
+
+// Client Admin Types
+export type CompanyTeamMember = typeof companyTeamMembers.$inferSelect;
+export type InsertCompanyTeamMember = z.infer<typeof insertCompanyTeamMemberSchema>;
+export type SupportTicket = typeof supportTickets.$inferSelect;
+export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
+export type SupportTicketMessage = typeof supportTicketMessages.$inferSelect;
+export type InsertSupportTicketMessage = z.infer<typeof insertSupportTicketMessageSchema>;
