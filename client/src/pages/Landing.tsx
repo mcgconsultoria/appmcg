@@ -61,6 +61,18 @@ const features = [
 
 const services = [
   {
+    title: "Consultoria Comercial",
+    description: "Acompanhamento especializado para transformar sua operação comercial em logística, com mentoria contínua e suporte estratégico.",
+    features: [
+      "Mentoria executiva personalizada",
+      "Análise de mercado e concorrência",
+      "Estratégias de expansão comercial",
+      "Acompanhamento de metas e KPIs",
+    ],
+    icon: Handshake,
+    highlighted: true,
+  },
+  {
     title: "Diagnóstico de Maturidade Comercial",
     description: "Avaliação completa da estrutura comercial da sua empresa de logística, identificando pontos de melhoria e oportunidades de crescimento.",
     features: [
@@ -83,18 +95,6 @@ const services = [
     ],
     icon: Zap,
     highlighted: false,
-  },
-  {
-    title: "Consultoria Comercial",
-    description: "Acompanhamento especializado para transformar sua operação comercial em logística, com mentoria contínua e suporte estratégico.",
-    features: [
-      "Mentoria executiva personalizada",
-      "Análise de mercado e concorrência",
-      "Estratégias de expansão comercial",
-      "Acompanhamento de metas e KPIs",
-    ],
-    icon: Handshake,
-    highlighted: true,
   },
 ];
 
