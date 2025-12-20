@@ -278,7 +278,7 @@ export default function Landing() {
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Entre em Contato</h2>
               <p className="text-muted-foreground">Fale conosco para saber mais sobre nossos serviços</p>
             </div>
-            <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
               <a href="https://wa.me/5541995323362" target="_blank" rel="noopener noreferrer">
                 <Card className="hover-elevate cursor-pointer">
                   <CardContent className="p-6 flex flex-col items-center text-center">
@@ -301,16 +301,16 @@ export default function Landing() {
                   </CardContent>
                 </Card>
               </a>
-            </div>
-            <div className="text-center mt-8">
-              <p className="text-lg font-semibold mb-4">PodBlog MCG</p>
-              <a 
-                href="https://www.youtube.com/@mcgconsultoriacomercial" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-600 hover-elevate"
-              >
-                <SiYoutube className="h-6 w-6 text-white" />
+              <a href="https://www.youtube.com/@mcgconsultoriacomercial" target="_blank" rel="noopener noreferrer">
+                <Card className="hover-elevate cursor-pointer">
+                  <CardContent className="p-6 flex flex-col items-center text-center">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                      <SiYoutube className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="font-medium mb-1">PodBlog MCG</h3>
+                    <p className="text-sm text-muted-foreground">Canal no YouTube</p>
+                  </CardContent>
+                </Card>
               </a>
             </div>
           </div>
