@@ -269,6 +269,7 @@ export default function AdminParcerias() {
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
                     rows={2}
+                    data-testid="textarea-partner-description"
                   />
                 </div>
                 <div>
@@ -277,6 +278,7 @@ export default function AdminParcerias() {
                     value={form.benefits}
                     onChange={(e) => setForm({ ...form, benefits: e.target.value })}
                     rows={2}
+                    data-testid="textarea-partner-benefits"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -285,6 +287,7 @@ export default function AdminParcerias() {
                     <Input
                       value={form.ownerName}
                       onChange={(e) => setForm({ ...form, ownerName: e.target.value })}
+                      data-testid="input-partner-owner"
                     />
                   </div>
                 </div>
@@ -294,6 +297,7 @@ export default function AdminParcerias() {
                     value={form.notes}
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}
                     rows={2}
+                    data-testid="textarea-partner-notes"
                   />
                 </div>
               </div>

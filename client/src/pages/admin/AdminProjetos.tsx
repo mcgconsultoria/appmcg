@@ -238,6 +238,7 @@ export default function AdminProjetos() {
                       max={100}
                       value={form.progress}
                       onChange={(e) => setForm({ ...form, progress: Number(e.target.value) })}
+                      data-testid="input-project-progress"
                     />
                   </div>
                 </div>
@@ -248,6 +249,7 @@ export default function AdminProjetos() {
                       type="number"
                       value={form.value}
                       onChange={(e) => setForm({ ...form, value: e.target.value })}
+                      data-testid="input-project-value"
                     />
                   </div>
                   <div>
@@ -255,6 +257,7 @@ export default function AdminProjetos() {
                     <Input
                       value={form.assignedTo}
                       onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}
+                      data-testid="input-project-assigned"
                     />
                   </div>
                 </div>
@@ -264,6 +267,7 @@ export default function AdminProjetos() {
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
                     rows={3}
+                    data-testid="textarea-project-description"
                   />
                 </div>
               </div>
