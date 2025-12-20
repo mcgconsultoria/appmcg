@@ -29,10 +29,16 @@ export async function registerUser(data: RegisterData): Promise<{ user: User; se
   const user = await storage.createUserWithPassword({
     email: data.email,
     password: hashedPassword,
+    razaoSocial: data.razaoSocial || null,
+    cnpj: data.cnpj || null,
     firstName: data.firstName,
     lastName: data.lastName || null,
+    tipoEmpresa: data.tipoEmpresa || null,
+    segmento: data.segmento || null,
+    departamento: data.departamento || null,
+    vendedor: data.vendedor || null,
+    perfilConta: data.perfilConta || "colaborador",
     phone: data.phone || null,
-    cnpj: data.cnpj || null,
     activeSessionToken: sessionToken,
     subscriptionStatus: "free",
   });
@@ -65,7 +71,7 @@ export async function validateSession(sessionToken: string): Promise<User | null
   if (!sessionToken) return null;
   
   const user = await storage.getUserBySessionToken(sessionToken);
-  return user;
+  return user || null;
 }
 
 export async function logoutUser(userId: string): Promise<void> {

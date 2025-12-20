@@ -18,6 +18,8 @@ import {
   projects,
   tasks,
   rfis,
+  businessTypes,
+  marketSegments,
   type User,
   type UpsertUser,
   type Company,
@@ -56,6 +58,10 @@ import {
   type InsertTask,
   type Rfi,
   type InsertRfi,
+  type BusinessType,
+  type InsertBusinessType,
+  type MarketSegment,
+  type InsertMarketSegment,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, ne } from "drizzle-orm";
@@ -185,6 +191,14 @@ export interface IStorage {
   createRfi(rfi: InsertRfi): Promise<Rfi>;
   updateRfi(id: number, rfi: Partial<InsertRfi>): Promise<Rfi | undefined>;
   deleteRfi(id: number): Promise<boolean>;
+
+  // Business type operations
+  getBusinessTypes(): Promise<BusinessType[]>;
+  createBusinessType(type: InsertBusinessType): Promise<BusinessType>;
+
+  // Market segment operations
+  getMarketSegments(): Promise<MarketSegment[]>;
+  createMarketSegment(segment: InsertMarketSegment): Promise<MarketSegment>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -742,6 +756,26 @@ export class DatabaseStorage implements IStorage {
   async deleteRfi(id: number): Promise<boolean> {
     await db.delete(rfis).where(eq(rfis.id, id));
     return true;
+  }
+
+  // Business type operations
+  async getBusinessTypes(): Promise<BusinessType[]> {
+    return db.select().from(businessTypes).orderBy(businessTypes.name);
+  }
+
+  async createBusinessType(type: InsertBusinessType): Promise<BusinessType> {
+    const [newType] = await db.insert(businessTypes).values(type).returning();
+    return newType;
+  }
+
+  // Market segment operations
+  async getMarketSegments(): Promise<MarketSegment[]> {
+    return db.select().from(marketSegments).orderBy(marketSegments.name);
+  }
+
+  async createMarketSegment(segment: InsertMarketSegment): Promise<MarketSegment> {
+    const [newSegment] = await db.insert(marketSegments).values(segment).returning();
+    return newSegment;
   }
 }
 

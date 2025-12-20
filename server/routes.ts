@@ -159,6 +159,56 @@ export async function registerRoutes(
     }
   });
 
+  // Business types catalog (public - needed for registration)
+  app.get('/api/business-types', async (req, res) => {
+    try {
+      const types = await storage.getBusinessTypes();
+      res.json(types);
+    } catch (error) {
+      console.error("Error fetching business types:", error);
+      res.status(500).json({ message: "Erro ao buscar tipos de empresa" });
+    }
+  });
+
+  app.post('/api/business-types', async (req, res) => {
+    try {
+      const { name } = req.body;
+      if (!name) {
+        return res.status(400).json({ message: "Nome é obrigatório" });
+      }
+      const type = await storage.createBusinessType({ name, isDefault: false });
+      res.status(201).json(type);
+    } catch (error) {
+      console.error("Error creating business type:", error);
+      res.status(500).json({ message: "Erro ao criar tipo de empresa" });
+    }
+  });
+
+  // Market segments catalog (public - needed for registration)
+  app.get('/api/market-segments', async (req, res) => {
+    try {
+      const segments = await storage.getMarketSegments();
+      res.json(segments);
+    } catch (error) {
+      console.error("Error fetching market segments:", error);
+      res.status(500).json({ message: "Erro ao buscar segmentos" });
+    }
+  });
+
+  app.post('/api/market-segments', async (req, res) => {
+    try {
+      const { name } = req.body;
+      if (!name) {
+        return res.status(400).json({ message: "Nome é obrigatório" });
+      }
+      const segment = await storage.createMarketSegment({ name, isDefault: false });
+      res.status(201).json(segment);
+    } catch (error) {
+      console.error("Error creating market segment:", error);
+      res.status(500).json({ message: "Erro ao criar segmento" });
+    }
+  });
+
   // Client routes
   app.get("/api/clients", isAuthenticated, async (req, res) => {
     try {

@@ -74,6 +74,8 @@ const clientFormSchema = z.object({
   city: z.string().optional(),
   state: z.string().optional(),
   segment: z.string().optional(),
+  tipoEmpresa: z.string().optional(),
+  vendedor: z.string().optional(),
   status: z.string().optional(),
   pipelineStage: z.string().optional(),
   contactName: z.string().optional(),
@@ -146,6 +148,8 @@ export default function Clients() {
       city: "",
       state: "",
       segment: "",
+      tipoEmpresa: "",
+      vendedor: "",
       status: "prospect",
       pipelineStage: "lead",
       contactName: "",
@@ -218,6 +222,8 @@ export default function Clients() {
       city: client.city || "",
       state: client.state || "",
       segment: client.segment || "",
+      tipoEmpresa: client.tipoEmpresa || "",
+      vendedor: client.vendedor || "",
       status: client.status || "prospect",
       pipelineStage: client.pipelineStage || "lead",
       contactName: client.contactName || "",
@@ -368,6 +374,19 @@ export default function Clients() {
                               ))}
                             </SelectContent>
                           </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="vendedor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Vendedor</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="Responsável comercial" data-testid="input-client-vendedor" />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}

@@ -30,11 +30,17 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique().notNull(),
   password: varchar("password", { length: 255 }),
+  razaoSocial: varchar("razao_social", { length: 255 }),
+  cnpj: varchar("cnpj", { length: 18 }),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
+  tipoEmpresa: varchar("tipo_empresa", { length: 100 }),
+  segmento: varchar("segmento", { length: 100 }),
+  departamento: varchar("departamento", { length: 100 }),
+  vendedor: varchar("vendedor", { length: 255 }),
+  perfilConta: varchar("perfil_conta", { length: 50 }).default("colaborador"),
   profileImageUrl: varchar("profile_image_url"),
   phone: varchar("phone", { length: 20 }),
-  cnpj: varchar("cnpj", { length: 18 }),
   companyId: integer("company_id"),
   role: varchar("role").default("user"),
   stripeCustomerId: varchar("stripe_customer_id"),
@@ -49,6 +55,22 @@ export const users = pgTable("users", {
   lastCalculationAt: timestamp("last_calculation_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Custom business types catalog
+export const businessTypes = pgTable("business_types", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Custom market segments catalog
+export const marketSegments = pgTable("market_segments", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Companies table for multi-tenant architecture
@@ -81,6 +103,8 @@ export const clients = pgTable("clients", {
   city: varchar("city", { length: 100 }),
   state: varchar("state", { length: 2 }),
   segment: varchar("segment", { length: 100 }),
+  tipoEmpresa: varchar("tipo_empresa", { length: 100 }),
+  vendedor: varchar("vendedor", { length: 255 }),
   status: varchar("status").default("prospect"),
   pipelineStage: varchar("pipeline_stage").default("lead"),
   notes: text("notes"),
@@ -731,14 +755,31 @@ export const insertRfiSchema = createInsertSchema(rfis).omit({
   updatedAt: true,
 });
 
+// Business types and market segments insert schemas
+export const insertBusinessTypeSchema = createInsertSchema(businessTypes).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertMarketSegmentSchema = createInsertSchema(marketSegments).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Auth schemas
 export const registerSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(8, "Senha deve ter no mínimo 8 caracteres"),
+  razaoSocial: z.string().optional(),
+  cnpj: z.string().optional(),
   firstName: z.string().min(1, "Nome é obrigatório"),
   lastName: z.string().optional(),
+  tipoEmpresa: z.string().optional(),
+  segmento: z.string().optional(),
+  departamento: z.string().optional(),
+  vendedor: z.string().optional(),
+  perfilConta: z.string().optional().default("colaborador"),
   phone: z.string().optional(),
-  cnpj: z.string().optional(),
 });
 
 export const loginSchema = z.object({
@@ -791,3 +832,7 @@ export type Task = typeof tasks.$inferSelect;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type Rfi = typeof rfis.$inferSelect;
 export type InsertRfi = z.infer<typeof insertRfiSchema>;
+export type BusinessType = typeof businessTypes.$inferSelect;
+export type InsertBusinessType = z.infer<typeof insertBusinessTypeSchema>;
+export type MarketSegment = typeof marketSegments.$inferSelect;
+export type InsertMarketSegment = z.infer<typeof insertMarketSegmentSchema>;
