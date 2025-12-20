@@ -29,8 +29,7 @@ import TasksPage from "@/pages/TasksPage";
 import ProjectsPage from "@/pages/ProjectsPage";
 import RFI from "@/pages/RFI";
 import BrandKit from "@/pages/BrandKit";
-import TeamManagement from "@/pages/TeamManagement";
-import Support from "@/pages/Support";
+import AdminCliente from "@/pages/AdminCliente";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminComercial from "@/pages/admin/AdminComercial";
 import AdminProjetos from "@/pages/admin/AdminProjetos";
@@ -101,8 +100,7 @@ function Router() {
           <Route path="/configuracoes" component={Settings} />
           <Route path="/assinatura" component={Subscription} />
           <Route path="/kit-marca" component={BrandKit} />
-          <Route path="/equipe" component={TeamManagement} />
-          <Route path="/suporte" component={Support} />
+          <Route path="/admin-cliente" component={AdminCliente} />
         </>
       )}
       <Route component={NotFound} />
