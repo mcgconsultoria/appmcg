@@ -11,7 +11,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Truck, Eye, EyeOff, Loader2, Plus } from "lucide-react";
+import { Eye, EyeOff, Loader2, Plus } from "lucide-react";
+import logoMcg from "@assets/logo_mcg_principal.png";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { TaxIdField } from "@/components/TaxIdField";
@@ -203,9 +204,11 @@ export default function Register() {
       <header className="border-b border-border">
         <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center">
-              <Truck className="h-6 w-6 text-primary-foreground" />
-            </div>
+            <img 
+              src={logoMcg} 
+              alt="MCG Consultoria" 
+              className="h-10 w-10 object-contain"
+            />
             <div className="flex flex-col">
               <span className="font-bold text-lg leading-tight">MCG</span>
               <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
