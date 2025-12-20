@@ -318,16 +318,16 @@ export interface IStorage {
   getCompanyTeamMember(id: number): Promise<CompanyTeamMember | undefined>;
   getCompanyTeamMemberByUserId(companyId: number, userId: string): Promise<CompanyTeamMember | undefined>;
   createCompanyTeamMember(member: InsertCompanyTeamMember): Promise<CompanyTeamMember>;
-  updateCompanyTeamMember(id: number, member: Partial<InsertCompanyTeamMember>): Promise<CompanyTeamMember | undefined>;
-  deleteCompanyTeamMember(id: number): Promise<boolean>;
+  updateCompanyTeamMember(id: number, companyId: number, member: Partial<InsertCompanyTeamMember>): Promise<CompanyTeamMember | undefined>;
+  deleteCompanyTeamMember(id: number, companyId: number): Promise<boolean>;
 
   // Support Ticket operations
   getSupportTickets(companyId?: number): Promise<SupportTicket[]>;
   getSupportTicket(id: number): Promise<SupportTicket | undefined>;
   getSupportTicketByNumber(ticketNumber: string): Promise<SupportTicket | undefined>;
   createSupportTicket(ticket: InsertSupportTicket): Promise<SupportTicket>;
-  updateSupportTicket(id: number, ticket: Partial<InsertSupportTicket>): Promise<SupportTicket | undefined>;
-  deleteSupportTicket(id: number): Promise<boolean>;
+  updateSupportTicket(id: number, companyId: number, ticket: Partial<InsertSupportTicket>): Promise<SupportTicket | undefined>;
+  deleteSupportTicket(id: number, companyId: number): Promise<boolean>;
 
   // Support Ticket Message operations
   getSupportTicketMessages(ticketId: number): Promise<SupportTicketMessage[]>;
@@ -1236,17 +1236,18 @@ export class DatabaseStorage implements IStorage {
     return newMember;
   }
 
-  async updateCompanyTeamMember(id: number, member: Partial<InsertCompanyTeamMember>): Promise<CompanyTeamMember | undefined> {
+  async updateCompanyTeamMember(id: number, companyId: number, member: Partial<InsertCompanyTeamMember>): Promise<CompanyTeamMember | undefined> {
     const [updated] = await db
       .update(companyTeamMembers)
       .set({ ...member, updatedAt: new Date() })
-      .where(eq(companyTeamMembers.id, id))
+      .where(and(eq(companyTeamMembers.id, id), eq(companyTeamMembers.companyId, companyId)))
       .returning();
     return updated;
   }
 
-  async deleteCompanyTeamMember(id: number): Promise<boolean> {
-    await db.delete(companyTeamMembers).where(eq(companyTeamMembers.id, id));
+  async deleteCompanyTeamMember(id: number, companyId: number): Promise<boolean> {
+    const result = await db.delete(companyTeamMembers)
+      .where(and(eq(companyTeamMembers.id, id), eq(companyTeamMembers.companyId, companyId)));
     return true;
   }
 
@@ -1275,17 +1276,18 @@ export class DatabaseStorage implements IStorage {
     return newTicket;
   }
 
-  async updateSupportTicket(id: number, ticket: Partial<InsertSupportTicket>): Promise<SupportTicket | undefined> {
+  async updateSupportTicket(id: number, companyId: number, ticket: Partial<InsertSupportTicket>): Promise<SupportTicket | undefined> {
     const [updated] = await db
       .update(supportTickets)
       .set({ ...ticket, updatedAt: new Date() })
-      .where(eq(supportTickets.id, id))
+      .where(and(eq(supportTickets.id, id), eq(supportTickets.companyId, companyId)))
       .returning();
     return updated;
   }
 
-  async deleteSupportTicket(id: number): Promise<boolean> {
-    await db.delete(supportTickets).where(eq(supportTickets.id, id));
+  async deleteSupportTicket(id: number, companyId: number): Promise<boolean> {
+    await db.delete(supportTickets)
+      .where(and(eq(supportTickets.id, id), eq(supportTickets.companyId, companyId)));
     return true;
   }
 

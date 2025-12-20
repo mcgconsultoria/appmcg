@@ -2652,6 +2652,17 @@ export async function registerRoutes(
       const companyId = req.user?.companyId;
       if (!companyId) return res.status(400).json({ message: "Company not found" });
       
+      // If userId is provided, validate it belongs to the same company
+      if (req.body.userId) {
+        const targetUser = await storage.getUser(req.body.userId);
+        if (!targetUser) {
+          return res.status(400).json({ message: "User not found" });
+        }
+        if (targetUser.companyId !== companyId) {
+          return res.status(403).json({ message: "Cannot add user from another company" });
+        }
+      }
+      
       const parsed = insertCompanyTeamMemberSchema.safeParse({
         ...req.body,
         companyId,
@@ -2671,11 +2682,28 @@ export async function registerRoutes(
 
   app.patch("/api/company-team/:id", isAuthenticated, async (req: any, res) => {
     try {
+      const companyId = req.user?.companyId;
+      if (!companyId) return res.status(400).json({ message: "Company not found" });
+      
+      // If userId is being updated, validate it belongs to the same company
+      if (req.body.userId) {
+        const targetUser = await storage.getUser(req.body.userId);
+        if (!targetUser) {
+          return res.status(400).json({ message: "User not found" });
+        }
+        if (targetUser.companyId !== companyId) {
+          return res.status(403).json({ message: "Cannot link user from another company" });
+        }
+      }
+      
       const parsed = insertCompanyTeamMemberSchema.partial().safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
       }
-      const member = await storage.updateCompanyTeamMember(parseInt(req.params.id), parsed.data);
+      
+      // Strip companyId from payload to prevent cross-tenant reassignment
+      const { companyId: _, ...updateData } = parsed.data;
+      const member = await storage.updateCompanyTeamMember(parseInt(req.params.id), companyId, updateData);
       if (!member) return res.status(404).json({ message: "Member not found" });
       res.json(member);
     } catch (error) {
@@ -2686,7 +2714,10 @@ export async function registerRoutes(
 
   app.delete("/api/company-team/:id", isAuthenticated, async (req: any, res) => {
     try {
-      await storage.deleteCompanyTeamMember(parseInt(req.params.id));
+      const companyId = req.user?.companyId;
+      if (!companyId) return res.status(400).json({ message: "Company not found" });
+      
+      await storage.deleteCompanyTeamMember(parseInt(req.params.id), companyId);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting team member:", error);
@@ -2747,21 +2778,39 @@ export async function registerRoutes(
 
   app.patch("/api/support-tickets/:id", isAuthenticated, async (req: any, res) => {
     try {
+      const companyId = req.user?.companyId;
+      const isAdmin = req.user?.role === 'admin' || req.user?.role === 'admin_mcg';
+      
+      // Regular users can only update their company's tickets
+      if (!companyId && !isAdmin) return res.status(400).json({ message: "Company not found" });
+      
       const parsed = insertSupportTicketSchema.partial().safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
       }
       
+      // Strip companyId from payload to prevent cross-tenant reassignment
+      const { companyId: payloadCompanyId, ...safeData } = parsed.data;
+      
       // Add resolution timestamps if status changes
-      const updates: any = { ...parsed.data };
-      if (parsed.data.status === 'resolved' && !updates.resolvedAt) {
+      const updates: any = { ...safeData };
+      if (safeData.status === 'resolved' && !updates.resolvedAt) {
         updates.resolvedAt = new Date();
       }
-      if (parsed.data.status === 'closed' && !updates.closedAt) {
+      if (safeData.status === 'closed' && !updates.closedAt) {
         updates.closedAt = new Date();
       }
       
-      const ticket = await storage.updateSupportTicket(parseInt(req.params.id), updates);
+      // Admin can update any ticket, regular users only their company's
+      let ticket;
+      if (isAdmin) {
+        // Get ticket first to find its companyId for update
+        const existingTicket = await storage.getSupportTicket(parseInt(req.params.id));
+        if (!existingTicket) return res.status(404).json({ message: "Ticket not found" });
+        ticket = await storage.updateSupportTicket(parseInt(req.params.id), existingTicket.companyId, updates);
+      } else {
+        ticket = await storage.updateSupportTicket(parseInt(req.params.id), companyId, updates);
+      }
       if (!ticket) return res.status(404).json({ message: "Ticket not found" });
       res.json(ticket);
     } catch (error) {
@@ -2772,7 +2821,20 @@ export async function registerRoutes(
 
   app.delete("/api/support-tickets/:id", isAuthenticated, async (req: any, res) => {
     try {
-      await storage.deleteSupportTicket(parseInt(req.params.id));
+      const companyId = req.user?.companyId;
+      const isAdmin = req.user?.role === 'admin' || req.user?.role === 'admin_mcg';
+      
+      // Regular users can only delete their company's tickets
+      if (!companyId && !isAdmin) return res.status(400).json({ message: "Company not found" });
+      
+      if (isAdmin) {
+        // Admin can delete any ticket - first get it to find companyId
+        const ticket = await storage.getSupportTicket(parseInt(req.params.id));
+        if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+        await storage.deleteSupportTicket(parseInt(req.params.id), ticket.companyId);
+      } else {
+        await storage.deleteSupportTicket(parseInt(req.params.id), companyId);
+      }
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting support ticket:", error);
@@ -2783,6 +2845,17 @@ export async function registerRoutes(
   // Support Ticket Messages
   app.get("/api/support-tickets/:ticketId/messages", isAuthenticated, async (req: any, res) => {
     try {
+      const companyId = req.user?.companyId;
+      const isAdmin = req.user?.role === 'admin' || req.user?.role === 'admin_mcg';
+      
+      // Verify the ticket belongs to the user's company (or user is admin)
+      const ticket = await storage.getSupportTicket(parseInt(req.params.ticketId));
+      if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+      
+      if (!isAdmin && ticket.companyId !== companyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
       const messages = await storage.getSupportTicketMessages(parseInt(req.params.ticketId));
       res.json(messages);
     } catch (error) {
@@ -2793,6 +2866,17 @@ export async function registerRoutes(
 
   app.post("/api/support-tickets/:ticketId/messages", isAuthenticated, async (req: any, res) => {
     try {
+      const companyId = req.user?.companyId;
+      const isAdmin = req.user?.role === 'admin' || req.user?.role === 'admin_mcg';
+      
+      // Verify the ticket belongs to the user's company (or user is admin)
+      const ticket = await storage.getSupportTicket(parseInt(req.params.ticketId));
+      if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+      
+      if (!isAdmin && ticket.companyId !== companyId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
       const parsed = insertSupportTicketMessageSchema.safeParse({
         ...req.body,
         ticketId: parseInt(req.params.ticketId),
