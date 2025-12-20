@@ -13,9 +13,7 @@ import {
   Calculator,
   ClipboardCheck,
   TrendingUp,
-  Phone,
   Mail,
-  MapPin,
 } from "lucide-react";
 import { SiFacebook, SiInstagram, SiLinkedin, SiWhatsapp, SiGoogle } from "react-icons/si";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -257,34 +255,29 @@ export default function Landing() {
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Entre em Contato</h2>
               <p className="text-muted-foreground">Fale conosco para saber mais sobre nossos serviços</p>
             </div>
-            <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-              <Card>
-                <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Phone className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="font-medium mb-1">Telefone</h3>
-                  <p className="text-sm text-muted-foreground">(41) 99999-9999</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Mail className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="font-medium mb-1">Email</h3>
-                  <p className="text-sm text-muted-foreground">contato@mcgconsultoria.com.br</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-6 flex flex-col items-center text-center">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <MapPin className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="font-medium mb-1">Localização</h3>
-                  <p className="text-sm text-muted-foreground">Curitiba, PR</p>
-                </CardContent>
-              </Card>
+            <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+              <a href="https://wa.me/5541995323362" target="_blank" rel="noopener noreferrer">
+                <Card className="hover-elevate cursor-pointer">
+                  <CardContent className="p-6 flex flex-col items-center text-center">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                      <SiWhatsapp className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="font-medium mb-1">WhatsApp</h3>
+                    <p className="text-sm text-muted-foreground">(41) 9 9532-3362</p>
+                  </CardContent>
+                </Card>
+              </a>
+              <a href="mailto:comercial@mcgconsultoria.com.br">
+                <Card className="hover-elevate cursor-pointer">
+                  <CardContent className="p-6 flex flex-col items-center text-center">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                      <Mail className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="font-medium mb-1">Email</h3>
+                    <p className="text-sm text-muted-foreground">comercial@mcgconsultoria.com.br</p>
+                  </CardContent>
+                </Card>
+              </a>
             </div>
           </div>
         </section>
@@ -305,8 +298,11 @@ export default function Landing() {
                   <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mb-2">
                 Consultoria especializada em logística com foco na área comercial.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                CNPJ: 08.670.140/0001-89
               </p>
             </div>
             <div>
