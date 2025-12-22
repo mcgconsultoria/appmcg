@@ -8,6 +8,7 @@ import {
   insertClientSchema,
   insertChecklistSchema,
   insertChecklistItemSchema,
+  insertChecklistAttachmentSchema,
   insertFreightCalculationSchema,
   insertStorageCalculationSchema,
   insertFinancialAccountSchema,
@@ -466,6 +467,85 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error updating checklist item:", error);
       res.status(500).json({ message: "Failed to update checklist item" });
+    }
+  });
+
+  // Checklist attachments routes
+  app.get("/api/checklists/:checklistId/attachments", isAuthenticated, async (req, res) => {
+    try {
+      const checklistId = parseInt(req.params.checklistId);
+      const attachments = await storage.getChecklistAttachments(checklistId);
+      res.json(attachments);
+    } catch (error) {
+      console.error("Error fetching checklist attachments:", error);
+      res.status(500).json({ message: "Failed to fetch attachments" });
+    }
+  });
+
+  app.get("/api/company/:companyId/attachments", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = parseInt(req.params.companyId);
+      const attachments = await storage.getChecklistAttachmentsByCompany(companyId);
+      res.json(attachments);
+    } catch (error) {
+      console.error("Error fetching company attachments:", error);
+      res.status(500).json({ message: "Failed to fetch attachments" });
+    }
+  });
+
+  app.get("/api/attachments/expiring", isAuthenticated, async (req, res) => {
+    try {
+      const days = parseInt(req.query.days as string) || 15;
+      const attachments = await storage.getExpiringAttachments(days);
+      res.json(attachments);
+    } catch (error) {
+      console.error("Error fetching expiring attachments:", error);
+      res.status(500).json({ message: "Failed to fetch expiring attachments" });
+    }
+  });
+
+  app.post("/api/checklists/:checklistId/attachments", isAuthenticated, async (req, res) => {
+    try {
+      const checklistId = parseInt(req.params.checklistId);
+      const companyId = req.user?.companyId || 1;
+      const parsed = insertChecklistAttachmentSchema.safeParse({ 
+        ...req.body, 
+        checklistId,
+        companyId 
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid attachment data", errors: parsed.error.errors });
+      }
+      const attachment = await storage.createChecklistAttachment(parsed.data);
+      res.status(201).json(attachment);
+    } catch (error) {
+      console.error("Error creating checklist attachment:", error);
+      res.status(500).json({ message: "Failed to create attachment" });
+    }
+  });
+
+  app.patch("/api/attachments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const attachment = await storage.updateChecklistAttachment(id, req.body);
+      if (!attachment) {
+        return res.status(404).json({ message: "Attachment not found" });
+      }
+      res.json(attachment);
+    } catch (error) {
+      console.error("Error updating attachment:", error);
+      res.status(500).json({ message: "Failed to update attachment" });
+    }
+  });
+
+  app.delete("/api/attachments/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteChecklistAttachment(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting attachment:", error);
+      res.status(500).json({ message: "Failed to delete attachment" });
     }
   });
 

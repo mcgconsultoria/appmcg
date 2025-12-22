@@ -39,6 +39,9 @@ import {
   type InsertChecklist,
   type ChecklistItem,
   type InsertChecklistItem,
+  type ChecklistAttachment,
+  type InsertChecklistAttachment,
+  checklistAttachments,
   type FreightCalculation,
   type InsertFreightCalculation,
   type StorageCalculation,
@@ -100,7 +103,7 @@ import {
   type InsertSupportTicketMessage,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql, and, gte, lt, ne } from "drizzle-orm";
+import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -134,6 +137,14 @@ export interface IStorage {
   getChecklistItems(checklistId: number): Promise<ChecklistItem[]>;
   createChecklistItem(item: InsertChecklistItem): Promise<ChecklistItem>;
   updateChecklistItem(id: number, item: Partial<InsertChecklistItem>): Promise<ChecklistItem | undefined>;
+
+  // Checklist attachment operations
+  getChecklistAttachments(checklistId: number): Promise<ChecklistAttachment[]>;
+  getChecklistAttachmentsByCompany(companyId: number): Promise<ChecklistAttachment[]>;
+  getExpiringAttachments(daysAhead: number): Promise<ChecklistAttachment[]>;
+  createChecklistAttachment(attachment: InsertChecklistAttachment): Promise<ChecklistAttachment>;
+  updateChecklistAttachment(id: number, attachment: Partial<InsertChecklistAttachment>): Promise<ChecklistAttachment | undefined>;
+  deleteChecklistAttachment(id: number): Promise<boolean>;
 
   // Freight calculation operations
   getFreightCalculations(companyId?: number): Promise<FreightCalculation[]>;
@@ -480,6 +491,50 @@ export class DatabaseStorage implements IStorage {
       .where(eq(checklistItems.id, id))
       .returning();
     return updated;
+  }
+
+  // Checklist attachment operations
+  async getChecklistAttachments(checklistId: number): Promise<ChecklistAttachment[]> {
+    return db.select().from(checklistAttachments).where(eq(checklistAttachments.checklistId, checklistId));
+  }
+
+  async getChecklistAttachmentsByCompany(companyId: number): Promise<ChecklistAttachment[]> {
+    return db.select().from(checklistAttachments).where(eq(checklistAttachments.companyId, companyId));
+  }
+
+  async getExpiringAttachments(daysAhead: number): Promise<ChecklistAttachment[]> {
+    const today = new Date();
+    const futureDate = new Date();
+    futureDate.setDate(today.getDate() + daysAhead);
+    
+    return db.select().from(checklistAttachments)
+      .where(
+        and(
+          gte(checklistAttachments.dataValidade, today),
+          lte(checklistAttachments.dataValidade, futureDate),
+          eq(checklistAttachments.lembrete15DiasEnviado, false),
+          eq(checklistAttachments.status, "active")
+        )
+      );
+  }
+
+  async createChecklistAttachment(attachment: InsertChecklistAttachment): Promise<ChecklistAttachment> {
+    const [newAttachment] = await db.insert(checklistAttachments).values(attachment).returning();
+    return newAttachment;
+  }
+
+  async updateChecklistAttachment(id: number, attachment: Partial<InsertChecklistAttachment>): Promise<ChecklistAttachment | undefined> {
+    const [updated] = await db
+      .update(checklistAttachments)
+      .set({ ...attachment, updatedAt: new Date() })
+      .where(eq(checklistAttachments.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteChecklistAttachment(id: number): Promise<boolean> {
+    await db.delete(checklistAttachments).where(eq(checklistAttachments.id, id));
+    return true;
   }
 
   // Freight calculation operations

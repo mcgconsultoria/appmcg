@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TaxIdField } from "@/components/TaxIdField";
 import {
@@ -94,6 +95,7 @@ const sections = [
   { id: "motoristas", label: "Motoristas", icon: Truck, group: "areas" },
   { id: "marketing", label: "Marketing", icon: BarChart3, group: "areas" },
   { id: "juridico", label: "Jurídico", icon: Gavel, group: "areas" },
+  { id: "anexos", label: "Anexos", icon: FileText, group: "areas" },
   { id: "teste", label: "Cliente em Teste", icon: ClipboardList, group: "final" },
   { id: "onboarding", label: "Boas Vindas", icon: PartyPopper, group: "final" },
   { id: "relacionamento", label: "Relacionamento", icon: Handshake, group: "final" },
@@ -303,6 +305,24 @@ interface DocumentoEmpresa {
   razaoSocial: string;
 }
 
+interface AnexoDocumento {
+  id?: number;
+  categoria: "contratos" | "tabelas" | "licencas" | "cnd" | "certificacoes";
+  nome: string;
+  descricao: string;
+  dataValidade: string;
+  emailsNotificacao: string[];
+  sectionKey: string;
+}
+
+const categoriaAnexos = [
+  { id: "contratos", label: "Contratos", icon: FileText },
+  { id: "tabelas", label: "Tabelas", icon: FileText },
+  { id: "licencas", label: "Licenças", icon: FileText },
+  { id: "cnd", label: "CND", icon: FileText },
+  { id: "certificacoes", label: "Certificações", icon: Award },
+] as const;
+
 export default function Checklist() {
   const [activeSection, setActiveSection] = useState("perfil");
   const [checklistId, setChecklistId] = useState<number | null>(null);
@@ -345,6 +365,7 @@ export default function Checklist() {
   
   const [contatosCliente, setContatosCliente] = useState<ContatoCliente[]>([]);
   const [portaisSenhas, setPortaisSenhas] = useState<PortalSenha[]>([]);
+  const [anexos, setAnexos] = useState<AnexoDocumento[]>([]);
   
   // Section responsáveis
   const [sectionResponsaveis, setSectionResponsaveis] = useState<Record<string, SectionResponsavel>>({});
@@ -478,6 +499,27 @@ export default function Checklist() {
     setPortaisSenhas(portaisSenhas.filter((_, i) => i !== index));
   };
 
+  const addAnexo = (categoria: AnexoDocumento["categoria"]) => {
+    setAnexos([...anexos, {
+      categoria,
+      nome: "",
+      descricao: "",
+      dataValidade: "",
+      emailsNotificacao: [],
+      sectionKey: "",
+    }]);
+  };
+
+  const updateAnexo = (index: number, field: keyof AnexoDocumento, value: any) => {
+    const updated = [...anexos];
+    updated[index] = { ...updated[index], [field]: value };
+    setAnexos(updated);
+  };
+
+  const removeAnexo = (index: number) => {
+    setAnexos(anexos.filter((_, i) => i !== index));
+  };
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       const payload = {
@@ -514,6 +556,7 @@ export default function Checklist() {
         pipelineTarget: pipelineTarget ? parseFloat(pipelineTarget) : null,
         contatosCliente,
         portaisSenhas,
+        anexos,
       };
       
       if (checklistId) {
@@ -571,6 +614,7 @@ export default function Checklist() {
     setPipelineTarget("");
     setContatosCliente([]);
     setPortaisSenhas([]);
+    setAnexos([]);
     setSectionResponsaveis({});
     setAnswers({});
     setSelectedClientId(null);
@@ -1186,6 +1230,165 @@ export default function Checklist() {
     </div>
   );
 
+  const renderAnexosSection = () => {
+    const getDaysUntilExpiry = (dateStr: string) => {
+      if (!dateStr) return null;
+      const today = new Date();
+      const expiryDate = new Date(dateStr);
+      const diffTime = expiryDate.getTime() - today.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    };
+
+    const getExpiryBadge = (dateStr: string) => {
+      const days = getDaysUntilExpiry(dateStr);
+      if (days === null) return null;
+      if (days < 0) return <Badge variant="destructive">Vencido</Badge>;
+      if (days <= 15) return <Badge variant="destructive">Vence em {days} dias</Badge>;
+      if (days <= 30) return <Badge variant="secondary">Vence em {days} dias</Badge>;
+      return <Badge variant="outline">{days} dias</Badge>;
+    };
+
+    const allEmails = contatosCliente
+      .filter(c => c.email)
+      .map(c => c.email);
+
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Documentos e Anexos
+            </CardTitle>
+            <CardDescription>
+              Gerencie contratos, tabelas, licenças e certificações com datas de validade.
+              Os responsáveis serão notificados 15 dias antes do vencimento.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {categoriaAnexos.map((cat) => {
+              const anexosCategoria = anexos.filter(a => a.categoria === cat.id);
+              return (
+                <div key={cat.id} className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <cat.icon className="h-4 w-4" />
+                      {cat.label}
+                    </h4>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => addAnexo(cat.id)}
+                      data-testid={`button-add-anexo-${cat.id}`}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Adicionar
+                    </Button>
+                  </div>
+                  
+                  {anexosCategoria.length === 0 ? (
+                    <p className="text-sm text-muted-foreground pl-6">
+                      Nenhum documento cadastrado
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {anexos.map((anexo, index) => {
+                        if (anexo.categoria !== cat.id) return null;
+                        return (
+                          <Card key={index} className="p-4">
+                            <div className="flex items-start justify-between gap-2 mb-3">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium text-sm">{anexo.nome || "Novo documento"}</span>
+                                  {getExpiryBadge(anexo.dataValidade)}
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => removeAnexo(index)}
+                                data-testid={`button-remove-anexo-${index}`}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <div className="space-y-1">
+                                <Label className="text-xs">Nome do Documento</Label>
+                                <Input
+                                  value={anexo.nome}
+                                  onChange={(e) => updateAnexo(index, "nome", e.target.value)}
+                                  placeholder="Ex: Contrato de Prestação de Serviços"
+                                  data-testid={`input-anexo-nome-${index}`}
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <Label className="text-xs">Data de Validade</Label>
+                                <Input
+                                  type="date"
+                                  value={anexo.dataValidade}
+                                  onChange={(e) => updateAnexo(index, "dataValidade", e.target.value)}
+                                  data-testid={`input-anexo-validade-${index}`}
+                                />
+                              </div>
+                            </div>
+                            <div className="mt-3 space-y-1">
+                              <Label className="text-xs">Descrição</Label>
+                              <Input
+                                value={anexo.descricao}
+                                onChange={(e) => updateAnexo(index, "descricao", e.target.value)}
+                                placeholder="Detalhes do documento..."
+                                data-testid={`input-anexo-descricao-${index}`}
+                              />
+                            </div>
+                            <div className="mt-3 space-y-1">
+                              <Label className="text-xs">Área Relacionada</Label>
+                              <Select
+                                value={anexo.sectionKey}
+                                onValueChange={(v) => updateAnexo(index, "sectionKey", v)}
+                              >
+                                <SelectTrigger data-testid={`select-anexo-area-${index}`}>
+                                  <SelectValue placeholder="Selecione a área..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {sections.filter(s => s.group === "areas" || s.group === "operacoes").map((sec) => (
+                                    <SelectItem key={sec.id} value={sec.id}>
+                                      {sec.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="mt-3 space-y-1">
+                              <Label className="text-xs">Emails para Notificação (separados por vírgula)</Label>
+                              <Input
+                                value={anexo.emailsNotificacao.join(", ")}
+                                onChange={(e) => updateAnexo(index, "emailsNotificacao", e.target.value.split(",").map(e => e.trim()).filter(Boolean))}
+                                placeholder="email1@empresa.com, email2@empresa.com"
+                                data-testid={`input-anexo-emails-${index}`}
+                              />
+                              {allEmails.length > 0 && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Contatos disponíveis: {allEmails.join(", ")}
+                                </p>
+                              )}
+                            </div>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
+                  <Separator className="my-4" />
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
   const renderQuestionsSection = () => {
     const sectionData = sectionResponsaveis[activeSection] || {};
     
@@ -1643,7 +1846,11 @@ export default function Checklist() {
               </Badge>
             </CardHeader>
             <CardContent>
-              {activeSection === "perfil" ? renderPerfilSection() : renderQuestionsSection()}
+              {activeSection === "perfil" 
+                ? renderPerfilSection() 
+                : activeSection === "anexos" 
+                  ? renderAnexosSection() 
+                  : renderQuestionsSection()}
             </CardContent>
           </Card>
 

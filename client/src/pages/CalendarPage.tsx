@@ -23,10 +23,10 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plus, Calendar, Trash2, Edit2, Loader2, Clock, MapPin, Users } from "lucide-react";
+import { Plus, Calendar, Trash2, Edit2, Loader2, Clock, MapPin, Users, FileText, AlertCircle } from "lucide-react";
 import { format, startOfWeek, addDays, isSameDay, parseISO, getWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { CommercialEvent, Client } from "@shared/schema";
+import type { CommercialEvent, Client, ChecklistAttachment } from "@shared/schema";
 import { ClientCombobox } from "@/components/ClientCombobox";
 
 const eventTypes = [
@@ -74,6 +74,10 @@ export default function CalendarPage() {
 
   const { data: clients } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
+  });
+
+  const { data: expiringAttachments } = useQuery<ChecklistAttachment[]>({
+    queryKey: ["/api/attachments/expiring?days=30"],
   });
 
   const createMutation = useMutation({
@@ -194,6 +198,32 @@ export default function CalendarPage() {
       if (!event.startDate) return false;
       return isSameDay(parseISO(event.startDate.toString()), date);
     }) || [];
+  };
+
+  const getAttachmentsExpiringOnDay = (date: Date) => {
+    return expiringAttachments?.filter(attachment => {
+      if (!attachment.dataValidade) return false;
+      return isSameDay(new Date(attachment.dataValidade), date);
+    }) || [];
+  };
+
+  const getDaysUntilExpiry = (dateValue: Date | string | null) => {
+    if (!dateValue) return null;
+    const today = new Date();
+    const expiryDate = new Date(dateValue);
+    const diffTime = expiryDate.getTime() - today.getTime();
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+
+  const getCategoriaLabel = (categoria: string) => {
+    const labels: Record<string, string> = {
+      contratos: "Contrato",
+      tabelas: "Tabela",
+      licencas: "Licenca",
+      cnd: "CND",
+      certificacoes: "Certificacao",
+    };
+    return labels[categoria] || categoria;
   };
 
   const getClientName = (clientId: number | null) => {
@@ -386,6 +416,7 @@ export default function CalendarPage() {
           <div className="grid grid-cols-7 gap-2">
             {weekDays.map((day, index) => {
               const dayEvents = getEventsForDay(day);
+              const dayAttachments = getAttachmentsExpiringOnDay(day);
               const isToday = isSameDay(day, new Date());
 
               return (
@@ -402,6 +433,29 @@ export default function CalendarPage() {
                     </div>
                   </div>
                   <div className="space-y-1">
+                    {dayAttachments.map((attachment) => {
+                      const days = getDaysUntilExpiry(attachment.dataValidade);
+                      const isExpired = days !== null && days < 0;
+                      const isUrgent = days !== null && days <= 15;
+                      return (
+                        <div
+                          key={`att-${attachment.id}`}
+                          className={`p-2 rounded-md text-xs ${isExpired ? "bg-destructive/20" : isUrgent ? "bg-amber-500/20" : "bg-orange-500/10"}`}
+                          data-testid={`attachment-expiry-${attachment.id}`}
+                        >
+                          <div className="flex items-center gap-1 mb-1">
+                            <AlertCircle className={`h-3 w-3 ${isExpired ? "text-destructive" : isUrgent ? "text-amber-600" : "text-orange-600"}`} />
+                            <span className="font-medium truncate">{getCategoriaLabel(attachment.categoria)}</span>
+                          </div>
+                          <div className="text-muted-foreground truncate">
+                            {attachment.nome}
+                          </div>
+                          <Badge variant={isExpired ? "destructive" : "secondary"} className="mt-1 text-xs">
+                            {isExpired ? "Vencido" : `Vence`}
+                          </Badge>
+                        </div>
+                      );
+                    })}
                     {dayEvents.map((event) => {
                       const typeInfo = getEventTypeInfo(event.eventType);
                       return (
@@ -454,6 +508,10 @@ export default function CalendarPage() {
             <span className="text-muted-foreground">{type.label}</span>
           </div>
         ))}
+        <div className="flex items-center gap-2 text-sm ml-4 pl-4 border-l">
+          <AlertCircle className="h-3 w-3 text-amber-600" />
+          <span className="text-muted-foreground">Vencimento de Documento</span>
+        </div>
       </div>
     </div>
   );
