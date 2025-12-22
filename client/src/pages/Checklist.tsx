@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TaxIdField } from "@/components/TaxIdField";
 import {
   Select,
   SelectContent,
@@ -295,6 +296,13 @@ interface PortalSenha {
   observacao: string;
 }
 
+interface DocumentoEmpresa {
+  tipo: "cnpj" | "cpf";
+  numero: string;
+  categoria: "matriz" | "filial" | "grupo";
+  razaoSocial: string;
+}
+
 export default function Checklist() {
   const [activeSection, setActiveSection] = useState("perfil");
   const [checklistId, setChecklistId] = useState<number | null>(null);
@@ -303,6 +311,7 @@ export default function Checklist() {
   // Profile fields
   const [clienteNome, setClienteNome] = useState("");
   const [clienteCnpj, setClienteCnpj] = useState("");
+  const [documentosEmpresa, setDocumentosEmpresa] = useState<DocumentoEmpresa[]>([]);
   const [focalPointNome, setFocalPointNome] = useState("");
   const [focalPointEmail, setFocalPointEmail] = useState("");
   const [focalPointCelular, setFocalPointCelular] = useState("");
@@ -615,20 +624,106 @@ export default function Checklist() {
                   <Input 
                     value={clienteNome} 
                     onChange={(e) => setClienteNome(e.target.value)}
-                    placeholder="Razão Social"
+                    placeholder="Razao Social"
                     data-testid="input-cliente-nome"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>CNPJ</Label>
-                  <Input 
-                    value={clienteCnpj} 
-                    onChange={(e) => setClienteCnpj(e.target.value)}
-                    placeholder="00.000.000/0000-00"
+                  <TaxIdField
+                    value={clienteCnpj}
+                    onChange={setClienteCnpj}
+                    label="Documento Principal (Matriz)"
                     data-testid="input-cliente-cnpj"
                   />
                 </div>
               </div>
+              
+              {documentosEmpresa.length > 0 && (
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">Documentos Adicionais (Filiais / Grupo)</Label>
+                  {documentosEmpresa.map((doc, index) => (
+                    <div key={index} className="p-3 border rounded-lg bg-muted/30 space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <Badge variant="outline" className="text-xs">
+                          {doc.categoria === "matriz" ? "Matriz" : doc.categoria === "filial" ? "Filial" : "Grupo"}
+                        </Badge>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => setDocumentosEmpresa(documentosEmpresa.filter((_, i) => i !== index))}
+                          data-testid={`btn-remove-doc-${index}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        <Select 
+                          value={doc.tipo} 
+                          onValueChange={(v) => {
+                            const updated = [...documentosEmpresa];
+                            updated[index] = { ...updated[index], tipo: v as "cnpj" | "cpf" };
+                            setDocumentosEmpresa(updated);
+                          }}
+                        >
+                          <SelectTrigger data-testid={`select-tipo-doc-${index}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="cnpj">CNPJ</SelectItem>
+                            <SelectItem value="cpf">CPF</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Input 
+                          value={doc.numero}
+                          onChange={(e) => {
+                            const updated = [...documentosEmpresa];
+                            updated[index] = { ...updated[index], numero: e.target.value };
+                            setDocumentosEmpresa(updated);
+                          }}
+                          placeholder={doc.tipo === "cnpj" ? "00.000.000/0000-00" : "000.000.000-00"}
+                          data-testid={`input-doc-numero-${index}`}
+                        />
+                        <Select 
+                          value={doc.categoria} 
+                          onValueChange={(v) => {
+                            const updated = [...documentosEmpresa];
+                            updated[index] = { ...updated[index], categoria: v as "matriz" | "filial" | "grupo" };
+                            setDocumentosEmpresa(updated);
+                          }}
+                        >
+                          <SelectTrigger data-testid={`select-categoria-${index}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="filial">Filial</SelectItem>
+                            <SelectItem value="grupo">Grupo</SelectItem>
+                            <SelectItem value="matriz">Matriz</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Input 
+                        value={doc.razaoSocial}
+                        onChange={(e) => {
+                          const updated = [...documentosEmpresa];
+                          updated[index] = { ...updated[index], razaoSocial: e.target.value };
+                          setDocumentosEmpresa(updated);
+                        }}
+                        placeholder="Razao Social"
+                        data-testid={`input-razao-social-${index}`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <Button 
+                variant="outline" 
+                onClick={() => setDocumentosEmpresa([...documentosEmpresa, { tipo: "cnpj", numero: "", categoria: "filial", razaoSocial: "" }])}
+                data-testid="btn-add-documento"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar CNPJ/CPF (Filial ou Grupo)
+              </Button>
             </CardContent>
           </Card>
           
