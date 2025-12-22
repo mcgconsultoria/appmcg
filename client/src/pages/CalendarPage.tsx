@@ -23,7 +23,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plus, Calendar, Trash2, Edit2, Loader2, Clock, MapPin, Users, FileText, AlertCircle } from "lucide-react";
+import { Plus, Calendar, Trash2, Edit2, Loader2, Clock, MapPin, Users, FileText, AlertCircle, Upload, FileSpreadsheet } from "lucide-react";
+import { SiGoogle } from "react-icons/si";
 import { format, startOfWeek, addDays, isSameDay, parseISO, getWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { CommercialEvent, Client, ChecklistAttachment } from "@shared/schema";
@@ -122,6 +123,35 @@ export default function CalendarPage() {
     },
     onError: () => {
       toast({ title: "Erro ao excluir evento", variant: "destructive" });
+    },
+  });
+
+  const syncGoogleCalendarMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest("POST", `/api/commercial-events/${id}/sync-google-calendar`);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Evento sincronizado com Google Calendar" });
+    },
+    onError: () => {
+      toast({ title: "Erro ao sincronizar com Google Calendar", variant: "destructive" });
+    },
+  });
+
+  const exportGoogleSheetsMutation = useMutation({
+    mutationFn: async (type: string) => {
+      const res = await apiRequest("POST", "/api/export/google-sheets", { type });
+      return res.json();
+    },
+    onSuccess: (data: any) => {
+      if (data.spreadsheetUrl) {
+        window.open(data.spreadsheetUrl, "_blank");
+      }
+      toast({ title: "Dados exportados para Google Sheets" });
+    },
+    onError: () => {
+      toast({ title: "Erro ao exportar para Google Sheets", variant: "destructive" });
     },
   });
 
@@ -394,7 +424,7 @@ export default function CalendarPage() {
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
+        <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4 flex-wrap">
           <div className="flex items-center gap-4">
             <Button variant="outline" size="icon" onClick={() => navigateWeek(-1)} data-testid="button-prev-week">
               <span className="sr-only">Semana anterior</span>
@@ -408,9 +438,25 @@ export default function CalendarPage() {
               {">"}
             </Button>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))} data-testid="button-today">
-            Hoje
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => exportGoogleSheetsMutation.mutate("events")}
+              disabled={exportGoogleSheetsMutation.isPending}
+              data-testid="button-export-sheets"
+            >
+              {exportGoogleSheetsMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <SiGoogle className="h-4 w-4 mr-2" />
+              )}
+              Exportar Sheets
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }))} data-testid="button-today">
+              Hoje
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-7 gap-2">
@@ -461,13 +507,26 @@ export default function CalendarPage() {
                       return (
                         <div
                           key={event.id}
-                          className="p-2 rounded-md bg-muted hover-elevate cursor-pointer text-xs"
+                          className="p-2 rounded-md bg-muted hover-elevate cursor-pointer text-xs group relative"
                           onClick={() => openEditDialog(event)}
                           data-testid={`event-card-${event.id}`}
                         >
                           <div className="flex items-center gap-1 mb-1">
                             <div className={`w-2 h-2 rounded-full ${typeInfo.color}`} />
-                            <span className="font-medium truncate">{event.title}</span>
+                            <span className="font-medium truncate flex-1">{event.title}</span>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-5 w-5 invisible group-hover:visible"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                syncGoogleCalendarMutation.mutate(event.id);
+                              }}
+                              disabled={syncGoogleCalendarMutation.isPending}
+                              data-testid={`button-sync-google-${event.id}`}
+                            >
+                              <SiGoogle className="h-3 w-3" />
+                            </Button>
                           </div>
                           {event.startDate && (
                             <div className="flex items-center gap-1 text-muted-foreground">

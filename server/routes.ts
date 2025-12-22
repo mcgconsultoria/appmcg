@@ -1887,6 +1887,156 @@ export async function registerRoutes(
     }
   });
 
+  // Google Calendar sync endpoint
+  app.post("/api/commercial-events/:id/sync-google-calendar", isAuthenticated, async (req: any, res) => {
+    try {
+      const { createCalendarEvent, isGoogleIntegrationAvailable } = await import("./googleServices");
+      
+      if (!isGoogleIntegrationAvailable()) {
+        return res.status(400).json({ message: "Integracao com Google Calendar nao configurada" });
+      }
+
+      const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      const event = await storage.getCommercialEvent(id);
+      
+      if (!event) {
+        return res.status(404).json({ message: "Evento nao encontrado" });
+      }
+      if (event.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+
+      const client = event.clientId ? await storage.getClient(event.clientId) : null;
+      const description = `${event.description || ""}\n\nCliente: ${client?.name || "Nao especificado"}\nLocal: ${event.location || "Nao especificado"}`;
+      
+      const startDate = event.startDate ? new Date(event.startDate) : new Date();
+      const endDate = event.endDate ? new Date(event.endDate) : new Date(startDate.getTime() + 60 * 60 * 1000);
+
+      const result = await createCalendarEvent(
+        event.title,
+        description,
+        startDate,
+        endDate
+      );
+
+      if (result.success) {
+        res.json({ success: true, message: "Evento sincronizado com Google Calendar", eventId: result.eventId });
+      } else {
+        res.status(500).json({ success: false, message: "Erro ao sincronizar", error: result.error });
+      }
+    } catch (error: any) {
+      console.error("Error syncing to Google Calendar:", error);
+      res.status(500).json({ message: "Falha ao sincronizar com Google Calendar", error: error.message });
+    }
+  });
+
+  // Google Sheets export endpoint
+  app.post("/api/export/google-sheets", isAuthenticated, async (req: any, res) => {
+    try {
+      const { exportToGoogleSheets, isGoogleIntegrationAvailable } = await import("./googleServices");
+      
+      if (!isGoogleIntegrationAvailable()) {
+        return res.status(400).json({ message: "Integracao com Google Sheets nao configurada" });
+      }
+
+      const { type } = req.body;
+      const userCompanyId = req.user.companyId || 1;
+      let data: any[][] = [];
+      let sheetName = "";
+
+      switch (type) {
+        case "clients":
+          const clients = await storage.getClients(userCompanyId);
+          sheetName = `MCG_Clientes_${new Date().toISOString().split('T')[0]}`;
+          data = [
+            ["Nome", "Nome Fantasia", "CNPJ", "Email", "Telefone", "Cidade", "Estado", "Segmento", "Status", "Estagio Pipeline"],
+            ...clients.map(c => [
+              c.name || "",
+              c.tradeName || "",
+              c.cnpj || "",
+              c.email || "",
+              c.phone || "",
+              c.city || "",
+              c.state || "",
+              c.segment || "",
+              c.status || "",
+              c.pipelineStage || ""
+            ])
+          ];
+          break;
+
+        case "tasks":
+          const tasks = await storage.getTasks(userCompanyId);
+          sheetName = `MCG_Tarefas_${new Date().toISOString().split('T')[0]}`;
+          data = [
+            ["Titulo", "Descricao", "Prioridade", "Status", "Data Limite", "Responsavel"],
+            ...tasks.map(t => [
+              t.title || "",
+              t.description || "",
+              t.priority || "",
+              t.status || "",
+              t.dueDate ? new Date(t.dueDate).toLocaleDateString('pt-BR') : "",
+              t.assignedTo || ""
+            ])
+          ];
+          break;
+
+        case "events":
+          const events = await storage.getCommercialEvents(userCompanyId);
+          sheetName = `MCG_Eventos_${new Date().toISOString().split('T')[0]}`;
+          data = [
+            ["Titulo", "Tipo", "Data Inicio", "Data Fim", "Local", "Descricao"],
+            ...events.map(e => [
+              e.title || "",
+              e.eventType || "",
+              e.startDate ? new Date(e.startDate).toLocaleString('pt-BR') : "",
+              e.endDate ? new Date(e.endDate).toLocaleString('pt-BR') : "",
+              e.location || "",
+              e.description || ""
+            ])
+          ];
+          break;
+
+        default:
+          return res.status(400).json({ message: "Tipo de exportacao invalido" });
+      }
+
+      const result = await exportToGoogleSheets(sheetName, data);
+
+      if (result.success) {
+        res.json({ 
+          success: true, 
+          message: "Dados exportados para Google Sheets", 
+          spreadsheetUrl: result.spreadsheetUrl 
+        });
+      } else {
+        res.status(500).json({ success: false, message: "Erro ao exportar", error: result.error });
+      }
+    } catch (error: any) {
+      console.error("Error exporting to Google Sheets:", error);
+      res.status(500).json({ message: "Falha ao exportar para Google Sheets", error: error.message });
+    }
+  });
+
+  // Check Google integration status
+  app.get("/api/google/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const { isGoogleIntegrationAvailable } = await import("./googleServices");
+      res.json({ 
+        configured: isGoogleIntegrationAvailable(),
+        services: {
+          gmail: isGoogleIntegrationAvailable(),
+          calendar: isGoogleIntegrationAvailable(),
+          drive: isGoogleIntegrationAvailable(),
+          sheets: isGoogleIntegrationAvailable()
+        }
+      });
+    } catch (error) {
+      res.json({ configured: false, services: {} });
+    }
+  });
+
   // Projects routes
   app.get("/api/projects", isAuthenticated, async (req: any, res) => {
     try {
