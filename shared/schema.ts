@@ -273,6 +273,38 @@ export const checklistItems = pgTable("checklist_items", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Checklist attachments table - Documents with validity dates
+export const checklistAttachments = pgTable("checklist_attachments", {
+  id: serial("id").primaryKey(),
+  checklistId: integer("checklist_id").notNull(),
+  companyId: integer("company_id").notNull(),
+  
+  // Categoria do documento
+  categoria: varchar("categoria", { length: 50 }).notNull(), // contratos, tabelas, licencas, cnd, certificacoes
+  
+  // Detalhes do documento
+  nome: varchar("nome", { length: 255 }).notNull(),
+  descricao: text("descricao"),
+  arquivo: varchar("arquivo", { length: 500 }), // URL ou path do arquivo
+  
+  // Data de validade
+  dataValidade: timestamp("data_validade"),
+  
+  // Controle de lembretes
+  lembrete15DiasEnviado: boolean("lembrete_15_dias_enviado").default(false),
+  lembreteEnviadoEm: timestamp("lembrete_enviado_em"),
+  
+  // Emails para notificar (JSON array de emails)
+  emailsNotificacao: jsonb("emails_notificacao").$type<string[]>(),
+  
+  // Área/Seção relacionada (para pegar contatos)
+  sectionKey: varchar("section_key", { length: 50 }),
+  
+  status: varchar("status").default("active"), // active, expired, archived
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Freight calculations table
 export const freightCalculations = pgTable("freight_calculations", {
   id: serial("id").primaryKey(),
@@ -681,6 +713,17 @@ export const checklistItemsRelations = relations(checklistItems, ({ one }) => ({
   }),
 }));
 
+export const checklistAttachmentsRelations = relations(checklistAttachments, ({ one }) => ({
+  checklist: one(checklists, {
+    fields: [checklistAttachments.checklistId],
+    references: [checklists.id],
+  }),
+  company: one(companies, {
+    fields: [checklistAttachments.companyId],
+    references: [companies.id],
+  }),
+}));
+
 // Insert schemas
 export const insertCompanySchema = createInsertSchema(companies).omit({
   id: true,
@@ -709,6 +752,12 @@ export const insertChecklistSectionSchema = createInsertSchema(checklistSections
 export const insertChecklistItemSchema = createInsertSchema(checklistItems).omit({
   id: true,
   createdAt: true,
+});
+
+export const insertChecklistAttachmentSchema = createInsertSchema(checklistAttachments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertFreightCalculationSchema = createInsertSchema(freightCalculations).omit({
@@ -1152,6 +1201,8 @@ export type ChecklistSection = typeof checklistSections.$inferSelect;
 export type InsertChecklistSection = z.infer<typeof insertChecklistSectionSchema>;
 export type ChecklistItem = typeof checklistItems.$inferSelect;
 export type InsertChecklistItem = z.infer<typeof insertChecklistItemSchema>;
+export type ChecklistAttachment = typeof checklistAttachments.$inferSelect;
+export type InsertChecklistAttachment = z.infer<typeof insertChecklistAttachmentSchema>;
 export type FreightCalculation = typeof freightCalculations.$inferSelect;
 export type InsertFreightCalculation = z.infer<typeof insertFreightCalculationSchema>;
 export type StorageCalculation = typeof storageCalculations.$inferSelect;
