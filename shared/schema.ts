@@ -1147,6 +1147,80 @@ export const supportTicketMessages = pgTable("support_ticket_messages", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// ============================================
+// DIGITAL CONTRACTS - Assinatura Digital
+// ============================================
+
+// Contract templates - MCG defines contract templates
+export const contractTemplates = pgTable("contract_templates", {
+  id: serial("id").primaryKey(),
+  type: varchar("type", { length: 50 }).notNull(), // consultoria, aplicativo
+  name: varchar("name", { length: 255 }).notNull(),
+  version: varchar("version", { length: 20 }).default("1.0"),
+  content: text("content"), // HTML/Markdown content of the contract
+  isActive: boolean("is_active").default(true),
+  validFrom: timestamp("valid_from"),
+  validUntil: timestamp("valid_until"),
+  createdBy: varchar("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Contract agreements - instances of contracts for each company
+export const contractAgreements = pgTable("contract_agreements", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  templateId: integer("template_id").notNull(),
+  contractType: varchar("contract_type", { length: 50 }).notNull(), // consultoria, aplicativo
+  status: varchar("status", { length: 50 }).default("pending"), // pending, sent, viewed, signed, expired, cancelled
+  providerName: varchar("provider_name", { length: 50 }), // d4sign, clicksign, docusign
+  providerEnvelopeId: varchar("provider_envelope_id", { length: 255 }), // External ID from signing provider
+  providerSignUrl: varchar("provider_sign_url", { length: 1000 }), // URL for signing
+  signedPdfUrl: varchar("signed_pdf_url", { length: 1000 }), // URL to signed PDF
+  issuedAt: timestamp("issued_at"),
+  viewedAt: timestamp("viewed_at"),
+  signedAt: timestamp("signed_at"),
+  expiresAt: timestamp("expires_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Contract signatures - individual signatures on agreements
+export const contractSignatures = pgTable("contract_signatures", {
+  id: serial("id").primaryKey(),
+  agreementId: integer("agreement_id").notNull(),
+  signerRole: varchar("signer_role", { length: 50 }).notNull(), // cliente, mcg
+  signerUserId: varchar("signer_user_id"),
+  signerName: varchar("signer_name", { length: 255 }),
+  signerEmail: varchar("signer_email", { length: 255 }),
+  signerCpf: varchar("signer_cpf", { length: 14 }),
+  signatureType: varchar("signature_type", { length: 50 }), // eletronica, digital_icp
+  certificateInfo: jsonb("certificate_info"), // ICP-Brasil certificate details
+  signedAt: timestamp("signed_at"),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  status: varchar("status", { length: 50 }).default("pending"), // pending, signed, rejected
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert schemas for contracts
+export const insertContractTemplateSchema = createInsertSchema(contractTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertContractAgreementSchema = createInsertSchema(contractAgreements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertContractSignatureSchema = createInsertSchema(contractSignatures).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Client Admin insert schemas
 export const insertCompanyTeamMemberSchema = createInsertSchema(companyTeamMembers).omit({
   id: true,
@@ -1265,3 +1339,11 @@ export type SupportTicket = typeof supportTickets.$inferSelect;
 export type InsertSupportTicket = z.infer<typeof insertSupportTicketSchema>;
 export type SupportTicketMessage = typeof supportTicketMessages.$inferSelect;
 export type InsertSupportTicketMessage = z.infer<typeof insertSupportTicketMessageSchema>;
+
+// Digital Contract Types
+export type ContractTemplate = typeof contractTemplates.$inferSelect;
+export type InsertContractTemplate = z.infer<typeof insertContractTemplateSchema>;
+export type ContractAgreement = typeof contractAgreements.$inferSelect;
+export type InsertContractAgreement = z.infer<typeof insertContractAgreementSchema>;
+export type ContractSignature = typeof contractSignatures.$inferSelect;
+export type InsertContractSignature = z.infer<typeof insertContractSignatureSchema>;

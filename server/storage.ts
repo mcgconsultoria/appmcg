@@ -95,12 +95,21 @@ import {
   companyTeamMembers,
   supportTickets,
   supportTicketMessages,
+  contractTemplates,
+  contractAgreements,
+  contractSignatures,
   type CompanyTeamMember,
   type InsertCompanyTeamMember,
   type SupportTicket,
   type InsertSupportTicket,
   type SupportTicketMessage,
   type InsertSupportTicketMessage,
+  type ContractTemplate,
+  type InsertContractTemplate,
+  type ContractAgreement,
+  type InsertContractAgreement,
+  type ContractSignature,
+  type InsertContractSignature,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
@@ -343,6 +352,31 @@ export interface IStorage {
   // Support Ticket Message operations
   getSupportTicketMessages(ticketId: number): Promise<SupportTicketMessage[]>;
   createSupportTicketMessage(message: InsertSupportTicketMessage): Promise<SupportTicketMessage>;
+
+  // ============================================
+  // DIGITAL CONTRACTS - Assinatura Digital
+  // ============================================
+
+  // Contract Template operations
+  getContractTemplates(): Promise<ContractTemplate[]>;
+  getContractTemplate(id: number): Promise<ContractTemplate | undefined>;
+  getContractTemplateByType(type: string): Promise<ContractTemplate | undefined>;
+  createContractTemplate(template: InsertContractTemplate): Promise<ContractTemplate>;
+  updateContractTemplate(id: number, template: Partial<InsertContractTemplate>): Promise<ContractTemplate | undefined>;
+  deleteContractTemplate(id: number): Promise<boolean>;
+
+  // Contract Agreement operations
+  getContractAgreements(companyId?: number): Promise<ContractAgreement[]>;
+  getContractAgreement(id: number): Promise<ContractAgreement | undefined>;
+  getContractAgreementsByCompany(companyId: number): Promise<ContractAgreement[]>;
+  createContractAgreement(agreement: InsertContractAgreement): Promise<ContractAgreement>;
+  updateContractAgreement(id: number, agreement: Partial<InsertContractAgreement>): Promise<ContractAgreement | undefined>;
+  deleteContractAgreement(id: number): Promise<boolean>;
+
+  // Contract Signature operations
+  getContractSignatures(agreementId: number): Promise<ContractSignature[]>;
+  createContractSignature(signature: InsertContractSignature): Promise<ContractSignature>;
+  updateContractSignature(id: number, signature: Partial<InsertContractSignature>): Promise<ContractSignature | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1356,6 +1390,107 @@ export class DatabaseStorage implements IStorage {
   async createSupportTicketMessage(message: InsertSupportTicketMessage): Promise<SupportTicketMessage> {
     const [newMessage] = await db.insert(supportTicketMessages).values(message).returning();
     return newMessage;
+  }
+
+  // ============================================
+  // DIGITAL CONTRACTS - Assinatura Digital
+  // ============================================
+
+  // Contract Template operations
+  async getContractTemplates(): Promise<ContractTemplate[]> {
+    return db.select().from(contractTemplates).orderBy(desc(contractTemplates.createdAt));
+  }
+
+  async getContractTemplate(id: number): Promise<ContractTemplate | undefined> {
+    const [template] = await db.select().from(contractTemplates).where(eq(contractTemplates.id, id));
+    return template;
+  }
+
+  async getContractTemplateByType(type: string): Promise<ContractTemplate | undefined> {
+    const [template] = await db.select().from(contractTemplates)
+      .where(and(eq(contractTemplates.type, type), eq(contractTemplates.isActive, true)))
+      .orderBy(desc(contractTemplates.createdAt));
+    return template;
+  }
+
+  async createContractTemplate(template: InsertContractTemplate): Promise<ContractTemplate> {
+    const [newTemplate] = await db.insert(contractTemplates).values(template).returning();
+    return newTemplate;
+  }
+
+  async updateContractTemplate(id: number, template: Partial<InsertContractTemplate>): Promise<ContractTemplate | undefined> {
+    const [updated] = await db
+      .update(contractTemplates)
+      .set({ ...template, updatedAt: new Date() })
+      .where(eq(contractTemplates.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteContractTemplate(id: number): Promise<boolean> {
+    await db.delete(contractTemplates).where(eq(contractTemplates.id, id));
+    return true;
+  }
+
+  // Contract Agreement operations
+  async getContractAgreements(companyId?: number): Promise<ContractAgreement[]> {
+    if (companyId) {
+      return db.select().from(contractAgreements)
+        .where(eq(contractAgreements.companyId, companyId))
+        .orderBy(desc(contractAgreements.createdAt));
+    }
+    return db.select().from(contractAgreements).orderBy(desc(contractAgreements.createdAt));
+  }
+
+  async getContractAgreement(id: number): Promise<ContractAgreement | undefined> {
+    const [agreement] = await db.select().from(contractAgreements).where(eq(contractAgreements.id, id));
+    return agreement;
+  }
+
+  async getContractAgreementsByCompany(companyId: number): Promise<ContractAgreement[]> {
+    return db.select().from(contractAgreements)
+      .where(eq(contractAgreements.companyId, companyId))
+      .orderBy(desc(contractAgreements.createdAt));
+  }
+
+  async createContractAgreement(agreement: InsertContractAgreement): Promise<ContractAgreement> {
+    const [newAgreement] = await db.insert(contractAgreements).values(agreement).returning();
+    return newAgreement;
+  }
+
+  async updateContractAgreement(id: number, agreement: Partial<InsertContractAgreement>): Promise<ContractAgreement | undefined> {
+    const [updated] = await db
+      .update(contractAgreements)
+      .set({ ...agreement, updatedAt: new Date() })
+      .where(eq(contractAgreements.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteContractAgreement(id: number): Promise<boolean> {
+    await db.delete(contractAgreements).where(eq(contractAgreements.id, id));
+    return true;
+  }
+
+  // Contract Signature operations
+  async getContractSignatures(agreementId: number): Promise<ContractSignature[]> {
+    return db.select().from(contractSignatures)
+      .where(eq(contractSignatures.agreementId, agreementId))
+      .orderBy(contractSignatures.createdAt);
+  }
+
+  async createContractSignature(signature: InsertContractSignature): Promise<ContractSignature> {
+    const [newSignature] = await db.insert(contractSignatures).values(signature).returning();
+    return newSignature;
+  }
+
+  async updateContractSignature(id: number, signature: Partial<InsertContractSignature>): Promise<ContractSignature | undefined> {
+    const [updated] = await db
+      .update(contractSignatures)
+      .set(signature)
+      .where(eq(contractSignatures.id, id))
+      .returning();
+    return updated;
   }
 }
 
