@@ -66,11 +66,15 @@ import {
   Ticket,
   PhoneCall,
   UserCog,
+  FileText,
+  Eye,
+  Download,
+  PenTool,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { CompanyTeamMember, User, SupportTicket, SupportTicketMessage } from "@shared/schema";
+import type { CompanyTeamMember, User, SupportTicket, SupportTicketMessage, ContractAgreement } from "@shared/schema";
 
 const teamMemberFormSchema = z.object({
   userId: z.string().min(1, "Selecione um usuario"),
@@ -150,6 +154,29 @@ const priorityColors: Record<string, string> = {
   medium: "bg-blue-500/10 text-blue-500",
   high: "bg-orange-500/10 text-orange-500",
   urgent: "bg-destructive/10 text-destructive",
+};
+
+const contractStatusLabels: Record<string, string> = {
+  pending: "Pendente",
+  sent: "Enviado",
+  viewed: "Visualizado",
+  signed: "Assinado",
+  expired: "Expirado",
+  cancelled: "Cancelado",
+};
+
+const contractStatusColors: Record<string, string> = {
+  pending: "bg-yellow-500/10 text-yellow-500",
+  sent: "bg-blue-500/10 text-blue-500",
+  viewed: "bg-purple-500/10 text-purple-500",
+  signed: "bg-green-500/10 text-green-500",
+  expired: "bg-red-500/10 text-red-500",
+  cancelled: "bg-muted text-muted-foreground",
+};
+
+const contractTypeLabels: Record<string, string> = {
+  consultoria: "Contrato de Consultoria",
+  aplicativo: "Contrato do Aplicativo",
 };
 
 function TeamTab() {
@@ -1057,6 +1084,302 @@ function SupportTab() {
   );
 }
 
+function ContractsTab() {
+  const { toast } = useToast();
+  const [selectedContract, setSelectedContract] = useState<ContractAgreement | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [signDialogOpen, setSignDialogOpen] = useState(false);
+  const [signerName, setSignerName] = useState("");
+  const [signerCpf, setSignerCpf] = useState("");
+
+  const { data: contracts = [], isLoading } = useQuery<ContractAgreement[]>({
+    queryKey: ["/api/my-contracts"],
+  });
+
+  const signMutation = useMutation({
+    mutationFn: async (agreementId: number) => {
+      const response = await apiRequest("POST", `/api/contract-agreements/${agreementId}/sign`, {
+        signerName,
+        signerCpf,
+        signatureType: "eletronica",
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/my-contracts"] });
+      setSignDialogOpen(false);
+      setSelectedContract(null);
+      setSignerName("");
+      setSignerCpf("");
+      toast({ title: "Contrato assinado com sucesso!" });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao assinar contrato",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const markViewedMutation = useMutation({
+    mutationFn: async (agreementId: number) => {
+      const response = await apiRequest("POST", `/api/contract-agreements/${agreementId}/view`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/my-contracts"] });
+    },
+  });
+
+  const handleViewContract = (contract: ContractAgreement) => {
+    setSelectedContract(contract);
+    setViewDialogOpen(true);
+    if (contract.status === "pending" || contract.status === "sent") {
+      markViewedMutation.mutate(contract.id);
+    }
+  };
+
+  const handleSignContract = (contract: ContractAgreement) => {
+    setSelectedContract(contract);
+    setSignDialogOpen(true);
+  };
+
+  const consultoriaContracts = contracts.filter(c => c.contractType === "consultoria");
+  const aplicativoContracts = contracts.filter(c => c.contractType === "aplicativo");
+
+  const renderContractCard = (contract: ContractAgreement) => (
+    <Card key={contract.id} className="mb-4">
+      <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 pb-2">
+        <div className="flex items-center gap-3">
+          <FileText className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <CardTitle className="text-base">
+              {contractTypeLabels[contract.contractType] || contract.contractType}
+            </CardTitle>
+            {contract.issuedAt && (
+              <p className="text-sm text-muted-foreground">
+                Emitido em {format(new Date(contract.issuedAt), "dd/MM/yyyy", { locale: ptBR })}
+              </p>
+            )}
+          </div>
+        </div>
+        <Badge className={contractStatusColors[contract.status || "pending"]}>
+          {contractStatusLabels[contract.status || "pending"]}
+        </Badge>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => handleViewContract(contract)}
+            data-testid={`button-view-contract-${contract.id}`}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            Visualizar
+          </Button>
+          {contract.status !== "signed" && contract.status !== "cancelled" && contract.status !== "expired" && (
+            <Button
+              size="sm"
+              onClick={() => handleSignContract(contract)}
+              data-testid={`button-sign-contract-${contract.id}`}
+            >
+              <PenTool className="h-4 w-4 mr-2" />
+              Assinar
+            </Button>
+          )}
+          {contract.signedPdfUrl && (
+            <Button
+              size="sm"
+              variant="outline"
+              asChild
+              data-testid={`button-download-contract-${contract.id}`}
+            >
+              <a href={contract.signedPdfUrl} target="_blank" rel="noopener noreferrer">
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </a>
+            </Button>
+          )}
+        </div>
+        {contract.signedAt && (
+          <p className="text-sm text-green-600 mt-2">
+            Assinado em {format(new Date(contract.signedAt), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-muted-foreground">Carregando contratos...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-6 md:grid-cols-2">
+        <div>
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Contrato de Consultoria
+          </h3>
+          {consultoriaContracts.length > 0 ? (
+            consultoriaContracts.map(renderContractCard)
+          ) : (
+            <Card className="bg-muted/50">
+              <CardContent className="py-8 text-center">
+                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">
+                  Nenhum contrato de consultoria disponivel
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        <div>
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Contrato do Aplicativo
+          </h3>
+          {aplicativoContracts.length > 0 ? (
+            aplicativoContracts.map(renderContractCard)
+          ) : (
+            <Card className="bg-muted/50">
+              <CardContent className="py-8 text-center">
+                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">
+                  Nenhum contrato do aplicativo disponivel
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedContract && (contractTypeLabels[selectedContract.contractType] || selectedContract.contractType)}
+            </DialogTitle>
+            <DialogDescription>
+              Visualize os detalhes do contrato
+            </DialogDescription>
+          </DialogHeader>
+          {selectedContract && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Status</p>
+                  <Badge className={contractStatusColors[selectedContract.status || "pending"]}>
+                    {contractStatusLabels[selectedContract.status || "pending"]}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Data de Emissao</p>
+                  <p className="font-medium">
+                    {selectedContract.issuedAt
+                      ? format(new Date(selectedContract.issuedAt), "dd/MM/yyyy", { locale: ptBR })
+                      : "-"}
+                  </p>
+                </div>
+                {selectedContract.viewedAt && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Visualizado em</p>
+                    <p className="font-medium">
+                      {format(new Date(selectedContract.viewedAt), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}
+                    </p>
+                  </div>
+                )}
+                {selectedContract.signedAt && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Assinado em</p>
+                    <p className="font-medium text-green-600">
+                      {format(new Date(selectedContract.signedAt), "dd/MM/yyyy 'as' HH:mm", { locale: ptBR })}
+                    </p>
+                  </div>
+                )}
+              </div>
+              {selectedContract.notes && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Observacoes</p>
+                  <p>{selectedContract.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewDialogOpen(false)}>
+              Fechar
+            </Button>
+            {selectedContract && selectedContract.status !== "signed" && selectedContract.status !== "cancelled" && (
+              <Button onClick={() => {
+                setViewDialogOpen(false);
+                handleSignContract(selectedContract);
+              }}>
+                <PenTool className="h-4 w-4 mr-2" />
+                Assinar Contrato
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={signDialogOpen} onOpenChange={setSignDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assinar Contrato</DialogTitle>
+            <DialogDescription>
+              Preencha os dados para assinar o contrato eletronicamente
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Nome Completo</label>
+              <Input
+                value={signerName}
+                onChange={(e) => setSignerName(e.target.value)}
+                placeholder="Digite seu nome completo"
+                data-testid="input-signer-name"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">CPF</label>
+              <Input
+                value={signerCpf}
+                onChange={(e) => setSignerCpf(e.target.value)}
+                placeholder="000.000.000-00"
+                data-testid="input-signer-cpf"
+              />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Ao clicar em "Assinar", voce concorda com os termos do contrato e confirma que as informacoes fornecidas sao verdadeiras.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSignDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => selectedContract && signMutation.mutate(selectedContract.id)}
+              disabled={!signerName || !signerCpf || signMutation.isPending}
+              data-testid="button-confirm-sign"
+            >
+              {signMutation.isPending ? "Assinando..." : "Assinar Contrato"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 export default function AdminCliente() {
   return (
     <AppLayout title="Admin Cliente">
@@ -1067,11 +1390,30 @@ export default function AdminCliente() {
             Admin Cliente
           </h1>
           <p className="text-muted-foreground">
-            Gerencie os membros da sua equipe
+            Gerencie sua equipe e contratos
           </p>
         </div>
 
-        <TeamTab />
+        <Tabs defaultValue="equipe" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="equipe" data-testid="tab-equipe">
+              <Users className="h-4 w-4 mr-2" />
+              Equipe
+            </TabsTrigger>
+            <TabsTrigger value="contratos" data-testid="tab-contratos">
+              <FileText className="h-4 w-4 mr-2" />
+              Contratos
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="equipe">
+            <TeamTab />
+          </TabsContent>
+          
+          <TabsContent value="contratos">
+            <ContractsTab />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );
