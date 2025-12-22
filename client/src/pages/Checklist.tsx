@@ -378,10 +378,37 @@ export default function Checklist() {
     }));
   };
 
+  const defaultSectionResponsavel: SectionResponsavel = {
+    responsavelNome: "",
+    responsavelEmail: "",
+    dataRecebimento: "",
+    dataRetorno: "",
+    isPerfil: null,
+    parecer: "",
+    documentosAtualizados: false,
+    prestadorNome: "",
+    prestadorTelefone: "",
+    prestadorEmail: "",
+    prestadorAniversario: "",
+    prestadorCargo: "",
+    clienteNome: "",
+    clienteTelefone: "",
+    clienteEmail: "",
+    clienteAniversario: "",
+    clienteCargo: "",
+    aprovadoPrestador: false,
+    aprovadoPrestadorData: "",
+    aprovadoPrestadorPor: "",
+    aprovadoCliente: false,
+    aprovadoClienteData: "",
+    aprovadoClientePor: "",
+  };
+
   const handleResponsavelChange = (sectionId: string, field: keyof SectionResponsavel, value: any) => {
     setSectionResponsaveis((prev) => ({
       ...prev,
       [sectionId]: {
+        ...defaultSectionResponsavel,
         ...prev[sectionId],
         [field]: value,
       },
