@@ -29,6 +29,7 @@ import {
   LogOut,
   Megaphone,
   Palette,
+  PenTool,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 
@@ -62,6 +63,11 @@ const adminMenuItems = [
     title: "Conteudo",
     url: "/admin/conteudo",
     icon: FileText,
+  },
+  {
+    title: "Contratos Digitais",
+    url: "/admin/contratos",
+    icon: PenTool,
   },
 ];
 

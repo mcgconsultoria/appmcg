@@ -40,6 +40,7 @@ import AdminProjetos from "@/pages/admin/AdminProjetos";
 import AdminFinanceiro from "@/pages/admin/AdminFinanceiro";
 import AdminParcerias from "@/pages/admin/AdminParcerias";
 import AdminConteudo from "@/pages/admin/AdminConteudo";
+import AdminContratos from "@/pages/admin/AdminContratos";
 import AdminLogin from "@/pages/admin/AdminLogin";
 
 function Router() {
@@ -84,6 +85,9 @@ function Router() {
       </Route>
       <Route path="/admin/conteudo">
         {() => isAuthenticated && isAdmin ? <AdminConteudo /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/contratos">
+        {() => isAuthenticated && isAdmin ? <AdminContratos /> : <AdminLogin />}
       </Route>
       <Route path="/admin/kit-marca">
         {() => isAuthenticated && isAdmin ? <BrandKit isAdmin /> : <AdminLogin />}
