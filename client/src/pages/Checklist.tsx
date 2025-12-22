@@ -67,6 +67,8 @@ import {
   Eye,
   Pencil,
   Trash2,
+  CheckCircle2,
+  Clock,
 } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -259,6 +261,22 @@ interface SectionResponsavel {
   isPerfil: boolean | null;
   parecer: string;
   documentosAtualizados: boolean;
+  prestadorNome: string;
+  prestadorTelefone: string;
+  prestadorEmail: string;
+  prestadorAniversario: string;
+  prestadorCargo: string;
+  clienteNome: string;
+  clienteTelefone: string;
+  clienteEmail: string;
+  clienteAniversario: string;
+  clienteCargo: string;
+  aprovadoPrestador: boolean;
+  aprovadoPrestadorData: string;
+  aprovadoPrestadorPor: string;
+  aprovadoCliente: boolean;
+  aprovadoClienteData: string;
+  aprovadoClientePor: string;
 }
 
 interface ContatoCliente {
@@ -1049,32 +1067,141 @@ export default function Checklist() {
     
     return (
       <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                Prestador de Servico (Cliente MCG)
+              </CardTitle>
+              <CardDescription>Contato interno responsavel por esta area</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Nome</Label>
+                  <Input 
+                    value={sectionData.prestadorNome || ""}
+                    onChange={(e) => handleResponsavelChange(activeSection, "prestadorNome", e.target.value)}
+                    placeholder="Nome do responsavel"
+                    data-testid="input-prestador-nome"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Cargo/Funcao</Label>
+                  <Input 
+                    value={sectionData.prestadorCargo || ""}
+                    onChange={(e) => handleResponsavelChange(activeSection, "prestadorCargo", e.target.value)}
+                    placeholder="Ex: Gerente Comercial"
+                    data-testid="input-prestador-cargo"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Telefone</Label>
+                  <Input 
+                    value={sectionData.prestadorTelefone || ""}
+                    onChange={(e) => handleResponsavelChange(activeSection, "prestadorTelefone", e.target.value)}
+                    placeholder="(00) 00000-0000"
+                    data-testid="input-prestador-telefone"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Aniversario</Label>
+                  <Input 
+                    value={sectionData.prestadorAniversario || ""}
+                    onChange={(e) => handleResponsavelChange(activeSection, "prestadorAniversario", e.target.value)}
+                    placeholder="DD/MM"
+                    data-testid="input-prestador-aniversario"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">E-mail</Label>
+                <Input 
+                  type="email"
+                  value={sectionData.prestadorEmail || ""}
+                  onChange={(e) => handleResponsavelChange(activeSection, "prestadorEmail", e.target.value)}
+                  placeholder="email@empresa.com"
+                  data-testid="input-prestador-email"
+                />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Cliente (a ser atendido)
+              </CardTitle>
+              <CardDescription>Contato do cliente correspondente a esta area</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Nome</Label>
+                  <Input 
+                    value={sectionData.clienteNome || ""}
+                    onChange={(e) => handleResponsavelChange(activeSection, "clienteNome", e.target.value)}
+                    placeholder="Nome do contato"
+                    data-testid="input-cliente-contato-nome"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Cargo/Funcao</Label>
+                  <Input 
+                    value={sectionData.clienteCargo || ""}
+                    onChange={(e) => handleResponsavelChange(activeSection, "clienteCargo", e.target.value)}
+                    placeholder="Ex: Coord. Compras"
+                    data-testid="input-cliente-cargo"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Telefone</Label>
+                  <Input 
+                    value={sectionData.clienteTelefone || ""}
+                    onChange={(e) => handleResponsavelChange(activeSection, "clienteTelefone", e.target.value)}
+                    placeholder="(00) 00000-0000"
+                    data-testid="input-cliente-telefone"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Aniversario</Label>
+                  <Input 
+                    value={sectionData.clienteAniversario || ""}
+                    onChange={(e) => handleResponsavelChange(activeSection, "clienteAniversario", e.target.value)}
+                    placeholder="DD/MM"
+                    data-testid="input-cliente-aniversario"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">E-mail</Label>
+                <Input 
+                  type="email"
+                  value={sectionData.clienteEmail || ""}
+                  onChange={(e) => handleResponsavelChange(activeSection, "clienteEmail", e.target.value)}
+                  placeholder="email@cliente.com"
+                  data-testid="input-cliente-email"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <UserCheck className="h-4 w-4" />
-              Responsável pela Área
+              Parecer e Validacao
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label>Nome do Responsável</Label>
-                <Input 
-                  value={sectionData.responsavelNome || ""}
-                  onChange={(e) => handleResponsavelChange(activeSection, "responsavelNome", e.target.value)}
-                  data-testid="input-responsavel-nome"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>E-mail</Label>
-                <Input 
-                  type="email"
-                  value={sectionData.responsavelEmail || ""}
-                  onChange={(e) => handleResponsavelChange(activeSection, "responsavelEmail", e.target.value)}
-                  data-testid="input-responsavel-email"
-                />
-              </div>
               <div className="space-y-2">
                 <Label>Data Recebimento</Label>
                 <Input 
@@ -1093,11 +1220,8 @@ export default function Checklist() {
                   data-testid="input-data-retorno"
                 />
               </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
               <div className="space-y-2">
-                <Label>É Perfil?</Label>
+                <Label>E Perfil?</Label>
                 <Select 
                   value={sectionData.isPerfil === true ? "sim" : sectionData.isPerfil === false ? "nao" : ""}
                   onValueChange={(v) => handleResponsavelChange(activeSection, "isPerfil", v === "sim" ? true : v === "nao" ? false : null)}
@@ -1107,7 +1231,7 @@ export default function Checklist() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="sim">Sim</SelectItem>
-                    <SelectItem value="nao">Não</SelectItem>
+                    <SelectItem value="nao">Nao</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1120,13 +1244,13 @@ export default function Checklist() {
                     onCheckedChange={(c) => handleResponsavelChange(activeSection, "documentosAtualizados", c)}
                     data-testid="check-docs-atualizados"
                   />
-                  <Label htmlFor="docs-atualizados">Sim, estão atualizados</Label>
+                  <Label htmlFor="docs-atualizados">Sim</Label>
                 </div>
               </div>
             </div>
             
             <div className="space-y-2">
-              <Label>Parecer da Área sobre o Cliente</Label>
+              <Label>Parecer da Area sobre o Cliente</Label>
               <Textarea 
                 value={sectionData.parecer || ""}
                 onChange={(e) => handleResponsavelChange(activeSection, "parecer", e.target.value)}
@@ -1135,8 +1259,156 @@ export default function Checklist() {
                 data-testid="input-parecer"
               />
             </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+              <div className="p-4 rounded-lg border bg-muted/30">
+                <div className="flex items-center gap-3">
+                  <Checkbox 
+                    id="aprovado-prestador"
+                    checked={sectionData.aprovadoPrestador || false}
+                    onCheckedChange={(c) => {
+                      handleResponsavelChange(activeSection, "aprovadoPrestador", c);
+                      if (c) {
+                        handleResponsavelChange(activeSection, "aprovadoPrestadorData", new Date().toISOString());
+                      }
+                    }}
+                    data-testid="check-aprovado-prestador"
+                  />
+                  <div className="flex-1">
+                    <Label htmlFor="aprovado-prestador" className="font-medium cursor-pointer">
+                      Check-in Prestador
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Confirmo que li e aprovo as informacoes desta area
+                    </p>
+                    {sectionData.aprovadoPrestador && sectionData.aprovadoPrestadorData && (
+                      <p className="text-xs text-green-600 mt-1">
+                        Aprovado em {new Date(sectionData.aprovadoPrestadorData).toLocaleDateString('pt-BR')}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-4 rounded-lg border bg-muted/30">
+                <div className="flex items-center gap-3">
+                  <Checkbox 
+                    id="aprovado-cliente"
+                    checked={sectionData.aprovadoCliente || false}
+                    onCheckedChange={(c) => {
+                      handleResponsavelChange(activeSection, "aprovadoCliente", c);
+                      if (c) {
+                        handleResponsavelChange(activeSection, "aprovadoClienteData", new Date().toISOString());
+                      }
+                    }}
+                    data-testid="check-aprovado-cliente"
+                  />
+                  <div className="flex-1">
+                    <Label htmlFor="aprovado-cliente" className="font-medium cursor-pointer">
+                      Check-in Cliente
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Cliente confirma que leu e aprova as informacoes
+                    </p>
+                    {sectionData.aprovadoCliente && sectionData.aprovadoClienteData && (
+                      <p className="text-xs text-green-600 mt-1">
+                        Aprovado em {new Date(sectionData.aprovadoClienteData).toLocaleDateString('pt-BR')}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
+        
+        {activeSection === "teste" && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <ClipboardCheck className="h-4 w-4" />
+                Painel de Validacao - Aprovacao das Areas
+              </CardTitle>
+              <CardDescription>
+                Visao geral das aprovacoes de cada area. Todas as areas devem estar aprovadas para liberar o teste.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                const areasParaValidar = sections.filter(s => s.group === "areas" || s.group === "operacoes");
+                const totalAreas = areasParaValidar.length;
+                const areasAprovadasPrestador = areasParaValidar.filter(s => sectionResponsaveis[s.id]?.aprovadoPrestador).length;
+                const areasAprovadasCliente = areasParaValidar.filter(s => sectionResponsaveis[s.id]?.aprovadoCliente).length;
+                const todasAprovadas = areasAprovadasPrestador === totalAreas && areasAprovadasCliente === totalAreas;
+                
+                return (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="p-4 rounded-lg border bg-muted/30 text-center">
+                        <p className="text-2xl font-bold">{areasAprovadasPrestador}/{totalAreas}</p>
+                        <p className="text-sm text-muted-foreground">Prestador Aprovou</p>
+                      </div>
+                      <div className="p-4 rounded-lg border bg-muted/30 text-center">
+                        <p className="text-2xl font-bold">{areasAprovadasCliente}/{totalAreas}</p>
+                        <p className="text-sm text-muted-foreground">Cliente Aprovou</p>
+                      </div>
+                    </div>
+                    
+                    {todasAprovadas ? (
+                      <div className="p-4 rounded-lg bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700">
+                        <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                          <CheckCircle2 className="h-5 w-5" />
+                          <span className="font-medium">Todas as areas aprovadas! Cliente liberado para teste.</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-4 rounded-lg bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700">
+                        <div className="flex items-center gap-2 text-yellow-700 dark:text-yellow-400">
+                          <Clock className="h-5 w-5" />
+                          <span className="font-medium">Aguardando aprovacao de todas as areas para liberar teste.</span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
+                      {areasParaValidar.map(section => {
+                        const sectionData = sectionResponsaveis[section.id] || {};
+                        const prestadorOk = sectionData.aprovadoPrestador;
+                        const clienteOk = sectionData.aprovadoCliente;
+                        const IconComponent = section.icon;
+                        
+                        return (
+                          <div 
+                            key={section.id}
+                            className={`p-3 rounded-lg border ${
+                              prestadorOk && clienteOk 
+                                ? "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700" 
+                                : "bg-muted/30"
+                            }`}
+                            data-testid={`validacao-${section.id}`}
+                          >
+                            <div className="flex items-center gap-2 mb-2">
+                              <IconComponent className="h-4 w-4" />
+                              <span className="text-sm font-medium">{section.label}</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <Badge variant={prestadorOk ? "default" : "secondary"} className="text-xs">
+                                {prestadorOk ? "Prestador OK" : "Prestador Pendente"}
+                              </Badge>
+                              <Badge variant={clienteOk ? "default" : "secondary"} className="text-xs">
+                                {clienteOk ? "Cliente OK" : "Cliente Pendente"}
+                              </Badge>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        )}
         
         <Card>
           <CardHeader>
@@ -1163,7 +1435,7 @@ export default function Checklist() {
                       {index + 1}. {q.question}
                     </Label>
                     <Textarea
-                      placeholder="Observações..."
+                      placeholder="Observacoes..."
                       value={answers[q.id]?.notes || ""}
                       onChange={(e) => handleNotes(q.id, e.target.value)}
                       className="text-sm"

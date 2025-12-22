@@ -207,7 +207,21 @@ export const checklistSections = pgTable("checklist_sections", {
   sectionKey: varchar("section_key", { length: 50 }).notNull(),
   sectionName: varchar("section_name", { length: 100 }).notNull(),
   
-  // Responsável
+  // Contato do PRESTADOR (Cliente MCG) - Par interno
+  prestadorNome: varchar("prestador_nome", { length: 255 }),
+  prestadorTelefone: varchar("prestador_telefone", { length: 20 }),
+  prestadorEmail: varchar("prestador_email", { length: 255 }),
+  prestadorAniversario: varchar("prestador_aniversario", { length: 10 }),
+  prestadorCargo: varchar("prestador_cargo", { length: 100 }),
+  
+  // Contato do CLIENTE (a ser atendido) - Par externo
+  clienteNome: varchar("cliente_contato_nome", { length: 255 }),
+  clienteTelefone: varchar("cliente_contato_telefone", { length: 20 }),
+  clienteEmail: varchar("cliente_contato_email", { length: 255 }),
+  clienteAniversario: varchar("cliente_contato_aniversario", { length: 10 }),
+  clienteCargo: varchar("cliente_contato_cargo", { length: 100 }),
+  
+  // Responsável (mantido para compatibilidade)
   responsavelNome: varchar("responsavel_nome", { length: 255 }),
   responsavelEmail: varchar("responsavel_email", { length: 255 }),
   dataRecebimento: timestamp("data_recebimento"),
@@ -220,6 +234,15 @@ export const checklistSections = pgTable("checklist_sections", {
   // Documentos
   documentosAtualizados: boolean("documentos_atualizados").default(false),
   documentosObservacao: text("documentos_observacao"),
+  
+  // Check-in de Aprovacao - Confirma que leu e aprovou
+  aprovadoPrestador: boolean("aprovado_prestador").default(false),
+  aprovadoPrestadorData: timestamp("aprovado_prestador_data"),
+  aprovadoPrestadorPor: varchar("aprovado_prestador_por", { length: 255 }),
+  
+  aprovadoCliente: boolean("aprovado_cliente").default(false),
+  aprovadoClienteData: timestamp("aprovado_cliente_data"),
+  aprovadoClientePor: varchar("aprovado_cliente_por", { length: 255 }),
   
   // Status da seção
   status: varchar("status").default("pending"),
