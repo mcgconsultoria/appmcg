@@ -140,6 +140,12 @@ export const checklists = pgTable("checklists", {
   // Capa/Perfil do Cliente
   clienteNome: varchar("cliente_nome", { length: 255 }),
   clienteCnpj: varchar("cliente_cnpj", { length: 18 }),
+  documentosEmpresa: jsonb("documentos_empresa").$type<{
+    tipo: "cnpj" | "cpf";
+    numero: string;
+    categoria: "matriz" | "filial" | "grupo";
+    razaoSocial: string;
+  }[]>(),
   focalPointNome: varchar("focal_point_nome", { length: 255 }),
   focalPointEmail: varchar("focal_point_email", { length: 255 }),
   focalPointCelular: varchar("focal_point_celular", { length: 20 }),

@@ -487,6 +487,7 @@ export default function Checklist() {
         status: calculateTotalProgress() === 100 ? "completed" : "in_progress",
         clienteNome,
         clienteCnpj,
+        documentosEmpresa,
         focalPointNome,
         focalPointEmail,
         focalPointCelular,
@@ -543,6 +544,7 @@ export default function Checklist() {
     setChecklistId(null);
     setClienteNome("");
     setClienteCnpj("");
+    setDocumentosEmpresa([]);
     setFocalPointNome("");
     setFocalPointEmail("");
     setFocalPointCelular("");
