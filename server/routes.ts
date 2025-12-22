@@ -2043,6 +2043,57 @@ export async function registerRoutes(
     }
   });
 
+  // GitHub integration routes
+  app.get("/api/github/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const { isGitHubIntegrationAvailable, getAuthenticatedUser } = await import("./githubService");
+      const configured = isGitHubIntegrationAvailable();
+      let user = null;
+      if (configured) {
+        user = await getAuthenticatedUser();
+      }
+      res.json({ configured, user });
+    } catch (error) {
+      res.json({ configured: false, user: null });
+    }
+  });
+
+  app.get("/api/github/repositories", isAuthenticated, async (req: any, res) => {
+    try {
+      const { listUserRepositories, isGitHubIntegrationAvailable } = await import("./githubService");
+      if (!isGitHubIntegrationAvailable()) {
+        return res.status(400).json({ message: "GitHub nao configurado" });
+      }
+      const repos = await listUserRepositories();
+      res.json(repos);
+    } catch (error: any) {
+      console.error("Error listing GitHub repos:", error);
+      res.status(500).json({ message: "Erro ao listar repositorios", error: error.message });
+    }
+  });
+
+  app.post("/api/github/create-repository", isAuthenticated, async (req: any, res) => {
+    try {
+      const { createRepository, isGitHubIntegrationAvailable } = await import("./githubService");
+      if (!isGitHubIntegrationAvailable()) {
+        return res.status(400).json({ message: "GitHub nao configurado" });
+      }
+      const { name, description, isPrivate } = req.body;
+      if (!name) {
+        return res.status(400).json({ message: "Nome do repositorio e obrigatorio" });
+      }
+      const result = await createRepository(name, description || "", isPrivate !== false);
+      if (result.success) {
+        res.json({ success: true, url: result.url });
+      } else {
+        res.status(500).json({ success: false, error: result.error });
+      }
+    } catch (error: any) {
+      console.error("Error creating GitHub repo:", error);
+      res.status(500).json({ message: "Erro ao criar repositorio", error: error.message });
+    }
+  });
+
   // Projects routes
   app.get("/api/projects", isAuthenticated, async (req: any, res) => {
     try {
