@@ -134,22 +134,35 @@ MCG Consultoria is a commercial management platform for logistics, filling the g
 - **Endpoint Ready**: POST /api/route-calculation (code implemented, waiting for API token)
 - **Note**: System works fully in manual mode without API configured
 
-### Email Service (Resend)
-- **Status**: Fully implemented, pending API key configuration
-- **Purpose**: Send meeting records (Ata) as PDF to participants, task reminders 1 day before due date
+### Google Workspace Integration (Active)
+- **Status**: Fully implemented via Replit OAuth Connectors
+- **Services Integrated**:
+  - **Gmail**: Primary email provider for sending meeting records, reminders
+  - **Google Calendar**: Sync commercial events (meetings, visits, calls) with one-click
+  - **Google Drive**: File storage integration ready
+  - **Google Sheets**: Export clients, tasks, and events to spreadsheets
 - **Implementation**:
-  - `server/emailService.ts`: Resend wrapper with attachment support
-  - `server/reminderService.ts`: Background service for daily task reminders
-  - PDF generation with company logo (using PDFKit)
-  - Structured participants with name and email fields
-  - Tasks have assignedEmail field for reminder delivery
-  - Action items auto-create tasks when due date is set
-- **Features**:
-  - Download meeting record as PDF
-  - Send meeting record via email to all participants with PDF attachment
-  - Automatic email reminders 1 day before task due date
-- **To activate**: Set RESEND_API_KEY secret
-- **Note**: System fully functional without email configured; email buttons will show configuration message
+  - `server/googleServices.ts`: Unified API clients for all Google services
+  - `server/emailService.ts`: Gmail as primary provider, Resend as fallback
+  - OAuth tokens managed automatically by Replit Connectors
+- **Endpoints**:
+  - `POST /api/commercial-events/:id/sync-google-calendar`: Sync event to Google Calendar
+  - `POST /api/export/google-sheets`: Export data (clients, tasks, events) to Sheets
+  - `GET /api/google/status`: Check integration availability
+- **UI Features**:
+  - Calendar page: "Exportar Sheets" button to export all events
+  - Event cards: Google icon to sync individual events to Calendar
+- **Usage Limits**:
+  - Gmail: 500 emails/day (personal), 2000/day (Workspace)
+  - Calendar/Sheets/Drive: Free within normal usage quotas
+- **Note**: Integration is OAuth-based and free for normal usage
+
+### Email Service (Resend - Fallback)
+- **Status**: Available as fallback if Gmail not configured
+- **Purpose**: Send meeting records (Ata) as PDF to participants, task reminders 1 day before due date
+- **Priority**: Gmail is preferred when Google integration is available
+- **To activate fallback**: Set RESEND_API_KEY secret
+- **Note**: System uses Gmail first; falls back to Resend if Gmail unavailable
 
 ### KMM ERP Integration (Grupo NStech)
 - **Status**: Pending formal partnership agreement

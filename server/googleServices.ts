@@ -1,5 +1,12 @@
 import { google } from 'googleapis';
 
+// Check if Google integration is available (Replit Connectors configured)
+export function isGoogleIntegrationAvailable(): boolean {
+  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+  const xReplitToken = process.env.REPL_IDENTITY || process.env.WEB_REPL_RENEWAL;
+  return !!(hostname && xReplitToken);
+}
+
 // Gmail Integration
 let gmailConnectionSettings: any;
 
@@ -342,6 +349,3 @@ export async function exportToGoogleSheets(spreadsheetName: string, data: any[][
   }
 }
 
-export function isGoogleIntegrationAvailable(): boolean {
-  return !!process.env.REPLIT_CONNECTORS_HOSTNAME;
-}

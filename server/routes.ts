@@ -1893,11 +1893,14 @@ export async function registerRoutes(
       const { createCalendarEvent, isGoogleIntegrationAvailable } = await import("./googleServices");
       
       if (!isGoogleIntegrationAvailable()) {
-        return res.status(400).json({ message: "Integracao com Google Calendar nao configurada" });
+        return res.status(400).json({ message: "Integracao com Google Calendar nao configurada", configured: false });
       }
 
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "ID de evento invalido" });
+      }
+      const userCompanyId = req.user?.companyId || 1;
       const event = await storage.getCommercialEvent(id);
       
       if (!event) {
@@ -1937,11 +1940,14 @@ export async function registerRoutes(
       const { exportToGoogleSheets, isGoogleIntegrationAvailable } = await import("./googleServices");
       
       if (!isGoogleIntegrationAvailable()) {
-        return res.status(400).json({ message: "Integracao com Google Sheets nao configurada" });
+        return res.status(400).json({ message: "Integracao com Google Sheets nao configurada", configured: false });
       }
 
       const { type } = req.body;
-      const userCompanyId = req.user.companyId || 1;
+      if (!type || !["clients", "tasks", "events"].includes(type)) {
+        return res.status(400).json({ message: "Tipo de exportacao invalido. Use: clients, tasks, events" });
+      }
+      const userCompanyId = req.user?.companyId || 1;
       let data: any[][] = [];
       let sheetName = "";
 
