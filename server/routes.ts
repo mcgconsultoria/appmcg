@@ -31,6 +31,9 @@ import {
   insertCompanyTeamMemberSchema,
   insertSupportTicketSchema,
   insertSupportTicketMessageSchema,
+  insertContractTemplateSchema,
+  insertContractAgreementSchema,
+  insertContractSignatureSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -3195,6 +3198,261 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error creating ticket message:", error);
       res.status(500).json({ message: "Failed to create ticket message" });
+    }
+  });
+
+  // ============================================
+  // DIGITAL CONTRACTS - Assinatura Digital APIs
+  // ============================================
+
+  // Contract Templates (Admin MCG only)
+  app.get("/api/contract-templates", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const templates = await storage.getContractTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching contract templates:", error);
+      res.status(500).json({ message: "Falha ao buscar modelos de contrato" });
+    }
+  });
+
+  app.get("/api/contract-templates/:id", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const template = await storage.getContractTemplate(parseInt(req.params.id));
+      if (!template) {
+        return res.status(404).json({ message: "Modelo não encontrado" });
+      }
+      res.json(template);
+    } catch (error) {
+      console.error("Error fetching contract template:", error);
+      res.status(500).json({ message: "Falha ao buscar modelo de contrato" });
+    }
+  });
+
+  app.post("/api/contract-templates", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertContractTemplateSchema.safeParse({
+        ...req.body,
+        createdBy: req.user?.id,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados inválidos", errors: parsed.error.errors });
+      }
+      const template = await storage.createContractTemplate(parsed.data);
+      res.status(201).json(template);
+    } catch (error) {
+      console.error("Error creating contract template:", error);
+      res.status(500).json({ message: "Falha ao criar modelo de contrato" });
+    }
+  });
+
+  app.patch("/api/contract-templates/:id", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const template = await storage.updateContractTemplate(parseInt(req.params.id), req.body);
+      if (!template) {
+        return res.status(404).json({ message: "Modelo não encontrado" });
+      }
+      res.json(template);
+    } catch (error) {
+      console.error("Error updating contract template:", error);
+      res.status(500).json({ message: "Falha ao atualizar modelo de contrato" });
+    }
+  });
+
+  app.delete("/api/contract-templates/:id", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      await storage.deleteContractTemplate(parseInt(req.params.id));
+      res.json({ message: "Modelo excluído com sucesso" });
+    } catch (error) {
+      console.error("Error deleting contract template:", error);
+      res.status(500).json({ message: "Falha ao excluir modelo de contrato" });
+    }
+  });
+
+  // Contract Agreements - Admin MCG can see all, clients see their own
+  app.get("/api/contract-agreements", isAuthenticated, async (req: any, res) => {
+    try {
+      const isAdminUser = req.user?.role === 'admin' || req.user?.role === 'admin_mcg';
+      const companyId = isAdminUser ? undefined : req.user?.companyId;
+      const agreements = await storage.getContractAgreements(companyId);
+      res.json(agreements);
+    } catch (error) {
+      console.error("Error fetching contract agreements:", error);
+      res.status(500).json({ message: "Falha ao buscar contratos" });
+    }
+  });
+
+  app.get("/api/contract-agreements/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const agreement = await storage.getContractAgreement(parseInt(req.params.id));
+      if (!agreement) {
+        return res.status(404).json({ message: "Contrato não encontrado" });
+      }
+      
+      // Check access
+      const isAdminUser = req.user?.role === 'admin' || req.user?.role === 'admin_mcg';
+      if (!isAdminUser && agreement.companyId !== req.user?.companyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      
+      res.json(agreement);
+    } catch (error) {
+      console.error("Error fetching contract agreement:", error);
+      res.status(500).json({ message: "Falha ao buscar contrato" });
+    }
+  });
+
+  // Admin MCG creates agreements for companies
+  app.post("/api/contract-agreements", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const parsed = insertContractAgreementSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados inválidos", errors: parsed.error.errors });
+      }
+      const agreement = await storage.createContractAgreement({
+        ...parsed.data,
+        status: "pending",
+        issuedAt: new Date(),
+      });
+      res.status(201).json(agreement);
+    } catch (error) {
+      console.error("Error creating contract agreement:", error);
+      res.status(500).json({ message: "Falha ao criar contrato" });
+    }
+  });
+
+  app.patch("/api/contract-agreements/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const agreement = await storage.getContractAgreement(parseInt(req.params.id));
+      if (!agreement) {
+        return res.status(404).json({ message: "Contrato não encontrado" });
+      }
+      
+      const isAdminUser = req.user?.role === 'admin' || req.user?.role === 'admin_mcg';
+      if (!isAdminUser && agreement.companyId !== req.user?.companyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      
+      const updated = await storage.updateContractAgreement(parseInt(req.params.id), req.body);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating contract agreement:", error);
+      res.status(500).json({ message: "Falha ao atualizar contrato" });
+    }
+  });
+
+  // Mark agreement as viewed (client action)
+  app.post("/api/contract-agreements/:id/view", isAuthenticated, async (req: any, res) => {
+    try {
+      const agreement = await storage.getContractAgreement(parseInt(req.params.id));
+      if (!agreement) {
+        return res.status(404).json({ message: "Contrato não encontrado" });
+      }
+      
+      if (agreement.companyId !== req.user?.companyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      
+      const updated = await storage.updateContractAgreement(parseInt(req.params.id), {
+        status: "viewed",
+        viewedAt: new Date(),
+      });
+      res.json(updated);
+    } catch (error) {
+      console.error("Error marking agreement as viewed:", error);
+      res.status(500).json({ message: "Falha ao registrar visualização" });
+    }
+  });
+
+  // Contract Signatures
+  app.get("/api/contract-agreements/:agreementId/signatures", isAuthenticated, async (req: any, res) => {
+    try {
+      const agreement = await storage.getContractAgreement(parseInt(req.params.agreementId));
+      if (!agreement) {
+        return res.status(404).json({ message: "Contrato não encontrado" });
+      }
+      
+      const isAdminUser = req.user?.role === 'admin' || req.user?.role === 'admin_mcg';
+      if (!isAdminUser && agreement.companyId !== req.user?.companyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      
+      const signatures = await storage.getContractSignatures(parseInt(req.params.agreementId));
+      res.json(signatures);
+    } catch (error) {
+      console.error("Error fetching signatures:", error);
+      res.status(500).json({ message: "Falha ao buscar assinaturas" });
+    }
+  });
+
+  // Create signature record (used when client signs)
+  app.post("/api/contract-agreements/:agreementId/sign", isAuthenticated, async (req: any, res) => {
+    try {
+      const agreement = await storage.getContractAgreement(parseInt(req.params.agreementId));
+      if (!agreement) {
+        return res.status(404).json({ message: "Contrato não encontrado" });
+      }
+      
+      // Verify access
+      const isAdminUser = req.user?.role === 'admin' || req.user?.role === 'admin_mcg';
+      const signerRole = isAdminUser ? 'mcg' : 'cliente';
+      
+      if (!isAdminUser && agreement.companyId !== req.user?.companyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      
+      // Create signature record
+      const signatureData = {
+        agreementId: parseInt(req.params.agreementId),
+        signerRole,
+        signerUserId: req.user?.id,
+        signerName: req.body.signerName || req.user?.firstName + ' ' + req.user?.lastName,
+        signerEmail: req.body.signerEmail || req.user?.email,
+        signerCpf: req.body.signerCpf,
+        signatureType: req.body.signatureType || 'eletronica',
+        signedAt: new Date(),
+        ipAddress: req.ip,
+        status: 'signed',
+      };
+      
+      const parsed = insertContractSignatureSchema.safeParse(signatureData);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados inválidos", errors: parsed.error.errors });
+      }
+      
+      const signature = await storage.createContractSignature(parsed.data);
+      
+      // Check if all required signatures are complete
+      const allSignatures = await storage.getContractSignatures(parseInt(req.params.agreementId));
+      const hasMcgSignature = allSignatures.some(s => s.signerRole === 'mcg' && s.status === 'signed');
+      const hasClientSignature = allSignatures.some(s => s.signerRole === 'cliente' && s.status === 'signed');
+      
+      if (hasMcgSignature && hasClientSignature) {
+        await storage.updateContractAgreement(parseInt(req.params.agreementId), {
+          status: 'signed',
+          signedAt: new Date(),
+        });
+      }
+      
+      res.status(201).json(signature);
+    } catch (error) {
+      console.error("Error creating signature:", error);
+      res.status(500).json({ message: "Falha ao registrar assinatura" });
+    }
+  });
+
+  // Get company's contracts for Client Admin
+  app.get("/api/my-contracts", isAuthenticated, async (req: any, res) => {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "Empresa não encontrada" });
+      }
+      const agreements = await storage.getContractAgreementsByCompany(companyId);
+      res.json(agreements);
+    } catch (error) {
+      console.error("Error fetching my contracts:", error);
+      res.status(500).json({ message: "Falha ao buscar meus contratos" });
     }
   });
 
