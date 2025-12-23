@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Check, Loader2, Briefcase, ArrowRight, Lock, Percent, Save } from "lucide-react";
+import { Check, Loader2, Briefcase, ArrowRight, Lock, Percent, Save, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -358,8 +358,19 @@ export default function Pricing() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-16 px-4">
+    <div className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-6xl mx-auto">
+        <div className="mb-8">
+          <Button
+            variant="ghost"
+            className="gap-2"
+            onClick={() => window.history.length > 1 ? window.history.back() : (window.location.href = "/")}
+            data-testid="button-back"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
+          </Button>
+        </div>
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4" data-testid="text-pricing-title">
             Escolha seu Plano

@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -64,17 +64,28 @@ export default function Login() {
     <div className="min-h-screen bg-background flex flex-col">
       <header className="border-b border-border">
         <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <img 
-              src={logoMcg} 
-              alt="MCG Consultoria" 
-              className="h-10 w-10 object-contain"
-            />
-            <div className="flex flex-col">
-              <span className="font-bold text-lg leading-tight">MCG</span>
-              <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
-            </div>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => window.history.length > 1 ? window.history.back() : setLocation("/")}
+              data-testid="button-back"
+              title="Voltar"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <Link href="/" className="flex items-center gap-2">
+              <img 
+                src={logoMcg} 
+                alt="MCG Consultoria" 
+                className="h-10 w-10 object-contain"
+              />
+              <div className="flex flex-col">
+                <span className="font-bold text-lg leading-tight">MCG</span>
+                <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
+              </div>
+            </Link>
+          </div>
           <ThemeToggle />
         </div>
       </header>
