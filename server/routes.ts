@@ -380,13 +380,11 @@ export async function registerRoutes(
 
   app.patch("/api/company", isAuthenticated, async (req: any, res) => {
     try {
-      // Use user's companyId or default to 1 for single-tenant MVP
-      const userCompanyId = req.user.companyId || 1;
+      console.log("PATCH /api/company - user:", req.user?.id, "companyId:", req.user?.companyId);
+      console.log("PATCH /api/company - body fields:", Object.keys(req.body));
       
-      // Security: Verify user has access to this company
-      if (req.user.companyId && req.user.companyId !== userCompanyId) {
-        return res.status(403).json({ message: "Access denied" });
-      }
+      // Use user's companyId or default to 1 for single-tenant MVP
+      const userCompanyId = req.user?.companyId || 1;
       
       // Validate and sanitize allowed fields
       const allowedFields = ["name", "nomeFantasia", "cnpj", "inscricaoEstadual", "inscricaoEstadualIsento", "inscricaoMunicipal", "email", "phone", "address", "city", "state", "logo"];
@@ -398,20 +396,22 @@ export async function registerRoutes(
         }
       }
       
+      console.log("PATCH /api/company - sanitized fields:", Object.keys(sanitizedData));
+      
       // Validate logo if provided
       if (sanitizedData.logo) {
-        // Check if it's a valid data URL
         if (!sanitizedData.logo.startsWith("data:image/")) {
           return res.status(400).json({ message: "Logo must be a valid image data URL" });
         }
-        // Check size limit (500KB encoded ~ 700KB base64)
-        const maxLogoSize = 750000; // ~500KB image becomes ~700KB base64
+        const maxLogoSize = 750000;
         if (sanitizedData.logo.length > maxLogoSize) {
           return res.status(400).json({ message: "Logo too large. Maximum size is 500KB" });
         }
       }
       
       const company = await storage.updateCompany(userCompanyId, sanitizedData);
+      console.log("PATCH /api/company - result:", company ? "success" : "not found");
+      
       if (!company) {
         return res.status(404).json({ message: "Company not found" });
       }
