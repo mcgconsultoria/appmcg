@@ -845,6 +845,67 @@ export async function registerRoutes(
     }
   });
 
+  // Apply purchased template to a client
+  app.post("/api/checklist-templates/:id/apply", isAuthenticated, async (req, res) => {
+    try {
+      const templateId = parseInt(req.params.id);
+      const userId = req.user!.id;
+      const companyId = req.user?.companyId;
+      const { clientId } = req.body;
+
+      if (!clientId) {
+        return res.status(400).json({ message: "Cliente é obrigatório" });
+      }
+
+      // Verify purchase exists and is completed
+      const purchase = await storage.getChecklistTemplatePurchaseByTemplateAndUser(templateId, userId);
+      if (!purchase || purchase.status !== "completed") {
+        return res.status(403).json({ message: "Você precisa adquirir este template primeiro" });
+      }
+
+      // Get template data
+      const template = await storage.getChecklistTemplate(templateId);
+      if (!template) {
+        return res.status(404).json({ message: "Template não encontrado" });
+      }
+
+      // Get client data
+      const client = await storage.getClient(clientId);
+      if (!client || client.companyId !== companyId) {
+        return res.status(404).json({ message: "Cliente não encontrado" });
+      }
+
+      // Create checklist from template
+      const templateData = template.templateData || {};
+      const checklist = await storage.createChecklist({
+        companyId: companyId!,
+        clientId,
+        name: `${template.name} - ${client.name}`,
+        segment: template.segment,
+        status: "in_progress",
+        clienteNome: client.name,
+        clienteCnpj: client.cnpj || undefined,
+        historia: templateData.historia || undefined,
+        localizacao: templateData.localizacao || undefined,
+        segmentoDetalhado: templateData.segmentoDetalhado || undefined,
+        produto: templateData.produto || undefined,
+        numeros: templateData.numeros || undefined,
+        noticias: templateData.noticias || undefined,
+        mercado: templateData.mercado || undefined,
+        oportunidades: templateData.oportunidades || undefined,
+        pipeline: templateData.pipeline || undefined,
+      });
+
+      res.status(201).json({ 
+        message: "Template aplicado com sucesso",
+        checklist 
+      });
+    } catch (error) {
+      console.error("Error applying template:", error);
+      res.status(500).json({ message: "Failed to apply template" });
+    }
+  });
+
   // Route calculation API (QualP integration)
   app.post("/api/route-calculation", async (req, res) => {
     try {

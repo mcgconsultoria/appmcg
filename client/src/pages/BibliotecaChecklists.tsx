@@ -30,12 +30,13 @@ import {
   Filter,
   Eye,
   Loader2,
+  UserPlus,
 } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
-import type { ChecklistTemplate } from "@shared/schema";
+import type { ChecklistTemplate, Client } from "@shared/schema";
 
 const SEGMENT_LABELS: Record<string, string> = {
   alimenticio: "Alimentício",
@@ -63,6 +64,9 @@ export default function BibliotecaChecklists() {
   const [selectedSegment, setSelectedSegment] = useState<string>("all");
   const [selectedTemplate, setSelectedTemplate] = useState<ChecklistTemplate | null>(null);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+  const [showApplyDialog, setShowApplyDialog] = useState(false);
+  const [applyingTemplate, setApplyingTemplate] = useState<ChecklistTemplate | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState<string>("");
 
   const { data: templates, isLoading } = useQuery<ChecklistTemplate[]>({
     queryKey: ["/api/checklist-templates", selectedSegment !== "all" ? selectedSegment : undefined],
@@ -74,6 +78,10 @@ export default function BibliotecaChecklists() {
 
   const { data: purchases } = useQuery<any[]>({
     queryKey: ["/api/checklist-template-purchases"],
+  });
+
+  const { data: clients } = useQuery<Client[]>({
+    queryKey: ["/api/clients"],
   });
 
   const purchaseMutation = useMutation({
@@ -92,6 +100,30 @@ export default function BibliotecaChecklists() {
       toast({
         title: "Erro",
         description: error.message || "Erro ao iniciar compra",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const applyMutation = useMutation({
+    mutationFn: async ({ templateId, clientId }: { templateId: number; clientId: number }) => {
+      const response = await apiRequest("POST", `/api/checklist-templates/${templateId}/apply`, { clientId });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/checklists"] });
+      toast({
+        title: "Sucesso",
+        description: "Template aplicado ao cliente com sucesso! Acesse a área de Checklists para ver.",
+      });
+      setShowApplyDialog(false);
+      setApplyingTemplate(null);
+      setSelectedClientId("");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro",
+        description: error.message || "Erro ao aplicar template",
         variant: "destructive",
       });
     },
@@ -139,6 +171,20 @@ export default function BibliotecaChecklists() {
   const handlePreview = (template: ChecklistTemplate) => {
     setSelectedTemplate(template);
     setShowPreviewDialog(true);
+  };
+
+  const handleApplyToClient = (template: ChecklistTemplate) => {
+    setApplyingTemplate(template);
+    setSelectedClientId("");
+    setShowApplyDialog(true);
+  };
+
+  const confirmApply = () => {
+    if (!applyingTemplate || !selectedClientId) return;
+    applyMutation.mutate({
+      templateId: applyingTemplate.id,
+      clientId: parseInt(selectedClientId),
+    });
   };
 
   return (
@@ -280,22 +326,32 @@ export default function BibliotecaChecklists() {
                       <Eye className="h-4 w-4 mr-1" />
                       Visualizar
                     </Button>
-                    <Button
-                      size="sm"
-                      className="flex-1"
-                      onClick={() => handlePurchase(template)}
-                      disabled={purchaseMutation.isPending || isPurchased(template.id)}
-                      data-testid={`button-purchase-${template.id}`}
-                    >
-                      {purchaseMutation.isPending ? (
-                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                      ) : isPurchased(template.id) ? (
-                        <CheckCircle2 className="h-4 w-4 mr-1" />
-                      ) : (
-                        <ShoppingCart className="h-4 w-4 mr-1" />
-                      )}
-                      {isPurchased(template.id) ? "Adquirido" : "Comprar"}
-                    </Button>
+                    {isPurchased(template.id) ? (
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => handleApplyToClient(template)}
+                        data-testid={`button-apply-${template.id}`}
+                      >
+                        <UserPlus className="h-4 w-4 mr-1" />
+                        Aplicar a Cliente
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => handlePurchase(template)}
+                        disabled={purchaseMutation.isPending}
+                        data-testid={`button-purchase-${template.id}`}
+                      >
+                        {purchaseMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        ) : (
+                          <ShoppingCart className="h-4 w-4 mr-1" />
+                        )}
+                        Comprar
+                      </Button>
+                    )}
                   </div>
                 </CardFooter>
               </Card>
@@ -409,6 +465,62 @@ export default function BibliotecaChecklists() {
                   {selectedTemplate && isPurchased(selectedTemplate.id) ? "Já Adquirido" : "Comprar Agora"}
                 </Button>
               </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showApplyDialog} onOpenChange={setShowApplyDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5" />
+                Aplicar Template a Cliente
+              </DialogTitle>
+              <DialogDescription>
+                Selecione o cliente para aplicar o template "{applyingTemplate?.name}"
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Selecione o Cliente</label>
+                <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+                  <SelectTrigger data-testid="select-client-apply">
+                    <SelectValue placeholder="Selecione um cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {clients?.map((client) => (
+                      <SelectItem key={client.id} value={client.id.toString()}>
+                        {client.name} {client.tradeName ? `(${client.tradeName})` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {clients?.length === 0 && (
+                <div className="text-sm text-muted-foreground text-center py-4">
+                  Você ainda não tem clientes cadastrados. Acesse a área de Clientes para cadastrar.
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowApplyDialog(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={confirmApply}
+                disabled={!selectedClientId || applyMutation.isPending}
+                data-testid="button-confirm-apply"
+              >
+                {applyMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                )}
+                Aplicar Template
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

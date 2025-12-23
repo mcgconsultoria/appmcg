@@ -30,6 +30,7 @@ import {
   Megaphone,
   Palette,
   PenTool,
+  Library,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 
@@ -68,6 +69,11 @@ const adminMenuItems = [
     title: "Contratos Digitais",
     url: "/admin/contratos",
     icon: PenTool,
+  },
+  {
+    title: "Biblioteca Templates",
+    url: "/admin/templates",
+    icon: Library,
   },
 ];
 

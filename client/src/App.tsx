@@ -41,6 +41,7 @@ import AdminFinanceiro from "@/pages/admin/AdminFinanceiro";
 import AdminParcerias from "@/pages/admin/AdminParcerias";
 import AdminConteudo from "@/pages/admin/AdminConteudo";
 import AdminContratos from "@/pages/admin/AdminContratos";
+import AdminTemplates from "@/pages/admin/AdminTemplates";
 import AdminLogin from "@/pages/admin/AdminLogin";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
@@ -96,6 +97,9 @@ function Router() {
       </Route>
       <Route path="/admin/kit-marca">
         {() => isAuthenticated && isAdmin ? <BrandKit isAdmin /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/templates">
+        {() => isAuthenticated && isAdmin ? <AdminTemplates /> : <AdminLogin />}
       </Route>
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />
