@@ -841,6 +841,10 @@ export async function registerRoutes(
           userId,
           type: "checklist_template",
         },
+        // @ts-ignore - Disable adaptive pricing to prevent multiple currency options
+        adaptive_pricing: {
+          enabled: false,
+        },
       });
 
       // Create pending purchase record
