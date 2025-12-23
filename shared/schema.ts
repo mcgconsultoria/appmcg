@@ -1262,6 +1262,34 @@ export const checklistTemplatePurchases = pgTable("checklist_template_purchases"
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Diagnostic Leads - leads captured from commercial maturity diagnostic
+export const diagnosticLeads = pgTable("diagnostic_leads", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  company: varchar("company", { length: 255 }),
+  phone: varchar("phone", { length: 20 }),
+  segment: varchar("segment", { length: 100 }),
+  score: integer("score").notNull(),
+  maxScore: integer("max_score").notNull(),
+  percentage: integer("percentage").notNull(),
+  maturityLevel: varchar("maturity_level", { length: 50 }).notNull(), // iniciante, basico, intermediario, avancado
+  answers: jsonb("answers").$type<Record<string, number>>(),
+  status: varchar("status", { length: 50 }).default("novo"), // novo, contatado, interessado, em_negociacao, convertido, perdido
+  notes: text("notes"),
+  followUpDate: timestamp("follow_up_date"),
+  assignedTo: varchar("assigned_to", { length: 255 }),
+  source: varchar("source", { length: 100 }).default("diagnostico"), // diagnostico, campanha, indicacao
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertDiagnosticLeadSchema = createInsertSchema(diagnosticLeads).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Insert schemas for checklist templates
 export const insertChecklistTemplateSchema = createInsertSchema(checklistTemplates).omit({
   id: true,
@@ -1424,3 +1452,7 @@ export type ChecklistTemplate = typeof checklistTemplates.$inferSelect;
 export type InsertChecklistTemplate = z.infer<typeof insertChecklistTemplateSchema>;
 export type ChecklistTemplatePurchase = typeof checklistTemplatePurchases.$inferSelect;
 export type InsertChecklistTemplatePurchase = z.infer<typeof insertChecklistTemplatePurchaseSchema>;
+
+// Diagnostic Lead Types
+export type DiagnosticLead = typeof diagnosticLeads.$inferSelect;
+export type InsertDiagnosticLead = z.infer<typeof insertDiagnosticLeadSchema>;
