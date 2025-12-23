@@ -834,8 +834,8 @@ export async function registerRoutes(
           },
         ],
         mode: "payment",
-        success_url: `${baseUrl}/biblioteca?success=true&template=${templateId}`,
-        cancel_url: `${baseUrl}/biblioteca?canceled=true`,
+        success_url: `${baseUrl}/biblioteca-checklists?success=true&template=${templateId}`,
+        cancel_url: `${baseUrl}/biblioteca-checklists?canceled=true`,
         metadata: {
           templateId: templateId.toString(),
           userId,
