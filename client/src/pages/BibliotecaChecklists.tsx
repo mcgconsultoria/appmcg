@@ -93,13 +93,14 @@ export default function BibliotecaChecklists() {
       return response.json();
     },
     onSuccess: (data) => {
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: ["/api/checklist-template-purchases"] });
       queryClient.invalidateQueries({ queryKey: ["/api/checklist-templates"] });
       setShowCurrencyDialog(false);
       setPurchasingTemplate(null);
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-      }
     },
     onError: (error: any) => {
       toast({
