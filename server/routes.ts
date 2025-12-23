@@ -176,6 +176,80 @@ export async function registerRoutes(
     }
   });
 
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ message: "Email é obrigatório" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.json({ message: "Se o email existir, você receberá as instruções" });
+      }
+
+      const crypto = await import("crypto");
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const resetTokenExpiry = new Date(Date.now() + 3600000);
+
+      await storage.setPasswordResetToken(user.id, resetToken, resetTokenExpiry);
+
+      const { sendEmail } = await import("./emailService");
+      const resetUrl = `${process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'https://www.mcgconsultoria.com.br'}/redefinir-senha?token=${resetToken}`;
+      
+      await sendEmail({
+        to: email,
+        subject: "Redefinir Senha - MCG Consultoria",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #0EA5E9;">Redefinir Senha</h2>
+            <p>Você solicitou a redefinição da sua senha. Clique no link abaixo para criar uma nova senha:</p>
+            <p><a href="${resetUrl}" style="background-color: #0EA5E9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Redefinir Senha</a></p>
+            <p style="color: #666; font-size: 14px;">Este link expira em 1 hora.</p>
+            <p style="color: #666; font-size: 14px;">Se você não solicitou esta redefinição, ignore este email.</p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="color: #999; font-size: 12px;">MCG Consultoria - Gestão Comercial Logística</p>
+          </div>
+        `,
+      });
+
+      res.json({ message: "Se o email existir, você receberá as instruções" });
+    } catch (error) {
+      console.error("Error sending password reset:", error);
+      res.json({ message: "Se o email existir, você receberá as instruções" });
+    }
+  });
+
+  app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+      const { token, password } = req.body;
+      if (!token || !password) {
+        return res.status(400).json({ message: "Token e senha são obrigatórios" });
+      }
+
+      const user = await storage.getUserByResetToken(token);
+      if (!user) {
+        return res.status(400).json({ message: "Link inválido ou expirado" });
+      }
+
+      if (user.passwordResetExpiry && new Date() > new Date(user.passwordResetExpiry)) {
+        await storage.clearPasswordResetToken(user.id);
+        return res.status(400).json({ message: "Link expirado. Solicite um novo." });
+      }
+
+      const bcrypt = await import("bcryptjs");
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      await storage.updateUserPassword(user.id, hashedPassword);
+      await storage.clearPasswordResetToken(user.id);
+
+      res.json({ message: "Senha redefinida com sucesso" });
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      res.status(500).json({ message: "Erro ao redefinir senha" });
+    }
+  });
+
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const { password, ...userWithoutPassword } = req.user;

@@ -42,6 +42,8 @@ import AdminParcerias from "@/pages/admin/AdminParcerias";
 import AdminConteudo from "@/pages/admin/AdminConteudo";
 import AdminContratos from "@/pages/admin/AdminContratos";
 import AdminLogin from "@/pages/admin/AdminLogin";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -67,6 +69,8 @@ function Router() {
       <Route path="/termos" component={Terms} />
       <Route path="/login" component={Login} />
       <Route path="/registro" component={Register} />
+      <Route path="/esqueci-senha" component={ForgotPassword} />
+      <Route path="/redefinir-senha" component={ResetPassword} />
       {/* Admin routes - show login if not authenticated or not admin */}
       <Route path="/admin">
         {() => isAuthenticated && isAdmin ? <AdminDashboard /> : <AdminLogin />}

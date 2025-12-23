@@ -57,6 +57,8 @@ export const users = pgTable("users", {
   freeCalculationsRemaining: integer("free_calculations_remaining").default(3),
   totalCalculationsUsed: integer("total_calculations_used").default(0),
   lastCalculationAt: timestamp("last_calculation_at"),
+  passwordResetToken: varchar("password_reset_token"),
+  passwordResetExpiry: timestamp("password_reset_expiry"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

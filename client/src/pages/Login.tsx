@@ -166,7 +166,12 @@ export default function Login() {
                 </Button>
               </form>
             </Form>
-            <div className="mt-6 text-center text-sm">
+            <div className="mt-4 text-center">
+              <Link href="/esqueci-senha" className="text-sm text-muted-foreground hover:text-primary hover:underline" data-testid="link-forgot-password">
+                Esqueceu a senha?
+              </Link>
+            </div>
+            <div className="mt-4 text-center text-sm">
               <span className="text-muted-foreground">Não tem uma conta? </span>
               <Link href="/registro" className="text-primary hover:underline" data-testid="link-register">
                 Criar conta
