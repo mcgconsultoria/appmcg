@@ -29,6 +29,8 @@ import {
   adminPartnerships,
   adminPosts,
   adminFinancialRecords,
+  checklistTemplates,
+  checklistTemplatePurchases,
   type User,
   type UpsertUser,
   type Company,
@@ -110,6 +112,10 @@ import {
   type InsertContractAgreement,
   type ContractSignature,
   type InsertContractSignature,
+  type ChecklistTemplate,
+  type InsertChecklistTemplate,
+  type ChecklistTemplatePurchase,
+  type InsertChecklistTemplatePurchase,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
@@ -378,6 +384,24 @@ export interface IStorage {
   getContractSignatures(agreementId: number): Promise<ContractSignature[]>;
   createContractSignature(signature: InsertContractSignature): Promise<ContractSignature>;
   updateContractSignature(id: number, signature: Partial<InsertContractSignature>): Promise<ContractSignature | undefined>;
+
+  // ============================================
+  // CHECKLIST TEMPLATE LIBRARY
+  // ============================================
+
+  // Checklist Template operations
+  getChecklistTemplates(segment?: string): Promise<ChecklistTemplate[]>;
+  getChecklistTemplate(id: number): Promise<ChecklistTemplate | undefined>;
+  getChecklistTemplateSegments(): Promise<string[]>;
+  createChecklistTemplate(template: InsertChecklistTemplate): Promise<ChecklistTemplate>;
+  updateChecklistTemplate(id: number, template: Partial<InsertChecklistTemplate>): Promise<ChecklistTemplate | undefined>;
+  deleteChecklistTemplate(id: number): Promise<boolean>;
+
+  // Checklist Template Purchase operations
+  getChecklistTemplatePurchases(userId: string): Promise<ChecklistTemplatePurchase[]>;
+  getChecklistTemplatePurchaseByTemplateAndUser(templateId: number, userId: string): Promise<ChecklistTemplatePurchase | undefined>;
+  createChecklistTemplatePurchase(purchase: InsertChecklistTemplatePurchase): Promise<ChecklistTemplatePurchase>;
+  updateChecklistTemplatePurchase(id: number, purchase: Partial<InsertChecklistTemplatePurchase>): Promise<ChecklistTemplatePurchase | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1528,6 +1552,89 @@ export class DatabaseStorage implements IStorage {
       .update(contractSignatures)
       .set(signature)
       .where(eq(contractSignatures.id, id))
+      .returning();
+    return updated;
+  }
+
+  // ============================================
+  // CHECKLIST TEMPLATE LIBRARY
+  // ============================================
+
+  async getChecklistTemplates(segment?: string): Promise<ChecklistTemplate[]> {
+    if (segment) {
+      return db.select().from(checklistTemplates)
+        .where(and(
+          eq(checklistTemplates.isActive, true),
+          eq(checklistTemplates.segment, segment)
+        ))
+        .orderBy(checklistTemplates.name);
+    }
+    return db.select().from(checklistTemplates)
+      .where(eq(checklistTemplates.isActive, true))
+      .orderBy(checklistTemplates.segment, checklistTemplates.name);
+  }
+
+  async getChecklistTemplate(id: number): Promise<ChecklistTemplate | undefined> {
+    const [template] = await db.select().from(checklistTemplates)
+      .where(eq(checklistTemplates.id, id));
+    return template;
+  }
+
+  async getChecklistTemplateSegments(): Promise<string[]> {
+    const results = await db.selectDistinct({ segment: checklistTemplates.segment })
+      .from(checklistTemplates)
+      .where(eq(checklistTemplates.isActive, true))
+      .orderBy(checklistTemplates.segment);
+    return results.map(r => r.segment);
+  }
+
+  async createChecklistTemplate(template: InsertChecklistTemplate): Promise<ChecklistTemplate> {
+    const [newTemplate] = await db.insert(checklistTemplates).values(template).returning();
+    return newTemplate;
+  }
+
+  async updateChecklistTemplate(id: number, template: Partial<InsertChecklistTemplate>): Promise<ChecklistTemplate | undefined> {
+    const [updated] = await db
+      .update(checklistTemplates)
+      .set({ ...template, updatedAt: new Date() })
+      .where(eq(checklistTemplates.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteChecklistTemplate(id: number): Promise<boolean> {
+    await db.update(checklistTemplates)
+      .set({ isActive: false })
+      .where(eq(checklistTemplates.id, id));
+    return true;
+  }
+
+  // Checklist Template Purchase operations
+  async getChecklistTemplatePurchases(userId: string): Promise<ChecklistTemplatePurchase[]> {
+    return db.select().from(checklistTemplatePurchases)
+      .where(eq(checklistTemplatePurchases.userId, userId))
+      .orderBy(desc(checklistTemplatePurchases.createdAt));
+  }
+
+  async getChecklistTemplatePurchaseByTemplateAndUser(templateId: number, userId: string): Promise<ChecklistTemplatePurchase | undefined> {
+    const [purchase] = await db.select().from(checklistTemplatePurchases)
+      .where(and(
+        eq(checklistTemplatePurchases.templateId, templateId),
+        eq(checklistTemplatePurchases.userId, userId)
+      ));
+    return purchase;
+  }
+
+  async createChecklistTemplatePurchase(purchase: InsertChecklistTemplatePurchase): Promise<ChecklistTemplatePurchase> {
+    const [newPurchase] = await db.insert(checklistTemplatePurchases).values(purchase).returning();
+    return newPurchase;
+  }
+
+  async updateChecklistTemplatePurchase(id: number, purchase: Partial<InsertChecklistTemplatePurchase>): Promise<ChecklistTemplatePurchase | undefined> {
+    const [updated] = await db
+      .update(checklistTemplatePurchases)
+      .set(purchase)
+      .where(eq(checklistTemplatePurchases.id, id))
       .returning();
     return updated;
   }

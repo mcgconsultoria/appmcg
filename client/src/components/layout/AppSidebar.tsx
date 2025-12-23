@@ -35,6 +35,7 @@ import {
   BarChart3,
   UserRound,
   Settings2,
+  Library,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -77,6 +78,11 @@ const mainMenuItems = [
     title: "Checklist",
     url: "/checklist",
     icon: ClipboardCheck,
+  },
+  {
+    title: "Biblioteca",
+    url: "/biblioteca",
+    icon: Library,
   },
   {
     title: "RFI",

@@ -1205,6 +1205,75 @@ export const contractSignatures = pgTable("contract_signatures", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Checklist Templates Library - pre-filled checklists for sale by segment
+export const checklistTemplates = pgTable("checklist_templates", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  segment: varchar("segment", { length: 100 }).notNull(), // alimenticio, embalagem, quimico, etc.
+  industryName: varchar("industry_name", { length: 255 }), // Nome da indústria/cliente que serviu de base
+  priceInCents: integer("price_in_cents").default(9900), // R$ 99,00 default
+  stripePriceId: varchar("stripe_price_id", { length: 255 }), // Stripe price ID for checkout
+  isActive: boolean("is_active").default(true),
+  previewImageUrl: varchar("preview_image_url", { length: 500 }),
+  
+  // Template content - JSON with all checklist data
+  templateData: jsonb("template_data").$type<{
+    clienteNome?: string;
+    clienteCnpj?: string;
+    historia?: string;
+    localizacao?: string;
+    segmentoDetalhado?: string;
+    produto?: string;
+    numeros?: string;
+    noticias?: string;
+    mercado?: string;
+    oportunidades?: string;
+    pipeline?: string;
+    contatos?: any[];
+    portais?: any[];
+    sections?: any[];
+  }>(),
+  
+  // Update tracking per section
+  sectionUpdates: jsonb("section_updates").$type<{
+    [sectionName: string]: {
+      lastUpdatedAt: string;
+      updatedBy?: string;
+    };
+  }>(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Checklist Template Purchases - track who bought which templates
+export const checklistTemplatePurchases = pgTable("checklist_template_purchases", {
+  id: serial("id").primaryKey(),
+  templateId: integer("template_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  companyId: integer("company_id"),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
+  stripeSessionId: varchar("stripe_session_id", { length: 255 }),
+  amountPaid: integer("amount_paid"), // in cents
+  status: varchar("status", { length: 50 }).default("pending"), // pending, completed, failed, refunded
+  resultingChecklistId: integer("resulting_checklist_id"), // The checklist created from this purchase
+  purchasedAt: timestamp("purchased_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert schemas for checklist templates
+export const insertChecklistTemplateSchema = createInsertSchema(checklistTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertChecklistTemplatePurchaseSchema = createInsertSchema(checklistTemplatePurchases).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Insert schemas for contracts
 export const insertContractTemplateSchema = createInsertSchema(contractTemplates).omit({
   id: true,
@@ -1349,3 +1418,9 @@ export type ContractAgreement = typeof contractAgreements.$inferSelect;
 export type InsertContractAgreement = z.infer<typeof insertContractAgreementSchema>;
 export type ContractSignature = typeof contractSignatures.$inferSelect;
 export type InsertContractSignature = z.infer<typeof insertContractSignatureSchema>;
+
+// Checklist Library Types
+export type ChecklistTemplate = typeof checklistTemplates.$inferSelect;
+export type InsertChecklistTemplate = z.infer<typeof insertChecklistTemplateSchema>;
+export type ChecklistTemplatePurchase = typeof checklistTemplatePurchases.$inferSelect;
+export type InsertChecklistTemplatePurchase = z.infer<typeof insertChecklistTemplatePurchaseSchema>;

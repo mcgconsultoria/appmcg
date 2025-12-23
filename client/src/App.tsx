@@ -44,6 +44,7 @@ import AdminContratos from "@/pages/admin/AdminContratos";
 import AdminLogin from "@/pages/admin/AdminLogin";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
+import BibliotecaChecklists from "@/pages/BibliotecaChecklists";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -108,6 +109,7 @@ function Router() {
           <Route path="/calendario" component={CalendarPage} />
           <Route path="/atas" component={MeetingRecords} />
           <Route path="/checklist" component={Checklist} />
+          <Route path="/biblioteca" component={BibliotecaChecklists} />
           <Route path="/rfi" component={RFI} />
           <Route path="/tarefas" component={TasksPage} />
           <Route path="/projetos" component={ProjectsPage} />

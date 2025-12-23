@@ -683,6 +683,168 @@ export async function registerRoutes(
     }
   });
 
+  // Checklist Templates Library routes
+  app.get("/api/checklist-templates", isAuthenticated, async (req, res) => {
+    try {
+      const segment = req.query.segment as string | undefined;
+      const templates = await storage.getChecklistTemplates(segment);
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching checklist templates:", error);
+      res.status(500).json({ message: "Failed to fetch templates" });
+    }
+  });
+
+  app.get("/api/checklist-templates/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const template = await storage.getChecklistTemplate(id);
+      if (!template) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+      res.json(template);
+    } catch (error) {
+      console.error("Error fetching checklist template:", error);
+      res.status(500).json({ message: "Failed to fetch template" });
+    }
+  });
+
+  app.get("/api/checklist-templates/segments/list", isAuthenticated, async (req, res) => {
+    try {
+      const segments = await storage.getChecklistTemplateSegments();
+      res.json(segments);
+    } catch (error) {
+      console.error("Error fetching template segments:", error);
+      res.status(500).json({ message: "Failed to fetch segments" });
+    }
+  });
+
+  app.post("/api/checklist-templates", isAuthenticated, async (req, res) => {
+    try {
+      const isAdmin = req.user?.role === "admin" || req.user?.role === "admin_mcg";
+      if (!isAdmin) {
+        return res.status(403).json({ message: "Apenas administradores podem criar templates" });
+      }
+      const template = await storage.createChecklistTemplate(req.body);
+      res.status(201).json(template);
+    } catch (error) {
+      console.error("Error creating checklist template:", error);
+      res.status(500).json({ message: "Failed to create template" });
+    }
+  });
+
+  app.patch("/api/checklist-templates/:id", isAuthenticated, async (req, res) => {
+    try {
+      const isAdmin = req.user?.role === "admin" || req.user?.role === "admin_mcg";
+      if (!isAdmin) {
+        return res.status(403).json({ message: "Apenas administradores podem editar templates" });
+      }
+      const id = parseInt(req.params.id);
+      const template = await storage.updateChecklistTemplate(id, req.body);
+      if (!template) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+      res.json(template);
+    } catch (error) {
+      console.error("Error updating checklist template:", error);
+      res.status(500).json({ message: "Failed to update template" });
+    }
+  });
+
+  app.delete("/api/checklist-templates/:id", isAuthenticated, async (req, res) => {
+    try {
+      const isAdmin = req.user?.role === "admin" || req.user?.role === "admin_mcg";
+      if (!isAdmin) {
+        return res.status(403).json({ message: "Apenas administradores podem excluir templates" });
+      }
+      const id = parseInt(req.params.id);
+      await storage.deleteChecklistTemplate(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting checklist template:", error);
+      res.status(500).json({ message: "Failed to delete template" });
+    }
+  });
+
+  // Checklist Template Purchases
+  app.get("/api/checklist-template-purchases", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const purchases = await storage.getChecklistTemplatePurchases(userId);
+      res.json(purchases);
+    } catch (error) {
+      console.error("Error fetching purchases:", error);
+      res.status(500).json({ message: "Failed to fetch purchases" });
+    }
+  });
+
+  app.post("/api/checklist-templates/:id/purchase", isAuthenticated, async (req, res) => {
+    try {
+      const templateId = parseInt(req.params.id);
+      const userId = req.user!.id;
+      const companyId = req.user?.companyId;
+      
+      const template = await storage.getChecklistTemplate(templateId);
+      if (!template) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+
+      // Check if already purchased
+      const existingPurchase = await storage.getChecklistTemplatePurchaseByTemplateAndUser(templateId, userId);
+      if (existingPurchase && existingPurchase.status === "completed") {
+        return res.status(400).json({ message: "Você já possui este template" });
+      }
+
+      // Create Stripe checkout session
+      const stripe = await import("stripe");
+      const stripeClient = new stripe.default(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2025-11-17.clover" as const });
+      
+      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+        : 'https://www.mcgconsultoria.com.br';
+
+      const session = await stripeClient.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price_data: {
+              currency: "brl",
+              product_data: {
+                name: template.name,
+                description: `Checklist Template - ${template.segment}`,
+              },
+              unit_amount: template.priceInCents || 9900,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        success_url: `${baseUrl}/biblioteca?success=true&template=${templateId}`,
+        cancel_url: `${baseUrl}/biblioteca?canceled=true`,
+        metadata: {
+          templateId: templateId.toString(),
+          userId,
+          type: "checklist_template",
+        },
+      });
+
+      // Create pending purchase record
+      await storage.createChecklistTemplatePurchase({
+        templateId,
+        userId,
+        companyId: companyId || undefined,
+        stripeSessionId: session.id,
+        amountPaid: template.priceInCents || 9900,
+        status: "pending",
+      });
+
+      res.json({ checkoutUrl: session.url });
+    } catch (error) {
+      console.error("Error creating template purchase:", error);
+      res.status(500).json({ message: "Failed to create purchase" });
+    }
+  });
+
   // Route calculation API (QualP integration)
   app.post("/api/route-calculation", async (req, res) => {
     try {
