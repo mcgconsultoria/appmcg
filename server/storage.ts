@@ -119,6 +119,15 @@ import {
   type InsertChecklistTemplatePurchase,
   type DiagnosticLead,
   type InsertDiagnosticLead,
+  dreAccounts,
+  costCenters,
+  bankAccounts,
+  type DreAccount,
+  type InsertDreAccount,
+  type CostCenter,
+  type InsertCostCenter,
+  type BankAccount,
+  type InsertBankAccount,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
@@ -412,6 +421,26 @@ export interface IStorage {
   createDiagnosticLead(lead: InsertDiagnosticLead): Promise<DiagnosticLead>;
   updateDiagnosticLead(id: number, lead: Partial<InsertDiagnosticLead>): Promise<DiagnosticLead | undefined>;
   deleteDiagnosticLead(id: number): Promise<boolean>;
+
+  // Financial Module - DRE Accounts
+  getDreAccounts(): Promise<DreAccount[]>;
+  createDreAccount(account: InsertDreAccount): Promise<DreAccount>;
+  updateDreAccount(id: number, account: Partial<InsertDreAccount>): Promise<DreAccount | undefined>;
+  deleteDreAccount(id: number): Promise<boolean>;
+  seedDefaultDreAccounts(): Promise<void>;
+
+  // Financial Module - Cost Centers
+  getCostCenters(): Promise<CostCenter[]>;
+  createCostCenter(center: InsertCostCenter): Promise<CostCenter>;
+  updateCostCenter(id: number, center: Partial<InsertCostCenter>): Promise<CostCenter | undefined>;
+  deleteCostCenter(id: number): Promise<boolean>;
+  seedDefaultCostCenters(): Promise<void>;
+
+  // Financial Module - Bank Accounts
+  getBankAccounts(): Promise<BankAccount[]>;
+  createBankAccount(account: InsertBankAccount): Promise<BankAccount>;
+  updateBankAccount(id: number, account: Partial<InsertBankAccount>): Promise<BankAccount | undefined>;
+  deleteBankAccount(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1675,6 +1704,165 @@ export class DatabaseStorage implements IStorage {
 
   async deleteDiagnosticLead(id: number): Promise<boolean> {
     await db.delete(diagnosticLeads).where(eq(diagnosticLeads.id, id));
+    return true;
+  }
+
+  // ==========================================
+  // FINANCIAL MODULE - DRE, Cost Centers, Banks
+  // ==========================================
+
+  // DRE Accounts
+  async getDreAccounts(): Promise<DreAccount[]> {
+    return db.select().from(dreAccounts).orderBy(dreAccounts.code);
+  }
+
+  async createDreAccount(account: InsertDreAccount): Promise<DreAccount> {
+    const [newAccount] = await db.insert(dreAccounts).values(account).returning();
+    return newAccount;
+  }
+
+  async updateDreAccount(id: number, account: Partial<InsertDreAccount>): Promise<DreAccount | undefined> {
+    const [updated] = await db
+      .update(dreAccounts)
+      .set(account)
+      .where(eq(dreAccounts.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteDreAccount(id: number): Promise<boolean> {
+    await db.delete(dreAccounts).where(eq(dreAccounts.id, id));
+    return true;
+  }
+
+  async seedDefaultDreAccounts(): Promise<void> {
+    const defaultAccounts = [
+      { code: "1", name: "RECEITA BRUTA", nature: "receita", level: 1 },
+      { code: "1.1", name: "Receita de Servicos", nature: "receita", level: 2 },
+      { code: "1.1.1", name: "Consultoria", nature: "receita", level: 3 },
+      { code: "1.1.2", name: "Licencas de Software", nature: "receita", level: 3 },
+      { code: "1.1.3", name: "Treinamentos", nature: "receita", level: 3 },
+      { code: "2", name: "(-) DEDUCOES DA RECEITA", nature: "custo", level: 1 },
+      { code: "2.1", name: "Impostos sobre Servicos", nature: "custo", level: 2 },
+      { code: "2.1.1", name: "ISS", nature: "custo", level: 3 },
+      { code: "2.1.2", name: "PIS", nature: "custo", level: 3 },
+      { code: "2.1.3", name: "COFINS", nature: "custo", level: 3 },
+      { code: "3", name: "CUSTOS DOS SERVICOS PRESTADOS", nature: "custo", level: 1 },
+      { code: "3.1", name: "Custos Diretos", nature: "custo", level: 2 },
+      { code: "3.1.1", name: "Mao de Obra Direta", nature: "custo", level: 3 },
+      { code: "3.1.2", name: "Materiais e Insumos", nature: "custo", level: 3 },
+      { code: "4", name: "DESPESAS OPERACIONAIS", nature: "despesa", level: 1 },
+      { code: "4.1", name: "Despesas Administrativas", nature: "despesa", level: 2 },
+      { code: "4.1.1", name: "Salarios e Encargos", nature: "despesa", level: 3 },
+      { code: "4.1.2", name: "Aluguel e Condominio", nature: "despesa", level: 3 },
+      { code: "4.1.3", name: "Energia e Telecom", nature: "despesa", level: 3 },
+      { code: "4.1.4", name: "Servicos de Terceiros", nature: "despesa", level: 3 },
+      { code: "4.2", name: "Despesas Comerciais", nature: "despesa", level: 2 },
+      { code: "4.2.1", name: "Marketing e Publicidade", nature: "despesa", level: 3 },
+      { code: "4.2.2", name: "Comissoes de Vendas", nature: "despesa", level: 3 },
+      { code: "4.3", name: "Despesas Financeiras", nature: "despesa", level: 2 },
+      { code: "4.3.1", name: "Juros e Multas", nature: "despesa", level: 3 },
+      { code: "4.3.2", name: "Tarifas Bancarias", nature: "despesa", level: 3 },
+      { code: "5", name: "RESULTADO ANTES DO IR/CSLL", nature: "receita", level: 1 },
+      { code: "6", name: "(-) IR/CSLL", nature: "custo", level: 1 },
+      { code: "7", name: "RESULTADO LIQUIDO", nature: "receita", level: 1 },
+    ];
+
+    // Build parent ID mapping
+    const insertedAccounts: Record<string, number> = {};
+    
+    for (const acc of defaultAccounts) {
+      const parentCode = acc.code.includes(".") ? acc.code.split(".").slice(0, -1).join(".") : null;
+      const parentId = parentCode ? insertedAccounts[parentCode] : null;
+      
+      const [inserted] = await db.insert(dreAccounts).values({
+        ...acc,
+        parentId,
+      }).returning();
+      
+      insertedAccounts[acc.code] = inserted.id;
+    }
+  }
+
+  // Cost Centers
+  async getCostCenters(): Promise<CostCenter[]> {
+    return db.select().from(costCenters).orderBy(costCenters.code);
+  }
+
+  async createCostCenter(center: InsertCostCenter): Promise<CostCenter> {
+    const [newCenter] = await db.insert(costCenters).values(center).returning();
+    return newCenter;
+  }
+
+  async updateCostCenter(id: number, center: Partial<InsertCostCenter>): Promise<CostCenter | undefined> {
+    const [updated] = await db
+      .update(costCenters)
+      .set(center)
+      .where(eq(costCenters.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCostCenter(id: number): Promise<boolean> {
+    await db.delete(costCenters).where(eq(costCenters.id, id));
+    return true;
+  }
+
+  async seedDefaultCostCenters(): Promise<void> {
+    const defaultCenters = [
+      { code: "ADM", name: "Administrativo", type: "administrativo" },
+      { code: "ADM.01", name: "Recursos Humanos", type: "administrativo" },
+      { code: "ADM.02", name: "Financeiro", type: "administrativo" },
+      { code: "ADM.03", name: "Juridico", type: "administrativo" },
+      { code: "COM", name: "Comercial", type: "comercial" },
+      { code: "COM.01", name: "Vendas", type: "comercial" },
+      { code: "COM.02", name: "Marketing", type: "comercial" },
+      { code: "COM.03", name: "Relacionamento", type: "comercial" },
+      { code: "OPE", name: "Operacional", type: "operacional" },
+      { code: "OPE.01", name: "Consultoria", type: "operacional" },
+      { code: "OPE.02", name: "Implantacao", type: "operacional" },
+      { code: "OPE.03", name: "Suporte", type: "operacional" },
+      { code: "PRJ", name: "Projetos", type: "projeto" },
+      { code: "PRJ.01", name: "Desenvolvimento MCG", type: "projeto" },
+      { code: "PRJ.02", name: "Parcerias", type: "projeto" },
+    ];
+
+    const insertedCenters: Record<string, number> = {};
+    
+    for (const center of defaultCenters) {
+      const parentCode = center.code.includes(".") ? center.code.split(".")[0] : null;
+      const parentId = parentCode ? insertedCenters[parentCode] : null;
+      
+      const [inserted] = await db.insert(costCenters).values({
+        ...center,
+        parentId,
+      }).returning();
+      
+      insertedCenters[center.code] = inserted.id;
+    }
+  }
+
+  // Bank Accounts
+  async getBankAccounts(): Promise<BankAccount[]> {
+    return db.select().from(bankAccounts).orderBy(desc(bankAccounts.isMain), bankAccounts.bankName);
+  }
+
+  async createBankAccount(account: InsertBankAccount): Promise<BankAccount> {
+    const [newAccount] = await db.insert(bankAccounts).values(account).returning();
+    return newAccount;
+  }
+
+  async updateBankAccount(id: number, account: Partial<InsertBankAccount>): Promise<BankAccount | undefined> {
+    const [updated] = await db
+      .update(bankAccounts)
+      .set({ ...account, updatedAt: new Date() })
+      .where(eq(bankAccounts.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteBankAccount(id: number): Promise<boolean> {
+    await db.delete(bankAccounts).where(eq(bankAccounts.id, id));
     return true;
   }
 }

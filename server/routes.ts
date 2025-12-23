@@ -35,6 +35,9 @@ import {
   insertContractAgreementSchema,
   insertContractSignatureSchema,
   insertDiagnosticLeadSchema,
+  insertDreAccountSchema,
+  insertCostCenterSchema,
+  insertBankAccountSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -3896,6 +3899,186 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting diagnostic lead:", error);
       res.status(500).json({ message: "Falha ao excluir lead" });
+    }
+  });
+
+  // ==========================================
+  // FINANCIAL MODULE ROUTES
+  // ==========================================
+
+  // DRE Accounts routes
+  app.get("/api/dre-accounts", isAdmin, async (req, res) => {
+    try {
+      const accounts = await storage.getDreAccounts();
+      res.json(accounts);
+    } catch (error) {
+      console.error("Error fetching DRE accounts:", error);
+      res.status(500).json({ message: "Falha ao buscar contas DRE" });
+    }
+  });
+
+  app.post("/api/dre-accounts", isAdmin, async (req, res) => {
+    try {
+      const parsed = insertDreAccountSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados invalidos", errors: parsed.error.errors });
+      }
+      const account = await storage.createDreAccount(parsed.data);
+      res.status(201).json(account);
+    } catch (error) {
+      console.error("Error creating DRE account:", error);
+      res.status(500).json({ message: "Falha ao criar conta DRE" });
+    }
+  });
+
+  app.post("/api/dre-accounts/seed", isAdmin, async (req, res) => {
+    try {
+      await storage.seedDefaultDreAccounts();
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error seeding DRE accounts:", error);
+      res.status(500).json({ message: "Falha ao criar plano de contas" });
+    }
+  });
+
+  app.patch("/api/dre-accounts/:id", isAdmin, async (req, res) => {
+    try {
+      const parsed = insertDreAccountSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados invalidos", errors: parsed.error.errors });
+      }
+      const updated = await storage.updateDreAccount(parseInt(req.params.id), parsed.data);
+      if (!updated) {
+        return res.status(404).json({ message: "Conta não encontrada" });
+      }
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating DRE account:", error);
+      res.status(500).json({ message: "Falha ao atualizar conta DRE" });
+    }
+  });
+
+  app.delete("/api/dre-accounts/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteDreAccount(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting DRE account:", error);
+      res.status(500).json({ message: "Falha ao excluir conta DRE" });
+    }
+  });
+
+  // Cost Centers routes
+  app.get("/api/cost-centers", isAdmin, async (req, res) => {
+    try {
+      const centers = await storage.getCostCenters();
+      res.json(centers);
+    } catch (error) {
+      console.error("Error fetching cost centers:", error);
+      res.status(500).json({ message: "Falha ao buscar centros de custo" });
+    }
+  });
+
+  app.post("/api/cost-centers", isAdmin, async (req, res) => {
+    try {
+      const parsed = insertCostCenterSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados invalidos", errors: parsed.error.errors });
+      }
+      const center = await storage.createCostCenter(parsed.data);
+      res.status(201).json(center);
+    } catch (error) {
+      console.error("Error creating cost center:", error);
+      res.status(500).json({ message: "Falha ao criar centro de custo" });
+    }
+  });
+
+  app.post("/api/cost-centers/seed", isAdmin, async (req, res) => {
+    try {
+      await storage.seedDefaultCostCenters();
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error seeding cost centers:", error);
+      res.status(500).json({ message: "Falha ao criar estrutura de centros de custo" });
+    }
+  });
+
+  app.patch("/api/cost-centers/:id", isAdmin, async (req, res) => {
+    try {
+      const parsed = insertCostCenterSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados invalidos", errors: parsed.error.errors });
+      }
+      const updated = await storage.updateCostCenter(parseInt(req.params.id), parsed.data);
+      if (!updated) {
+        return res.status(404).json({ message: "Centro de custo não encontrado" });
+      }
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating cost center:", error);
+      res.status(500).json({ message: "Falha ao atualizar centro de custo" });
+    }
+  });
+
+  app.delete("/api/cost-centers/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteCostCenter(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting cost center:", error);
+      res.status(500).json({ message: "Falha ao excluir centro de custo" });
+    }
+  });
+
+  // Bank Accounts routes
+  app.get("/api/bank-accounts", isAdmin, async (req, res) => {
+    try {
+      const accounts = await storage.getBankAccounts();
+      res.json(accounts);
+    } catch (error) {
+      console.error("Error fetching bank accounts:", error);
+      res.status(500).json({ message: "Falha ao buscar contas bancarias" });
+    }
+  });
+
+  app.post("/api/bank-accounts", isAdmin, async (req, res) => {
+    try {
+      const parsed = insertBankAccountSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados invalidos", errors: parsed.error.errors });
+      }
+      const account = await storage.createBankAccount(parsed.data);
+      res.status(201).json(account);
+    } catch (error) {
+      console.error("Error creating bank account:", error);
+      res.status(500).json({ message: "Falha ao criar conta bancaria" });
+    }
+  });
+
+  app.patch("/api/bank-accounts/:id", isAdmin, async (req, res) => {
+    try {
+      const parsed = insertBankAccountSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados invalidos", errors: parsed.error.errors });
+      }
+      const updated = await storage.updateBankAccount(parseInt(req.params.id), parsed.data);
+      if (!updated) {
+        return res.status(404).json({ message: "Conta bancaria não encontrada" });
+      }
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating bank account:", error);
+      res.status(500).json({ message: "Falha ao atualizar conta bancaria" });
+    }
+  });
+
+  app.delete("/api/bank-accounts/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteBankAccount(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting bank account:", error);
+      res.status(500).json({ message: "Falha ao excluir conta bancária" });
     }
   });
 

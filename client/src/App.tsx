@@ -45,6 +45,9 @@ import AdminTemplates from "@/pages/admin/AdminTemplates";
 import AdminCampanhaPiloto from "@/pages/admin/AdminCampanhaPiloto";
 import AdminDiagnosticoLeads from "@/pages/admin/AdminDiagnosticoLeads";
 import AdminLogin from "@/pages/admin/AdminLogin";
+import AdminDRE from "@/pages/admin/AdminDRE";
+import AdminCentroCustos from "@/pages/admin/AdminCentroCustos";
+import AdminBancos from "@/pages/admin/AdminBancos";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import BibliotecaChecklists from "@/pages/BibliotecaChecklists";
@@ -112,6 +115,15 @@ function Router() {
       </Route>
       <Route path="/admin/leads-diagnostico">
         {() => isAuthenticated && isAdmin ? <AdminDiagnosticoLeads /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/dre">
+        {() => isAuthenticated && isAdmin ? <AdminDRE /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/centros-custo">
+        {() => isAuthenticated && isAdmin ? <AdminCentroCustos /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/bancos">
+        {() => isAuthenticated && isAdmin ? <AdminBancos /> : <AdminLogin />}
       </Route>
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />

@@ -1338,6 +1338,198 @@ export const insertSupportTicketMessageSchema = createInsertSchema(supportTicket
   createdAt: true,
 });
 
+// ==========================================
+// FINANCIAL MODULE - DRE, Cost Centers, Banks, NFS-e
+// ==========================================
+
+// Digital Certificates for NFS-e
+export const digitalCertificates = pgTable("digital_certificates", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id"),
+  name: varchar("name", { length: 255 }).notNull(),
+  type: varchar("type", { length: 10 }).default("A1"), // A1 or A3
+  cnpj: varchar("cnpj", { length: 18 }),
+  serialNumber: varchar("serial_number", { length: 100 }),
+  issuer: varchar("issuer", { length: 255 }),
+  validFrom: timestamp("valid_from"),
+  validUntil: timestamp("valid_until"),
+  certificateData: text("certificate_data"), // Encrypted PKCS12 base64
+  passwordHash: varchar("password_hash", { length: 255 }),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// DRE Accounts (Chart of Accounts)
+export const dreAccounts = pgTable("dre_accounts", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id"),
+  parentId: integer("parent_id"), // Self-referencing for tree structure
+  code: varchar("code", { length: 20 }).notNull(), // e.g., "3.1.1"
+  name: varchar("name", { length: 255 }).notNull(),
+  nature: varchar("nature", { length: 20 }).notNull(), // receita, custo, despesa
+  type: varchar("type", { length: 50 }), // operacional, financeira, administrativa
+  level: integer("level").default(1),
+  reportOrder: integer("report_order"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Cost Centers (Hierarchical)
+export const costCenters = pgTable("cost_centers", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id"),
+  parentId: integer("parent_id"), // Self-referencing for tree structure
+  code: varchar("code", { length: 20 }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  type: varchar("type", { length: 50 }), // administrativo, comercial, operacional, projeto
+  description: text("description"),
+  budget: decimal("budget", { precision: 15, scale: 2 }),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Bank Accounts
+export const bankAccounts = pgTable("bank_accounts", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id"),
+  bankCode: varchar("bank_code", { length: 10 }).notNull(), // e.g., "336" for C6
+  bankName: varchar("bank_name", { length: 100 }).notNull(),
+  agency: varchar("agency", { length: 10 }).notNull(),
+  agencyDigit: varchar("agency_digit", { length: 2 }),
+  accountNumber: varchar("account_number", { length: 20 }).notNull(),
+  accountDigit: varchar("account_digit", { length: 2 }),
+  accountType: varchar("account_type", { length: 20 }).default("corrente"), // corrente, poupanca
+  holderName: varchar("holder_name", { length: 255 }),
+  holderCnpj: varchar("holder_cnpj", { length: 18 }),
+  pixKey: varchar("pix_key", { length: 100 }),
+  pixKeyType: varchar("pix_key_type", { length: 20 }), // cpf, cnpj, email, telefone, aleatoria
+  openBankingEnabled: boolean("open_banking_enabled").default(false),
+  openBankingToken: text("open_banking_token"),
+  isMain: boolean("is_main").default(false),
+  isActive: boolean("is_active").default(true),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// NFS-e Provider Configuration (per municipality)
+export const nfseProviders = pgTable("nfse_providers", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id"),
+  cityCode: varchar("city_code", { length: 10 }).notNull(), // IBGE code
+  cityName: varchar("city_name", { length: 100 }).notNull(),
+  state: varchar("state", { length: 2 }).notNull(),
+  providerType: varchar("provider_type", { length: 50 }).notNull(), // abrasf, betha, ginfes, issweb, etc.
+  homologationUrl: varchar("homologation_url", { length: 500 }),
+  productionUrl: varchar("production_url", { length: 500 }),
+  apiToken: text("api_token"), // For third-party APIs like Webmania, Focus NFe
+  apiProvider: varchar("api_provider", { length: 50 }), // webmania, focusnfe, plugnotas
+  inscricaoMunicipal: varchar("inscricao_municipal", { length: 20 }),
+  codigoTributacao: varchar("codigo_tributacao", { length: 20 }),
+  itemListaServico: varchar("item_lista_servico", { length: 10 }),
+  cnae: varchar("cnae", { length: 10 }),
+  certificateId: integer("certificate_id"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// NFS-e Invoices
+export const nfseInvoices = pgTable("nfse_invoices", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id"),
+  providerId: integer("provider_id"),
+  clientId: integer("client_id"),
+  rpsNumber: varchar("rps_number", { length: 20 }),
+  rpsSeries: varchar("rps_series", { length: 10 }),
+  rpsType: varchar("rps_type", { length: 5 }).default("1"),
+  nfseNumber: varchar("nfse_number", { length: 20 }),
+  verificationCode: varchar("verification_code", { length: 50 }),
+  issueDate: timestamp("issue_date").defaultNow(),
+  competenceDate: timestamp("competence_date"),
+  status: varchar("status", { length: 20 }).default("pending"), // pending, processing, approved, cancelled, error
+  serviceDescription: text("service_description").notNull(),
+  serviceValue: decimal("service_value", { precision: 15, scale: 2 }).notNull(),
+  deductionValue: decimal("deduction_value", { precision: 15, scale: 2 }).default("0"),
+  issRate: decimal("iss_rate", { precision: 5, scale: 2 }),
+  issValue: decimal("iss_value", { precision: 15, scale: 2 }),
+  issRetained: boolean("iss_retained").default(false),
+  pisValue: decimal("pis_value", { precision: 15, scale: 2 }),
+  cofinsValue: decimal("cofins_value", { precision: 15, scale: 2 }),
+  irValue: decimal("ir_value", { precision: 15, scale: 2 }),
+  csllValue: decimal("csll_value", { precision: 15, scale: 2 }),
+  inssValue: decimal("inss_value", { precision: 15, scale: 2 }),
+  totalValue: decimal("total_value", { precision: 15, scale: 2 }),
+  xmlContent: text("xml_content"),
+  pdfUrl: text("pdf_url"),
+  xmlUrl: text("xml_url"),
+  apiResponse: jsonb("api_response"),
+  errorMessage: text("error_message"),
+  cancelledAt: timestamp("cancelled_at"),
+  cancellationReason: text("cancellation_reason"),
+  financialRecordId: integer("financial_record_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Product Cost Structure (for DRE pricing)
+export const productCostStructures = pgTable("product_cost_structures", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id"),
+  productName: varchar("product_name", { length: 255 }).notNull(),
+  productType: varchar("product_type", { length: 50 }), // servico, licenca, consultoria
+  costComponents: jsonb("cost_components"), // Array of {dreAccountId, description, value, percentage}
+  fixedCosts: decimal("fixed_costs", { precision: 15, scale: 2 }).default("0"),
+  variableCosts: decimal("variable_costs", { precision: 15, scale: 2 }).default("0"),
+  marginTarget: decimal("margin_target", { precision: 5, scale: 2 }),
+  suggestedPrice: decimal("suggested_price", { precision: 15, scale: 2 }),
+  currentPrice: decimal("current_price", { precision: 15, scale: 2 }),
+  isActive: boolean("is_active").default(true),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Insert schemas for financial module
+export const insertDigitalCertificateSchema = createInsertSchema(digitalCertificates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertDreAccountSchema = createInsertSchema(dreAccounts).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCostCenterSchema = createInsertSchema(costCenters).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertBankAccountSchema = createInsertSchema(bankAccounts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertNfseProviderSchema = createInsertSchema(nfseProviders).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertNfseInvoiceSchema = createInsertSchema(nfseInvoices).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProductCostStructureSchema = createInsertSchema(productCostStructures).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Auth schemas
 export const registerSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -1456,3 +1648,19 @@ export type InsertChecklistTemplatePurchase = z.infer<typeof insertChecklistTemp
 // Diagnostic Lead Types
 export type DiagnosticLead = typeof diagnosticLeads.$inferSelect;
 export type InsertDiagnosticLead = z.infer<typeof insertDiagnosticLeadSchema>;
+
+// Financial Module Types
+export type DigitalCertificate = typeof digitalCertificates.$inferSelect;
+export type InsertDigitalCertificate = z.infer<typeof insertDigitalCertificateSchema>;
+export type DreAccount = typeof dreAccounts.$inferSelect;
+export type InsertDreAccount = z.infer<typeof insertDreAccountSchema>;
+export type CostCenter = typeof costCenters.$inferSelect;
+export type InsertCostCenter = z.infer<typeof insertCostCenterSchema>;
+export type BankAccount = typeof bankAccounts.$inferSelect;
+export type InsertBankAccount = z.infer<typeof insertBankAccountSchema>;
+export type NfseProvider = typeof nfseProviders.$inferSelect;
+export type InsertNfseProvider = z.infer<typeof insertNfseProviderSchema>;
+export type NfseInvoice = typeof nfseInvoices.$inferSelect;
+export type InsertNfseInvoice = z.infer<typeof insertNfseInvoiceSchema>;
+export type ProductCostStructure = typeof productCostStructures.$inferSelect;
+export type InsertProductCostStructure = z.infer<typeof insertProductCostStructureSchema>;
