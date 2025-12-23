@@ -88,6 +88,11 @@ const marketingMenuItems = [
     url: "/admin/campanha-piloto",
     icon: Megaphone,
   },
+  {
+    title: "Leads Diagnostico",
+    url: "/admin/leads-diagnostico",
+    icon: Users,
+  },
 ];
 
 interface AdminLayoutProps {
