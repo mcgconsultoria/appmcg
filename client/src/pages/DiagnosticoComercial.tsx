@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -168,6 +171,7 @@ interface LeadData {
 
 export default function DiagnosticoComercial() {
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [showResult, setShowResult] = useState(false);
@@ -181,6 +185,37 @@ export default function DiagnosticoComercial() {
 
   const totalQuestions = questions.length;
   const progress = ((currentStep + 1) / totalQuestions) * 100;
+
+  const getMaturityLevel = (percentage: number) => {
+    if (percentage >= 75) return "avancado";
+    if (percentage >= 50) return "intermediario";
+    if (percentage >= 25) return "basico";
+    return "iniciante";
+  };
+
+  const saveLead = useMutation({
+    mutationFn: async (data: {
+      name: string;
+      email: string;
+      company: string;
+      phone: string;
+      score: number;
+      maxScore: number;
+      percentage: number;
+      maturityLevel: string;
+      answers: Record<string, number>;
+    }) => {
+      const res = await apiRequest("POST", "/api/diagnostic-leads", data);
+      return res.json();
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Nao foi possivel salvar. Tente novamente.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleAnswer = (value: string) => {
     const question = questions[currentStep];
@@ -204,8 +239,26 @@ export default function DiagnosticoComercial() {
     }
   };
 
-  const handleLeadSubmit = (e: React.FormEvent) => {
+  const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const total = Object.values(answers).reduce((sum, val) => sum + val, 0);
+    const maxScore = totalQuestions * 3;
+    const percentage = Math.round((total / maxScore) * 100);
+    const maturityLevel = getMaturityLevel(percentage);
+    
+    await saveLead.mutateAsync({
+      name: leadData.name,
+      email: leadData.email,
+      company: leadData.company,
+      phone: leadData.phone || "",
+      score: total,
+      maxScore,
+      percentage,
+      maturityLevel,
+      answers,
+    });
+    
     setShowLeadForm(false);
     setShowResult(true);
   };
@@ -468,9 +521,15 @@ export default function DiagnosticoComercial() {
                       />
                     </div>
                   </div>
-                  <Button type="submit" className="w-full" size="lg" data-testid="button-see-result">
-                    Ver Meu Resultado
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    size="lg" 
+                    disabled={saveLead.isPending}
+                    data-testid="button-see-result"
+                  >
+                    {saveLead.isPending ? "Processando..." : "Ver Meu Resultado"}
+                    {!saveLead.isPending && <ArrowRight className="w-4 h-4 ml-2" />}
                   </Button>
                   <p className="text-xs text-center text-muted-foreground">
                     Seus dados estão protegidos conforme nossa{" "}
