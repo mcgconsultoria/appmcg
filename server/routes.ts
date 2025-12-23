@@ -124,7 +124,7 @@ export async function registerRoutes(
       res.cookie(SESSION_COOKIE_NAME, result.sessionToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'lax',
         maxAge: SESSION_MAX_AGE,
         path: '/',
       });
@@ -152,7 +152,7 @@ export async function registerRoutes(
       res.cookie(SESSION_COOKIE_NAME, result.sessionToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'lax',
         maxAge: SESSION_MAX_AGE,
         path: '/',
       });
