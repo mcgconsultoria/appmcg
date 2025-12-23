@@ -67,6 +67,9 @@ export default function BibliotecaChecklists() {
   const [showApplyDialog, setShowApplyDialog] = useState(false);
   const [applyingTemplate, setApplyingTemplate] = useState<ChecklistTemplate | null>(null);
   const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [showCurrencyDialog, setShowCurrencyDialog] = useState(false);
+  const [purchasingTemplate, setPurchasingTemplate] = useState<ChecklistTemplate | null>(null);
+  const [selectedCurrency, setSelectedCurrency] = useState<string>("brl");
 
   const { data: templates, isLoading } = useQuery<ChecklistTemplate[]>({
     queryKey: ["/api/checklist-templates", selectedSegment !== "all" ? selectedSegment : undefined],
@@ -85,13 +88,15 @@ export default function BibliotecaChecklists() {
   });
 
   const purchaseMutation = useMutation({
-    mutationFn: async (templateId: number) => {
-      const response = await apiRequest("POST", `/api/checklist-templates/${templateId}/purchase`);
+    mutationFn: async ({ templateId, currency }: { templateId: number; currency: string }) => {
+      const response = await apiRequest("POST", `/api/checklist-templates/${templateId}/purchase`, { currency });
       return response.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/checklist-template-purchases"] });
       queryClient.invalidateQueries({ queryKey: ["/api/checklist-templates"] });
+      setShowCurrencyDialog(false);
+      setPurchasingTemplate(null);
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
       }
@@ -144,12 +149,26 @@ export default function BibliotecaChecklists() {
     return purchases?.some(p => p.templateId === templateId && p.status === "completed");
   };
 
-  const formatPrice = (priceInCents: number | null) => {
-    if (!priceInCents) return "R$ 99,00";
-    return new Intl.NumberFormat("pt-BR", {
+  const formatPrice = (priceInCents: number | null, currency: string = "brl") => {
+    const basePriceInCents = priceInCents || 9900;
+    let convertedPrice = basePriceInCents;
+    let currencyCode = "BRL";
+    let locale = "pt-BR";
+    
+    if (currency === "usd") {
+      convertedPrice = Math.round(basePriceInCents / 5.0);
+      currencyCode = "USD";
+      locale = "en-US";
+    } else if (currency === "eur") {
+      convertedPrice = Math.round(basePriceInCents / 6.2);
+      currencyCode = "EUR";
+      locale = "de-DE";
+    }
+    
+    return new Intl.NumberFormat(locale, {
       style: "currency",
-      currency: "BRL",
-    }).format(priceInCents / 100);
+      currency: currencyCode,
+    }).format(convertedPrice / 100);
   };
 
   const formatDate = (dateStr: string | null) => {
@@ -165,7 +184,17 @@ export default function BibliotecaChecklists() {
       });
       return;
     }
-    purchaseMutation.mutate(template.id);
+    setPurchasingTemplate(template);
+    setSelectedCurrency("brl");
+    setShowCurrencyDialog(true);
+  };
+
+  const confirmPurchase = () => {
+    if (!purchasingTemplate) return;
+    purchaseMutation.mutate({
+      templateId: purchasingTemplate.id,
+      currency: selectedCurrency,
+    });
   };
 
   const handlePreview = (template: ChecklistTemplate) => {
@@ -520,6 +549,77 @@ export default function BibliotecaChecklists() {
                   <CheckCircle2 className="h-4 w-4 mr-2" />
                 )}
                 Aplicar Template
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showCurrencyDialog} onOpenChange={setShowCurrencyDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5" />
+                Escolha a Moeda de Pagamento
+              </DialogTitle>
+              <DialogDescription>
+                Selecione a moeda para pagar pelo template "{purchasingTemplate?.name}"
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid grid-cols-3 gap-3 py-4">
+              <Button
+                variant={selectedCurrency === "brl" ? "default" : "outline"}
+                className="flex flex-col items-center gap-2 h-auto py-4"
+                onClick={() => setSelectedCurrency("brl")}
+                data-testid="button-currency-brl"
+              >
+                <span className="text-lg font-bold">R$</span>
+                <span className="font-medium">Real</span>
+                <span className="text-sm text-muted-foreground">
+                  {formatPrice(purchasingTemplate?.priceInCents || null, "brl")}
+                </span>
+              </Button>
+              <Button
+                variant={selectedCurrency === "usd" ? "default" : "outline"}
+                className="flex flex-col items-center gap-2 h-auto py-4"
+                onClick={() => setSelectedCurrency("usd")}
+                data-testid="button-currency-usd"
+              >
+                <span className="text-lg font-bold">$</span>
+                <span className="font-medium">Dólar</span>
+                <span className="text-sm text-muted-foreground">
+                  {formatPrice(purchasingTemplate?.priceInCents || null, "usd")}
+                </span>
+              </Button>
+              <Button
+                variant={selectedCurrency === "eur" ? "default" : "outline"}
+                className="flex flex-col items-center gap-2 h-auto py-4"
+                onClick={() => setSelectedCurrency("eur")}
+                data-testid="button-currency-eur"
+              >
+                <span className="text-lg font-bold">€</span>
+                <span className="font-medium">Euro</span>
+                <span className="text-sm text-muted-foreground">
+                  {formatPrice(purchasingTemplate?.priceInCents || null, "eur")}
+                </span>
+              </Button>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCurrencyDialog(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={confirmPurchase}
+                disabled={purchaseMutation.isPending}
+                data-testid="button-confirm-purchase"
+              >
+                {purchaseMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                )}
+                Ir para Pagamento
               </Button>
             </DialogFooter>
           </DialogContent>

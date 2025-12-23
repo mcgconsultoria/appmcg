@@ -783,6 +783,11 @@ export async function registerRoutes(
       const templateId = parseInt(req.params.id);
       const userId = req.user!.id;
       const companyId = req.user?.companyId;
+      const { currency = "brl" } = req.body;
+      
+      // Validate currency
+      const validCurrencies = ["brl", "usd", "eur"];
+      const selectedCurrency = validCurrencies.includes(currency.toLowerCase()) ? currency.toLowerCase() : "brl";
       
       const template = await storage.getChecklistTemplate(templateId);
       if (!template) {
@@ -803,17 +808,27 @@ export async function registerRoutes(
         ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
         : 'https://www.mcgconsultoria.com.br';
 
+      // Calculate price based on currency (approximate conversion rates)
+      // BRL base price, convert to USD/EUR
+      const basePriceInCents = template.priceInCents || 9900;
+      let priceInCents = basePriceInCents;
+      if (selectedCurrency === "usd") {
+        priceInCents = Math.round(basePriceInCents / 5.0); // ~5 BRL per USD
+      } else if (selectedCurrency === "eur") {
+        priceInCents = Math.round(basePriceInCents / 6.2); // ~6.2 BRL per EUR
+      }
+
       const session = await stripeClient.checkout.sessions.create({
         payment_method_types: ["card"],
         line_items: [
           {
             price_data: {
-              currency: "brl",
+              currency: selectedCurrency,
               product_data: {
                 name: template.name,
                 description: `Checklist Template - ${template.segment}`,
               },
-              unit_amount: template.priceInCents || 9900,
+              unit_amount: priceInCents,
             },
             quantity: 1,
           },
