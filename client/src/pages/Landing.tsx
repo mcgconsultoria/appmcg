@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -100,6 +101,22 @@ const services = [
 ];
 
 export default function Landing() {
+  useEffect(() => {
+    const existingScript = document.getElementById("ra-embed-reputation");
+    if (!existingScript) {
+      const script = document.createElement("script");
+      script.id = "ra-embed-reputation";
+      script.src = "https://s3.amazonaws.com/raichu-beta/selos/bundle.js";
+      script.setAttribute("data-id", "Ul8zMWxjWHRCU05IcTBHUTptY2ctY29uc3VsdG9yaWEtbHRkYQ==");
+      script.setAttribute("data-target", "reputation-ra");
+      script.setAttribute("data-model", "1");
+      const container = document.getElementById("reputation-ra");
+      if (container) {
+        container.appendChild(script);
+      }
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -441,16 +458,10 @@ export default function Landing() {
               </div>
 
               <div className="flex items-center gap-4 flex-wrap justify-center">
-                <a
-                  href="https://www.reclameaqui.com.br/empresa/mcg-consultoria/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md hover-elevate"
+                <div 
+                  id="reputation-ra" 
                   data-testid="badge-reclame-aqui"
-                >
-                  <MessageSquareWarning className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                  Reclame Aqui
-                </a>
+                />
                 <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-md">
                   <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                   Pagamento Seguro
