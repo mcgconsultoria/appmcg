@@ -26,6 +26,10 @@ export async function registerUser(data: RegisterData): Promise<{ user: User; se
   const hashedPassword = await hashPassword(data.password);
   const sessionToken = generateSessionToken();
 
+  // Emails @mcgconsultoria.com.br recebem role admin_mcg automaticamente
+  const isMcgEmail = data.email.toLowerCase().endsWith("@mcgconsultoria.com.br");
+  const role = isMcgEmail ? "admin_mcg" : undefined;
+
   const user = await storage.createUserWithPassword({
     email: data.email,
     password: hashedPassword,
@@ -41,6 +45,7 @@ export async function registerUser(data: RegisterData): Promise<{ user: User; se
     phone: data.phone || null,
     activeSessionToken: sessionToken,
     subscriptionStatus: "free",
+    ...(role && { role }),
   });
 
   return { user, sessionToken };
