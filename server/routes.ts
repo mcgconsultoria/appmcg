@@ -194,11 +194,11 @@ export async function registerRoutes(
 
       await storage.setPasswordResetToken(user.id, resetToken, resetTokenExpiry);
 
-      const { sendEmail } = await import("./emailService");
+      const { emailService } = await import("./emailService");
       const resetUrl = `${process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'https://www.mcgconsultoria.com.br'}/redefinir-senha?token=${resetToken}`;
       
-      await sendEmail({
-        to: email,
+      const emailResult = await emailService.send({
+        to: [email],
         subject: "Redefinir Senha - MCG Consultoria",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -212,6 +212,10 @@ export async function registerRoutes(
           </div>
         `,
       });
+      
+      if (!emailResult.success) {
+        console.log("Email service not configured:", emailResult.error);
+      }
 
       res.json({ message: "Se o email existir, você receberá as instruções" });
     } catch (error) {
