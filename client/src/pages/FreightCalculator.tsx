@@ -385,7 +385,7 @@ export default function FreightCalculator() {
       return;
     }
 
-    if (!quota?.unlimited && quota?.remaining !== null && quota?.remaining <= 0) {
+    if (!quota?.unlimited && quota?.remaining !== undefined && quota?.remaining !== null && quota.remaining <= 0) {
       setShowUpgradeDialog(true);
       return;
     }

@@ -115,6 +115,9 @@ export default function Landing() {
             </div>
           </div>
           <nav className="hidden md:flex items-center gap-6">
+            <Link href="/diagnostico" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Diagn\u00f3stico Gr\u00e1tis
+            </Link>
             <Link href="/calculadora-frete" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Calculadora Frete
             </Link>
@@ -155,15 +158,15 @@ export default function Landing() {
               checklists e controle financeiro em uma única plataforma.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/calculadora-frete">
-                <Button size="lg" className="gap-2" data-testid="button-start-free">
-                  Calculadora Grátis
+              <Link href="/diagnostico">
+                <Button size="lg" className="gap-2" data-testid="button-diagnostic">
+                  Fazer Diagn\u00f3stico Gr\u00e1tis
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/planos">
-                <Button size="lg" variant="outline" data-testid="button-learn-more">
-                  Ver Planos
+              <Link href="/calculadora-frete">
+                <Button size="lg" variant="outline" className="gap-2" data-testid="button-start-free">
+                  Calculadora de Frete
                 </Button>
               </Link>
             </div>
