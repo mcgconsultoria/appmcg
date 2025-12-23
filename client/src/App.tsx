@@ -47,6 +47,7 @@ import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import BibliotecaChecklists from "@/pages/BibliotecaChecklists";
 import DiagnosticoComercial from "@/pages/DiagnosticoComercial";
+import CampanhaPiloto from "@/pages/CampanhaPiloto";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -66,6 +67,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/diagnostico" component={DiagnosticoComercial} />
+      <Route path="/campanha-piloto" component={CampanhaPiloto} />
       <Route path="/calculadora-frete" component={FreightCalculator} />
       <Route path="/calculadora-armazenagem" component={StorageCalculator} />
       <Route path="/planos" component={Pricing} />
