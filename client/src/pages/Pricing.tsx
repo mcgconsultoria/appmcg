@@ -320,16 +320,31 @@ export default function Pricing() {
   };
 
   const plans = productsData?.data?.length
-    ? productsData.data.map((product, index) => ({
-        name: product.name,
-        description: product.description || "",
-        price: product.prices[0]?.unit_amount ? product.prices[0].unit_amount / 100 : 0,
-        interval: product.prices[0]?.recurring?.interval === "month" ? "mês" : "ano",
-        features: product.metadata?.features?.split(",") || [],
-        popular: index === 1,
-        priceId: product.prices[0]?.id,
-      }))
+    ? productsData.data
+        .filter((product) => ["free", "professional", "enterprise"].includes(product.metadata?.plan_type || ""))
+        .sort((a, b) => parseInt(a.metadata?.order || "99") - parseInt(b.metadata?.order || "99"))
+        .map((product) => ({
+          name: product.name,
+          description: product.description || "",
+          price: product.prices[0]?.unit_amount ? product.prices[0].unit_amount / 100 : 0,
+          interval: product.prices[0]?.recurring?.interval === "month" ? "mês" : "ano",
+          features: product.metadata?.features?.split(",") || [],
+          popular: product.metadata?.popular === "true",
+          priceId: product.prices[0]?.id,
+        }))
     : defaultPlans;
+
+  const addons = productsData?.data?.length
+    ? productsData.data
+        .filter((product) => product.metadata?.plan_type === "addon")
+        .map((product) => ({
+          name: product.name,
+          description: product.description || "",
+          price: product.prices[0]?.unit_amount ? product.prices[0].unit_amount / 100 : 0,
+          interval: product.prices[0]?.recurring?.interval === "month" ? "mês" : "ano",
+          priceId: product.prices[0]?.id,
+        }))
+    : individualProducts;
 
   const handleSubscribe = (priceId: string | null) => {
     if (!priceId) {
@@ -440,7 +455,7 @@ export default function Pricing() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-6">
-            {individualProducts.slice(0, 2).map((product, index) => (
+            {addons.slice(0, 2).map((product, index) => (
               <Card key={index} className="flex flex-col" data-testid={`card-product-${index}`}>
                 <CardHeader>
                   <CardTitle className="text-xl" data-testid={`text-product-name-${index}`}>
@@ -471,7 +486,7 @@ export default function Pricing() {
             ))}
           </div>
           <div className="grid md:grid-cols-3 gap-6">
-            {individualProducts.slice(2).map((product, index) => (
+            {addons.slice(2).map((product, index) => (
               <Card key={index + 2} className="flex flex-col" data-testid={`card-product-${index + 2}`}>
                 <CardHeader>
                   <CardTitle className="text-xl" data-testid={`text-product-name-${index + 2}`}>
