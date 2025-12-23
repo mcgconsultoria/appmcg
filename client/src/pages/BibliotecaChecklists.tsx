@@ -93,14 +93,17 @@ export default function BibliotecaChecklists() {
       return response.json();
     },
     onSuccess: (data) => {
+      setShowCurrencyDialog(false);
+      setPurchasingTemplate(null);
       if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-        return;
+        window.open(data.checkoutUrl, "_blank");
+        toast({
+          title: "Checkout Aberto",
+          description: "O pagamento foi aberto em uma nova aba. Complete o pagamento lá.",
+        });
       }
       queryClient.invalidateQueries({ queryKey: ["/api/checklist-template-purchases"] });
       queryClient.invalidateQueries({ queryKey: ["/api/checklist-templates"] });
-      setShowCurrencyDialog(false);
-      setPurchasingTemplate(null);
     },
     onError: (error: any) => {
       toast({
