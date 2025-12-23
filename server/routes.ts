@@ -795,9 +795,9 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Você já possui este template" });
       }
 
-      // Create Stripe checkout session
-      const stripe = await import("stripe");
-      const stripeClient = new stripe.default(process.env.STRIPE_SECRET_KEY || "", { apiVersion: "2025-11-17.clover" as const });
+      // Create Stripe checkout session using Replit connector
+      const { getUncachableStripeClient } = await import("./stripeClient");
+      const stripeClient = await getUncachableStripeClient();
       
       const baseUrl = process.env.REPLIT_DEV_DOMAIN 
         ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
