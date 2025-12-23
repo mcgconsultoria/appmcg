@@ -122,6 +122,7 @@ export interface IStorage {
   getUserBySessionToken(token: string): Promise<User | undefined>;
   createUserWithPassword(userData: Partial<UpsertUser>): Promise<User>;
   updateUserSessionToken(userId: string, token: string | null): Promise<void>;
+  updateUserProfile(userId: string, data: { profileImageUrl?: string; firstName?: string; lastName?: string }): Promise<User | undefined>;
 
   // Company operations
   getCompany(id: number): Promise<Company | undefined>;
@@ -421,6 +422,15 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({ activeSessionToken: token, updatedAt: new Date() })
       .where(eq(users.id, userId));
+  }
+
+  async updateUserProfile(userId: string, data: { profileImageUrl?: string; firstName?: string; lastName?: string }): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
   }
 
   // Company operations

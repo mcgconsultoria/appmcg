@@ -22,6 +22,7 @@ export default function Settings() {
   const { theme, toggleTheme } = useTheme();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const profileImageInputRef = useRef<HTMLInputElement>(null);
   const [cnpjLoading, setCnpjLoading] = useState(false);
   const [cnpjFound, setCnpjFound] = useState(false);
   
@@ -114,6 +115,36 @@ export default function Settings() {
     updateCompanyMutation.mutate(companyForm);
   };
 
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: { profileImageUrl?: string }) => {
+      const res = await apiRequest("PATCH", "/api/user/profile", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      toast({ title: "Foto atualizada com sucesso" });
+    },
+    onError: () => {
+      toast({ title: "Erro ao atualizar foto", variant: "destructive" });
+    },
+  });
+
+  const handleProfileImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 500000) {
+        toast({ title: "Imagem muito grande. Maximo 500KB.", variant: "destructive" });
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        updateProfileMutation.mutate({ profileImageUrl: base64 });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const getInitials = (firstName?: string | null, lastName?: string | null) => {
     const first = firstName?.charAt(0) || "";
     const last = lastName?.charAt(0) || "";
@@ -133,12 +164,36 @@ export default function Settings() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center gap-6">
-              <Avatar className="h-20 w-20">
-                <AvatarImage src={user?.profileImageUrl || undefined} style={{ objectFit: "cover" }} />
-                <AvatarFallback className="text-xl">
-                  {getInitials(user?.firstName, user?.lastName)}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={user?.profileImageUrl || undefined} style={{ objectFit: "cover" }} />
+                  <AvatarFallback className="text-xl">
+                    {getInitials(user?.firstName, user?.lastName)}
+                  </AvatarFallback>
+                </Avatar>
+                <input
+                  ref={profileImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfileImageUpload}
+                  className="hidden"
+                  data-testid="input-profile-image"
+                />
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full"
+                  onClick={() => profileImageInputRef.current?.click()}
+                  disabled={updateProfileMutation.isPending}
+                  data-testid="button-upload-profile-image"
+                >
+                  {updateProfileMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
               <div>
                 <h3 className="font-semibold text-lg">
                   {user?.firstName} {user?.lastName}

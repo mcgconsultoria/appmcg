@@ -186,6 +186,41 @@ export async function registerRoutes(
     }
   });
 
+  // User profile update (including profile image)
+  app.patch('/api/user/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const { profileImageUrl, firstName, lastName } = req.body;
+      
+      // Validate profile image if provided
+      if (profileImageUrl) {
+        if (!profileImageUrl.startsWith("data:image/")) {
+          return res.status(400).json({ message: "Imagem deve ser um data URL valido" });
+        }
+        // Check size limit (500KB encoded ~ 700KB base64)
+        const maxImageSize = 750000;
+        if (profileImageUrl.length > maxImageSize) {
+          return res.status(400).json({ message: "Imagem muito grande. Maximo 500KB" });
+        }
+      }
+      
+      const updateData: any = {};
+      if (profileImageUrl !== undefined) updateData.profileImageUrl = profileImageUrl;
+      if (firstName !== undefined) updateData.firstName = firstName;
+      if (lastName !== undefined) updateData.lastName = lastName;
+      
+      const updatedUser = await storage.updateUserProfile(req.user.id, updateData);
+      if (!updatedUser) {
+        return res.status(404).json({ message: "Usuario nao encontrado" });
+      }
+      
+      const { password, ...userWithoutPassword } = updatedUser;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Erro ao atualizar perfil" });
+    }
+  });
+
   // CNPJ lookup (public - needed for registration)
   app.get('/api/cnpj/:cnpj', async (req, res) => {
     try {
