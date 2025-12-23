@@ -31,6 +31,10 @@ import {
   Palette,
   PenTool,
   Library,
+  Building2,
+  Shield,
+  PieChart,
+  Landmark,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 
@@ -95,6 +99,29 @@ const marketingMenuItems = [
   },
 ];
 
+const financeConfigItems = [
+  {
+    title: "Plano de Contas DRE",
+    url: "/admin/dre",
+    icon: PieChart,
+  },
+  {
+    title: "Centros de Custo",
+    url: "/admin/centros-custo",
+    icon: Building2,
+  },
+  {
+    title: "Contas Bancarias",
+    url: "/admin/bancos",
+    icon: Landmark,
+  },
+  {
+    title: "Certificados Digitais",
+    url: "/admin/certificados",
+    icon: Shield,
+  },
+];
+
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
@@ -153,6 +180,27 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {marketingMenuItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={location === item.url || location.startsWith(item.url)}
+                      >
+                        <Link href={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>Config. Financeiras</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {financeConfigItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild

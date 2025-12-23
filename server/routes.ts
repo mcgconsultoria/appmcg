@@ -4082,5 +4082,47 @@ export async function registerRoutes(
     }
   });
 
+  // Digital Certificates routes
+  app.get("/api/digital-certificates", isAdmin, async (req, res) => {
+    try {
+      const certificates = await storage.getDigitalCertificates();
+      res.json(certificates);
+    } catch (error) {
+      console.error("Error fetching digital certificates:", error);
+      res.status(500).json({ message: "Falha ao buscar certificados" });
+    }
+  });
+
+  app.post("/api/digital-certificates", isAdmin, async (req, res) => {
+    try {
+      // For now, handle JSON data (file upload would require multer)
+      const data = {
+        name: req.body.name || "Certificado",
+        type: req.body.type || "A1",
+        cnpj: req.body.cnpj || null,
+        certificateData: req.body.certificateData || null,
+        validFrom: req.body.validFrom ? new Date(req.body.validFrom) : null,
+        validUntil: req.body.validUntil ? new Date(req.body.validUntil) : null,
+        issuer: req.body.issuer || null,
+        isActive: true,
+      };
+      const certificate = await storage.createDigitalCertificate(data);
+      res.status(201).json(certificate);
+    } catch (error) {
+      console.error("Error creating digital certificate:", error);
+      res.status(500).json({ message: "Falha ao criar certificado" });
+    }
+  });
+
+  app.delete("/api/digital-certificates/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteDigitalCertificate(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting digital certificate:", error);
+      res.status(500).json({ message: "Falha ao excluir certificado" });
+    }
+  });
+
   return httpServer;
 }

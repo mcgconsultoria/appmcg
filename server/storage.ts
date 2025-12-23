@@ -122,12 +122,15 @@ import {
   dreAccounts,
   costCenters,
   bankAccounts,
+  digitalCertificates,
   type DreAccount,
   type InsertDreAccount,
   type CostCenter,
   type InsertCostCenter,
   type BankAccount,
   type InsertBankAccount,
+  type DigitalCertificate,
+  type InsertDigitalCertificate,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
@@ -441,6 +444,11 @@ export interface IStorage {
   createBankAccount(account: InsertBankAccount): Promise<BankAccount>;
   updateBankAccount(id: number, account: Partial<InsertBankAccount>): Promise<BankAccount | undefined>;
   deleteBankAccount(id: number): Promise<boolean>;
+
+  // Financial Module - Digital Certificates
+  getDigitalCertificates(): Promise<DigitalCertificate[]>;
+  createDigitalCertificate(cert: InsertDigitalCertificate): Promise<DigitalCertificate>;
+  deleteDigitalCertificate(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1863,6 +1871,21 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBankAccount(id: number): Promise<boolean> {
     await db.delete(bankAccounts).where(eq(bankAccounts.id, id));
+    return true;
+  }
+
+  // Digital Certificates
+  async getDigitalCertificates(): Promise<DigitalCertificate[]> {
+    return db.select().from(digitalCertificates).orderBy(desc(digitalCertificates.isActive), digitalCertificates.name);
+  }
+
+  async createDigitalCertificate(cert: InsertDigitalCertificate): Promise<DigitalCertificate> {
+    const [newCert] = await db.insert(digitalCertificates).values(cert).returning();
+    return newCert;
+  }
+
+  async deleteDigitalCertificate(id: number): Promise<boolean> {
+    await db.delete(digitalCertificates).where(eq(digitalCertificates.id, id));
     return true;
   }
 }
