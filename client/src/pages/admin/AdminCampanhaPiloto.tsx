@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearch } from "wouter";
 import { AdminLayout } from "@/components/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -63,9 +64,28 @@ const benefitsList = [
 ];
 
 export default function AdminCampanhaPiloto() {
+  const searchString = useSearch();
   const [data, setData] = useState<InviteData>(initialData);
   const [copied, setCopied] = useState<"email" | "whatsapp" | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (searchString) {
+      const params = new URLSearchParams(searchString);
+      const company = params.get("company");
+      const contact = params.get("contact");
+      const segment = params.get("segment");
+      
+      if (company || contact || segment) {
+        setData((prev) => ({
+          ...prev,
+          companyName: company || prev.companyName,
+          contactName: contact || prev.contactName,
+          segment: segment || prev.segment,
+        }));
+      }
+    }
+  }, [searchString]);
 
   const updateField = (field: keyof InviteData, value: string) => {
     setData((prev) => ({ ...prev, [field]: value }));

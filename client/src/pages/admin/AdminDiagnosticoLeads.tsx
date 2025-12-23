@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { AdminLayout } from "@/components/AdminLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -45,6 +46,7 @@ import {
   Filter,
   Search,
   RefreshCw,
+  Gift,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { DiagnosticLead } from "@shared/schema";
@@ -77,6 +79,7 @@ const pipelineColumns = [
 
 export default function AdminDiagnosticoLeads() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterMaturity, setFilterMaturity] = useState<string>("all");
   const [selectedLead, setSelectedLead] = useState<DiagnosticLead | null>(null);
@@ -87,6 +90,16 @@ export default function AdminDiagnosticoLeads() {
     followUpDate: "",
     assignedTo: "",
   });
+
+  const handleGeneratePilotInvite = (lead: DiagnosticLead) => {
+    const params = new URLSearchParams({
+      company: lead.company || "",
+      contact: lead.name,
+      segment: lead.segment || "",
+    });
+    setEditDialogOpen(false);
+    setLocation(`/admin/campanha-piloto?${params.toString()}`);
+  };
 
   const { data: leads = [], isLoading, refetch } = useQuery<DiagnosticLead[]>({
     queryKey: ["/api/diagnostic-leads"],
@@ -427,13 +440,23 @@ export default function AdminDiagnosticoLeads() {
                 />
               </div>
 
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-                  Cancelar
+              <div className="flex justify-between gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => handleGeneratePilotInvite(selectedLead)}
+                  data-testid="button-generate-pilot-invite"
+                >
+                  <Gift className="h-4 w-4 mr-2" />
+                  Gerar Convite Piloto
                 </Button>
-                <Button onClick={handleEditSubmit} disabled={updateLead.isPending} data-testid="button-save-lead">
-                  {updateLead.isPending ? "Salvando..." : "Salvar"}
-                </Button>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleEditSubmit} disabled={updateLead.isPending} data-testid="button-save-lead">
+                    {updateLead.isPending ? "Salvando..." : "Salvar"}
+                  </Button>
+                </div>
               </div>
             </div>
           )}
