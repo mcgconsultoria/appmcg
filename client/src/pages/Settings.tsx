@@ -409,7 +409,12 @@ export default function Settings() {
                   Adicione uma camada extra de segurança
                 </p>
               </div>
-              <Button variant="outline" size="sm" data-testid="button-enable-2fa">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                data-testid="button-enable-2fa"
+                onClick={() => toast({ title: "Autenticação em 2 fatores será disponibilizada em breve" })}
+              >
                 Configurar
               </Button>
             </div>

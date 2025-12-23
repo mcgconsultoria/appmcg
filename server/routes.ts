@@ -196,7 +196,18 @@ export async function registerRoutes(
         return res.status(404).json({ message: "CNPJ nao encontrado" });
       }
       
-      res.json(data);
+      // Return data in snake_case format expected by frontend
+      res.json({
+        razao_social: data.razaoSocial,
+        nome_fantasia: data.nomeFantasia,
+        situacao_cadastral: data.situacaoCadastral,
+        endereco: data.endereco,
+        cnae: data.cnae,
+        cnae_descricao: data.cnaeDescricao,
+        natureza_juridica: data.naturezaJuridica,
+        data_abertura: data.dataAbertura,
+        capital_social: data.capitalSocial,
+      });
     } catch (error: any) {
       console.error("Erro ao consultar CNPJ:", error);
       res.status(500).json({ message: error.message || "Erro ao consultar CNPJ" });
@@ -343,7 +354,7 @@ export async function registerRoutes(
       }
       
       // Validate and sanitize allowed fields
-      const allowedFields = ["name", "cnpj", "email", "phone", "address", "city", "state", "logo"];
+      const allowedFields = ["name", "nomeFantasia", "cnpj", "inscricaoEstadual", "inscricaoEstadualIsento", "inscricaoMunicipal", "email", "phone", "address", "city", "state", "logo"];
       const sanitizedData: Record<string, any> = {};
       
       for (const field of allowedFields) {
