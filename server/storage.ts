@@ -31,6 +31,7 @@ import {
   adminFinancialRecords,
   checklistTemplates,
   checklistTemplatePurchases,
+  diagnosticLeads,
   type User,
   type UpsertUser,
   type Company,
@@ -116,6 +117,8 @@ import {
   type InsertChecklistTemplate,
   type ChecklistTemplatePurchase,
   type InsertChecklistTemplatePurchase,
+  type DiagnosticLead,
+  type InsertDiagnosticLead,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
@@ -402,6 +405,13 @@ export interface IStorage {
   getChecklistTemplatePurchaseByTemplateAndUser(templateId: number, userId: string): Promise<ChecklistTemplatePurchase | undefined>;
   createChecklistTemplatePurchase(purchase: InsertChecklistTemplatePurchase): Promise<ChecklistTemplatePurchase>;
   updateChecklistTemplatePurchase(id: number, purchase: Partial<InsertChecklistTemplatePurchase>): Promise<ChecklistTemplatePurchase | undefined>;
+
+  // Diagnostic Lead operations
+  getDiagnosticLeads(): Promise<DiagnosticLead[]>;
+  getDiagnosticLead(id: number): Promise<DiagnosticLead | undefined>;
+  createDiagnosticLead(lead: InsertDiagnosticLead): Promise<DiagnosticLead>;
+  updateDiagnosticLead(id: number, lead: Partial<InsertDiagnosticLead>): Promise<DiagnosticLead | undefined>;
+  deleteDiagnosticLead(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1637,6 +1647,35 @@ export class DatabaseStorage implements IStorage {
       .where(eq(checklistTemplatePurchases.id, id))
       .returning();
     return updated;
+  }
+
+  // Diagnostic Lead operations
+  async getDiagnosticLeads(): Promise<DiagnosticLead[]> {
+    return db.select().from(diagnosticLeads).orderBy(desc(diagnosticLeads.createdAt));
+  }
+
+  async getDiagnosticLead(id: number): Promise<DiagnosticLead | undefined> {
+    const [lead] = await db.select().from(diagnosticLeads).where(eq(diagnosticLeads.id, id));
+    return lead;
+  }
+
+  async createDiagnosticLead(lead: InsertDiagnosticLead): Promise<DiagnosticLead> {
+    const [newLead] = await db.insert(diagnosticLeads).values(lead).returning();
+    return newLead;
+  }
+
+  async updateDiagnosticLead(id: number, lead: Partial<InsertDiagnosticLead>): Promise<DiagnosticLead | undefined> {
+    const [updated] = await db
+      .update(diagnosticLeads)
+      .set({ ...lead, updatedAt: new Date() })
+      .where(eq(diagnosticLeads.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteDiagnosticLead(id: number): Promise<boolean> {
+    await db.delete(diagnosticLeads).where(eq(diagnosticLeads.id, id));
+    return true;
   }
 }
 

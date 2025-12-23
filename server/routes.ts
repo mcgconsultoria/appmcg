@@ -34,6 +34,7 @@ import {
   insertContractTemplateSchema,
   insertContractAgreementSchema,
   insertContractSignatureSchema,
+  insertDiagnosticLeadSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -3826,6 +3827,75 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching my contracts:", error);
       res.status(500).json({ message: "Falha ao buscar meus contratos" });
+    }
+  });
+
+  // ============================================
+  // Diagnostic Leads Routes (Admin MCG)
+  // ============================================
+
+  // Create diagnostic lead (public - from diagnostic form)
+  app.post("/api/diagnostic-leads", async (req, res) => {
+    try {
+      const parsed = insertDiagnosticLeadSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados inválidos", errors: parsed.error.errors });
+      }
+      const lead = await storage.createDiagnosticLead(parsed.data);
+      res.status(201).json(lead);
+    } catch (error) {
+      console.error("Error creating diagnostic lead:", error);
+      res.status(500).json({ message: "Falha ao salvar lead" });
+    }
+  });
+
+  // Get all diagnostic leads (admin only)
+  app.get("/api/diagnostic-leads", isAdmin, async (req, res) => {
+    try {
+      const leads = await storage.getDiagnosticLeads();
+      res.json(leads);
+    } catch (error) {
+      console.error("Error fetching diagnostic leads:", error);
+      res.status(500).json({ message: "Falha ao buscar leads" });
+    }
+  });
+
+  // Get single diagnostic lead (admin only)
+  app.get("/api/diagnostic-leads/:id", isAdmin, async (req, res) => {
+    try {
+      const lead = await storage.getDiagnosticLead(parseInt(req.params.id));
+      if (!lead) {
+        return res.status(404).json({ message: "Lead não encontrado" });
+      }
+      res.json(lead);
+    } catch (error) {
+      console.error("Error fetching diagnostic lead:", error);
+      res.status(500).json({ message: "Falha ao buscar lead" });
+    }
+  });
+
+  // Update diagnostic lead (admin only)
+  app.patch("/api/diagnostic-leads/:id", isAdmin, async (req, res) => {
+    try {
+      const updated = await storage.updateDiagnosticLead(parseInt(req.params.id), req.body);
+      if (!updated) {
+        return res.status(404).json({ message: "Lead não encontrado" });
+      }
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating diagnostic lead:", error);
+      res.status(500).json({ message: "Falha ao atualizar lead" });
+    }
+  });
+
+  // Delete diagnostic lead (admin only)
+  app.delete("/api/diagnostic-leads/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteDiagnosticLead(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting diagnostic lead:", error);
+      res.status(500).json({ message: "Falha ao excluir lead" });
     }
   });
 
