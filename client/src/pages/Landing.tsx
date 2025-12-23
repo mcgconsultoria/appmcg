@@ -446,7 +446,7 @@ export default function Landing() {
                   <SiYoutube className="h-4 w-4 text-muted-foreground" />
                 </a>
                 <a
-                  href="https://www.reclameaqui.com.br/empresa/mcg-consultoria/"
+                  href="https://www.reclameaqui.com.br/empresa/mcg-consultoria-ltda/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-9 h-9 rounded-md bg-muted/50 flex items-center justify-center hover-elevate"
