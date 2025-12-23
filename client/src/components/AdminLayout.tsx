@@ -83,6 +83,11 @@ const marketingMenuItems = [
     url: "/admin/kit-marca",
     icon: Palette,
   },
+  {
+    title: "Campanha Piloto",
+    url: "/admin/campanha-piloto",
+    icon: Megaphone,
+  },
 ];
 
 interface AdminLayoutProps {

@@ -42,6 +42,7 @@ import AdminParcerias from "@/pages/admin/AdminParcerias";
 import AdminConteudo from "@/pages/admin/AdminConteudo";
 import AdminContratos from "@/pages/admin/AdminContratos";
 import AdminTemplates from "@/pages/admin/AdminTemplates";
+import AdminCampanhaPiloto from "@/pages/admin/AdminCampanhaPiloto";
 import AdminLogin from "@/pages/admin/AdminLogin";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
@@ -104,6 +105,9 @@ function Router() {
       </Route>
       <Route path="/admin/templates">
         {() => isAuthenticated && isAdmin ? <AdminTemplates /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/campanha-piloto">
+        {() => isAuthenticated && isAdmin ? <AdminCampanhaPiloto /> : <AdminLogin />}
       </Route>
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />
