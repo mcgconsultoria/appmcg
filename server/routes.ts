@@ -197,6 +197,11 @@ export async function registerRoutes(
       const { emailService } = await import("./emailService");
       const resetUrl = `${process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'https://www.mcgconsultoria.com.br'}/redefinir-senha?token=${resetToken}`;
       
+      console.log("Attempting to send password reset email to:", email);
+      console.log("Email service configured:", emailService.isConfigured());
+      console.log("Gmail configured:", emailService.isGmailConfigured());
+      console.log("Resend configured:", emailService.isResendConfigured());
+      
       const emailResult = await emailService.send({
         to: [email],
         subject: "Redefinir Senha - MCG Consultoria",
@@ -213,8 +218,10 @@ export async function registerRoutes(
         `,
       });
       
+      console.log("Email result:", emailResult);
+      
       if (!emailResult.success) {
-        console.log("Email service not configured:", emailResult.error);
+        console.log("Email service error:", emailResult.error);
       }
 
       res.json({ message: "Se o email existir, você receberá as instruções" });
