@@ -1,7 +1,8 @@
 import { Link } from "wouter";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
-import { Truck, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import logoMcg from "@assets/logo_mcg_principal.png";
 
 interface PublicLayoutProps {
   children: React.ReactNode;
@@ -21,10 +22,7 @@ export function PublicLayout({ children, title, subtitle }: PublicLayoutProps) {
           </Link>
           <Link href="/">
             <div className="flex items-center gap-2 cursor-pointer">
-              <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-                <Truck className="h-4 w-4 text-primary-foreground" />
-              </div>
-              <span className="font-bold hidden sm:inline">MCG Consultoria</span>
+              <img src={logoMcg} alt="MCG Consultoria" className="h-10 w-auto" />
             </div>
           </Link>
         </div>
