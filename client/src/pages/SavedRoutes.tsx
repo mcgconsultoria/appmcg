@@ -54,7 +54,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import type { SavedRoute } from "@shared/schema";
-import { BRAZIL_STATES } from "@/lib/brazilStates";
+import { brazilStates } from "@/lib/brazilStates";
 
 const routeFormSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
@@ -389,7 +389,7 @@ export default function SavedRoutes() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {BRAZIL_STATES.map((state) => (
+                            {brazilStates.map((state) => (
                               <SelectItem key={state.uf} value={state.uf}>
                                 {state.uf} - {state.name}
                               </SelectItem>
@@ -430,7 +430,7 @@ export default function SavedRoutes() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {BRAZIL_STATES.map((state) => (
+                            {brazilStates.map((state) => (
                               <SelectItem key={state.uf} value={state.uf}>
                                 {state.uf} - {state.name}
                               </SelectItem>
