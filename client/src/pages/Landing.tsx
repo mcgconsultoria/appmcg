@@ -16,7 +16,6 @@ import {
   TrendingUp,
   Mail,
   Handshake,
-  MessageSquareWarning,
 } from "lucide-react";
 import { SiFacebook, SiInstagram, SiLinkedin, SiWhatsapp, SiGoogle, SiYoutube } from "react-icons/si";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -451,19 +450,9 @@ export default function Landing() {
                 >
                   <SiYoutube className="h-4 w-4 text-muted-foreground" />
                 </a>
-                <a
-                  href="https://www.reclameaqui.com.br/empresa/mcg-consultoria-ltda/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-md bg-muted/50 flex items-center justify-center hover-elevate"
-                  data-testid="link-reclame-aqui"
-                  aria-label="Reclame Aqui"
-                >
-                  <MessageSquareWarning className="h-4 w-4 text-muted-foreground" />
-                </a>
               </div>
 
-              <div className="flex items-center gap-4 flex-wrap justify-center">
+              <div className="flex items-center gap-3 flex-wrap justify-center">
                 <div 
                   id="reputation-ra" 
                   data-testid="badge-reclame-aqui"
