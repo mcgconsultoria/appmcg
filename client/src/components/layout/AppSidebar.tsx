@@ -270,7 +270,6 @@ export function AppSidebar() {
           icon={ShoppingCart}
           items={vendasItems}
           location={location}
-          defaultOpen={true}
         />
 
         <CollapsibleSection
