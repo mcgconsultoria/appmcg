@@ -11,6 +11,7 @@ import {
   insertChecklistAttachmentSchema,
   insertFreightCalculationSchema,
   insertStorageCalculationSchema,
+  insertSavedRouteSchema,
   insertFinancialAccountSchema,
   insertMeetingRecordSchema,
   insertMeetingObjectiveSchema,
@@ -1141,6 +1142,78 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error creating storage calculation:", error);
       res.status(500).json({ message: "Failed to create storage calculation" });
+    }
+  });
+
+  // Saved routes - reuse KM and toll data for freight calculations
+  app.get("/api/saved-routes", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as User;
+      if (!user.companyId) {
+        return res.status(400).json({ message: "Usuário não vinculado a uma empresa" });
+      }
+      const routes = await storage.getSavedRoutes(user.companyId);
+      res.json(routes);
+    } catch (error) {
+      console.error("Error fetching saved routes:", error);
+      res.status(500).json({ message: "Falha ao buscar rotas salvas" });
+    }
+  });
+
+  app.get("/api/saved-routes/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const route = await storage.getSavedRoute(id);
+      if (!route) {
+        return res.status(404).json({ message: "Rota não encontrada" });
+      }
+      res.json(route);
+    } catch (error) {
+      console.error("Error fetching saved route:", error);
+      res.status(500).json({ message: "Falha ao buscar rota" });
+    }
+  });
+
+  app.post("/api/saved-routes", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as User;
+      if (!user.companyId) {
+        return res.status(400).json({ message: "Usuário não vinculado a uma empresa" });
+      }
+      const parsed = insertSavedRouteSchema.safeParse({ ...req.body, companyId: user.companyId });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados inválidos", errors: parsed.error.errors });
+      }
+      const route = await storage.createSavedRoute(parsed.data);
+      res.status(201).json(route);
+    } catch (error) {
+      console.error("Error creating saved route:", error);
+      res.status(500).json({ message: "Falha ao criar rota" });
+    }
+  });
+
+  app.patch("/api/saved-routes/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const route = await storage.updateSavedRoute(id, req.body);
+      if (!route) {
+        return res.status(404).json({ message: "Rota não encontrada" });
+      }
+      res.json(route);
+    } catch (error) {
+      console.error("Error updating saved route:", error);
+      res.status(500).json({ message: "Falha ao atualizar rota" });
+    }
+  });
+
+  app.delete("/api/saved-routes/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteSavedRoute(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting saved route:", error);
+      res.status(500).json({ message: "Falha ao excluir rota" });
     }
   });
 
