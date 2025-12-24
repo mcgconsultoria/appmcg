@@ -276,6 +276,14 @@ const adminMcgFinanceiroItems = [
   },
 ];
 
+const adminMcgLojaItems = [
+  {
+    title: "Loja MCG",
+    url: "/admin/loja",
+    icon: Store,
+  },
+];
+
 const suporteItems = [
   {
     title: "Suporte",
@@ -400,6 +408,12 @@ function AdminMcgSection({ location }: { location: string }) {
               title="Financeiro"
               icon={Landmark}
               items={adminMcgFinanceiroItems}
+              location={location}
+            />
+            <CollapsibleSection
+              title="Loja"
+              icon={Store}
+              items={adminMcgLojaItems}
               location={location}
             />
           </div>
