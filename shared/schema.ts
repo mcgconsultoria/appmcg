@@ -492,6 +492,30 @@ export const anttFreightTable = pgTable("antt_freight_table", {
   validUntil: timestamp("valid_until"),
 });
 
+// Saved Routes for freight calculations (avoid repeated API calls)
+export const savedRoutes = pgTable("saved_routes", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  name: varchar("name", { length: 255 }).notNull(), // Nome descritivo da rota
+  originCity: varchar("origin_city", { length: 100 }).notNull(),
+  originState: varchar("origin_state", { length: 2 }).notNull(),
+  destinationCity: varchar("destination_city", { length: 100 }).notNull(),
+  destinationState: varchar("destination_state", { length: 2 }).notNull(),
+  distanceKm: decimal("distance_km", { precision: 10, scale: 2 }).notNull(),
+  // Toll values by axle count
+  toll2Axles: decimal("toll_2_axles", { precision: 10, scale: 2 }).default("0"),
+  toll3Axles: decimal("toll_3_axles", { precision: 10, scale: 2 }).default("0"),
+  toll4Axles: decimal("toll_4_axles", { precision: 10, scale: 2 }).default("0"),
+  toll5Axles: decimal("toll_5_axles", { precision: 10, scale: 2 }).default("0"),
+  toll6Axles: decimal("toll_6_axles", { precision: 10, scale: 2 }).default("0"),
+  toll7Axles: decimal("toll_7_axles", { precision: 10, scale: 2 }).default("0"),
+  toll9Axles: decimal("toll_9_axles", { precision: 10, scale: 2 }).default("0"),
+  notes: text("notes"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Meeting Objectives Catalog
 export const meetingObjectives = pgTable("meeting_objectives", {
   id: serial("id").primaryKey(),
@@ -843,6 +867,12 @@ export const insertOperationBillingGoalSchema = createInsertSchema(operationBill
 
 export const insertAnttFreightTableSchema = createInsertSchema(anttFreightTable).omit({
   id: true,
+});
+
+export const insertSavedRouteSchema = createInsertSchema(savedRoutes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertMeetingObjectiveSchema = createInsertSchema(meetingObjectives).omit({
@@ -1718,6 +1748,8 @@ export type OperationBillingGoal = typeof operationBillingGoals.$inferSelect;
 export type InsertOperationBillingGoal = z.infer<typeof insertOperationBillingGoalSchema>;
 export type AnttFreightTable = typeof anttFreightTable.$inferSelect;
 export type InsertAnttFreightTable = z.infer<typeof insertAnttFreightTableSchema>;
+export type SavedRoute = typeof savedRoutes.$inferSelect;
+export type InsertSavedRoute = z.infer<typeof insertSavedRouteSchema>;
 export type MeetingRecord = typeof meetingRecords.$inferSelect;
 export type InsertMeetingRecord = z.infer<typeof insertMeetingRecordSchema>;
 export type MeetingObjective = typeof meetingObjectives.$inferSelect;
