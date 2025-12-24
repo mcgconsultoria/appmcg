@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./replitAuth";
 import { registerUser, loginUser, validateSession, logoutUser } from "./customAuth";
 import { consultarCNPJ } from "./cnpjService";
+import { logAudit } from "./auditHelper";
 import {
   insertClientSchema,
   insertChecklistSchema,
@@ -445,13 +446,16 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/clients", isAuthenticated, async (req, res) => {
+  app.post("/api/clients", isAuthenticated, async (req: any, res) => {
     try {
       const parsed = insertClientSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ message: "Invalid client data", errors: parsed.error.errors });
       }
       const client = await storage.createClient(parsed.data);
+      
+      await logAudit(req, "create", "client", client.id, `Cliente criado: ${client.razaoSocial}`);
+      
       res.status(201).json(client);
     } catch (error) {
       console.error("Error creating client:", error);
@@ -481,6 +485,9 @@ export async function registerRoutes(
       }
       
       const client = await storage.updateClient(id, req.body);
+      
+      await logAudit(req, "update", "client", client?.id, `Cliente atualizado: ${client?.razaoSocial}`);
+      
       res.json(client);
     } catch (error) {
       console.error("Error updating client:", error);
@@ -508,6 +515,8 @@ export async function registerRoutes(
           return res.status(403).json({ message: "Acesso negado a este cliente" });
         }
       }
+      
+      await logAudit(req, "delete", "client", id, `Cliente excluido: ${existingClient.razaoSocial}`);
       
       await storage.deleteClient(id);
       res.status(204).send();
@@ -3888,6 +3897,50 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting team member:", error);
       res.status(500).json({ message: "Failed to delete team member" });
+    }
+  });
+
+  // Audit Logs
+  app.get("/api/audit-logs", isAuthenticated, async (req: any, res) => {
+    try {
+      const companyId = req.user?.companyId;
+      const perfilConta = req.user?.perfilConta;
+      
+      if (!companyId) return res.status(400).json({ message: "Company not found" });
+      if (perfilConta !== "admin" && perfilConta !== "gestor") {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      
+      const { userId, action, limit, offset } = req.query;
+      const logs = await storage.getAuditLogs(companyId, {
+        userId: userId as string | undefined,
+        action: action as string | undefined,
+        limit: limit ? parseInt(limit as string) : 100,
+        offset: offset ? parseInt(offset as string) : 0,
+      });
+      
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      res.status(500).json({ message: "Failed to fetch audit logs" });
+    }
+  });
+
+  app.get("/api/audit-logs/user/:userId", isAuthenticated, async (req: any, res) => {
+    try {
+      const companyId = req.user?.companyId;
+      const perfilConta = req.user?.perfilConta;
+      
+      if (!companyId) return res.status(400).json({ message: "Company not found" });
+      if (perfilConta !== "admin" && perfilConta !== "gestor") {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      
+      const logs = await storage.getAuditLogsByUser(companyId, req.params.userId);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching user audit logs:", error);
+      res.status(500).json({ message: "Failed to fetch user audit logs" });
     }
   });
 
