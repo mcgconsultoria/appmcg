@@ -131,7 +131,7 @@ const vendasItems = [
     icon: BarChart3,
   },
   {
-    title: "Operacoes",
+    title: "Metas",
     url: "/operacoes",
     icon: Settings2,
   },
