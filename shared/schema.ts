@@ -1865,6 +1865,104 @@ export const insertStoreOrderItemSchema = createInsertSchema(storeOrderItems).om
   createdAt: true,
 });
 
+// WhatsApp Support Journey - Jornada de Atendimento
+export const whatsappJourneySteps = pgTable("whatsapp_journey_steps", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  stepType: varchar("step_type", { length: 50 }).notNull(), // welcome, menu, faq, human, goodbye
+  parentId: integer("parent_id"), // For tree structure
+  order: integer("order").default(0),
+  triggerKeywords: text("trigger_keywords").array(), // Keywords that trigger this step
+  messageTemplate: text("message_template"), // Message to send
+  buttonOptions: jsonb("button_options").$type<{ id: string; label: string; targetStepId?: number }[]>(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const whatsappConfig = pgTable("whatsapp_config", {
+  id: serial("id").primaryKey(),
+  phoneNumber: varchar("phone_number", { length: 20 }).notNull(),
+  businessName: varchar("business_name", { length: 255 }),
+  provider: varchar("provider", { length: 50 }).default("aisensy"), // aisensy, twilio, 360dialog
+  apiKey: varchar("api_key", { length: 500 }),
+  webhookUrl: varchar("webhook_url", { length: 500 }),
+  welcomeMessage: text("welcome_message"),
+  businessHoursStart: varchar("business_hours_start", { length: 5 }), // HH:mm
+  businessHoursEnd: varchar("business_hours_end", { length: 5 }),
+  outsideHoursMessage: text("outside_hours_message"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const whatsappConversations = pgTable("whatsapp_conversations", {
+  id: serial("id").primaryKey(),
+  customerPhone: varchar("customer_phone", { length: 20 }).notNull(),
+  customerName: varchar("customer_name", { length: 255 }),
+  currentStepId: integer("current_step_id"),
+  status: varchar("status", { length: 50 }).default("active"), // active, waiting_human, resolved, closed
+  assignedAgentId: varchar("assigned_agent_id", { length: 36 }),
+  lastMessageAt: timestamp("last_message_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const whatsappMessages = pgTable("whatsapp_messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull(),
+  direction: varchar("direction", { length: 10 }).notNull(), // inbound, outbound
+  messageType: varchar("message_type", { length: 20 }).default("text"), // text, button, template, media
+  content: text("content"),
+  mediaUrl: text("media_url"),
+  senderType: varchar("sender_type", { length: 20 }), // customer, bot, agent
+  agentId: varchar("agent_id", { length: 36 }),
+  status: varchar("status", { length: 20 }).default("sent"), // sent, delivered, read, failed
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const whatsappAgents = pgTable("whatsapp_agents", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  phone: varchar("phone", { length: 20 }),
+  isAvailable: boolean("is_available").default(true),
+  maxConcurrentChats: integer("max_concurrent_chats").default(5),
+  currentChatCount: integer("current_chat_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertWhatsappJourneyStepSchema = createInsertSchema(whatsappJourneySteps).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertWhatsappConfigSchema = createInsertSchema(whatsappConfig).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertWhatsappConversationSchema = createInsertSchema(whatsappConversations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertWhatsappMessageSchema = createInsertSchema(whatsappMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertWhatsappAgentSchema = createInsertSchema(whatsappAgents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Auth schemas
 export const registerSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -2023,3 +2121,15 @@ export type StoreOrder = typeof storeOrders.$inferSelect;
 export type InsertStoreOrder = z.infer<typeof insertStoreOrderSchema>;
 export type StoreOrderItem = typeof storeOrderItems.$inferSelect;
 export type InsertStoreOrderItem = z.infer<typeof insertStoreOrderItemSchema>;
+
+// WhatsApp Support Types
+export type WhatsappJourneyStep = typeof whatsappJourneySteps.$inferSelect;
+export type InsertWhatsappJourneyStep = z.infer<typeof insertWhatsappJourneyStepSchema>;
+export type WhatsappConfig = typeof whatsappConfig.$inferSelect;
+export type InsertWhatsappConfig = z.infer<typeof insertWhatsappConfigSchema>;
+export type WhatsappConversation = typeof whatsappConversations.$inferSelect;
+export type InsertWhatsappConversation = z.infer<typeof insertWhatsappConversationSchema>;
+export type WhatsappMessage = typeof whatsappMessages.$inferSelect;
+export type InsertWhatsappMessage = z.infer<typeof insertWhatsappMessageSchema>;
+export type WhatsappAgent = typeof whatsappAgents.$inferSelect;
+export type InsertWhatsappAgent = z.infer<typeof insertWhatsappAgentSchema>;
