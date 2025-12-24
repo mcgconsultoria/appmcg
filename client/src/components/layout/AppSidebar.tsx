@@ -219,7 +219,7 @@ const adminMcgComercialItems = [
 
 const adminMcgMarketingItems = [
   {
-    title: "Conteudo",
+    title: "Conteúdo",
     url: "/admin/conteudo",
     icon: FileText,
   },

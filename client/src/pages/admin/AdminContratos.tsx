@@ -487,7 +487,7 @@ export default function AdminContratos() {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium">Conteudo do Contrato</label>
+                <label className="text-sm font-medium">Conteúdo do Contrato</label>
                 <Textarea
                   value={templateForm.content}
                   onChange={(e) => setTemplateForm({ ...templateForm, content: e.target.value })}

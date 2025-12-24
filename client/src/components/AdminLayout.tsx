@@ -66,7 +66,7 @@ const adminMenuItems = [
     icon: Handshake,
   },
   {
-    title: "Conteudo",
+    title: "Conteúdo",
     url: "/admin/conteudo",
     icon: FileText,
   },

@@ -169,8 +169,8 @@ export default function AdminConteudo() {
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold" data-testid="text-admin-conteudo-title">Conteudo / Blog</h1>
-            <p className="text-muted-foreground">Gestão de conteudos e publicacoes</p>
+            <h1 className="text-2xl font-bold" data-testid="text-admin-conteudo-title">Conteúdo / Blog</h1>
+            <p className="text-muted-foreground">Gestão de conteúdos e publicações</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
@@ -209,12 +209,12 @@ export default function AdminConteudo() {
                   />
                 </div>
                 <div>
-                  <Label>Conteudo</Label>
+                  <Label>Conteúdo</Label>
                   <Textarea
                     value={form.content}
                     onChange={(e) => setForm({ ...form, content: e.target.value })}
                     rows={8}
-                    placeholder="Conteudo completo do post..."
+                    placeholder="Conteúdo completo do post..."
                     data-testid="textarea-post-content"
                   />
                 </div>
