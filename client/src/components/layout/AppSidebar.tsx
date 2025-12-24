@@ -366,19 +366,19 @@ function AdminMcgSection({ location }: { location: string }) {
         <CollapsibleContent>
           <div className="pl-2">
             <CollapsibleSection
-              title="Comercial"
-              icon={Briefcase}
-              items={adminMcgComercialItems}
-              location={location}
-            />
-            <CollapsibleSection
-              title="Marketing"
+              title="MKT (Pré Vendas)"
               icon={Megaphone}
               items={adminMcgMarketingItems}
               location={location}
             />
             <CollapsibleSection
-              title="Financeiro"
+              title="COM (Vendas)"
+              icon={Briefcase}
+              items={adminMcgComercialItems}
+              location={location}
+            />
+            <CollapsibleSection
+              title="CAC (Pós Vendas)"
               icon={Landmark}
               items={adminMcgFinanceiroItems}
               location={location}
@@ -441,21 +441,21 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <CollapsibleSection
-          title="Pre-Vendas"
+          title="MKT (Pré Vendas)"
           icon={Megaphone}
           items={preVendasItems}
           location={location}
         />
 
         <CollapsibleSection
-          title="Vendas"
+          title="COM (Vendas)"
           icon={ShoppingCart}
           items={vendasItems}
           location={location}
         />
 
         <CollapsibleSection
-          title="Pos-Vendas"
+          title="CAC (Pós Vendas)"
           icon={Handshake}
           items={posVendasItems}
           location={location}
