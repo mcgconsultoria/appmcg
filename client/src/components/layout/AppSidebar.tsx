@@ -431,7 +431,7 @@ function AdminMcgSection({ location }: { location: string }) {
 
 export function AppSidebar() {
   const [location] = useLocation();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const getInitials = (firstName?: string | null, lastName?: string | null) => {
     const first = firstName?.charAt(0) || "";
@@ -549,14 +549,7 @@ export function AppSidebar() {
             variant="ghost"
             size="icon"
             data-testid="button-logout"
-            onClick={async () => {
-              try {
-                await apiRequest("POST", "/api/auth/logout");
-                window.location.href = "/";
-              } catch (error) {
-                window.location.href = "/";
-              }
-            }}
+            onClick={() => logout()}
           >
             <LogOut className="h-4 w-4" />
           </Button>
