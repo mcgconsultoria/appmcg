@@ -2,6 +2,9 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Users,
   DollarSign,
@@ -13,12 +16,31 @@ import {
   ChevronRight,
   BarChart3,
   PieChart,
+  Target,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { formatCurrency } from "@/lib/brazilStates";
 import type { Client, FinancialAccount } from "@shared/schema";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart as RechartPie, Pie, Cell, Legend } from "recharts";
+
+interface BillingPaceData {
+  month: string;
+  daysInMonth: number;
+  ritmoCalculatedUntilDay: number;
+  data: Array<{
+    operationId: number;
+    operationName: string;
+    clientId: number;
+    clientName: string;
+    avg3Months: number;
+    prevYearSameMonth: number;
+    currentMonth: number;
+    ritmo: number;
+    goal: number;
+  }>;
+}
 
 interface StatCardProps {
   title: string;
@@ -76,13 +98,39 @@ const pipelineStages = [
   { id: "closed", label: "Fechado", color: "bg-emerald-600 dark:bg-emerald-500" },
 ];
 
+function getMonthOptions() {
+  const options = [];
+  const now = new Date();
+  for (let i = -6; i <= 6; i++) {
+    const date = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    const label = date.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+    options.push({ value, label: label.charAt(0).toUpperCase() + label.slice(1) });
+  }
+  return options;
+}
+
 export default function Dashboard() {
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const monthOptions = getMonthOptions();
+
   const { data: clients = [] } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
   });
 
   const { data: financials = [] } = useQuery<FinancialAccount[]>({
     queryKey: ["/api/financial"],
+  });
+
+  const { data: billingPace, isLoading: billingPaceLoading } = useQuery<BillingPaceData>({
+    queryKey: ["/api/dashboard/billing-pace", selectedMonth],
+    queryFn: async () => {
+      const res = await fetch(`/api/dashboard/billing-pace?month=${selectedMonth}`);
+      if (!res.ok) throw new Error("Failed to fetch billing pace");
+      return res.json();
+    },
   });
 
   const activeClients = clients.filter(c => c.status === "active").length;
@@ -274,45 +322,88 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
-              <CardTitle className="text-lg">Resumo Financeiro</CardTitle>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/financeiro">
-                  Ver detalhes
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                </Link>
-              </Button>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Ritmo de Faturamento
+              </CardTitle>
+              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+                <SelectTrigger className="w-[180px]" data-testid="select-billing-month">
+                  <SelectValue placeholder="Selecione o mês" />
+                </SelectTrigger>
+                <SelectContent>
+                  {monthOptions.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                      <ArrowUpRight className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">A Receber</p>
-                      <p className="font-semibold">{formatCurrency(totalReceivables)}</p>
-                    </div>
-                  </div>
+              {billingPaceLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
+                  <Skeleton className="h-8 w-full" />
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-red-500/10">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
-                      <ArrowDownRight className="h-5 w-5 text-red-600 dark:text-red-400" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">A Pagar</p>
-                      <p className="font-semibold">
-                        {formatCurrency(
-                          financials
-                            .filter(f => f.type === "payable" && f.status === "pending")
-                            .reduce((sum, f) => sum + Number(f.value || 0), 0)
-                        )}
-                      </p>
-                    </div>
-                  </div>
+              ) : billingPace?.data && billingPace.data.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="min-w-[150px]">Operacao</TableHead>
+                        <TableHead className="text-right">Media 3M</TableHead>
+                        <TableHead className="text-right">Ano Ant.</TableHead>
+                        <TableHead className="text-right">Atual</TableHead>
+                        <TableHead className="text-right">Ritmo</TableHead>
+                        <TableHead className="text-right">Meta</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {billingPace.data.map((row) => (
+                        <TableRow key={row.operationId} data-testid={`row-billing-pace-${row.operationId}`}>
+                          <TableCell className="font-medium">
+                            <div className="truncate max-w-[150px]" title={row.operationName}>
+                              {row.operationName}
+                            </div>
+                            <div className="text-xs text-muted-foreground truncate" title={row.clientName}>
+                              {row.clientName}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right text-sm">
+                            {formatCurrency(row.avg3Months)}
+                          </TableCell>
+                          <TableCell className="text-right text-sm">
+                            {formatCurrency(row.prevYearSameMonth)}
+                          </TableCell>
+                          <TableCell className="text-right text-sm font-medium">
+                            {formatCurrency(row.currentMonth)}
+                          </TableCell>
+                          <TableCell className="text-right text-sm">
+                            <span className={row.ritmo >= row.goal && row.goal > 0 ? "text-emerald-600 dark:text-emerald-400" : ""}>
+                              {formatCurrency(row.ritmo)}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right text-sm">
+                            {row.goal > 0 ? formatCurrency(row.goal) : "-"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
-              </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Target className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>Nenhuma operacao cadastrada</p>
+                  <p className="text-sm mt-1">Cadastre operacoes nos clientes para acompanhar o ritmo de faturamento</p>
+                </div>
+              )}
+              {billingPace && billingPace.data.length > 0 && (
+                <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
+                  Ritmo calculado ate o dia {billingPace.ritmoCalculatedUntilDay} de {billingPace.daysInMonth} dias
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

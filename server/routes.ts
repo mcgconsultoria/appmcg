@@ -2908,9 +2908,9 @@ export async function registerRoutes(
         });
         const ritmoSum = ritmoEntries.reduce((sum, e) => sum + Number(e.amount), 0);
         
-        // Ritmo = (sum of days 1 to yesterday) / days in month * days in month = projected monthly total
-        // But user wants: sum / daysInMonth (the daily average projected over month)
-        const ritmo = daysInMonth > 0 ? (ritmoSum / daysInMonth) * daysInMonth : 0;
+        // Ritmo = (sum of days 1 to cutoff) / elapsed days * total days in month = projected monthly total
+        const elapsedDays = Math.max(1, ritmoEndDate.getDate());
+        const ritmo = daysInMonth > 0 ? (ritmoSum / elapsedDays) * daysInMonth : 0;
         
         // Previous year same month
         const prevYearTotal = prevYearEntries
@@ -2991,10 +2991,16 @@ export async function registerRoutes(
   app.patch("/api/billing-entries/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const entry = await storage.updateOperationBillingEntry(id, req.body);
-      if (!entry) {
+      const userCompanyId = req.user.companyId || 1;
+      
+      // Verify ownership by fetching entries for this company and checking if the ID exists
+      const allEntries = await storage.getOperationBillingEntries(userCompanyId, new Date(2000, 0, 1), new Date(2100, 0, 1));
+      const existingEntry = allEntries.find(e => e.id === id);
+      if (!existingEntry) {
         return res.status(404).json({ message: "Entry not found" });
       }
+      
+      const entry = await storage.updateOperationBillingEntry(id, req.body);
       res.json(entry);
     } catch (error) {
       console.error("Error updating billing entry:", error);
@@ -3005,6 +3011,15 @@ export async function registerRoutes(
   app.delete("/api/billing-entries/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      
+      // Verify ownership
+      const allEntries = await storage.getOperationBillingEntries(userCompanyId, new Date(2000, 0, 1), new Date(2100, 0, 1));
+      const existingEntry = allEntries.find(e => e.id === id);
+      if (!existingEntry) {
+        return res.status(404).json({ message: "Entry not found" });
+      }
+      
       await storage.deleteOperationBillingEntry(id);
       res.status(204).send();
     } catch (error) {
@@ -3050,10 +3065,16 @@ export async function registerRoutes(
   app.patch("/api/billing-goals/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const goal = await storage.updateOperationBillingGoal(id, req.body);
-      if (!goal) {
+      const userCompanyId = req.user.companyId || 1;
+      
+      // Verify ownership
+      const allGoals = await storage.getOperationBillingGoals(userCompanyId);
+      const existingGoal = allGoals.find(g => g.id === id);
+      if (!existingGoal) {
         return res.status(404).json({ message: "Goal not found" });
       }
+      
+      const goal = await storage.updateOperationBillingGoal(id, req.body);
       res.json(goal);
     } catch (error) {
       console.error("Error updating billing goal:", error);
@@ -3064,6 +3085,15 @@ export async function registerRoutes(
   app.delete("/api/billing-goals/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      const userCompanyId = req.user.companyId || 1;
+      
+      // Verify ownership
+      const allGoals = await storage.getOperationBillingGoals(userCompanyId);
+      const existingGoal = allGoals.find(g => g.id === id);
+      if (!existingGoal) {
+        return res.status(404).json({ message: "Goal not found" });
+      }
+      
       await storage.deleteOperationBillingGoal(id);
       res.status(204).send();
     } catch (error) {
