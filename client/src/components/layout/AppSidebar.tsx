@@ -424,19 +424,18 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {suporteItems.map((item) => {
-                const isActive = location === item.url;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={location === "/suporte"}>
+                  <Link 
+                    href="/suporte" 
+                    data-testid="nav-suporte"
+                    className="flex items-center gap-2 px-3 py-2 text-base font-semibold text-blue-600 dark:text-blue-400"
+                  >
+                    <HeadphonesIcon className="h-5 w-5" />
+                    <span>Suporte</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
