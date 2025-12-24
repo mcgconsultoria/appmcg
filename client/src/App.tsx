@@ -34,6 +34,7 @@ import Support from "@/pages/Support";
 import Reports from "@/pages/Reports";
 import Vendedores from "@/pages/Vendedores";
 import Operacoes from "@/pages/Operacoes";
+import Indicadores from "@/pages/Indicadores";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminComercial from "@/pages/admin/AdminComercial";
 import AdminProjetos from "@/pages/admin/AdminProjetos";
@@ -154,6 +155,7 @@ function Router() {
           <Route path="/tarefas" component={TasksPage} />
           <Route path="/projetos" component={ProjectsPage} />
           <Route path="/relatorios" component={Reports} />
+          <Route path="/indicadores" component={Indicadores} />
           <Route path="/operacoes" component={Operacoes} />
           <Route path="/financeiro" component={Financial} />
           <Route path="/marketing" component={Marketing} />

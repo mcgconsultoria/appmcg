@@ -36,6 +36,7 @@ import {
   UserRound,
   Settings2,
   Library,
+  TrendingUp,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -53,11 +54,6 @@ const mainMenuItems = [
     title: "Clientes",
     url: "/clientes",
     icon: Users,
-  },
-  {
-    title: "Vendedores",
-    url: "/vendedores",
-    icon: UserRound,
   },
   {
     title: "Pipeline",
@@ -80,11 +76,6 @@ const mainMenuItems = [
     icon: ClipboardCheck,
   },
   {
-    title: "Biblioteca",
-    url: "/biblioteca",
-    icon: Library,
-  },
-  {
     title: "RFI",
     url: "/rfi",
     icon: ClipboardList,
@@ -100,6 +91,11 @@ const mainMenuItems = [
     icon: FolderKanban,
   },
   {
+    title: "Indicadores",
+    url: "/indicadores",
+    icon: TrendingUp,
+  },
+  {
     title: "Relatorios",
     url: "/relatorios",
     icon: BarChart3,
@@ -108,6 +104,22 @@ const mainMenuItems = [
     title: "Operacoes",
     url: "/operacoes",
     icon: Settings2,
+  },
+];
+
+const teamMenuItems = [
+  {
+    title: "Vendedores",
+    url: "/vendedores",
+    icon: UserRound,
+  },
+];
+
+const resourceMenuItems = [
+  {
+    title: "Biblioteca",
+    url: "/biblioteca",
+    icon: Library,
   },
 ];
 
@@ -189,6 +201,48 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {mainMenuItems.map((item) => {
+                const isActive = location === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Equipe</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {teamMenuItems.map((item) => {
+                const isActive = location === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Recursos</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {resourceMenuItems.map((item) => {
                 const isActive = location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
