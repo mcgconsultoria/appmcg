@@ -319,12 +319,10 @@ export default function SavedRoutes() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Origem</TableHead>
-                      <TableHead>Destino</TableHead>
-                      <TableHead className="text-right">KM</TableHead>
-                      <TableHead className="text-right">Pedágio/Eixo</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>Nome da Rota</TableHead>
+                      <TableHead className="text-right">Distância (KM)</TableHead>
+                      <TableHead className="text-right">Pedágio Por Rota (R$)</TableHead>
+                      <TableHead>Data</TableHead>
                       <TableHead className="w-10"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -332,14 +330,13 @@ export default function SavedRoutes() {
                     {filteredRoutes.map((route) => (
                       <TableRow key={route.id} data-testid={`row-route-${route.id}`}>
                         <TableCell className="font-medium">{route.name}</TableCell>
-                        <TableCell>{route.originCity}/{route.originState}</TableCell>
-                        <TableCell>{route.destinationCity}/{route.destinationState}</TableCell>
                         <TableCell className="text-right">{parseFloat(route.distanceKm).toLocaleString("pt-BR")} km</TableCell>
                         <TableCell className="text-right">{formatCurrency(route.tollPerAxle)}</TableCell>
                         <TableCell>
-                          <Badge variant={route.isActive ? "default" : "secondary"}>
-                            {route.isActive ? "Ativa" : "Inativa"}
-                          </Badge>
+                          {route.routeDate 
+                            ? new Date(route.routeDate).toLocaleDateString("pt-BR")
+                            : "-"
+                          }
                         </TableCell>
                         <TableCell>
                           <DropdownMenu>
