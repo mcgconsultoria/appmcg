@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -75,12 +75,32 @@ const routeFormSchema = z.object({
 
 type RouteFormData = z.infer<typeof routeFormSchema>;
 
+interface IBGECity {
+  id: number;
+  nome: string;
+}
+
 export default function SavedRoutes() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRoute, setEditingRoute] = useState<SavedRoute | null>(null);
   const [deleteRoute, setDeleteRoute] = useState<SavedRoute | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [originCities, setOriginCities] = useState<IBGECity[]>([]);
+  const [destinationCities, setDestinationCities] = useState<IBGECity[]>([]);
+  const [loadingOriginCities, setLoadingOriginCities] = useState(false);
+  const [loadingDestinationCities, setLoadingDestinationCities] = useState(false);
   const { toast } = useToast();
+
+  const fetchCities = async (uf: string): Promise<IBGECity[]> => {
+    if (!uf) return [];
+    try {
+      const response = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios?orderBy=nome`);
+      if (!response.ok) return [];
+      return await response.json();
+    } catch {
+      return [];
+    }
+  };
 
   const form = useForm<RouteFormData>({
     resolver: zodResolver(routeFormSchema),
@@ -151,7 +171,7 @@ export default function SavedRoutes() {
     },
   });
 
-  const handleOpenDialog = (route?: SavedRoute) => {
+  const handleOpenDialog = async (route?: SavedRoute) => {
     if (route) {
       setEditingRoute(route);
       form.reset({
@@ -170,11 +190,44 @@ export default function SavedRoutes() {
         toll9Axles: route.toll9Axles || "0",
         notes: route.notes || "",
       });
+      // Load cities for editing
+      if (route.originState) {
+        setLoadingOriginCities(true);
+        const cities = await fetchCities(route.originState);
+        setOriginCities(cities);
+        setLoadingOriginCities(false);
+      }
+      if (route.destinationState) {
+        setLoadingDestinationCities(true);
+        const cities = await fetchCities(route.destinationState);
+        setDestinationCities(cities);
+        setLoadingDestinationCities(false);
+      }
     } else {
       setEditingRoute(null);
+      setOriginCities([]);
+      setDestinationCities([]);
       form.reset();
     }
     setIsDialogOpen(true);
+  };
+
+  const handleOriginStateChange = async (uf: string) => {
+    form.setValue("originState", uf);
+    form.setValue("originCity", "");
+    setLoadingOriginCities(true);
+    const cities = await fetchCities(uf);
+    setOriginCities(cities);
+    setLoadingOriginCities(false);
+  };
+
+  const handleDestinationStateChange = async (uf: string) => {
+    form.setValue("destinationState", uf);
+    form.setValue("destinationCity", "");
+    setLoadingDestinationCities(true);
+    const cities = await fetchCities(uf);
+    setDestinationCities(cities);
+    setLoadingDestinationCities(false);
   };
 
   const onSubmit = (data: RouteFormData) => {
@@ -365,27 +418,14 @@ export default function SavedRoutes() {
                   <h4 className="font-medium text-sm">Origem</h4>
                   <FormField
                     control={form.control}
-                    name="originCity"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cidade</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Cidade de origem" {...field} data-testid="input-origin-city" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
                     name="originState"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Estado</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={handleOriginStateChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger data-testid="select-origin-state">
-                              <SelectValue placeholder="Selecione" />
+                              <SelectValue placeholder="Selecione o estado" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -400,39 +440,82 @@ export default function SavedRoutes() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="originCity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cidade</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value}
+                          disabled={!form.watch("originState") || loadingOriginCities}
+                        >
+                          <FormControl>
+                            <SelectTrigger data-testid="select-origin-city">
+                              <SelectValue placeholder={loadingOriginCities ? "Carregando..." : "Selecione a cidade"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {originCities.map((city) => (
+                              <SelectItem key={city.id} value={city.nome}>
+                                {city.nome}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
 
                 <div className="space-y-4">
                   <h4 className="font-medium text-sm">Destino</h4>
                   <FormField
                     control={form.control}
-                    name="destinationCity"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Cidade</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Cidade de destino" {...field} data-testid="input-destination-city" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
                     name="destinationState"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Estado</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={handleDestinationStateChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger data-testid="select-destination-state">
-                              <SelectValue placeholder="Selecione" />
+                              <SelectValue placeholder="Selecione o estado" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {brazilStates.map((state) => (
                               <SelectItem key={state.uf} value={state.uf}>
                                 {state.uf} - {state.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="destinationCity"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Cidade</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value}
+                          disabled={!form.watch("destinationState") || loadingDestinationCities}
+                        >
+                          <FormControl>
+                            <SelectTrigger data-testid="select-destination-city">
+                              <SelectValue placeholder={loadingDestinationCities ? "Carregando..." : "Selecione a cidade"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {destinationCities.map((city) => (
+                              <SelectItem key={city.id} value={city.nome}>
+                                {city.nome}
                               </SelectItem>
                             ))}
                           </SelectContent>
