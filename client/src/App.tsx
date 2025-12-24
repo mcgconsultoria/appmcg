@@ -13,6 +13,7 @@ import Register from "@/pages/Register";
 import Dashboard from "@/pages/Dashboard";
 import Clients from "@/pages/Clients";
 import Pipeline from "@/pages/Pipeline";
+import SavedRoutes from "@/pages/SavedRoutes";
 import Checklist from "@/pages/Checklist";
 import FreightCalculator from "@/pages/FreightCalculator";
 import StorageCalculator from "@/pages/StorageCalculator";
@@ -150,6 +151,7 @@ function Router() {
           <Route path="/clientes" component={Clients} />
           <Route path="/vendedores" component={Vendedores} />
           <Route path="/pipeline" component={Pipeline} />
+          <Route path="/rotas" component={SavedRoutes} />
           <Route path="/calendário" component={CalendarPage} />
           <Route path="/atas" component={MeetingRecords} />
           <Route path="/checklist" component={Checklist} />
