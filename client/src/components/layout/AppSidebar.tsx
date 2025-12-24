@@ -340,6 +340,56 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
   );
 }
 
+function AdminMcgSection({ location }: { location: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  const allAdminItems = [...adminMcgComercialItems, ...adminMcgMarketingItems, ...adminMcgFinanceiroItems];
+  const hasActiveItem = allAdminItems.some(item => 
+    item.url === "/admin" ? location === "/admin" : (location === item.url || location.startsWith(item.url + "/"))
+  );
+
+  return (
+    <Collapsible open={isOpen || hasActiveItem} onOpenChange={setIsOpen}>
+      <SidebarGroup>
+        <CollapsibleTrigger asChild>
+          <button
+            className="flex items-center justify-between w-full px-3 py-2 text-base font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
+            data-testid="section-admin-mcg"
+          >
+            <div className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              <span>Admin MCG</span>
+            </div>
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen || hasActiveItem ? 'rotate-180' : ''}`} />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="pl-2">
+            <CollapsibleSection
+              title="Comercial"
+              icon={Briefcase}
+              items={adminMcgComercialItems}
+              location={location}
+            />
+            <CollapsibleSection
+              title="Marketing"
+              icon={Megaphone}
+              items={adminMcgMarketingItems}
+              location={location}
+            />
+            <CollapsibleSection
+              title="Financeiro"
+              icon={Landmark}
+              items={adminMcgFinanceiroItems}
+              location={location}
+            />
+          </div>
+        </CollapsibleContent>
+      </SidebarGroup>
+    </Collapsible>
+  );
+}
+
 export function AppSidebar() {
   const [location] = useLocation();
   const { user } = useAuth();
@@ -422,32 +472,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
-          <>
-            <div className="px-3 py-2 mt-2">
-              <div className="flex items-center gap-2 text-base font-semibold text-foreground">
-                <Shield className="h-5 w-5" />
-                <span>Admin MCG</span>
-              </div>
-            </div>
-            <CollapsibleSection
-              title="Comercial"
-              icon={Briefcase}
-              items={adminMcgComercialItems}
-              location={location}
-            />
-            <CollapsibleSection
-              title="Marketing"
-              icon={Megaphone}
-              items={adminMcgMarketingItems}
-              location={location}
-            />
-            <CollapsibleSection
-              title="Financeiro"
-              icon={Landmark}
-              items={adminMcgFinanceiroItems}
-              location={location}
-            />
-          </>
+          <AdminMcgSection location={location} />
         )}
       </SidebarContent>
 
