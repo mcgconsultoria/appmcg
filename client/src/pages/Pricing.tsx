@@ -46,7 +46,7 @@ const defaultPlans = [
   },
   {
     name: "Profissional",
-    description: "Todas as ferramentas para gestao comercial completa",
+    description: "Todas as ferramentas para gestão comercial completa",
     price: 297,
     interval: "mes",
     features: [
@@ -55,9 +55,9 @@ const defaultPlans = [
       "CRM de Clientes",
       "Pipeline de Vendas (Kanban)",
       "Checklists de 15 Departamentos",
-      "Calendario Comercial",
-      "Ata Plano de Acao",
-      "Gestao Financeira",
+      "Calendário Comercial",
+      "Ata Plano de Ação",
+      "Gestão Financeira",
       "Suporte por email",
     ],
     popular: true,
@@ -65,13 +65,13 @@ const defaultPlans = [
   },
   {
     name: "Corporativo",
-    description: "Para operacoes em grande escala",
+    description: "Para operações em grande escala",
     price: 597,
     interval: "mes",
     features: [
       "Tudo do plano Profissional",
       "Multi-usuarios (ate 10)",
-      "Gestao de Tarefas e Projetos",
+      "Gestão de Tarefas e Projetos",
       "Indicadores e Curva ABC",
       "Modulo de Marketing",
       "Integracoes personalizadas",
@@ -100,7 +100,7 @@ const individualProducts = [
   },
   {
     name: "Checklist Operacional",
-    description: "Checklists para 20 departamentos de logistica",
+    description: "Checklists para 20 departamentos de logística",
     price: 97,
     interval: "mes",
     priceId: null,
@@ -123,13 +123,13 @@ const individualProducts = [
 
 const consultingPhases = [
   {
-    id: "diagnostico",
+    id: "diagnóstico",
     name: "Diagnóstico",
     badge: "1ª Fase",
     duration: "1 mês",
     description: "Escopo, Estruturação In Loco, Acompanhamento On Line",
     price: 5000,
-    requiresDiagnostico: false,
+    requiresDiagnóstico: false,
     isExpansao: false,
   },
   {
@@ -139,7 +139,7 @@ const consultingPhases = [
     duration: "1 mês",
     description: "In Loco, On Line",
     price: 5000,
-    requiresDiagnostico: true,
+    requiresDiagnóstico: true,
     isExpansao: false,
   },
   {
@@ -149,7 +149,7 @@ const consultingPhases = [
     duration: "1 mês",
     description: "In Loco, On Line",
     price: 5000,
-    requiresDiagnostico: true,
+    requiresDiagnóstico: true,
     isExpansao: false,
   },
   {
@@ -160,7 +160,7 @@ const consultingPhases = [
     description: "On Line + Comissão sobre negócios fechados",
     price: 2000,
     commission: 5,
-    requiresDiagnostico: false,
+    requiresDiagnóstico: false,
     isExpansao: true,
   },
 ];
@@ -204,7 +204,7 @@ export default function Pricing() {
     const phase = consultingPhases.find(p => p.id === phaseId);
     if (!phase) return;
 
-    if (phase.requiresDiagnostico && !selectedPhases.includes("diagnostico")) {
+    if (phase.requiresDiagnóstico && !selectedPhases.includes("diagnóstico")) {
       toast({
         title: "Fase não disponível",
         description: "Selecione primeiro a fase de Diagnóstico para habilitar esta fase.",
@@ -215,8 +215,8 @@ export default function Pricing() {
 
     setSelectedPhases(prev => {
       if (prev.includes(phaseId)) {
-        if (phaseId === "diagnostico") {
-          return prev.filter(id => id === "expansao" || id === "diagnostico").filter(id => id !== "diagnostico");
+        if (phaseId === "diagnóstico") {
+          return prev.filter(id => id === "expansao" || id === "diagnóstico").filter(id => id !== "diagnóstico");
         }
         return prev.filter(id => id !== phaseId);
       }
@@ -624,7 +624,7 @@ export default function Pricing() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {consultingPhases.map((phase) => {
                     const isSelected = selectedPhases.includes(phase.id);
-                    const isLocked = phase.requiresDiagnostico && !selectedPhases.includes("diagnostico");
+                    const isLocked = phase.requiresDiagnóstico && !selectedPhases.includes("diagnóstico");
                     
                     return (
                       <div

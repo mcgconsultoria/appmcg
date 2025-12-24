@@ -27,7 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { AdminFinancialRecord } from "@shared/schema";
 
 const categories = {
-  receita: ["Assinatura", "Consultoria Diagnostico", "Consultoria Implementacao", "Consultoria Execucao", "Consultoria Expansao", "Revenda", "Outro"],
+  receita: ["Assinatura", "Consultoria Diagnóstico", "Consultoria Implementacao", "Consultoria Execucao", "Consultoria Expansao", "Revenda", "Outro"],
   despesa: ["Salarios", "Impostos", "Marketing", "Infraestrutura", "Software", "Viagens", "Outro"],
 };
 
@@ -169,7 +169,7 @@ export default function AdminFinanceiro() {
                   </Select>
                 </div>
                 <div>
-                  <Label>Descricao</Label>
+                  <Label>Descrição</Label>
                   <Input
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -208,7 +208,7 @@ export default function AdminFinanceiro() {
                 </div>
                 {form.type === "receita" && (
                   <div>
-                    <Label>Numero NFS-e</Label>
+                    <Label>Número NFS-e</Label>
                     <Input
                       value={form.nfseNumber}
                       onChange={(e) => setForm({ ...form, nfseNumber: e.target.value })}

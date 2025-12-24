@@ -47,7 +47,7 @@ const initialData: InviteData = {
 const segments = [
   { value: "transportadora", label: "Transportadora" },
   { value: "operador_logistico", label: "Operador Logistico" },
-  { value: "industria", label: "Industria com Logistica" },
+  { value: "industria", label: "Industria com Logística" },
   { value: "armazem", label: "Armazem / CD" },
   { value: "embarcador", label: "Embarcador" },
   { value: "outro", label: "Outro" },
@@ -55,10 +55,10 @@ const segments = [
 
 const benefitsList = [
   { icon: Calculator, text: "Calculadoras de frete e armazenagem profissionais" },
-  { icon: ClipboardCheck, text: "Checklist completo para diagnostico de clientes" },
-  { icon: Building2, text: "CRM especializado para logistica" },
+  { icon: ClipboardCheck, text: "Checklist completo para diagnóstico de clientes" },
+  { icon: Building2, text: "CRM especializado para logística" },
   { icon: TrendingUp, text: "Dashboard com indicadores comerciais" },
-  { icon: Calendar, text: "Calendario comercial integrado" },
+  { icon: Calendar, text: "Calendário comercial integrado" },
   { icon: MessageSquare, text: "Suporte prioritario durante o piloto" },
 ];
 
@@ -80,17 +80,17 @@ Prezado(a) ${data.contactName || "[Nome do Contato]"},
 
 E um prazer entrar em contato com voce da ${data.companyName || "[Nome da Empresa]"}.
 
-A MCG Consultoria esta selecionando empresas do segmento de ${segmentLabel || "logistica"} para participar do nosso Programa Piloto exclusivo, e acreditamos que sua empresa seria uma candidata ideal.
+A MCG Consultoria esta selecionando empresas do segmento de ${segmentLabel || "logística"} para participar do nosso Programa Piloto exclusivo, e acreditamos que sua empresa seria uma candidata ideal.
 
 O QUE E O PROGRAMA PILOTO?
 
-Durante ${data.pilotDays} dias, sua empresa tera acesso GRATUITO a nossa plataforma completa de gestao comercial para logistica, incluindo:
+Durante ${data.pilotDays} dias, sua empresa tera acesso GRATUITO a nossa plataforma completa de gestão comercial para logística, incluindo:
 
 - Calculadoras profissionais de frete e armazenagem (com base ANTT)
-- CRM especializado para operacoes logisticas
-- Checklist de diagnostico para prospectos e clientes
+- CRM especializado para operações logísticas
+- Checklist de diagnóstico para prospectos e clientes
 - Dashboard com indicadores ABC, por estado e segmento
-- Calendario comercial integrado
+- Calendário comercial integrado
 - Modulo de RFI (Request for Information) para participar de BIDs
 
 O QUE ESPERAMOS EM TROCA?
@@ -118,7 +118,7 @@ Equipe MCG Consultoria
 comercial@mcgconsultoria.com.br
 
 ---
-MCG Consultoria - Gestao Comercial para Logistica
+MCG Consultoria - Gestão Comercial para Logística
 www.mcgconsultoria.com.br`;
   };
 
@@ -127,13 +127,13 @@ www.mcgconsultoria.com.br`;
     
     return `Ola ${data.contactName || "[Nome]"}! Tudo bem?
 
-Sou da MCG Consultoria e estamos selecionando empresas de *${segmentLabel || "logistica"}* para nosso *Programa Piloto*.
+Sou da MCG Consultoria e estamos selecionando empresas de *${segmentLabel || "logística"}* para nosso *Programa Piloto*.
 
 Durante *${data.pilotDays} dias GRATUITOS*, a ${data.companyName || "[Empresa]"} tera acesso a:
 
 - Calculadoras de frete/armazenagem (base ANTT)
-- CRM especializado para logistica
-- Checklists de diagnostico comercial
+- CRM especializado para logística
+- Checklists de diagnóstico comercial
 - Dashboard com indicadores
 
 *O que pedimos?* Apenas seu feedback honesto sobre a plataforma.
@@ -169,7 +169,7 @@ Equipe MCG`;
                 Dados da Empresa Convidada
               </CardTitle>
               <CardDescription>
-                Preencha as informacoes para personalizar o convite
+                Preencha as informações para personalizar o convite
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -343,7 +343,7 @@ Equipe MCG`;
             <CardContent className="space-y-3 text-sm text-muted-foreground">
               <div className="flex gap-2">
                 <Badge variant="outline" className="shrink-0">1</Badge>
-                <span>Selecione 3-5 empresas para comecar - numero gerenciavel para coletar feedback</span>
+                <span>Selecione 3-5 empresas para comecar - número gerenciavel para coletar feedback</span>
               </div>
               <div className="flex gap-2">
                 <Badge variant="outline" className="shrink-0">2</Badge>

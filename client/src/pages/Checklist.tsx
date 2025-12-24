@@ -84,17 +84,17 @@ const sections = [
   { id: "qualidade", label: "Qualidade", icon: Award, group: "areas" },
   { id: "planejamento", label: "Planejamento", icon: Calculator, group: "areas" },
   { id: "financeiro", label: "Financeiro", icon: DollarSign, group: "areas" },
-  { id: "transporte", label: "Op. Transporte", icon: Truck, group: "operacoes" },
-  { id: "distribuicao", label: "Op. Distribuição", icon: Package, group: "operacoes" },
-  { id: "armazenagem", label: "Op. Armazenagem", icon: Warehouse, group: "operacoes" },
+  { id: "transporte", label: "Op. Transporte", icon: Truck, group: "operações" },
+  { id: "distribuição", label: "Op. Distribuição", icon: Package, group: "operações" },
+  { id: "armazenagem", label: "Op. Armazenagem", icon: Warehouse, group: "operações" },
   { id: "grisco", label: "GRISCO", icon: ShieldCheck, group: "areas" },
   { id: "ti", label: "T.I", icon: Computer, group: "areas" },
   { id: "compras", label: "Compras", icon: Package, group: "areas" },
-  { id: "contabil", label: "Contábil/Fiscal", icon: FileText, group: "areas" },
+  { id: "contábil", label: "Contábil/Fiscal", icon: FileText, group: "areas" },
   { id: "rh", label: "RH", icon: Users, group: "areas" },
   { id: "motoristas", label: "Motoristas", icon: Truck, group: "areas" },
   { id: "marketing", label: "Marketing", icon: BarChart3, group: "areas" },
-  { id: "juridico", label: "Jurídico", icon: Gavel, group: "areas" },
+  { id: "jurídico", label: "Jurídico", icon: Gavel, group: "areas" },
   { id: "anexos", label: "Anexos", icon: FileText, group: "areas" },
   { id: "teste", label: "Cliente em Teste", icon: ClipboardList, group: "final" },
   { id: "onboarding", label: "Boas Vindas", icon: PartyPopper, group: "final" },
@@ -147,7 +147,7 @@ const sectionQuestions: Record<string, { id: string; question: string }[]> = {
     { id: "trans5", question: "MDF-e configurado?" },
     { id: "trans6", question: "Liberação de cargas definida?" },
   ],
-  distribuicao: [
+  distribuição: [
     { id: "dist1", question: "Roteiros definidos?" },
     { id: "dist2", question: "Atendimento de distribuição estruturado?" },
     { id: "dist3", question: "Emissão de CT-e configurada?" },
@@ -182,7 +182,7 @@ const sectionQuestions: Record<string, { id: string; question: string }[]> = {
     { id: "comp3", question: "Investimentos aprovados?" },
     { id: "comp4", question: "Fornecedores homologados?" },
   ],
-  contabil: [
+  contábil: [
     { id: "cont1", question: "Regime tributário definido?" },
     { id: "cont2", question: "Análise de impostos por estado?" },
     { id: "cont3", question: "CND atualizada?" },
@@ -214,7 +214,7 @@ const sectionQuestions: Record<string, { id: string; question: string }[]> = {
     { id: "mkt6", question: "Site/Landing page do cliente?" },
     { id: "mkt7", question: "Comunicação visual alinhada?" },
   ],
-  juridico: [
+  jurídico: [
     { id: "jur1", question: "Análise de contrato realizada?" },
     { id: "jur2", question: "Validade do contrato verificada?" },
     { id: "jur3", question: "Cláusulas específicas documentadas?" },
@@ -300,7 +300,7 @@ interface PortalSenha {
 
 interface DocumentoEmpresa {
   tipo: "cnpj" | "cpf";
-  numero: string;
+  número: string;
   categoria: "matriz" | "filial" | "grupo";
   razaoSocial: string;
 }
@@ -309,9 +309,9 @@ interface AnexoDocumento {
   id?: number;
   categoria: "contratos" | "tabelas" | "licencas" | "cnd" | "certificacoes";
   nome: string;
-  descricao: string;
+  descrição: string;
   dataValidade: string;
-  emailsNotificacao: string[];
+  emailsNotificação: string[];
   sectionKey: string;
 }
 
@@ -341,7 +341,7 @@ export default function Checklist() {
   const [localizacao, setLocalizacao] = useState("");
   const [segmentoDetalhado, setSegmentoDetalhado] = useState("");
   const [produto, setProduto] = useState("");
-  const [numeros, setNumeros] = useState("");
+  const [números, setNúmeros] = useState("");
   const [noticias, setNoticias] = useState("");
   
   const [site, setSite] = useState("");
@@ -503,9 +503,9 @@ export default function Checklist() {
     setAnexos([...anexos, {
       categoria,
       nome: "",
-      descricao: "",
+      descrição: "",
       dataValidade: "",
-      emailsNotificacao: [],
+      emailsNotificação: [],
       sectionKey: "",
     }]);
   };
@@ -538,7 +538,7 @@ export default function Checklist() {
         localizacao,
         segmentoDetalhado,
         produto,
-        numeros,
+        números,
         noticias,
         site,
         linkedIn,
@@ -596,7 +596,7 @@ export default function Checklist() {
     setLocalizacao("");
     setSegmentoDetalhado("");
     setProduto("");
-    setNumeros("");
+    setNúmeros("");
     setNoticias("");
     setSite("");
     setLinkedIn("");
@@ -720,14 +720,14 @@ export default function Checklist() {
                           </SelectContent>
                         </Select>
                         <Input 
-                          value={doc.numero}
+                          value={doc.número}
                           onChange={(e) => {
                             const updated = [...documentosEmpresa];
-                            updated[index] = { ...updated[index], numero: e.target.value };
+                            updated[index] = { ...updated[index], número: e.target.value };
                             setDocumentosEmpresa(updated);
                           }}
                           placeholder={doc.tipo === "cnpj" ? "00.000.000/0000-00" : "000.000.000-00"}
-                          data-testid={`input-doc-numero-${index}`}
+                          data-testid={`input-doc-número-${index}`}
                         />
                         <Select 
                           value={doc.categoria} 
@@ -764,7 +764,7 @@ export default function Checklist() {
               
               <Button 
                 variant="outline" 
-                onClick={() => setDocumentosEmpresa([...documentosEmpresa, { tipo: "cnpj", numero: "", categoria: "filial", razaoSocial: "" }])}
+                onClick={() => setDocumentosEmpresa([...documentosEmpresa, { tipo: "cnpj", número: "", categoria: "filial", razaoSocial: "" }])}
                 data-testid="btn-add-documento"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -874,11 +874,11 @@ export default function Checklist() {
                 <div className="space-y-2">
                   <Label>Números</Label>
                   <Textarea 
-                    value={numeros} 
-                    onChange={(e) => setNumeros(e.target.value)}
+                    value={números} 
+                    onChange={(e) => setNúmeros(e.target.value)}
                     placeholder="Faturamento, funcionários, volume..."
                     rows={3}
-                    data-testid="input-numeros"
+                    data-testid="input-números"
                   />
                 </div>
               </div>
@@ -1336,10 +1336,10 @@ export default function Checklist() {
                             <div className="mt-3 space-y-1">
                               <Label className="text-xs">Descrição</Label>
                               <Input
-                                value={anexo.descricao}
-                                onChange={(e) => updateAnexo(index, "descricao", e.target.value)}
+                                value={anexo.descrição}
+                                onChange={(e) => updateAnexo(index, "descrição", e.target.value)}
                                 placeholder="Detalhes do documento..."
-                                data-testid={`input-anexo-descricao-${index}`}
+                                data-testid={`input-anexo-descrição-${index}`}
                               />
                             </div>
                             <div className="mt-3 space-y-1">
@@ -1352,7 +1352,7 @@ export default function Checklist() {
                                   <SelectValue placeholder="Selecione a área..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {sections.filter(s => s.group === "areas" || s.group === "operacoes").map((sec) => (
+                                  {sections.filter(s => s.group === "areas" || s.group === "operações").map((sec) => (
                                     <SelectItem key={sec.id} value={sec.id}>
                                       {sec.label}
                                     </SelectItem>
@@ -1363,8 +1363,8 @@ export default function Checklist() {
                             <div className="mt-3 space-y-1">
                               <Label className="text-xs">Emails para Notificação (separados por vírgula)</Label>
                               <Input
-                                value={anexo.emailsNotificacao.join(", ")}
-                                onChange={(e) => updateAnexo(index, "emailsNotificacao", e.target.value.split(",").map(e => e.trim()).filter(Boolean))}
+                                value={anexo.emailsNotificação.join(", ")}
+                                onChange={(e) => updateAnexo(index, "emailsNotificação", e.target.value.split(",").map(e => e.trim()).filter(Boolean))}
                                 placeholder="email1@empresa.com, email2@empresa.com"
                                 data-testid={`input-anexo-emails-${index}`}
                               />
@@ -1399,7 +1399,7 @@ export default function Checklist() {
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <Building2 className="h-4 w-4" />
-                Prestador de Servico (Cliente MCG)
+                Prestador de Serviço (Cliente MCG)
               </CardTitle>
               <CardDescription>Contato interno responsavel por esta area</CardDescription>
             </CardHeader>
@@ -1606,7 +1606,7 @@ export default function Checklist() {
                       Check-in Prestador
                     </Label>
                     <p className="text-xs text-muted-foreground">
-                      Confirmo que li e aprovo as informacoes desta area
+                      Confirmo que li e aprovo as informações desta area
                     </p>
                     {sectionData.aprovadoPrestador && sectionData.aprovadoPrestadorData && (
                       <p className="text-xs text-green-600 mt-1">
@@ -1635,7 +1635,7 @@ export default function Checklist() {
                       Check-in Cliente
                     </Label>
                     <p className="text-xs text-muted-foreground">
-                      Cliente confirma que leu e aprova as informacoes
+                      Cliente confirma que leu e aprova as informações
                     </p>
                     {sectionData.aprovadoCliente && sectionData.aprovadoClienteData && (
                       <p className="text-xs text-green-600 mt-1">
@@ -1657,12 +1657,12 @@ export default function Checklist() {
                 Painel de Validacao - Aprovacao das Areas
               </CardTitle>
               <CardDescription>
-                Visao geral das aprovacoes de cada area. Todas as areas devem estar aprovadas para liberar o teste.
+                Visão geral das aprovacoes de cada area. Todas as areas devem estar aprovadas para liberar o teste.
               </CardDescription>
             </CardHeader>
             <CardContent>
               {(() => {
-                const areasParaValidar = sections.filter(s => s.group === "areas" || s.group === "operacoes");
+                const areasParaValidar = sections.filter(s => s.group === "areas" || s.group === "operações");
                 const totalAreas = areasParaValidar.length;
                 const areasAprovadasPrestador = areasParaValidar.filter(s => sectionResponsaveis[s.id]?.aprovadoPrestador).length;
                 const areasAprovadasCliente = areasParaValidar.filter(s => sectionResponsaveis[s.id]?.aprovadoCliente).length;
@@ -1762,7 +1762,7 @@ export default function Checklist() {
                       {index + 1}. {q.question}
                     </Label>
                     <Textarea
-                      placeholder="Observacoes..."
+                      placeholder="Observações..."
                       value={answers[q.id]?.notes || ""}
                       onChange={(e) => handleNotes(q.id, e.target.value)}
                       className="text-sm"

@@ -936,7 +936,7 @@ export default function FreightCalculator() {
                   <p className="text-xs text-muted-foreground">
                     {routeApiStatus?.configured 
                       ? `Calculado automaticamente via ${routeApiStatus.provider}. Altere manualmente se necessario.`
-                      : "Configure ROTAS_BRASIL_TOKEN nas configuracoes para calculo automatico."
+                      : "Configure ROTAS_BRASIL_TOKEN nas configurações para calculo automatico."
                     }
                   </p>
                 </div>
@@ -1220,7 +1220,7 @@ export default function FreightCalculator() {
                       <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-950 rounded-md text-sm">
                         <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
                         <p className="text-amber-700 dark:text-amber-300">
-                          <strong>Sugestao:</strong> Para {parseFloat(route.weight).toLocaleString()}kg, recomendamos usar <strong>{suggested.label}</strong> (capacidade: {suggested.capacityKg.toLocaleString()}kg).
+                          <strong>Sugestão:</strong> Para {parseFloat(route.weight).toLocaleString()}kg, recomendamos usar <strong>{suggested.label}</strong> (capacidade: {suggested.capacityKg.toLocaleString()}kg).
                         </p>
                       </div>
                     );
@@ -1483,7 +1483,7 @@ export default function FreightCalculator() {
                         {(route.pickupExtras || []).map((extra, extraIndex) => (
                           <div key={extra.id} className="flex items-center gap-2">
                             <Input
-                              placeholder="Descricao"
+                              placeholder="Descrição"
                               value={extra.description}
                               onChange={(e) =>
                                 updatePickupExtra(route.id, extra.id, "description", e.target.value)
@@ -1546,7 +1546,7 @@ export default function FreightCalculator() {
                         {(route.deliveryExtras || []).map((extra, extraIndex) => (
                           <div key={extra.id} className="flex items-center gap-2">
                             <Input
-                              placeholder="Descricao"
+                              placeholder="Descrição"
                               value={extra.description}
                               onChange={(e) =>
                                 updateDeliveryExtra(route.id, extra.id, "description", e.target.value)
@@ -2064,7 +2064,7 @@ export default function FreightCalculator() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="notes">Observacoes</Label>
+                      <Label htmlFor="notes">Observações</Label>
                       <Textarea
                         id="notes"
                         value={proposalData.notes}
@@ -2074,7 +2074,7 @@ export default function FreightCalculator() {
                             notes: e.target.value,
                           }))
                         }
-                        placeholder="Observacoes adicionais..."
+                        placeholder="Observações adicionais..."
                         rows={3}
                         data-testid="input-notes"
                       />
@@ -2122,7 +2122,7 @@ export default function FreightCalculator() {
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2">
               <Info className="h-5 w-5" />
-              Informacoes Importantes
+              Informações Importantes
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
@@ -2170,10 +2170,10 @@ export default function FreightCalculator() {
                 <h4 className="font-semibold">Com um plano voce tem acesso a:</h4>
                 <ul className="text-sm text-muted-foreground space-y-1">
                   <li>Calculos ilimitados de frete e armazenagem</li>
-                  <li>CRM completo para gestao de clientes</li>
+                  <li>CRM completo para gestão de clientes</li>
                   <li>Pipeline de vendas</li>
                   <li>Checklists operacionais</li>
-                  <li>Gestao financeira</li>
+                  <li>Gestão financeira</li>
                   <li>Materiais de marketing</li>
                 </ul>
               </div>

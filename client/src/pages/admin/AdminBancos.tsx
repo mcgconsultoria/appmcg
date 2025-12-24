@@ -237,7 +237,7 @@ export default function AdminBancos() {
                     <Building2 className="h-5 w-5" />
                     {account.bankName}
                   </CardTitle>
-                  <CardDescription>Codigo: {account.bankCode}</CardDescription>
+                  <CardDescription>Código: {account.bankCode}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="grid grid-cols-2 gap-2 text-sm">
@@ -457,11 +457,11 @@ export default function AdminBancos() {
               </div>
 
               <div className="space-y-2">
-                <Label>Observacoes (opcional)</Label>
+                <Label>Observações (opcional)</Label>
                 <Textarea
                   value={formData.notes}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  placeholder="Observacoes sobre a conta..."
+                  placeholder="Observações sobre a conta..."
                   rows={2}
                   data-testid="textarea-bank-notes"
                 />

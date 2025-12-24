@@ -85,7 +85,7 @@ const permissionOptions = [
   { id: "calculator", label: "Calculadoras" },
   { id: "rfi", label: "RFI" },
   { id: "financial", label: "Financeiro" },
-  { id: "calendar", label: "Calendario" },
+  { id: "calendar", label: "Calendário" },
   { id: "tasks", label: "Tarefas" },
   { id: "projects", label: "Projetos" },
 ];
@@ -408,7 +408,7 @@ export default function TeamManagement() {
               </DialogTitle>
               <DialogDescription>
                 {editingMember
-                  ? "Atualize as informacoes do membro do time"
+                  ? "Atualize as informações do membro do time"
                   : "Adicione um novo membro ao time da empresa"}
               </DialogDescription>
             </DialogHeader>

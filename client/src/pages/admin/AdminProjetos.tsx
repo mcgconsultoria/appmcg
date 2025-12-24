@@ -37,7 +37,7 @@ const statusLabels: Record<string, string> = {
 };
 
 const projectTypes = [
-  "Diagnostico",
+  "Diagnóstico",
   "Implementacao",
   "Execucao",
   "Expansao",
@@ -262,7 +262,7 @@ export default function AdminProjetos() {
                   </div>
                 </div>
                 <div>
-                  <Label>Descricao</Label>
+                  <Label>Descrição</Label>
                   <Textarea
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}

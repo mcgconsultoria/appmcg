@@ -32,7 +32,7 @@ import { ClientCombobox } from "@/components/ClientCombobox";
 import { AppLayout } from "@/components/layout/AppLayout";
 
 const eventTypes = [
-  { value: "meeting", label: "Reuniao", color: "bg-primary" },
+  { value: "meeting", label: "Reunião", color: "bg-primary" },
   { value: "call", label: "Ligacao", color: "bg-emerald-600 dark:bg-emerald-500" },
   { value: "visit", label: "Visita", color: "bg-violet-600 dark:bg-violet-500" },
   { value: "proposal", label: "Proposta", color: "bg-amber-600 dark:bg-amber-500" },
@@ -274,7 +274,7 @@ export default function CalendarPage() {
 
   if (isLoading) {
     return (
-      <AppLayout title="Calendario Comercial" subtitle="Agende eventos e compromissos">
+      <AppLayout title="Calendário Comercial" subtitle="Agende eventos e compromissos">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
@@ -283,7 +283,7 @@ export default function CalendarPage() {
   }
 
   return (
-    <AppLayout title="Calendario Comercial" subtitle="Agende eventos e compromissos">
+    <AppLayout title="Calendário Comercial" subtitle="Agende eventos e compromissos">
       <div className="space-y-6">
         <div className="flex items-center justify-end gap-4 flex-wrap">
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -389,13 +389,13 @@ export default function CalendarPage() {
                   id="location"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  placeholder="Endereco ou link da reuniao"
+                  placeholder="Endereço ou link da reuniao"
                   data-testid="input-location"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Descricao</Label>
+                <Label htmlFor="description">Descrição</Label>
                 <Textarea
                   id="description"
                   value={formData.description}

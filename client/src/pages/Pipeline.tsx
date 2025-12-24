@@ -32,7 +32,7 @@ const pipelineStages = [
   { id: "lead", label: "Leads", color: "bg-sky-600 dark:bg-sky-500", description: "Novos contatos", isPending: false },
   { id: "contact", label: "Contato", color: "bg-primary", description: "Em primeiro contato", isPending: false },
   { id: "proposal", label: "Proposta", color: "bg-violet-600 dark:bg-violet-500", description: "Aguardando aprovacao", isPending: true },
-  { id: "negotiation", label: "Negociação", color: "bg-amber-600 dark:bg-amber-500", description: "Em negociacao", isPending: true },
+  { id: "negotiation", label: "Negociação", color: "bg-amber-600 dark:bg-amber-500", description: "Em negociação", isPending: true },
   { id: "closed", label: "Fechado", color: "bg-emerald-600 dark:bg-emerald-500", description: "Cliente conquistado", isPending: false },
 ];
 

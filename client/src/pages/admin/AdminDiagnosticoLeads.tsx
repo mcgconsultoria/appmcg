@@ -57,7 +57,7 @@ const statusConfig = {
   novo: { label: "Novo", color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" },
   contatado: { label: "Contatado", color: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200" },
   interessado: { label: "Interessado", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" },
-  em_negociacao: { label: "Em Negociacao", color: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200" },
+  em_negociação: { label: "Em Negociação", color: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200" },
   convertido: { label: "Convertido", color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" },
   perdido: { label: "Perdido", color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" },
 };
@@ -73,11 +73,11 @@ const pipelineColumns = [
   { status: "novo", label: "Novos Leads", icon: Users },
   { status: "contatado", label: "Contatados", icon: Phone },
   { status: "interessado", label: "Interessados", icon: Target },
-  { status: "em_negociacao", label: "Em Negociacao", icon: TrendingUp },
+  { status: "em_negociação", label: "Em Negociação", icon: TrendingUp },
   { status: "convertido", label: "Convertidos", icon: CheckCircle },
 ];
 
-export default function AdminDiagnosticoLeads() {
+export default function AdminDiagnósticoLeads() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
@@ -182,9 +182,9 @@ export default function AdminDiagnosticoLeads() {
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold">Leads do Diagnostico</h1>
+            <h1 className="text-2xl font-bold">Leads do Diagnóstico</h1>
             <p className="text-muted-foreground">
-              Gerencie os leads capturados pelo diagnostico comercial
+              Gerencie os leads capturados pelo diagnóstico comercial
             </p>
           </div>
           <Button variant="outline" onClick={() => refetch()} data-testid="button-refresh-leads">

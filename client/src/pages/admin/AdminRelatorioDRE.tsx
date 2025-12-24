@@ -96,7 +96,7 @@ export default function AdminRelatorioDRE() {
               Demonstrativo de Resultado (DRE)
             </h1>
             <p className="text-muted-foreground">
-              Relatorio gerencial de receitas e despesas do periodo
+              Relatorio gerencial de receitas e despesas do período
             </p>
           </div>
           <Button variant="outline" data-testid="button-export-dre">
@@ -110,7 +110,7 @@ export default function AdminRelatorioDRE() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Filter className="h-5 w-5" />
-                Periodo
+                Período
               </CardTitle>
             </div>
           </CardHeader>
@@ -187,7 +187,7 @@ export default function AdminRelatorioDRE() {
               DRE Analitico
             </CardTitle>
             <CardDescription>
-              Periodo: {filters.startDate ? format(new Date(filters.startDate), "dd/MM/yyyy") : "-"} a {filters.endDate ? format(new Date(filters.endDate), "dd/MM/yyyy") : "-"}
+              Período: {filters.startDate ? format(new Date(filters.startDate), "dd/MM/yyyy") : "-"} a {filters.endDate ? format(new Date(filters.endDate), "dd/MM/yyyy") : "-"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -195,17 +195,17 @@ export default function AdminRelatorioDRE() {
               <div className="text-center py-8 text-muted-foreground">Carregando...</div>
             ) : reportData.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                Nenhum dado encontrado para o periodo selecionado.
+                Nenhum dado encontrado para o período selecionado.
                 <br />
-                <span className="text-sm">Configure o plano de contas e registre lancamentos contabeis.</span>
+                <span className="text-sm">Configure o plano de contas e registre lançamentos contabeis.</span>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">Codigo</TableHead>
-                      <TableHead>Descricao</TableHead>
+                      <TableHead className="w-[100px]">Código</TableHead>
+                      <TableHead>Descrição</TableHead>
                       <TableHead className="text-right">Creditos</TableHead>
                       <TableHead className="text-right">Debitos</TableHead>
                       <TableHead className="text-right">Saldo</TableHead>

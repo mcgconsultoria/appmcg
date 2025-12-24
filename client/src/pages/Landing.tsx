@@ -133,7 +133,7 @@ export default function Landing() {
             </div>
           </div>
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="/diagnostico" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/diagnóstico" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Diagnóstico Grátis
             </Link>
             <Link href="/calculadora-frete" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -175,7 +175,7 @@ export default function Landing() {
               checklists e controle financeiro em uma única plataforma.
             </p>
             <div className="flex flex-col items-center justify-center gap-4">
-              <Link href="/diagnostico">
+              <Link href="/diagnóstico">
                 <Button size="lg" className="gap-2" data-testid="button-diagnostic">
                   Faça Diagnóstico Grátis
                   <ArrowRight className="h-4 w-4" />
@@ -215,7 +215,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="servicos" className="py-20 bg-muted/30">
+        <section id="serviços" className="py-20 bg-muted/30">
           <div className="max-w-screen-xl mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Nossos Serviços</h2>

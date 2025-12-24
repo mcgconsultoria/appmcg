@@ -82,7 +82,7 @@ const questions: Question[] = [
     ],
   },
   {
-    id: "historico",
+    id: "histórico",
     category: "Histórico",
     text: "Quando um vendedor sai da empresa, o que acontece com os dados dos clientes dele?",
     options: [
@@ -137,7 +137,7 @@ const questions: Question[] = [
     ],
   },
   {
-    id: "integracao",
+    id: "integração",
     category: "Integração",
     text: "Sua área comercial está integrada com a operação (TMS/WMS)?",
     options: [
@@ -169,7 +169,7 @@ interface LeadData {
   company: string;
 }
 
-export default function DiagnosticoComercial() {
+export default function DiagnósticoComercial() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(0);
@@ -311,7 +311,7 @@ export default function DiagnosticoComercial() {
         link: "/registro",
       });
     }
-    if (answers.integracao < 2) {
+    if (answers.integração < 2) {
       recommendations.push({
         title: "Integre comercial e operação",
         description: "Conecte seu CRM com os sistemas operacionais",

@@ -44,7 +44,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { AccountingEntry, DreAccount, CostCenter } from "@shared/schema";
 import { format } from "date-fns";
 
-export default function AdminLancamentos() {
+export default function AdminLançamentos() {
   const { toast } = useToast();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEntry, setEditingEntry] = useState<AccountingEntry | null>(null);
@@ -79,7 +79,7 @@ export default function AdminLancamentos() {
     queryFn: async () => {
       const url = queryString ? `/api/accounting-entries?${queryString}` : "/api/accounting-entries";
       const res = await fetch(url, { credentials: "include" });
-      if (!res.ok) throw new Error("Falha ao buscar lancamentos");
+      if (!res.ok) throw new Error("Falha ao buscar lançamentos");
       return res.json();
     },
   });
@@ -332,7 +332,7 @@ export default function AdminLancamentos() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                Lancamentos ({entries.length})
+                Lançamentos ({entries.length})
               </CardTitle>
               <CardDescription>
                 Registros contabeis vinculados ao DRE e centros de custo
@@ -366,7 +366,7 @@ export default function AdminLancamentos() {
                       <TableHead>Tipo</TableHead>
                       <TableHead>Conta DRE</TableHead>
                       <TableHead>Centro de Custo</TableHead>
-                      <TableHead>Descricao</TableHead>
+                      <TableHead>Descrição</TableHead>
                       <TableHead className="text-right">Valor</TableHead>
                       <TableHead>Doc.</TableHead>
                       <TableHead className="text-right">Acoes</TableHead>
@@ -446,7 +446,7 @@ export default function AdminLancamentos() {
               {editingEntry ? "Editar Lancamento" : "Novo Lancamento"}
             </DialogTitle>
             <DialogDescription>
-              Preencha os dados do lancamento contabil
+              Preencha os dados do lancamento contábil
             </DialogDescription>
           </DialogHeader>
 
@@ -541,7 +541,7 @@ export default function AdminLancamentos() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>Numero do Documento</Label>
+                <Label>Número do Documento</Label>
                 <Input
                   placeholder="NF, recibo, etc."
                   value={formData.documentNumber}
@@ -578,9 +578,9 @@ export default function AdminLancamentos() {
             </div>
 
             <div className="space-y-2">
-              <Label>Descricao</Label>
+              <Label>Descrição</Label>
               <Input
-                placeholder="Descricao resumida do lancamento"
+                placeholder="Descrição resumida do lancamento"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
@@ -590,7 +590,7 @@ export default function AdminLancamentos() {
             </div>
 
             <div className="space-y-2">
-              <Label>Historico</Label>
+              <Label>Histórico</Label>
               <Textarea
                 placeholder="Detalhes adicionais do lancamento"
                 value={formData.history}

@@ -33,7 +33,7 @@ import AdminCliente from "@/pages/AdminCliente";
 import Support from "@/pages/Support";
 import Reports from "@/pages/Reports";
 import Vendedores from "@/pages/Vendedores";
-import Operacoes from "@/pages/Operacoes";
+import Operações from "@/pages/Operacoes";
 import IndicadoresPreVendas from "@/pages/IndicadoresPreVendas";
 import IndicadoresVendas from "@/pages/IndicadoresVendas";
 import IndicadoresPosVendas from "@/pages/IndicadoresPosVendas";
@@ -47,18 +47,18 @@ import AdminConteudo from "@/pages/admin/AdminConteudo";
 import AdminContratos from "@/pages/admin/AdminContratos";
 import AdminTemplates from "@/pages/admin/AdminTemplates";
 import AdminCampanhaPiloto from "@/pages/admin/AdminCampanhaPiloto";
-import AdminDiagnosticoLeads from "@/pages/admin/AdminDiagnosticoLeads";
+import AdminDiagnósticoLeads from "@/pages/admin/AdminDiagnosticoLeads";
 import AdminLogin from "@/pages/admin/AdminLogin";
 import AdminDRE from "@/pages/admin/AdminDRE";
 import AdminCentroCustos from "@/pages/admin/AdminCentroCustos";
 import AdminBancos from "@/pages/admin/AdminBancos";
 import AdminCertificados from "@/pages/admin/AdminCertificados";
-import AdminLancamentos from "@/pages/admin/AdminLancamentos";
+import AdminLançamentos from "@/pages/admin/AdminLancamentos";
 import AdminRelatorioDRE from "@/pages/admin/AdminRelatorioDRE";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import BibliotecaChecklists from "@/pages/BibliotecaChecklists";
-import DiagnosticoComercial from "@/pages/DiagnosticoComercial";
+import DiagnósticoComercial from "@/pages/DiagnosticoComercial";
 import CampanhaPiloto from "@/pages/CampanhaPiloto";
 
 function Router() {
@@ -78,7 +78,7 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/diagnostico" component={DiagnosticoComercial} />
+      <Route path="/diagnóstico" component={DiagnósticoComercial} />
       <Route path="/campanha-piloto" component={CampanhaPiloto} />
       <Route path="/calculadora-frete" component={FreightCalculator} />
       <Route path="/calculadora-armazenagem" component={StorageCalculator} />
@@ -120,8 +120,8 @@ function Router() {
       <Route path="/admin/campanha-piloto">
         {() => isAuthenticated && isAdmin ? <AdminCampanhaPiloto /> : <AdminLogin />}
       </Route>
-      <Route path="/admin/leads-diagnostico">
-        {() => isAuthenticated && isAdmin ? <AdminDiagnosticoLeads /> : <AdminLogin />}
+      <Route path="/admin/leads-diagnóstico">
+        {() => isAuthenticated && isAdmin ? <AdminDiagnósticoLeads /> : <AdminLogin />}
       </Route>
       <Route path="/admin/dre">
         {() => isAuthenticated && isAdmin ? <AdminDRE /> : <AdminLogin />}
@@ -135,8 +135,8 @@ function Router() {
       <Route path="/admin/certificados">
         {() => isAuthenticated && isAdmin ? <AdminCertificados /> : <AdminLogin />}
       </Route>
-      <Route path="/admin/lancamentos">
-        {() => isAuthenticated && isAdmin ? <AdminLancamentos /> : <AdminLogin />}
+      <Route path="/admin/lançamentos">
+        {() => isAuthenticated && isAdmin ? <AdminLançamentos /> : <AdminLogin />}
       </Route>
       <Route path="/admin/relatorio-dre">
         {() => isAuthenticated && isAdmin ? <AdminRelatorioDRE /> : <AdminLogin />}
@@ -150,20 +150,20 @@ function Router() {
           <Route path="/clientes" component={Clients} />
           <Route path="/vendedores" component={Vendedores} />
           <Route path="/pipeline" component={Pipeline} />
-          <Route path="/calendario" component={CalendarPage} />
+          <Route path="/calendário" component={CalendarPage} />
           <Route path="/atas" component={MeetingRecords} />
           <Route path="/checklist" component={Checklist} />
           <Route path="/biblioteca" component={BibliotecaChecklists} />
           <Route path="/rfi" component={RFI} />
           <Route path="/tarefas" component={TasksPage} />
           <Route path="/projetos" component={ProjectsPage} />
-          <Route path="/relatorios" component={Reports} />
+          <Route path="/relatórios" component={Reports} />
           <Route path="/indicadores-pre-vendas" component={IndicadoresPreVendas} />
           <Route path="/indicadores-vendas" component={IndicadoresVendas} />
           <Route path="/indicadores-pos-vendas" component={IndicadoresPosVendas} />
-          <Route path="/operacoes" component={Operacoes} />
+          <Route path="/operações" component={Operações} />
           <Route path="/marketing" component={Marketing} />
-          <Route path="/configuracoes" component={Settings} />
+          <Route path="/configurações" component={Settings} />
           <Route path="/assinatura" component={Subscription} />
           <Route path="/pesquisas" component={Pesquisas} />
           <Route path="/admin-cliente" component={AdminCliente} />

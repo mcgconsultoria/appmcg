@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export default function Operacoes() {
+export default function Operações() {
   const { toast } = useToast();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -34,7 +34,7 @@ export default function Operacoes() {
     mutationFn: async ({ id, metaValor }: { id: number; metaValor: string }) => {
       const numericValue = metaValor ? parseFloat(metaValor.replace(",", ".")) : null;
       if (metaValor && (isNaN(numericValue!) || numericValue! < 0)) {
-        throw new Error("Valor invalido");
+        throw new Error("Valor inválido");
       }
       return apiRequest("PATCH", `/api/clients/${id}`, { metaValor: numericValue?.toString() || null });
     },
@@ -56,7 +56,7 @@ export default function Operacoes() {
 
   const handleSave = (id: number) => {
     if (editValue && isNaN(parseFloat(editValue.replace(",", ".")))) {
-      toast({ title: "Por favor insira um valor numerico valido", variant: "destructive" });
+      toast({ title: "Por favor insira um valor numerico válido", variant: "destructive" });
       return;
     }
     updateMetaMutation.mutate({ id, metaValor: editValue });
@@ -77,12 +77,12 @@ export default function Operacoes() {
   const percentualAtingido = totalMeta > 0 ? (totalEstimado / totalMeta) * 100 : 0;
 
   return (
-    <AppLayout title="Operacoes">
+    <AppLayout title="Operações">
       <div className="p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Target className="h-6 w-6" />
-            Operacoes - Metas por Cliente
+            Operações - Metas por Cliente
           </h1>
           <p className="text-muted-foreground">
             Defina e acompanhe as metas de cada cliente
@@ -161,7 +161,7 @@ export default function Operacoes() {
                   className="pl-9"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  data-testid="input-search-operacoes"
+                  data-testid="input-search-operações"
                 />
               </div>
             </div>

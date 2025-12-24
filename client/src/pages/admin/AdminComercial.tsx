@@ -31,7 +31,7 @@ const stageLabels: Record<string, string> = {
   lead: "Lead",
   qualified: "Qualificado",
   proposal: "Proposta",
-  negotiation: "Negociacao",
+  negotiation: "Negociação",
   closed_won: "Fechado Ganho",
   closed_lost: "Fechado Perdido",
 };
@@ -172,11 +172,11 @@ export default function AdminComercial() {
   };
 
   return (
-    <AppLayout title="Gestao Comercial MCG" subtitle="Leads, propostas e contratos">
+    <AppLayout title="Gestão Comercial MCG" subtitle="Leads, propostas e contratos">
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold" data-testid="text-admin-comercial-title">Gestao Comercial MCG</h1>
+            <h1 className="text-2xl font-bold" data-testid="text-admin-comercial-title">Gestão Comercial MCG</h1>
             <p className="text-muted-foreground">Leads, Pipeline, Propostas e Contratos</p>
           </div>
         </div>
@@ -317,7 +317,7 @@ export default function AdminComercial() {
                               <SelectItem value="lead">Lead</SelectItem>
                               <SelectItem value="qualified">Qualificado</SelectItem>
                               <SelectItem value="proposal">Proposta</SelectItem>
-                              <SelectItem value="negotiation">Negociacao</SelectItem>
+                              <SelectItem value="negotiation">Negociação</SelectItem>
                               <SelectItem value="closed_won">Fechado Ganho</SelectItem>
                               <SelectItem value="closed_lost">Fechado Perdido</SelectItem>
                             </SelectContent>
@@ -333,7 +333,7 @@ export default function AdminComercial() {
                         />
                       </div>
                       <div>
-                        <Label>Observacoes</Label>
+                        <Label>Observações</Label>
                         <Textarea
                           value={leadForm.notes}
                           onChange={(e) => setLeadForm({ ...leadForm, notes: e.target.value })}

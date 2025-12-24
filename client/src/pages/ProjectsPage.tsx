@@ -215,7 +215,7 @@ export default function ProjectsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Descricao</Label>
+                <Label htmlFor="description">Descrição</Label>
                 <Textarea
                   id="description"
                   value={formData.description}

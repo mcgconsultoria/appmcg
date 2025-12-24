@@ -40,9 +40,9 @@ const clientFormSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   tradeName: z.string().optional(),
   cnpj: z.string().optional(),
-  inscricaoEstadual: z.string().optional(),
-  inscricaoEstadualIsento: z.boolean().optional().default(false),
-  inscricaoMunicipal: z.string().optional(),
+  inscriçãoEstadual: z.string().optional(),
+  inscriçãoEstadualIsento: z.boolean().optional().default(false),
+  inscriçãoMunicipal: z.string().optional(),
   email: z.string().email("Email inválido").optional().or(z.literal("")),
   phone: z.string().optional(),
   address: z.string().optional(),
@@ -109,9 +109,9 @@ export function ClientFormDialog({
       name: "",
       tradeName: "",
       cnpj: "",
-      inscricaoEstadual: "",
-      inscricaoEstadualIsento: false,
-      inscricaoMunicipal: "",
+      inscriçãoEstadual: "",
+      inscriçãoEstadualIsento: false,
+      inscriçãoMunicipal: "",
       email: "",
       phone: "",
       address: "",
@@ -128,7 +128,7 @@ export function ClientFormDialog({
     },
   });
 
-  const watchIEIsento = form.watch("inscricaoEstadualIsento");
+  const watchIEIsento = form.watch("inscriçãoEstadualIsento");
 
   const handleCnpjLookup = async (cnpj: string) => {
     const cleanCnpj = cnpj.replace(/[^\d]/g, "");
@@ -164,9 +164,9 @@ export function ClientFormDialog({
         name: editingClient.name,
         tradeName: editingClient.tradeName || "",
         cnpj: editingClient.cnpj || "",
-        inscricaoEstadual: editingClient.inscricaoEstadual || "",
-        inscricaoEstadualIsento: editingClient.inscricaoEstadualIsento || false,
-        inscricaoMunicipal: editingClient.inscricaoMunicipal || "",
+        inscriçãoEstadual: editingClient.inscriçãoEstadual || "",
+        inscriçãoEstadualIsento: editingClient.inscriçãoEstadualIsento || false,
+        inscriçãoMunicipal: editingClient.inscriçãoMunicipal || "",
         email: editingClient.email || "",
         phone: editingClient.phone || "",
         address: editingClient.address || "",
@@ -187,9 +187,9 @@ export function ClientFormDialog({
         name: "",
         tradeName: "",
         cnpj: "",
-        inscricaoEstadual: "",
-        inscricaoEstadualIsento: false,
-        inscricaoMunicipal: "",
+        inscriçãoEstadual: "",
+        inscriçãoEstadualIsento: false,
+        inscriçãoMunicipal: "",
         email: "",
         phone: "",
         address: "",
@@ -322,13 +322,13 @@ export function ClientFormDialog({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="inscricaoEstadual"
+                name="inscriçãoEstadual"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Inscricao Estadual (I.E.)</FormLabel>
+                    <FormLabel>Inscrição Estadual (I.E.)</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder={watchIEIsento ? "ISENTO" : "Inscricao Estadual"}
+                        placeholder={watchIEIsento ? "ISENTO" : "Inscrição Estadual"}
                         disabled={watchIEIsento}
                         data-testid="input-client-ie"
                         {...field}
@@ -338,10 +338,10 @@ export function ClientFormDialog({
                     <div className="flex items-center gap-2 mt-1">
                       <Checkbox
                         id="client-ie-isento"
-                        checked={form.watch("inscricaoEstadualIsento")}
+                        checked={form.watch("inscriçãoEstadualIsento")}
                         onCheckedChange={(checked) => {
-                          form.setValue("inscricaoEstadualIsento", !!checked);
-                          if (checked) form.setValue("inscricaoEstadual", "");
+                          form.setValue("inscriçãoEstadualIsento", !!checked);
+                          if (checked) form.setValue("inscriçãoEstadual", "");
                         }}
                         data-testid="checkbox-client-ie-isento"
                       />
@@ -355,13 +355,13 @@ export function ClientFormDialog({
               />
               <FormField
                 control={form.control}
-                name="inscricaoMunicipal"
+                name="inscriçãoMunicipal"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Inscricao Municipal (I.M.)</FormLabel>
+                    <FormLabel>Inscrição Municipal (I.M.)</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Inscricao Municipal"
+                        placeholder="Inscrição Municipal"
                         data-testid="input-client-im"
                         {...field}
                       />

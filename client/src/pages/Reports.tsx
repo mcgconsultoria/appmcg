@@ -5,15 +5,15 @@ import { Button } from "@/components/ui/button";
 
 export default function Reports() {
   return (
-    <AppLayout title="Relatorios">
+    <AppLayout title="Relatórios">
       <div className="p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <BarChart3 className="h-6 w-6" />
-            Relatorios
+            Relatórios
           </h1>
           <p className="text-muted-foreground">
-            Visualize e exporte relatorios do seu negocio
+            Visualize e exporte relatórios do seu negocio
           </p>
         </div>
 
@@ -57,7 +57,7 @@ export default function Reports() {
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Receitas, despesas e fluxo de caixa do periodo
+                Receitas, despesas e fluxo de caixa do período
               </CardDescription>
               <Button variant="outline" size="sm" className="mt-4" data-testid="button-report-financial">
                 <Download className="h-4 w-4 mr-2" />
@@ -73,7 +73,7 @@ export default function Reports() {
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Tarefas concluidas, pendentes e atrasadas por periodo
+                Tarefas concluidas, pendentes e atrasadas por período
               </CardDescription>
               <Button variant="outline" size="sm" className="mt-4" data-testid="button-report-tasks">
                 <Download className="h-4 w-4 mr-2" />
@@ -119,12 +119,12 @@ export default function Reports() {
           <CardHeader>
             <CardTitle>Em breve</CardTitle>
             <CardDescription>
-              Novos relatorios estao sendo desenvolvidos para ajudar voce a tomar melhores decisoes
+              Novos relatórios estao sendo desenvolvidos para ajudar voce a tomar melhores decisoes
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Estamos trabalhando em relatorios personalizados, dashboards interativos e exportacao em varios formatos (PDF, Excel, CSV).
+              Estamos trabalhando em relatórios personalizados, dashboards interativos e exportacao em varios formatos (PDF, Excel, CSV).
             </p>
           </CardContent>
         </Card>

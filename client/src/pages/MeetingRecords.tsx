@@ -76,7 +76,7 @@ const statusColors: Record<string, string> = {
 
 const priorityLabels: Record<string, string> = {
   low: "Baixa",
-  medium: "Media",
+  medium: "Média",
   high: "Alta",
   urgent: "Urgente",
 };
@@ -336,7 +336,7 @@ export default function MeetingRecords() {
 
   if (isLoading) {
     return (
-      <AppLayout title="Ata Plano de Acao" subtitle="Registre reunioes e decisoes">
+      <AppLayout title="Ata Plano de Ação" subtitle="Registre reunioes e decisoes">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
@@ -345,7 +345,7 @@ export default function MeetingRecords() {
   }
 
   return (
-    <AppLayout title="Ata Plano de Acao" subtitle="Registre reunioes e decisoes">
+    <AppLayout title="Ata Plano de Ação" subtitle="Registre reunioes e decisoes">
       <div className="space-y-6">
         <div className="flex items-center justify-end gap-4 flex-wrap">
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -554,7 +554,7 @@ export default function MeetingRecords() {
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-4 flex-wrap">
-                  <Label>Plano de Acao</Label>
+                  <Label>Plano de Ação</Label>
                   <Button type="button" variant="outline" size="sm" onClick={addActionItem} data-testid="button-add-action">
                     <Plus className="h-4 w-4 mr-1" />
                     Adicionar Acao
@@ -565,7 +565,7 @@ export default function MeetingRecords() {
                     <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
                       <div className="md:col-span-2">
                         <Input
-                          placeholder="Descricao da acao"
+                          placeholder="Descrição da acao"
                           value={item.description}
                           onChange={(e) => updateActionItem(index, "description", e.target.value)}
                           data-testid={`input-action-description-${index}`}
@@ -816,7 +816,7 @@ export default function MeetingRecords() {
                                     const data = await res.json();
                                     if (data.emailServiceNotConfigured) {
                                       toast({ 
-                                        title: "Servico de email nao configurado", 
+                                        title: "Serviço de email nao configurado", 
                                         description: "Configure o RESEND_API_KEY ou SENDGRID_API_KEY para enviar emails.",
                                         variant: "destructive" 
                                       });

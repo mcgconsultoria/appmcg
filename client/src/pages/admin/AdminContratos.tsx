@@ -446,7 +446,7 @@ export default function AdminContratos() {
               </DialogTitle>
               <DialogDescription>
                 {editingTemplate
-                  ? "Atualize as informacoes do modelo"
+                  ? "Atualize as informações do modelo"
                   : "Crie um novo modelo de contrato"}
               </DialogDescription>
             </DialogHeader>
@@ -586,11 +586,11 @@ export default function AdminContratos() {
                 </Select>
               </div>
               <div>
-                <label className="text-sm font-medium">Observacoes (opcional)</label>
+                <label className="text-sm font-medium">Observações (opcional)</label>
                 <Textarea
                   value={agreementForm.notes}
                   onChange={(e) => setAgreementForm({ ...agreementForm, notes: e.target.value })}
-                  placeholder="Observacoes adicionais..."
+                  placeholder="Observações adicionais..."
                   data-testid="input-agreement-notes"
                 />
               </div>

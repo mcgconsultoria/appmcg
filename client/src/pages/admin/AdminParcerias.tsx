@@ -162,7 +162,7 @@ export default function AdminParcerias() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold" data-testid="text-admin-parcerias-title">Parcerias</h1>
-            <p className="text-muted-foreground">Gestao de parcerias estrategicas</p>
+            <p className="text-muted-foreground">Gestão de parcerias estrategicas</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
@@ -264,7 +264,7 @@ export default function AdminParcerias() {
                   </div>
                 </div>
                 <div>
-                  <Label>Descricao da Parceria</Label>
+                  <Label>Descrição da Parceria</Label>
                   <Textarea
                     value={form.description}
                     onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -292,7 +292,7 @@ export default function AdminParcerias() {
                   </div>
                 </div>
                 <div>
-                  <Label>Observacoes</Label>
+                  <Label>Observações</Label>
                   <Textarea
                     value={form.notes}
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}

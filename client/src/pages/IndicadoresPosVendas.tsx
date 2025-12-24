@@ -11,7 +11,7 @@ import {
 
 export default function IndicadoresPosVendas() {
   return (
-    <AppLayout title="Indicadores Pos-Vendas" subtitle="Acompanhe a satisfacao e retencao de clientes">
+    <AppLayout title="Indicadores Pos-Vendas" subtitle="Acompanhe a satisfação e retencao de clientes">
       <div className="p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card data-testid="card-nps">
@@ -25,9 +25,9 @@ export default function IndicadoresPosVendas() {
             </CardContent>
           </Card>
 
-          <Card data-testid="card-satisfacao-geral">
+          <Card data-testid="card-satisfação-geral">
             <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Satisfacao Geral</CardTitle>
+              <CardTitle className="text-sm font-medium">Satisfação Geral</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>

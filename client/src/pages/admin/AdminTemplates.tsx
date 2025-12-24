@@ -88,14 +88,14 @@ const CHECKLIST_SECTIONS = [
   "planejamento",
   "financeiro",
   "op_transporte",
-  "op_distribuicao",
+  "op_distribuição",
   "op_armazenagem",
   "grisco",
   "ti",
   "compras",
-  "contabil_fiscal",
+  "contábil_fiscal",
   "rh",
-  "juridico",
+  "jurídico",
   "cliente_teste",
   "boas_vindas",
   "relacionamento",
@@ -109,14 +109,14 @@ const SECTION_LABELS: Record<string, string> = {
   planejamento: "Planejamento",
   financeiro: "Financeiro",
   op_transporte: "Op. Transporte",
-  op_distribuicao: "Op. Distribuicao",
+  op_distribuição: "Op. Distribuição",
   op_armazenagem: "Op. Armazenagem",
   grisco: "GRISCO",
   ti: "T.I",
   compras: "Compras",
-  contabil_fiscal: "Contabil/Fiscal",
+  contábil_fiscal: "Contábil/Fiscal",
   rh: "RH",
-  juridico: "Juridico",
+  jurídico: "Jurídico",
   cliente_teste: "Cliente em Teste",
   boas_vindas: "Boas Vindas",
   relacionamento: "Relacionamento",
@@ -136,7 +136,7 @@ interface TemplateFormData {
     localizacao?: string;
     segmentoDetalhado?: string;
     produto?: string;
-    numeros?: string;
+    números?: string;
     noticias?: string;
     mercado?: string;
     oportunidades?: string;
@@ -148,7 +148,7 @@ interface TemplateFormData {
       ePerfil?: boolean;
       dataInicio?: string;
       dataConclusao?: string;
-      observacoes?: string;
+      observações?: string;
     }[];
   };
 }
@@ -166,7 +166,7 @@ const initialFormData: TemplateFormData = {
     localizacao: "",
     segmentoDetalhado: "",
     produto: "",
-    numeros: "",
+    números: "",
     noticias: "",
     mercado: "",
     oportunidades: "",
@@ -178,7 +178,7 @@ const initialFormData: TemplateFormData = {
       ePerfil: false,
       dataInicio: "",
       dataConclusao: "",
-      observacoes: "",
+      observações: "",
     })),
   },
 };
@@ -425,7 +425,7 @@ export default function AdminTemplates() {
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="info">Informacoes</TabsTrigger>
+              <TabsTrigger value="info">Informações</TabsTrigger>
               <TabsTrigger value="perfil">Perfil Cliente</TabsTrigger>
               <TabsTrigger value="secoes">Secoes (18)</TabsTrigger>
             </TabsList>
@@ -492,7 +492,7 @@ export default function AdminTemplates() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Descricao</Label>
+                <Label htmlFor="description">Descrição</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
@@ -553,7 +553,7 @@ export default function AdminTemplates() {
                       templateData: { ...formData.templateData, historia: e.target.value },
                     })
                   }
-                  placeholder="Historico da empresa, fundacao, evolucao..."
+                  placeholder="Histórico da empresa, fundacao, evolucao..."
                   rows={3}
                 />
               </div>
@@ -588,13 +588,13 @@ export default function AdminTemplates() {
               </div>
 
               <div className="space-y-2">
-                <Label>Numeros/Indicadores</Label>
+                <Label>Números/Indicadores</Label>
                 <Textarea
-                  value={formData.templateData.numeros || ""}
+                  value={formData.templateData.números || ""}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      templateData: { ...formData.templateData, numeros: e.target.value },
+                      templateData: { ...formData.templateData, números: e.target.value },
                     })
                   }
                   placeholder="Faturamento, funcionarios, volume..."
@@ -635,7 +635,7 @@ export default function AdminTemplates() {
 
             <TabsContent value="secoes" className="space-y-4 mt-4">
               <div className="text-sm text-muted-foreground mb-4">
-                Preencha as informacoes de cada secao do checklist. Estes dados servirao de modelo para os clientes.
+                Preencha as informações de cada secao do checklist. Estes dados servirao de modelo para os clientes.
               </div>
               
               <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
@@ -674,11 +674,11 @@ export default function AdminTemplates() {
                       </div>
                     </div>
                     <div className="mt-2">
-                      <Label className="text-xs">Observacoes</Label>
+                      <Label className="text-xs">Observações</Label>
                       <Textarea
-                        value={section.observacoes || ""}
-                        onChange={(e) => updateSection(index, "observacoes", e.target.value)}
-                        placeholder="Observacoes e detalhes..."
+                        value={section.observações || ""}
+                        onChange={(e) => updateSection(index, "observações", e.target.value)}
+                        placeholder="Observações e detalhes..."
                         rows={2}
                         className="text-sm"
                       />

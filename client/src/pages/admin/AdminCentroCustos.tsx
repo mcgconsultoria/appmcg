@@ -308,7 +308,7 @@ export default function AdminCentroCustos() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Codigo</Label>
+                  <Label>Código</Label>
                   <Input
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value })}
@@ -374,11 +374,11 @@ export default function AdminCentroCustos() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Descricao (opcional)</Label>
+                <Label>Descrição (opcional)</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Descricao do centro de custo..."
+                  placeholder="Descrição do centro de custo..."
                   rows={2}
                   data-testid="textarea-center-description"
                 />

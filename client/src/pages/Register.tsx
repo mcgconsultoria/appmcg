@@ -24,9 +24,9 @@ const registerSchema = z.object({
   password: z.string().min(8, "Senha deve ter no mínimo 8 caracteres"),
   confirmPassword: z.string(),
   cnpj: z.string().optional(),
-  inscricaoEstadual: z.string().optional(),
-  inscricaoEstadualIsento: z.boolean().optional().default(false),
-  inscricaoMunicipal: z.string().optional(),
+  inscriçãoEstadual: z.string().optional(),
+  inscriçãoEstadualIsento: z.boolean().optional().default(false),
+  inscriçãoMunicipal: z.string().optional(),
   razaoSocial: z.string().optional(),
   nomeFantasia: z.string().optional(),
   firstName: z.string().min(1, "Nome é obrigatório"),
@@ -88,7 +88,7 @@ const departamentos = [
   { value: "comercial", label: "Comercial" },
   { value: "financeiro", label: "Financeiro" },
   { value: "compras", label: "Compras" },
-  { value: "logistica", label: "Logística" },
+  { value: "logística", label: "Logística" },
   { value: "frota", label: "Frota" },
   { value: "qualidade", label: "Qualidade" },
   { value: "ti", label: "T.I" },
@@ -136,9 +136,9 @@ export default function Register() {
       password: "",
       confirmPassword: "",
       cnpj: "",
-      inscricaoEstadual: "",
-      inscricaoEstadualIsento: false,
-      inscricaoMunicipal: "",
+      inscriçãoEstadual: "",
+      inscriçãoEstadualIsento: false,
+      inscriçãoMunicipal: "",
       razaoSocial: "",
       nomeFantasia: "",
       firstName: "",
@@ -153,7 +153,7 @@ export default function Register() {
     },
   });
 
-  const watchIEIsento = form.watch("inscricaoEstadualIsento");
+  const watchIEIsento = form.watch("inscriçãoEstadualIsento");
 
   const handleCnpjLookup = async (cnpj: string) => {
     const cleanCnpj = cnpj.replace(/[^\d]/g, "");
@@ -320,13 +320,13 @@ export default function Register() {
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="inscricaoEstadual"
+                    name="inscriçãoEstadual"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Inscricao Estadual (I.E.)</FormLabel>
+                        <FormLabel>Inscrição Estadual (I.E.)</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder={watchIEIsento ? "ISENTO" : "Inscricao Estadual"}
+                            placeholder={watchIEIsento ? "ISENTO" : "Inscrição Estadual"}
                             disabled={watchIEIsento}
                             data-testid="input-ie"
                             {...field}
@@ -336,10 +336,10 @@ export default function Register() {
                         <div className="flex items-center gap-2 mt-1">
                           <Checkbox
                             id="ie-isento"
-                            checked={form.watch("inscricaoEstadualIsento")}
+                            checked={form.watch("inscriçãoEstadualIsento")}
                             onCheckedChange={(checked) => {
-                              form.setValue("inscricaoEstadualIsento", !!checked);
-                              if (checked) form.setValue("inscricaoEstadual", "");
+                              form.setValue("inscriçãoEstadualIsento", !!checked);
+                              if (checked) form.setValue("inscriçãoEstadual", "");
                             }}
                             data-testid="checkbox-ie-isento"
                           />
@@ -353,13 +353,13 @@ export default function Register() {
                   />
                   <FormField
                     control={form.control}
-                    name="inscricaoMunicipal"
+                    name="inscriçãoMunicipal"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Inscricao Municipal (I.M.)</FormLabel>
+                        <FormLabel>Inscrição Municipal (I.M.)</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Inscricao Municipal"
+                            placeholder="Inscrição Municipal"
                             data-testid="input-im"
                             {...field}
                           />

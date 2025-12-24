@@ -46,7 +46,7 @@ const adminMenuItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Gestao Comercial",
+    title: "Gestão Comercial",
     url: "/admin/comercial",
     icon: Users,
   },
@@ -94,8 +94,8 @@ const marketingMenuItems = [
     icon: Megaphone,
   },
   {
-    title: "Leads Diagnostico",
-    url: "/admin/leads-diagnostico",
+    title: "Leads Diagnóstico",
+    url: "/admin/leads-diagnóstico",
     icon: Users,
   },
 ];
@@ -122,8 +122,8 @@ const financeConfigItems = [
     icon: Shield,
   },
   {
-    title: "Lancamentos",
-    url: "/admin/lancamentos",
+    title: "Lançamentos",
+    url: "/admin/lançamentos",
     icon: FileText,
   },
   {
@@ -159,7 +159,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               />
               <div className="flex flex-col">
                 <span className="font-bold text-sm leading-tight">MCG Admin</span>
-                <span className="text-xs text-muted-foreground leading-tight">Gestao Interna</span>
+                <span className="text-xs text-muted-foreground leading-tight">Gestão Interna</span>
               </div>
             </div>
           </SidebarHeader>

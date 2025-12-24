@@ -128,7 +128,7 @@ export default function AdminCertificados() {
     if (daysRemaining <= 30) {
       return { status: "expiring", label: `Expira em ${daysRemaining} dias`, color: "text-amber-600", icon: Clock };
     }
-    return { status: "valid", label: "Valido", color: "text-emerald-600", icon: CheckCircle2 };
+    return { status: "valid", label: "Válido", color: "text-emerald-600", icon: CheckCircle2 };
   };
 
   return (
@@ -160,7 +160,7 @@ export default function AdminCertificados() {
           <CardHeader>
             <CardTitle>Sobre Certificados Digitais</CardTitle>
             <CardDescription>
-              O certificado digital e necessario para emitir Notas Fiscais de Servico Eletronicas (NFS-e)
+              O certificado digital e necessario para emitir Notas Fiscais de Serviço Eletronicas (NFS-e)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -191,7 +191,7 @@ export default function AdminCertificados() {
                 <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <span>
                   <strong>Importante:</strong> Para emissao de NFS-e em Curitiba/PR, voce precisara de um certificado 
-                  digital e-CNPJ valido. Recomendamos adquirir de uma Autoridade Certificadora credenciada pelo ICP-Brasil 
+                  digital e-CNPJ válido. Recomendamos adquirir de uma Autoridade Certificadora credenciada pelo ICP-Brasil 
                   (como Serasa, Certisign, ou outras).
                 </span>
               </p>

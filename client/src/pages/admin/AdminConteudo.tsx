@@ -27,8 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import type { AdminPost } from "@shared/schema";
 
 const categories = [
-  "Logistica",
-  "Gestao Comercial",
+  "Logística",
+  "Gestão Comercial",
   "Tecnologia",
   "Mercado",
   "Dicas",
@@ -170,7 +170,7 @@ export default function AdminConteudo() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold" data-testid="text-admin-conteudo-title">Conteudo / Blog</h1>
-            <p className="text-muted-foreground">Gestao de conteudos e publicacoes</p>
+            <p className="text-muted-foreground">Gestão de conteudos e publicacoes</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
@@ -204,7 +204,7 @@ export default function AdminConteudo() {
                     value={form.excerpt}
                     onChange={(e) => setForm({ ...form, excerpt: e.target.value })}
                     rows={2}
-                    placeholder="Breve descricao do post..."
+                    placeholder="Breve descrição do post..."
                     data-testid="textarea-post-excerpt"
                   />
                 </div>
@@ -236,7 +236,7 @@ export default function AdminConteudo() {
                     </Select>
                   </div>
                   <div>
-                    <Label>Publico-Alvo</Label>
+                    <Label>Público-Alvo</Label>
                     <Select
                       value={form.targetAudience[0] || ""}
                       onValueChange={(v) => setForm({ ...form, targetAudience: [v] })}

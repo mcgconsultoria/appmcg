@@ -156,7 +156,7 @@ const storageTypes: StorageType[] = [
     baseRate: 65,
     temperature: "0C a 4C",
     legislation: ["MAPA Decreto 9.013/2017", "ANVISA RDC 216/2004", "IN MAPA 60/2018"],
-    requirements: ["Prateleiras inferiores obrigatorias", "Separacao de carnes cruas", "SIF obrigatorio para comercio interestadual"],
+    requirements: ["Prateleiras inferiores obrigatorias", "Separacao de carnes cruas", "SIF obrigatorio para comércio interestadual"],
     icon: Apple,
   },
   {
@@ -166,7 +166,7 @@ const storageTypes: StorageType[] = [
     baseRate: 70,
     temperature: "0C a 2C",
     legislation: ["MAPA Decreto 9.013/2017", "ANVISA RDC 216/2004", "Resolucao CISA 10/1984"],
-    requirements: ["Gelo ou refrigeracao permanente", "Area exclusiva", "Rastreabilidade de origem"],
+    requirements: ["Gelo ou refrigeração permanente", "Area exclusiva", "Rastreabilidade de origem"],
     icon: Apple,
   },
   {
@@ -206,7 +206,7 @@ const storageTypes: StorageType[] = [
     baseRate: 90,
     temperature: "15C a 30C",
     legislation: ["ANVISA RDC 430/2020", "RDC 653/2022", "RDC 304"],
-    requirements: ["Sistema de Gestao da Qualidade", "Area de quarentena", "Rastreabilidade total", "POPs documentados"],
+    requirements: ["Sistema de Gestão da Qualidade", "Area de quarentena", "Rastreabilidade total", "POPs documentados"],
     icon: Pill,
   },
   {
@@ -620,13 +620,13 @@ export default function StorageCalculator() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="period">Periodo</Label>
+                  <Label htmlFor="period">Período</Label>
                   <Select
                     value={formData.period}
                     onValueChange={(value) => updateField("period", value)}
                   >
                     <SelectTrigger id="period" data-testid="select-period">
-                      <SelectValue placeholder="Selecione o periodo" />
+                      <SelectValue placeholder="Selecione o período" />
                     </SelectTrigger>
                     <SelectContent>
                       {periods.map((p) => (
@@ -807,7 +807,7 @@ export default function StorageCalculator() {
               <div>
                 <p className="font-medium text-foreground mb-2">Alimentos Refrigerados/Congelados</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li><strong>ANVISA RDC 216/2004:</strong> Boas praticas para servicos de alimentacao</li>
+                  <li><strong>ANVISA RDC 216/2004:</strong> Boas praticas para serviços de alimentacao</li>
                   <li><strong>MAPA Decreto 9.013/2017 (RIISPOA):</strong> Inspecao de produtos de origem animal</li>
                   <li><strong>Resolucao CNNPA 35/1977:</strong> Padroes para alimentos congelados (min. -18C)</li>
                   <li><strong>NBR 14701:</strong> Transporte de produtos pereciveis refrigerados/congelados</li>
@@ -816,10 +816,10 @@ export default function StorageCalculator() {
               <div>
                 <p className="font-medium text-foreground mb-2">Medicamentos e Farmaceuticos</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li><strong>ANVISA RDC 430/2020:</strong> Boas praticas de distribuicao e armazenagem</li>
+                  <li><strong>ANVISA RDC 430/2020:</strong> Boas praticas de distribuição e armazenagem</li>
                   <li><strong>RDC 938/2024:</strong> Armazens alfandegados - mapeamento termico obrigatorio</li>
                   <li><strong>RDC 653/2022:</strong> Prazo final marco/2024 para adequacao</li>
-                  <li><strong>RDC 887/2024:</strong> Gases medicinais - distribuicao e armazenagem</li>
+                  <li><strong>RDC 887/2024:</strong> Gases medicinais - distribuição e armazenagem</li>
                 </ul>
               </div>
               <div>
@@ -859,7 +859,7 @@ export default function StorageCalculator() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-primary-foreground/80">Periodo</span>
+                  <span className="text-primary-foreground/80">Período</span>
                   <span className="font-medium">{formData.period} dias</span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -1064,12 +1064,12 @@ export default function StorageCalculator() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes">Observacoes</Label>
+              <Label htmlFor="notes">Observações</Label>
               <Textarea
                 id="notes"
                 value={proposalData.notes}
                 onChange={(e) => setProposalData(prev => ({ ...prev, notes: e.target.value }))}
-                placeholder="Observacoes adicionais..."
+                placeholder="Observações adicionais..."
                 rows={2}
                 data-testid="input-notes"
               />
@@ -1087,7 +1087,7 @@ export default function StorageCalculator() {
                 <span className="font-medium">{formData.area} m²</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Periodo:</span>
+                <span className="text-sm text-muted-foreground">Período:</span>
                 <span className="font-medium">{formData.period} dias</span>
               </div>
               <div className="flex justify-between">
@@ -1128,10 +1128,10 @@ export default function StorageCalculator() {
               <p className="font-medium">Com um plano pago voce tem:</p>
               <ul className="text-sm text-muted-foreground space-y-1">
                 <li>- Calculos ilimitados de frete e armazenagem</li>
-                <li>- CRM completo para gestao de clientes</li>
+                <li>- CRM completo para gestão de clientes</li>
                 <li>- Pipeline de vendas e oportunidades</li>
                 <li>- Checklists operacionais para 15 departamentos</li>
-                <li>- Gestao financeira completa</li>
+                <li>- Gestão financeira completa</li>
                 <li>- Materiais de marketing personalizados</li>
               </ul>
             </div>

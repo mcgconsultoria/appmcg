@@ -396,7 +396,7 @@ export default function Dashboard() {
                 <div className="text-center py-8 text-muted-foreground">
                   <Target className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   <p>Nenhuma operacao cadastrada</p>
-                  <p className="text-sm mt-1">Cadastre operacoes nos clientes para acompanhar o ritmo de faturamento</p>
+                  <p className="text-sm mt-1">Cadastre operações nos clientes para acompanhar o ritmo de faturamento</p>
                 </div>
               )}
               {billingPace && billingPace.data.length > 0 && (
@@ -415,7 +415,7 @@ export default function Dashboard() {
                 <BarChart3 className="h-5 w-5" />
                 Clientes por Estado
               </CardTitle>
-              <CardDescription>Distribuicao geografica dos clientes</CardDescription>
+              <CardDescription>Distribuição geografica dos clientes</CardDescription>
             </CardHeader>
             <CardContent>
               {stateChartData.length > 0 ? (
@@ -444,7 +444,7 @@ export default function Dashboard() {
                 <PieChart className="h-5 w-5" />
                 Clientes por Segmento
               </CardTitle>
-              <CardDescription>Distribuicao por segmento de mercado</CardDescription>
+              <CardDescription>Distribuição por segmento de mercado</CardDescription>
             </CardHeader>
             <CardContent>
               {segmentChartData.length > 0 ? (

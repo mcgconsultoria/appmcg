@@ -15,7 +15,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import logoMcg from "@assets/logo_mcg_principal.png";
 
 const loginSchema = z.object({
-  email: z.string().email("Email invalido"),
+  email: z.string().email("Email inválido"),
   password: z.string().min(1, "Senha obrigatoria"),
 });
 
@@ -173,7 +173,7 @@ export default function AdminLogin() {
 
       <footer className="border-t border-border py-4">
         <p className="text-center text-sm text-muted-foreground">
-          MCG Consultoria - Gestao Interna
+          MCG Consultoria - Gestão Interna
         </p>
       </footer>
     </div>

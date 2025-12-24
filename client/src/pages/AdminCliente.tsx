@@ -88,7 +88,7 @@ type TeamMemberFormData = z.infer<typeof teamMemberFormSchema>;
 
 const ticketFormSchema = z.object({
   subject: z.string().min(1, "Assunto e obrigatorio"),
-  description: z.string().min(1, "Descricao e obrigatoria"),
+  description: z.string().min(1, "Descrição e obrigatoria"),
   category: z.string().min(1, "Categoria e obrigatoria"),
   priority: z.string().default("medium"),
 });
@@ -114,7 +114,7 @@ const permissionLabels: Record<string, string> = {
   calculator: "Calculadoras",
   rfi: "RFI",
   financial: "Financeiro",
-  calendar: "Calendario",
+  calendar: "Calendário",
   tasks: "Tarefas",
   projects: "Projetos",
 };
@@ -123,12 +123,12 @@ const categoryLabels: Record<string, string> = {
   suporte: "Suporte Tecnico",
   financeiro: "Financeiro",
   comercial: "Comercial",
-  tecnico: "Tecnico",
+  tecnico: "Técnico",
 };
 
 const priorityLabels: Record<string, string> = {
   low: "Baixa",
-  medium: "Media",
+  medium: "Média",
   high: "Alta",
   urgent: "Urgente",
 };
@@ -477,7 +477,7 @@ function TeamTab() {
             </DialogTitle>
             <DialogDescription>
               {editingMember
-                ? "Atualize as informacoes do membro da equipe"
+                ? "Atualize as informações do membro da equipe"
                 : "Preencha os dados para adicionar um novo membro"}
             </DialogDescription>
           </DialogHeader>
@@ -641,7 +641,7 @@ function TeamTab() {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmar Exclusao</DialogTitle>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
             <DialogDescription>
               Tem certeza que deseja remover este membro da equipe? Esta acao nao pode ser desfeita.
             </DialogDescription>
@@ -1009,7 +1009,7 @@ function SupportTab() {
                         <SelectItem value="suporte">Suporte Tecnico</SelectItem>
                         <SelectItem value="financeiro">Financeiro</SelectItem>
                         <SelectItem value="comercial">Comercial</SelectItem>
-                        <SelectItem value="tecnico">Tecnico</SelectItem>
+                        <SelectItem value="técnico">Tecnico</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -1046,7 +1046,7 @@ function SupportTab() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descricao</FormLabel>
+                    <FormLabel>Descrição</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Descreva seu problema em detalhes..."
@@ -1308,7 +1308,7 @@ function ContractsTab() {
               </div>
               {selectedContract.notes && (
                 <div>
-                  <p className="text-sm text-muted-foreground">Observacoes</p>
+                  <p className="text-sm text-muted-foreground">Observações</p>
                   <p>{selectedContract.notes}</p>
                 </div>
               )}
@@ -1359,7 +1359,7 @@ function ContractsTab() {
               />
             </div>
             <p className="text-sm text-muted-foreground">
-              Ao clicar em "Assinar", voce concorda com os termos do contrato e confirma que as informacoes fornecidas sao verdadeiras.
+              Ao clicar em "Assinar", voce concorda com os termos do contrato e confirma que as informações fornecidas sao verdadeiras.
             </p>
           </div>
           <DialogFooter>

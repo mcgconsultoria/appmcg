@@ -33,11 +33,11 @@ export default function AdminDashboard() {
   const activeProjects = projects.filter((p: any) => p.status === "active").slice(0, 5);
 
   return (
-    <AppLayout title="Dashboard MCG" subtitle="Visao geral da gestao interna">
+    <AppLayout title="Dashboard MCG" subtitle="Visão geral da gestão interna">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold" data-testid="text-admin-dashboard-title">Dashboard MCG</h1>
-          <p className="text-muted-foreground">Visao geral da gestao interna</p>
+          <p className="text-muted-foreground">Visão geral da gestão interna</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -50,7 +50,7 @@ export default function AdminDashboard() {
               <div className="text-2xl font-bold" data-testid="text-active-leads">
                 {isLoading ? "..." : stats?.activeLeads || 0}
               </div>
-              <p className="text-xs text-muted-foreground">Em negociacao</p>
+              <p className="text-xs text-muted-foreground">Em negociação</p>
             </CardContent>
           </Card>
 

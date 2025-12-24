@@ -102,12 +102,12 @@ const vendasItems = [
     icon: Kanban,
   },
   {
-    title: "Calendario",
-    url: "/calendario",
+    title: "Calendário",
+    url: "/calendário",
     icon: Calendar,
   },
   {
-    title: "Ata Plano de Acao",
+    title: "Ata Plano de Ação",
     url: "/atas",
     icon: FileEdit,
   },
@@ -137,13 +137,13 @@ const vendasItems = [
     icon: TrendingUp,
   },
   {
-    title: "Relatorios",
-    url: "/relatorios",
+    title: "Relatórios",
+    url: "/relatórios",
     icon: BarChart3,
   },
   {
     title: "Metas",
-    url: "/operacoes",
+    url: "/operações",
     icon: Settings2,
   },
   {
@@ -155,7 +155,7 @@ const vendasItems = [
 
 const posVendasItems = [
   {
-    title: "Pesquisas de Satisfacao",
+    title: "Pesquisas de Satisfação",
     url: "/pesquisas",
     icon: MessageSquareHeart,
   },
@@ -211,8 +211,8 @@ const adminMcgComercialItems = [
     icon: Rocket,
   },
   {
-    title: "Diagnostico Leads",
-    url: "/admin/leads-diagnostico",
+    title: "Diagnóstico Leads",
+    url: "/admin/leads-diagnóstico",
     icon: Search,
   },
 ];
@@ -262,8 +262,8 @@ const adminMcgFinanceiroItems = [
     icon: FileBadge,
   },
   {
-    title: "Lancamentos",
-    url: "/admin/lancamentos",
+    title: "Lançamentos",
+    url: "/admin/lançamentos",
     icon: BookOpen,
   },
   {
@@ -494,9 +494,9 @@ export function AppSidebar() {
         </div>
         <div className="flex gap-2">
           <Button variant="ghost" size="sm" className="flex-1 justify-start" asChild>
-            <Link href="/configuracoes">
+            <Link href="/configurações">
               <Settings className="h-4 w-4 mr-2" />
-              Configuracoes
+              Configurações
             </Link>
           </Button>
           <Button

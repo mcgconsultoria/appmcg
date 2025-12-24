@@ -19,7 +19,7 @@ const colorPalette = [
 const typography = [
   { name: "Inter", usage: "Textos de interface (UI)", weights: "400, 500, 600, 700" },
   { name: "IBM Plex Sans", usage: "Titulos e headlines", weights: "500, 600, 700" },
-  { name: "JetBrains Mono", usage: "Codigo e dados tecnicos", weights: "400, 500" },
+  { name: "JetBrains Mono", usage: "Código e dados tecnicos", weights: "400, 500" },
 ];
 
 export default function BrandKit({ isAdmin = false }: BrandKitProps) {

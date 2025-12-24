@@ -38,12 +38,12 @@ import type { DreAccount } from "@shared/schema";
 
 const defaultAccounts: Partial<DreAccount>[] = [
   { code: "1", name: "RECEITA BRUTA", nature: "receita", level: 1 },
-  { code: "1.1", name: "Receita de Servicos", nature: "receita", level: 2, parentId: undefined },
+  { code: "1.1", name: "Receita de Serviços", nature: "receita", level: 2, parentId: undefined },
   { code: "1.1.1", name: "Consultoria", nature: "receita", level: 3 },
   { code: "1.1.2", name: "Licencas de Software", nature: "receita", level: 3 },
   { code: "1.1.3", name: "Treinamentos", nature: "receita", level: 3 },
   { code: "2", name: "(-) DEDUCOES DA RECEITA", nature: "custo", level: 1 },
-  { code: "2.1", name: "Impostos sobre Servicos", nature: "custo", level: 2 },
+  { code: "2.1", name: "Impostos sobre Serviços", nature: "custo", level: 2 },
   { code: "2.1.1", name: "ISS", nature: "custo", level: 3 },
   { code: "2.1.2", name: "PIS", nature: "custo", level: 3 },
   { code: "2.1.3", name: "COFINS", nature: "custo", level: 3 },
@@ -56,7 +56,7 @@ const defaultAccounts: Partial<DreAccount>[] = [
   { code: "4.1.1", name: "Salarios e Encargos", nature: "despesa", level: 3 },
   { code: "4.1.2", name: "Aluguel e Condominio", nature: "despesa", level: 3 },
   { code: "4.1.3", name: "Energia e Telecom", nature: "despesa", level: 3 },
-  { code: "4.1.4", name: "Servicos de Terceiros", nature: "despesa", level: 3 },
+  { code: "4.1.4", name: "Serviços de Terceiros", nature: "despesa", level: 3 },
   { code: "4.2", name: "Despesas Comerciais", nature: "despesa", level: 2 },
   { code: "4.2.1", name: "Marketing e Publicidade", nature: "despesa", level: 3 },
   { code: "4.2.2", name: "Comissoes de Vendas", nature: "despesa", level: 3 },
@@ -324,13 +324,13 @@ export default function AdminDRE() {
                 {editingAccount ? "Editar Conta" : "Nova Conta"}
               </DialogTitle>
               <DialogDescription>
-                Preencha os dados da conta contabil
+                Preencha os dados da conta contábil
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Codigo</Label>
+                  <Label>Código</Label>
                   <Input
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value })}

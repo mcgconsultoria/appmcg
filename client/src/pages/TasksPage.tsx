@@ -32,7 +32,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 
 const priorityOptions = [
   { value: "low", label: "Baixa", color: "secondary" },
-  { value: "medium", label: "Media", color: "default" },
+  { value: "medium", label: "Média", color: "default" },
   { value: "high", label: "Alta", color: "destructive" },
   { value: "urgent", label: "Urgente", color: "destructive" },
 ];
@@ -251,7 +251,7 @@ export default function TasksPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Descricao</Label>
+                  <Label htmlFor="description">Descrição</Label>
                   <Textarea
                     id="description"
                     value={formData.description}

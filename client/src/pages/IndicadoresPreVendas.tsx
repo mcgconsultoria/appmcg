@@ -8,7 +8,7 @@ import {
 
 export default function IndicadoresPreVendas() {
   return (
-    <AppLayout title="Indicadores Pre-Vendas" subtitle="Acompanhe os indicadores de marketing e geracao de leads">
+    <AppLayout title="Indicadores Pre-Vendas" subtitle="Acompanhe os indicadores de marketing e geração de leads">
       <div className="p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card data-testid="card-leads-gerados">

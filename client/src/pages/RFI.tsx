@@ -115,8 +115,8 @@ const tiposAcondicionamento = [
 
 const tiposOperacao = [
   { id: "transferencia", label: "Transferência" },
-  { id: "distribuicaoUrbana", label: "Distribuição Urbana" },
-  { id: "distribuicaoFracionada", label: "Distribuição Fracionada" },
+  { id: "distribuiçãoUrbana", label: "Distribuição Urbana" },
+  { id: "distribuiçãoFracionada", label: "Distribuição Fracionada" },
   { id: "crossDocking", label: "Cross Docking / Transit Point" },
   { id: "frotaDedicada", label: "Frota Dedicada" },
   { id: "milkRun", label: "Milk Run" },
@@ -141,7 +141,7 @@ interface RfiFormData {
   razaoSocial: string;
   nomeFantasia: string;
   cnpj: string;
-  endereco: string;
+  endereço: string;
   bairro: string;
   cep: string;
   cidade: string;
@@ -153,7 +153,7 @@ interface RfiFormData {
   ramoAtividade: string;
   inicioAtividades: string;
   faturamentoAnual: Record<string, string>;
-  unidades: Array<{ local: string; endereco: string; telefone: string; contato: string }>;
+  unidades: Array<{ local: string; endereço: string; telefone: string; contato: string }>;
   fornecedores: Array<{ nome: string; ramoAtuacao: string }>;
   concorrentes: Array<{ nome: string }>;
   principaisClientes: Array<{ nome: string; percentualFaturamento: string; segmento: string }>;
@@ -176,7 +176,7 @@ interface RfiFormData {
   cargoResponsavel: string;
   telefoneResponsavel: string;
   emailResponsavel: string;
-  observacoes: string;
+  observações: string;
   status: string;
 }
 
@@ -184,7 +184,7 @@ const emptyFormData: RfiFormData = {
   razaoSocial: "",
   nomeFantasia: "",
   cnpj: "",
-  endereco: "",
+  endereço: "",
   bairro: "",
   cep: "",
   cidade: "",
@@ -225,7 +225,7 @@ const emptyFormData: RfiFormData = {
   cargoResponsavel: "",
   telefoneResponsavel: "",
   emailResponsavel: "",
-  observacoes: "",
+  observações: "",
   status: "draft",
 };
 
@@ -331,7 +331,7 @@ export default function RFI() {
       razaoSocial: rfi.razaoSocial || "",
       nomeFantasia: rfi.nomeFantasia || "",
       cnpj: rfi.cnpj || "",
-      endereco: rfi.endereco || "",
+      endereço: rfi.endereço || "",
       bairro: rfi.bairro || "",
       cep: rfi.cep || "",
       cidade: rfi.cidade || "",
@@ -343,7 +343,7 @@ export default function RFI() {
       ramoAtividade: rfi.ramoAtividade || "",
       inicioAtividades: rfi.inicioAtividades || "",
       faturamentoAnual: (rfi.faturamentoAnual as Record<string, string>) || {},
-      unidades: (rfi.unidades as Array<{ local: string; endereco: string; telefone: string; contato: string }>) || [],
+      unidades: (rfi.unidades as Array<{ local: string; endereço: string; telefone: string; contato: string }>) || [],
       fornecedores: (rfi.fornecedores as Array<{ nome: string; ramoAtuacao: string }>) || [],
       concorrentes: (rfi.concorrentes as Array<{ nome: string }>) || [],
       principaisClientes: (rfi.principaisClientes as Array<{ nome: string; percentualFaturamento: string; segmento: string }>) || [],
@@ -366,7 +366,7 @@ export default function RFI() {
       cargoResponsavel: rfi.cargoResponsavel || "",
       telefoneResponsavel: rfi.telefoneResponsavel || "",
       emailResponsavel: rfi.emailResponsavel || "",
-      observacoes: rfi.observacoes || "",
+      observações: rfi.observações || "",
       status: rfi.status || "draft",
     });
     setIsDialogOpen(true);
@@ -388,7 +388,7 @@ export default function RFI() {
   const addUnidade = () => {
     setFormData(prev => ({
       ...prev,
-      unidades: [...prev.unidades, { local: "", endereco: "", telefone: "", contato: "" }],
+      unidades: [...prev.unidades, { local: "", endereço: "", telefone: "", contato: "" }],
     }));
   };
 
@@ -682,10 +682,10 @@ export default function RFI() {
                     <div className="space-y-2">
                       <Label>Endereço</Label>
                       <Input
-                        value={formData.endereco}
-                        onChange={(e) => setFormData(prev => ({ ...prev, endereco: e.target.value }))}
+                        value={formData.endereço}
+                        onChange={(e) => setFormData(prev => ({ ...prev, endereço: e.target.value }))}
                         placeholder="Rua, número, complemento"
-                        data-testid="input-endereco"
+                        data-testid="input-endereço"
                       />
                     </div>
                     <div className="grid grid-cols-3 gap-4">
@@ -826,10 +826,10 @@ export default function RFI() {
                         <div className="space-y-1">
                           <Label className="text-xs">Endereço</Label>
                           <Input
-                            value={unidade.endereco}
+                            value={unidade.endereço}
                             onChange={(e) => {
                               const newUnidades = [...formData.unidades];
-                              newUnidades[index].endereco = e.target.value;
+                              newUnidades[index].endereço = e.target.value;
                               setFormData(prev => ({ ...prev, unidades: newUnidades }));
                             }}
                             placeholder="Endereço"
@@ -1407,11 +1407,11 @@ export default function RFI() {
                     <div className="space-y-2">
                       <Label>Observações</Label>
                       <Textarea
-                        value={formData.observacoes}
-                        onChange={(e) => setFormData(prev => ({ ...prev, observacoes: e.target.value }))}
+                        value={formData.observações}
+                        onChange={(e) => setFormData(prev => ({ ...prev, observações: e.target.value }))}
                         placeholder="Observações adicionais"
                         rows={4}
-                        data-testid="textarea-observacoes"
+                        data-testid="textarea-observações"
                       />
                     </div>
                   </div>

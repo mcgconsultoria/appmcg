@@ -55,7 +55,7 @@ import type { SupportTicket, SupportTicketMessage } from "@shared/schema";
 
 const ticketFormSchema = z.object({
   subject: z.string().min(1, "Assunto e obrigatorio"),
-  description: z.string().min(1, "Descricao e obrigatoria"),
+  description: z.string().min(1, "Descrição e obrigatoria"),
   category: z.string().min(1, "Categoria e obrigatoria"),
   priority: z.string().default("medium"),
 });
@@ -66,12 +66,12 @@ const categoryLabels: Record<string, string> = {
   suporte: "Suporte Tecnico",
   financeiro: "Financeiro",
   comercial: "Comercial",
-  tecnico: "Tecnico",
+  tecnico: "Técnico",
 };
 
 const priorityLabels: Record<string, string> = {
   low: "Baixa",
-  medium: "Media",
+  medium: "Média",
   high: "Alta",
   urgent: "Urgente",
 };
@@ -421,9 +421,9 @@ export default function Support() {
               ) : (
                 <div className="space-y-4">
                   <div className="p-4 bg-muted/50 rounded-lg">
-                    <h4 className="font-medium mb-2">Descricao</h4>
+                    <h4 className="font-medium mb-2">Descrição</h4>
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                      {selectedTicket.description || "Sem descricao"}
+                      {selectedTicket.description || "Sem descrição"}
                     </p>
                   </div>
 
@@ -533,7 +533,7 @@ export default function Support() {
                             <SelectItem value="suporte">Suporte Tecnico</SelectItem>
                             <SelectItem value="financeiro">Financeiro</SelectItem>
                             <SelectItem value="comercial">Comercial</SelectItem>
-                            <SelectItem value="tecnico">Tecnico</SelectItem>
+                            <SelectItem value="técnico">Tecnico</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -571,7 +571,7 @@ export default function Support() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Descricao</FormLabel>
+                      <FormLabel>Descrição</FormLabel>
                       <FormControl>
                         <Textarea
                           {...field}
