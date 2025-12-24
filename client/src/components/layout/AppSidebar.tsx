@@ -140,19 +140,14 @@ const posVendasItems = [
 
 const adminClienteItems = [
   {
-    title: "Vendedores",
-    url: "/vendedores",
-    icon: UserRound,
-  },
-  {
     title: "Meu Plano",
     url: "/assinatura",
     icon: CreditCard,
   },
   {
-    title: "Admin Cliente",
-    url: "/admin-cliente",
-    icon: UserCog,
+    title: "Vendedores",
+    url: "/vendedores",
+    icon: UserRound,
   },
 ];
 
