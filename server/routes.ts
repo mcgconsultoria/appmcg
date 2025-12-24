@@ -175,14 +175,17 @@ export async function registerRoutes(
     }
   });
 
-  app.post('/api/auth/logout', isAuthenticated, async (req: any, res) => {
+  app.post('/api/auth/logout', async (req: any, res) => {
     try {
-      await logoutUser(req.user.id);
+      if (req.user?.id) {
+        await logoutUser(req.user.id);
+      }
       res.clearCookie(SESSION_COOKIE_NAME);
       res.json({ message: "Logout realizado com sucesso" });
     } catch (error) {
       console.error("Error logging out:", error);
-      res.status(500).json({ message: "Erro ao fazer logout" });
+      res.clearCookie(SESSION_COOKIE_NAME);
+      res.json({ message: "Logout realizado com sucesso" });
     }
   });
 
