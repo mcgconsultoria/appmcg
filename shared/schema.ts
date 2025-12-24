@@ -10,6 +10,7 @@ import {
   boolean,
   decimal,
   serial,
+  date,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -1472,6 +1473,77 @@ export const nfseInvoices = pgTable("nfse_invoices", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Accounting Entries (Lançamentos Contábeis) - Integrates DRE + Cost Centers
+export const accountingEntries = pgTable("accounting_entries", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id"),
+  dreAccountId: integer("dre_account_id").notNull(), // References dreAccounts
+  costCenterId: integer("cost_center_id"), // References costCenters (optional for some entries)
+  bankAccountId: integer("bank_account_id"), // References bankAccounts (for cash flow)
+  entryDate: date("entry_date").notNull(),
+  competenceDate: date("competence_date").notNull(), // Regime de competência
+  documentNumber: varchar("document_number", { length: 50 }),
+  documentType: varchar("document_type", { length: 50 }), // nfse, nfe, recibo, contrato, outros
+  description: text("description").notNull(),
+  entryType: varchar("entry_type", { length: 10 }).notNull(), // credito, debito
+  value: decimal("value", { precision: 15, scale: 2 }).notNull(),
+  status: varchar("status", { length: 20 }).default("confirmado"), // pendente, confirmado, cancelado
+  reconciled: boolean("reconciled").default(false), // Conciliado com banco
+  reconciledAt: timestamp("reconciled_at"),
+  nfseInvoiceId: integer("nfse_invoice_id"), // Link to NFS-e if applicable
+  financialRecordId: integer("financial_record_id"), // Link to original financial record
+  notes: text("notes"),
+  createdBy: integer("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// C6 Bank Integration Config
+export const bankIntegrations = pgTable("bank_integrations", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id"),
+  bankAccountId: integer("bank_account_id").notNull(),
+  provider: varchar("provider", { length: 50 }).notNull(), // c6bank, itau, bradesco, etc
+  clientId: varchar("client_id", { length: 255 }),
+  clientSecret: text("client_secret"), // Encrypted
+  accessToken: text("access_token"), // Encrypted
+  refreshToken: text("refresh_token"), // Encrypted
+  tokenExpiresAt: timestamp("token_expires_at"),
+  webhookUrl: text("webhook_url"),
+  webhookSecret: text("webhook_secret"),
+  sandboxMode: boolean("sandbox_mode").default(true),
+  permissions: jsonb("permissions"), // Array of enabled permissions
+  lastSyncAt: timestamp("last_sync_at"),
+  syncStatus: varchar("sync_status", { length: 20 }).default("pending"), // pending, syncing, synced, error
+  errorMessage: text("error_message"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Bank Transactions (from API sync)
+export const bankTransactions = pgTable("bank_transactions", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id"),
+  bankAccountId: integer("bank_account_id").notNull(),
+  externalId: varchar("external_id", { length: 100 }), // Transaction ID from bank API
+  transactionDate: date("transaction_date").notNull(),
+  transactionType: varchar("transaction_type", { length: 50 }), // pix, ted, boleto, tarifa, etc
+  description: text("description"),
+  counterpartyName: varchar("counterparty_name", { length: 255 }),
+  counterpartyDocument: varchar("counterparty_document", { length: 20 }), // CPF/CNPJ
+  counterpartyBank: varchar("counterparty_bank", { length: 100 }),
+  pixKey: varchar("pix_key", { length: 255 }),
+  endToEndId: varchar("end_to_end_id", { length: 100 }), // PIX E2E ID
+  value: decimal("value", { precision: 15, scale: 2 }).notNull(),
+  balance: decimal("balance", { precision: 15, scale: 2 }), // Saldo após transação
+  accountingEntryId: integer("accounting_entry_id"), // Link to accounting entry when reconciled
+  reconciled: boolean("reconciled").default(false),
+  reconciledAt: timestamp("reconciled_at"),
+  rawData: jsonb("raw_data"), // Original API response
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Product Cost Structure (for DRE pricing)
 export const productCostStructures = pgTable("product_cost_structures", {
   id: serial("id").primaryKey(),
@@ -1528,6 +1600,23 @@ export const insertProductCostStructureSchema = createInsertSchema(productCostSt
   id: true,
   createdAt: true,
   updatedAt: true,
+});
+
+export const insertAccountingEntrySchema = createInsertSchema(accountingEntries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBankIntegrationSchema = createInsertSchema(bankIntegrations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBankTransactionSchema = createInsertSchema(bankTransactions).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Auth schemas
@@ -1664,3 +1753,9 @@ export type NfseInvoice = typeof nfseInvoices.$inferSelect;
 export type InsertNfseInvoice = z.infer<typeof insertNfseInvoiceSchema>;
 export type ProductCostStructure = typeof productCostStructures.$inferSelect;
 export type InsertProductCostStructure = z.infer<typeof insertProductCostStructureSchema>;
+export type AccountingEntry = typeof accountingEntries.$inferSelect;
+export type InsertAccountingEntry = z.infer<typeof insertAccountingEntrySchema>;
+export type BankIntegration = typeof bankIntegrations.$inferSelect;
+export type InsertBankIntegration = z.infer<typeof insertBankIntegrationSchema>;
+export type BankTransaction = typeof bankTransactions.$inferSelect;
+export type InsertBankTransaction = z.infer<typeof insertBankTransactionSchema>;

@@ -123,6 +123,9 @@ import {
   costCenters,
   bankAccounts,
   digitalCertificates,
+  accountingEntries,
+  bankIntegrations,
+  bankTransactions,
   type DreAccount,
   type InsertDreAccount,
   type CostCenter,
@@ -131,6 +134,12 @@ import {
   type InsertBankAccount,
   type DigitalCertificate,
   type InsertDigitalCertificate,
+  type AccountingEntry,
+  type InsertAccountingEntry,
+  type BankIntegration,
+  type InsertBankIntegration,
+  type BankTransaction,
+  type InsertBankTransaction,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
@@ -449,6 +458,25 @@ export interface IStorage {
   getDigitalCertificates(): Promise<DigitalCertificate[]>;
   createDigitalCertificate(cert: InsertDigitalCertificate): Promise<DigitalCertificate>;
   deleteDigitalCertificate(id: number): Promise<boolean>;
+
+  // Financial Module - Accounting Entries (Lançamentos Contábeis)
+  getAccountingEntries(filters?: { startDate?: string; endDate?: string; dreAccountId?: number; costCenterId?: number }): Promise<AccountingEntry[]>;
+  getAccountingEntry(id: number): Promise<AccountingEntry | undefined>;
+  createAccountingEntry(entry: InsertAccountingEntry): Promise<AccountingEntry>;
+  updateAccountingEntry(id: number, entry: Partial<InsertAccountingEntry>): Promise<AccountingEntry | undefined>;
+  deleteAccountingEntry(id: number): Promise<boolean>;
+
+  // Financial Module - Bank Integrations
+  getBankIntegrations(): Promise<BankIntegration[]>;
+  getBankIntegration(id: number): Promise<BankIntegration | undefined>;
+  createBankIntegration(integration: InsertBankIntegration): Promise<BankIntegration>;
+  updateBankIntegration(id: number, integration: Partial<InsertBankIntegration>): Promise<BankIntegration | undefined>;
+  deleteBankIntegration(id: number): Promise<boolean>;
+
+  // Financial Module - Bank Transactions
+  getBankTransactions(bankAccountId?: number): Promise<BankTransaction[]>;
+  createBankTransaction(transaction: InsertBankTransaction): Promise<BankTransaction>;
+  reconcileBankTransaction(id: number, accountingEntryId: number): Promise<BankTransaction | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1887,6 +1915,110 @@ export class DatabaseStorage implements IStorage {
   async deleteDigitalCertificate(id: number): Promise<boolean> {
     await db.delete(digitalCertificates).where(eq(digitalCertificates.id, id));
     return true;
+  }
+
+  // Accounting Entries
+  async getAccountingEntries(filters?: { startDate?: string; endDate?: string; dreAccountId?: number; costCenterId?: number }): Promise<AccountingEntry[]> {
+    let query = db.select().from(accountingEntries);
+    
+    const conditions = [];
+    if (filters?.dreAccountId) {
+      conditions.push(eq(accountingEntries.dreAccountId, filters.dreAccountId));
+    }
+    if (filters?.costCenterId) {
+      conditions.push(eq(accountingEntries.costCenterId, filters.costCenterId));
+    }
+    if (filters?.startDate) {
+      conditions.push(gte(accountingEntries.competenceDate, filters.startDate));
+    }
+    if (filters?.endDate) {
+      conditions.push(lte(accountingEntries.competenceDate, filters.endDate));
+    }
+    
+    if (conditions.length > 0) {
+      return db.select().from(accountingEntries).where(and(...conditions)).orderBy(desc(accountingEntries.competenceDate));
+    }
+    
+    return db.select().from(accountingEntries).orderBy(desc(accountingEntries.competenceDate));
+  }
+
+  async getAccountingEntry(id: number): Promise<AccountingEntry | undefined> {
+    const [entry] = await db.select().from(accountingEntries).where(eq(accountingEntries.id, id));
+    return entry;
+  }
+
+  async createAccountingEntry(entry: InsertAccountingEntry): Promise<AccountingEntry> {
+    const [newEntry] = await db.insert(accountingEntries).values(entry).returning();
+    return newEntry;
+  }
+
+  async updateAccountingEntry(id: number, entry: Partial<InsertAccountingEntry>): Promise<AccountingEntry | undefined> {
+    const [updated] = await db
+      .update(accountingEntries)
+      .set({ ...entry, updatedAt: new Date() })
+      .where(eq(accountingEntries.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteAccountingEntry(id: number): Promise<boolean> {
+    await db.delete(accountingEntries).where(eq(accountingEntries.id, id));
+    return true;
+  }
+
+  // Bank Integrations
+  async getBankIntegrations(): Promise<BankIntegration[]> {
+    return db.select().from(bankIntegrations).orderBy(desc(bankIntegrations.isActive));
+  }
+
+  async getBankIntegration(id: number): Promise<BankIntegration | undefined> {
+    const [integration] = await db.select().from(bankIntegrations).where(eq(bankIntegrations.id, id));
+    return integration;
+  }
+
+  async createBankIntegration(integration: InsertBankIntegration): Promise<BankIntegration> {
+    const [newIntegration] = await db.insert(bankIntegrations).values(integration).returning();
+    return newIntegration;
+  }
+
+  async updateBankIntegration(id: number, integration: Partial<InsertBankIntegration>): Promise<BankIntegration | undefined> {
+    const [updated] = await db
+      .update(bankIntegrations)
+      .set({ ...integration, updatedAt: new Date() })
+      .where(eq(bankIntegrations.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteBankIntegration(id: number): Promise<boolean> {
+    await db.delete(bankIntegrations).where(eq(bankIntegrations.id, id));
+    return true;
+  }
+
+  // Bank Transactions
+  async getBankTransactions(bankAccountId?: number): Promise<BankTransaction[]> {
+    if (bankAccountId) {
+      return db.select().from(bankTransactions).where(eq(bankTransactions.bankAccountId, bankAccountId)).orderBy(desc(bankTransactions.transactionDate));
+    }
+    return db.select().from(bankTransactions).orderBy(desc(bankTransactions.transactionDate));
+  }
+
+  async createBankTransaction(transaction: InsertBankTransaction): Promise<BankTransaction> {
+    const [newTransaction] = await db.insert(bankTransactions).values(transaction).returning();
+    return newTransaction;
+  }
+
+  async reconcileBankTransaction(id: number, accountingEntryId: number): Promise<BankTransaction | undefined> {
+    const [updated] = await db
+      .update(bankTransactions)
+      .set({ 
+        accountingEntryId, 
+        reconciled: true, 
+        reconciledAt: new Date() 
+      })
+      .where(eq(bankTransactions.id, id))
+      .returning();
+    return updated;
   }
 }
 

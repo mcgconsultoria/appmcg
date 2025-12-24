@@ -38,6 +38,8 @@ import {
   insertDreAccountSchema,
   insertCostCenterSchema,
   insertBankAccountSchema,
+  insertAccountingEntrySchema,
+  insertBankIntegrationSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -4121,6 +4123,211 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting digital certificate:", error);
       res.status(500).json({ message: "Falha ao excluir certificado" });
+    }
+  });
+
+  // ============ Accounting Entries (Lançamentos Contábeis) ============
+  app.get("/api/accounting-entries", isAdmin, async (req, res) => {
+    try {
+      const filters = {
+        startDate: req.query.startDate as string | undefined,
+        endDate: req.query.endDate as string | undefined,
+        dreAccountId: req.query.dreAccountId ? parseInt(req.query.dreAccountId as string) : undefined,
+        costCenterId: req.query.costCenterId ? parseInt(req.query.costCenterId as string) : undefined,
+      };
+      const entries = await storage.getAccountingEntries(filters);
+      res.json(entries);
+    } catch (error) {
+      console.error("Error fetching accounting entries:", error);
+      res.status(500).json({ message: "Falha ao buscar lancamentos" });
+    }
+  });
+
+  app.get("/api/accounting-entries/:id", isAdmin, async (req, res) => {
+    try {
+      const entry = await storage.getAccountingEntry(parseInt(req.params.id));
+      if (!entry) {
+        return res.status(404).json({ message: "Lancamento nao encontrado" });
+      }
+      res.json(entry);
+    } catch (error) {
+      console.error("Error fetching accounting entry:", error);
+      res.status(500).json({ message: "Falha ao buscar lancamento" });
+    }
+  });
+
+  app.post("/api/accounting-entries", isAdmin, async (req, res) => {
+    try {
+      const parsed = insertAccountingEntrySchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados invalidos", errors: parsed.error.errors });
+      }
+      const entry = await storage.createAccountingEntry(parsed.data);
+      res.status(201).json(entry);
+    } catch (error) {
+      console.error("Error creating accounting entry:", error);
+      res.status(500).json({ message: "Falha ao criar lancamento" });
+    }
+  });
+
+  app.patch("/api/accounting-entries/:id", isAdmin, async (req, res) => {
+    try {
+      const parsed = insertAccountingEntrySchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados invalidos", errors: parsed.error.errors });
+      }
+      const entry = await storage.updateAccountingEntry(parseInt(req.params.id), parsed.data);
+      if (!entry) {
+        return res.status(404).json({ message: "Lancamento nao encontrado" });
+      }
+      res.json(entry);
+    } catch (error) {
+      console.error("Error updating accounting entry:", error);
+      res.status(500).json({ message: "Falha ao atualizar lancamento" });
+    }
+  });
+
+  app.delete("/api/accounting-entries/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteAccountingEntry(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting accounting entry:", error);
+      res.status(500).json({ message: "Falha ao excluir lancamento" });
+    }
+  });
+
+  // DRE Report endpoint - consolidated monthly report
+  app.get("/api/dre-report", isAdmin, async (req, res) => {
+    try {
+      const { startDate, endDate } = req.query;
+      const entries = await storage.getAccountingEntries({
+        startDate: startDate as string,
+        endDate: endDate as string,
+      });
+      const accounts = await storage.getDreAccounts();
+      
+      // Group entries by DRE account and calculate totals
+      const accountTotals: Record<number, { credito: number; debito: number }> = {};
+      
+      entries.forEach(entry => {
+        if (!accountTotals[entry.dreAccountId]) {
+          accountTotals[entry.dreAccountId] = { credito: 0, debito: 0 };
+        }
+        const value = parseFloat(entry.value || "0");
+        if (entry.entryType === "credito") {
+          accountTotals[entry.dreAccountId].credito += value;
+        } else {
+          accountTotals[entry.dreAccountId].debito += value;
+        }
+      });
+      
+      // Build report with account names
+      const report = accounts.map(account => ({
+        ...account,
+        credito: accountTotals[account.id]?.credito || 0,
+        debito: accountTotals[account.id]?.debito || 0,
+        saldo: (accountTotals[account.id]?.credito || 0) - (accountTotals[account.id]?.debito || 0),
+      }));
+      
+      res.json(report);
+    } catch (error) {
+      console.error("Error generating DRE report:", error);
+      res.status(500).json({ message: "Falha ao gerar relatorio DRE" });
+    }
+  });
+
+  // ============ Bank Integrations ============
+  app.get("/api/bank-integrations", isAdmin, async (req, res) => {
+    try {
+      const integrations = await storage.getBankIntegrations();
+      res.json(integrations);
+    } catch (error) {
+      console.error("Error fetching bank integrations:", error);
+      res.status(500).json({ message: "Falha ao buscar integracoes bancarias" });
+    }
+  });
+
+  app.get("/api/bank-integrations/:id", isAdmin, async (req, res) => {
+    try {
+      const integration = await storage.getBankIntegration(parseInt(req.params.id));
+      if (!integration) {
+        return res.status(404).json({ message: "Integracao nao encontrada" });
+      }
+      res.json(integration);
+    } catch (error) {
+      console.error("Error fetching bank integration:", error);
+      res.status(500).json({ message: "Falha ao buscar integracao" });
+    }
+  });
+
+  app.post("/api/bank-integrations", isAdmin, async (req, res) => {
+    try {
+      const parsed = insertBankIntegrationSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados invalidos", errors: parsed.error.errors });
+      }
+      const integration = await storage.createBankIntegration(parsed.data);
+      res.status(201).json(integration);
+    } catch (error) {
+      console.error("Error creating bank integration:", error);
+      res.status(500).json({ message: "Falha ao criar integracao" });
+    }
+  });
+
+  app.patch("/api/bank-integrations/:id", isAdmin, async (req, res) => {
+    try {
+      const parsed = insertBankIntegrationSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados invalidos", errors: parsed.error.errors });
+      }
+      const integration = await storage.updateBankIntegration(parseInt(req.params.id), parsed.data);
+      if (!integration) {
+        return res.status(404).json({ message: "Integracao nao encontrada" });
+      }
+      res.json(integration);
+    } catch (error) {
+      console.error("Error updating bank integration:", error);
+      res.status(500).json({ message: "Falha ao atualizar integracao" });
+    }
+  });
+
+  app.delete("/api/bank-integrations/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteBankIntegration(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting bank integration:", error);
+      res.status(500).json({ message: "Falha ao excluir integracao" });
+    }
+  });
+
+  // ============ Bank Transactions ============
+  app.get("/api/bank-transactions", isAdmin, async (req, res) => {
+    try {
+      const bankAccountId = req.query.bankAccountId ? parseInt(req.query.bankAccountId as string) : undefined;
+      const transactions = await storage.getBankTransactions(bankAccountId);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching bank transactions:", error);
+      res.status(500).json({ message: "Falha ao buscar transacoes" });
+    }
+  });
+
+  app.post("/api/bank-transactions/:id/reconcile", isAdmin, async (req, res) => {
+    try {
+      const { accountingEntryId } = req.body;
+      if (!accountingEntryId) {
+        return res.status(400).json({ message: "accountingEntryId obrigatorio" });
+      }
+      const transaction = await storage.reconcileBankTransaction(parseInt(req.params.id), accountingEntryId);
+      if (!transaction) {
+        return res.status(404).json({ message: "Transacao nao encontrada" });
+      }
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error reconciling bank transaction:", error);
+      res.status(500).json({ message: "Falha ao conciliar transacao" });
     }
   });
 
