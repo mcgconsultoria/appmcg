@@ -50,6 +50,11 @@ const preVendasItems = [
     url: "/marketing",
     icon: Megaphone,
   },
+  {
+    title: "Indicadores",
+    url: "/indicadores-pre-vendas",
+    icon: TrendingUp,
+  },
 ];
 
 const vendasItems = [
@@ -110,7 +115,7 @@ const vendasItems = [
   },
   {
     title: "Indicadores",
-    url: "/indicadores",
+    url: "/indicadores-vendas",
     icon: TrendingUp,
   },
   {
@@ -135,6 +140,11 @@ const posVendasItems = [
     title: "Pesquisas de Satisfacao",
     url: "/pesquisas",
     icon: MessageSquareHeart,
+  },
+  {
+    title: "Indicadores",
+    url: "/indicadores-pos-vendas",
+    icon: TrendingUp,
   },
 ];
 

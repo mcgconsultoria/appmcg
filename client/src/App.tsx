@@ -34,7 +34,9 @@ import Support from "@/pages/Support";
 import Reports from "@/pages/Reports";
 import Vendedores from "@/pages/Vendedores";
 import Operacoes from "@/pages/Operacoes";
-import Indicadores from "@/pages/Indicadores";
+import IndicadoresPreVendas from "@/pages/IndicadoresPreVendas";
+import IndicadoresVendas from "@/pages/IndicadoresVendas";
+import IndicadoresPosVendas from "@/pages/IndicadoresPosVendas";
 import Pesquisas from "@/pages/Pesquisas";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminComercial from "@/pages/admin/AdminComercial";
@@ -156,7 +158,9 @@ function Router() {
           <Route path="/tarefas" component={TasksPage} />
           <Route path="/projetos" component={ProjectsPage} />
           <Route path="/relatorios" component={Reports} />
-          <Route path="/indicadores" component={Indicadores} />
+          <Route path="/indicadores-pre-vendas" component={IndicadoresPreVendas} />
+          <Route path="/indicadores-vendas" component={IndicadoresVendas} />
+          <Route path="/indicadores-pos-vendas" component={IndicadoresPosVendas} />
           <Route path="/operacoes" component={Operacoes} />
           <Route path="/marketing" component={Marketing} />
           <Route path="/configuracoes" component={Settings} />
