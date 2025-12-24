@@ -475,7 +475,7 @@ export interface IStorage {
 
   // Financial Module - Bank Transactions
   getBankTransactions(bankAccountId?: number): Promise<BankTransaction[]>;
-  createBankTransaction(transaction: InsertBankTransaction): Promise<BankTransaction>;
+  createBankTransaction(transaction: InsertBankTransaction): Promise<BankTransaction | null>;
   reconcileBankTransaction(id: number, accountingEntryId: number): Promise<BankTransaction | undefined>;
 }
 
@@ -2003,9 +2003,18 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(bankTransactions).orderBy(desc(bankTransactions.transactionDate));
   }
 
-  async createBankTransaction(transaction: InsertBankTransaction): Promise<BankTransaction> {
-    const [newTransaction] = await db.insert(bankTransactions).values(transaction).returning();
-    return newTransaction;
+  async createBankTransaction(transaction: InsertBankTransaction): Promise<BankTransaction | null> {
+    try {
+      const [newTransaction] = await db.insert(bankTransactions).values(transaction).returning();
+      return newTransaction;
+    } catch (error: any) {
+      // Handle unique constraint violation (duplicate externalId for bankAccountId)
+      if (error?.code === "23505" || error?.message?.includes("unique constraint")) {
+        console.log(`[Storage] Duplicate bank transaction detected: ${transaction.externalId}`);
+        return null;
+      }
+      throw error;
+    }
   }
 
   async reconcileBankTransaction(id: number, accountingEntryId: number): Promise<BankTransaction | undefined> {

@@ -61,6 +61,7 @@ interface C6BankConfig {
   certificateData?: string;
   certificatePassword?: string;
   useSandbox: boolean;
+  expectedCompanyId?: number; // For tenant isolation in webhook processing
 }
 
 class C6BankService {
@@ -77,12 +78,14 @@ class C6BankService {
     const clientSecret = process.env.C6_CLIENT_SECRET;
 
     if (clientId && clientSecret) {
+      const expectedCompanyIdStr = process.env.C6_EXPECTED_COMPANY_ID;
       this.config = {
         clientId,
         clientSecret,
         certificateData: process.env.C6_CERTIFICATE,
         certificatePassword: process.env.C6_CERTIFICATE_PASSWORD,
         useSandbox: process.env.C6_USE_SANDBOX === "true",
+        expectedCompanyId: expectedCompanyIdStr ? parseInt(expectedCompanyIdStr, 10) : undefined,
       };
     }
   }
@@ -269,11 +272,12 @@ class C6BankService {
   /**
    * Map external C6 account ID to internal bankAccountId
    * Looks up the bank account by externalAccountId field
+   * Returns both account ID and company ID for tenant validation
    */
   private async mapExternalAccountToInternal(
     externalAccountId: string,
     storageRef: typeof storage
-  ): Promise<number | null> {
+  ): Promise<{ accountId: number; companyId: number | null } | null> {
     try {
       const accounts = await storageRef.getBankAccounts();
       // Look for account with matching externalAccountId (primary) or accountNumber (fallback)
@@ -282,7 +286,8 @@ class C6BankService {
           a.externalAccountId === externalAccountId ||
           a.accountNumber === externalAccountId
       );
-      return account?.id || null;
+      if (!account) return null;
+      return { accountId: account.id, companyId: account.companyId ?? null };
     } catch (error) {
       console.error("[C6 Bank] Error mapping external account:", error);
       return null;
@@ -366,11 +371,11 @@ class C6BankService {
 
     try {
       // Map external account ID to internal bank account
-      const bankAccountId = await this.mapExternalAccountToInternal(
+      const mappedAccount = await this.mapExternalAccountToInternal(
         data.accountId,
         storageRef
       );
-      if (!bankAccountId) {
+      if (!mappedAccount) {
         console.warn(
           "[C6 Bank] Could not map external account:",
           data.accountId
@@ -381,27 +386,54 @@ class C6BankService {
         };
       }
 
+      const { accountId: bankAccountId, companyId } = mappedAccount;
+      console.log(`[C6 Bank] Mapped to bank account ${bankAccountId}, company ${companyId}`);
+
+      // Tenant isolation: MANDATORY - C6_EXPECTED_COMPANY_ID must be configured
+      if (!this.config?.expectedCompanyId) {
+        console.error("[C6 Bank] SECURITY: C6_EXPECTED_COMPANY_ID not configured - rejecting webhook");
+        return {
+          success: false,
+          message: "Tenant isolation not configured - set C6_EXPECTED_COMPANY_ID",
+        };
+      }
+      
+      // Strictly verify mapped account belongs to expected company
+      if (companyId === null || companyId !== this.config.expectedCompanyId) {
+        console.warn(
+          `[C6 Bank] Tenant mismatch: expected company ${this.config.expectedCompanyId}, got ${companyId} for account ${data.accountId}`
+        );
+        return {
+          success: false,
+          message: `Tenant mismatch: account belongs to different company`,
+        };
+      }
+
       // Check for duplicate
       if (await this.transactionExists(data.id, bankAccountId, storageRef)) {
         console.log("[C6 Bank] Transaction already exists:", data.id);
         return { success: true, message: "Transaction already processed" };
       }
 
-      // Create bank transaction record
-      await storageRef.createBankTransaction({
+      // Create bank transaction record with tenant association
+      const result = await storageRef.createBankTransaction({
         bankAccountId,
+        companyId: companyId ?? undefined,
         externalId: data.id,
         transactionDate: data.date || new Date().toISOString().split("T")[0],
         value: data.amount?.toString() || "0",
         transactionType: data.type === "credit" ? "credito" : "debito",
         description: data.description || "Transacao C6 Bank",
         counterpartyName: data.counterparty || null,
-        category: data.category || null,
-        status: data.status || "pending",
-        reconciled: false,
         rawData: data,
       });
-
+      
+      // Storage returns null for duplicate (handled at storage layer)
+      if (result === null) {
+        console.log("[C6 Bank] Transaction already exists (storage layer):", data.id);
+        return { success: true, message: "Transaction already processed" };
+      }
+      
       return { success: true, message: "Transaction processed" };
     } catch (error) {
       console.error("[C6 Bank] Error saving transaction:", error);
@@ -427,11 +459,11 @@ class C6BankService {
 
     try {
       // Map external account ID to internal bank account
-      const bankAccountId = await this.mapExternalAccountToInternal(
+      const mappedAccount = await this.mapExternalAccountToInternal(
         data.accountId,
         storageRef
       );
-      if (!bankAccountId) {
+      if (!mappedAccount) {
         console.warn(
           "[C6 Bank] Could not map external account for PIX:",
           data.accountId
@@ -439,6 +471,29 @@ class C6BankService {
         return {
           success: false,
           message: `Unknown account: ${data.accountId}`,
+        };
+      }
+
+      const { accountId: bankAccountId, companyId } = mappedAccount;
+      console.log(`[C6 Bank] PIX mapped to bank account ${bankAccountId}, company ${companyId}`);
+
+      // Tenant isolation: MANDATORY - C6_EXPECTED_COMPANY_ID must be configured
+      if (!this.config?.expectedCompanyId) {
+        console.error("[C6 Bank] SECURITY: C6_EXPECTED_COMPANY_ID not configured - rejecting PIX webhook");
+        return {
+          success: false,
+          message: "Tenant isolation not configured - set C6_EXPECTED_COMPANY_ID",
+        };
+      }
+      
+      // Strictly verify mapped account belongs to expected company
+      if (companyId === null || companyId !== this.config.expectedCompanyId) {
+        console.warn(
+          `[C6 Bank] PIX tenant mismatch: expected company ${this.config.expectedCompanyId}, got ${companyId}`
+        );
+        return {
+          success: false,
+          message: `Tenant mismatch: account belongs to different company`,
         };
       }
 
@@ -450,21 +505,26 @@ class C6BankService {
         return { success: true, message: "PIX already processed" };
       }
 
-      // Create bank transaction record for PIX
-      await storageRef.createBankTransaction({
+      // Create bank transaction record for PIX with tenant association
+      const result = await storageRef.createBankTransaction({
         bankAccountId,
+        companyId: companyId ?? undefined,
         externalId,
         transactionDate: new Date().toISOString().split("T")[0],
         value: data.amount?.toString() || "0",
-        transactionType: "credito",
+        transactionType: "pix",
         description: `PIX recebido de ${data.payer || "desconhecido"}`,
         counterpartyName: data.payer || null,
-        category: "pix",
-        status: "completed",
-        reconciled: false,
+        endToEndId: data.endToEndId || null,
         rawData: data,
       });
-
+      
+      // Storage returns null for duplicate (handled at storage layer)
+      if (result === null) {
+        console.log("[C6 Bank] PIX already exists (storage layer):", externalId);
+        return { success: true, message: "PIX already processed" };
+      }
+      
       return { success: true, message: "PIX processed" };
     } catch (error) {
       console.error("[C6 Bank] Error saving PIX:", error);

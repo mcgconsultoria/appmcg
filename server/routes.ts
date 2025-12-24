@@ -4411,11 +4411,18 @@ export async function registerRoutes(
         });
       }
 
-      // Verify the bank account exists and is linked to the external account
+      // Verify the bank account exists and belongs to the authenticated user's company
       const bankAccountsList = await storage.getBankAccounts();
       const account = bankAccountsList.find(a => a.id === bankAccountId);
       if (!account) {
         return res.status(404).json({ message: "Conta bancaria nao encontrada" });
+      }
+
+      // Tenant isolation: verify account belongs to user's company
+      const user = req.user as Express.User;
+      if (user.companyId && account.companyId && account.companyId !== user.companyId) {
+        console.warn(`[C6 Bank] User ${user.id} attempted to sync account ${bankAccountId} belonging to company ${account.companyId}`);
+        return res.status(403).json({ message: "Acesso negado - conta pertence a outra empresa" });
       }
 
       // Validate that the external account is linked to this bank account
@@ -4480,18 +4487,30 @@ export async function registerRoutes(
       // This is set in server/index.ts via express.json({ verify: (req, _res, buf) => { req.rawBody = buf; } })
       const rawBody = (req as any).rawBody as Buffer | undefined;
       
-      // Verify webhook signature if configured and signature provided
-      if (c6BankService.isConfigured() && signature) {
+      // When C6 Bank is configured, signature verification is MANDATORY
+      if (c6BankService.isConfigured()) {
+        // Reject requests without signature header
+        if (!signature || signature.trim() === "") {
+          console.warn("[C6 Bank] Missing signature header - rejecting webhook");
+          return res.status(401).json({ message: "Missing signature" });
+        }
+        
+        // Reject if no raw body available
         if (!rawBody) {
           console.warn("[C6 Bank] No raw body available for signature verification");
-          return res.status(401).json({ message: "Invalid signature - no raw body" });
+          return res.status(401).json({ message: "Invalid request - no body" });
         }
-        // Pass raw Buffer directly to preserve exact bytes
+        
+        // Verify signature
         const isValid = c6BankService.verifyWebhookSignature(rawBody, signature);
         if (!isValid) {
           console.warn("[C6 Bank] Invalid webhook signature");
           return res.status(401).json({ message: "Invalid signature" });
         }
+      } else {
+        // C6 Bank not configured - reject all webhooks
+        console.warn("[C6 Bank] Received webhook but service not configured");
+        return res.status(503).json({ message: "Service not configured" });
       }
 
       // Process the webhook event - now with bank account mapping

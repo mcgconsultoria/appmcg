@@ -1,6 +1,7 @@
 import { sql, relations } from "drizzle-orm";
 import {
   index,
+  uniqueIndex,
   jsonb,
   pgTable,
   timestamp,
@@ -1543,7 +1544,10 @@ export const bankTransactions = pgTable("bank_transactions", {
   reconciledAt: timestamp("reconciled_at"),
   rawData: jsonb("raw_data"), // Original API response
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  // Unique constraint to prevent duplicate transactions per bank account
+  uniqueExternalId: uniqueIndex("bank_transactions_unique_external").on(table.bankAccountId, table.externalId),
+}));
 
 // Product Cost Structure (for DRE pricing)
 export const productCostStructures = pgTable("product_cost_structures", {
