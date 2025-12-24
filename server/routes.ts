@@ -3910,9 +3910,12 @@ export async function registerRoutes(
     try {
       const companyId = req.user?.companyId;
       const perfilConta = req.user?.perfilConta;
+      const role = req.user?.role;
       
       if (!companyId) return res.status(400).json({ message: "Company not found" });
-      if (perfilConta !== "admin" && perfilConta !== "gestor") {
+      const isAuthorized = perfilConta === "admin" || perfilConta === "gestor" || 
+                           role === "administrador" || role === "admin" || role === "admin_mcg";
+      if (!isAuthorized) {
         return res.status(403).json({ message: "Acesso negado" });
       }
       
@@ -3935,9 +3938,12 @@ export async function registerRoutes(
     try {
       const companyId = req.user?.companyId;
       const perfilConta = req.user?.perfilConta;
+      const role = req.user?.role;
       
       if (!companyId) return res.status(400).json({ message: "Company not found" });
-      if (perfilConta !== "admin" && perfilConta !== "gestor") {
+      const isAuthorized = perfilConta === "admin" || perfilConta === "gestor" || 
+                           role === "administrador" || role === "admin" || role === "admin_mcg";
+      if (!isAuthorized) {
         return res.status(403).json({ message: "Acesso negado" });
       }
       

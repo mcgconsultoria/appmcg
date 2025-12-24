@@ -72,7 +72,7 @@ export default function AuditLogs() {
     );
   });
 
-  const isAdminOrGestor = user?.perfilConta === "admin" || user?.perfilConta === "gestor";
+  const isAdminOrGestor = user?.perfilConta === "admin" || user?.perfilConta === "gestor" || user?.role === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
 
   if (!isAdminOrGestor) {
     return (
