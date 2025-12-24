@@ -175,18 +175,25 @@ export default function Landing() {
               Sistema completo para gestão de empresas do setor logístico. CRM, calculadoras, 
               checklists e controle financeiro em uma única plataforma.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col items-center justify-center gap-4">
               <Link href="/diagnostico">
                 <Button size="lg" className="gap-2" data-testid="button-diagnostic">
-                  Fazer Diagnóstico Grátis
+                  Faça Diagnóstico Grátis
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/calculadora-frete">
-                <Button size="lg" variant="outline" className="gap-2" data-testid="button-start-free">
-                  Calculadora de Frete
-                </Button>
-              </Link>
+              <div className="flex flex-row items-center gap-4">
+                <Link href="/calculadora-frete">
+                  <Button size="lg" variant="outline" className="gap-2" data-testid="button-calc-frete">
+                    Calculadora de Frete
+                  </Button>
+                </Link>
+                <Link href="/calculadora-armazenagem">
+                  <Button size="lg" variant="outline" className="gap-2" data-testid="button-calc-armazenagem">
+                    Calculadora de Armazenagem
+                  </Button>
+                </Link>
+              </div>
             </div>
             <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
               <div className="text-center">
