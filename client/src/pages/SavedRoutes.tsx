@@ -63,6 +63,7 @@ const routeFormSchema = z.object({
   destinationState: z.string().min(1, "Estado de destino é obrigatório"),
   distanceKm: z.string().min(1, "Distância é obrigatória"),
   tollPerAxle: z.string().optional(),
+  routeDate: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -105,6 +106,7 @@ export default function SavedRoutes() {
       destinationState: "",
       distanceKm: "",
       tollPerAxle: "0",
+      routeDate: "",
       notes: "",
     },
   });
@@ -169,6 +171,7 @@ export default function SavedRoutes() {
         destinationState: route.destinationState,
         distanceKm: route.distanceKm,
         tollPerAxle: route.tollPerAxle || "0",
+        routeDate: route.routeDate ? new Date(route.routeDate).toISOString().split("T")[0] : "",
         notes: route.notes || "",
       });
       // Load cities for editing
@@ -508,28 +511,44 @@ export default function SavedRoutes() {
                 </div>
               </div>
 
-              <FormField
-                control={form.control}
-                name="distanceKm"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Distância (KM)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-distance" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="distanceKm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Distância (KM)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-distance" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tollPerAxle"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pedágio Por Eixo (R$)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-toll" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}
-                name="tollPerAxle"
+                name="routeDate"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Pedágio Por Eixo (R$)</FormLabel>
+                    <FormLabel>Data da Rota</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-toll" />
+                      <Input type="date" {...field} data-testid="input-route-date" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -503,6 +503,7 @@ export const savedRoutes = pgTable("saved_routes", {
   destinationState: varchar("destination_state", { length: 2 }).notNull(),
   distanceKm: decimal("distance_km", { precision: 10, scale: 2 }).notNull(),
   tollPerAxle: decimal("toll_per_axle", { precision: 10, scale: 2 }).default("0"), // Pedágio por eixo (R$)
+  routeDate: timestamp("route_date"), // Data da rota
   // Legacy fields - kept for backward compatibility
   toll2Axles: decimal("toll_2_axles", { precision: 10, scale: 2 }).default("0"),
   toll3Axles: decimal("toll_3_axles", { precision: 10, scale: 2 }).default("0"),
