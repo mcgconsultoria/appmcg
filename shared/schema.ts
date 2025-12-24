@@ -96,11 +96,34 @@ export const companies = pgTable("companies", {
   city: varchar("city", { length: 100 }),
   state: varchar("state", { length: 2 }),
   logo: text("logo"),
+  allowedEmailDomain: varchar("allowed_email_domain", { length: 255 }),
+  enforceEmailDomain: boolean("enforce_email_domain").default(false),
   subscriptionStatus: varchar("subscription_status").default("trial"),
   subscriptionEndDate: timestamp("subscription_end_date"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// Audit logs table for tracking user actions
+export const auditLogs = pgTable("audit_logs", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  userId: varchar("user_id", { length: 36 }).notNull(),
+  userEmail: varchar("user_email", { length: 255 }),
+  userName: varchar("user_name", { length: 255 }),
+  action: varchar("action", { length: 100 }).notNull(),
+  entityType: varchar("entity_type", { length: 100 }),
+  entityId: varchar("entity_id", { length: 100 }),
+  entityName: varchar("entity_name", { length: 255 }),
+  details: jsonb("details").$type<Record<string, unknown>>(),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({ id: true, createdAt: true });
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+export type AuditLog = typeof auditLogs.$inferSelect;
 
 // Clients (CRM) table
 export const clients = pgTable("clients", {

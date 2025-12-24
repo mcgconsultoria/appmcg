@@ -154,6 +154,7 @@ import {
   storeOrders,
   storeOrderItems,
   ebookVolumes,
+  auditLogs,
   type StoreProductCategory,
   type InsertStoreProductCategory,
   type StoreProduct,
@@ -164,6 +165,8 @@ import {
   type InsertStoreOrderItem,
   type EbookVolume,
   type InsertEbookVolume,
+  type AuditLog,
+  type InsertAuditLog,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
@@ -537,6 +540,11 @@ export interface IStorage {
 
   getStoreOrderItems(orderId: number): Promise<StoreOrderItem[]>;
   createStoreOrderItem(item: InsertStoreOrderItem): Promise<StoreOrderItem>;
+
+  // Audit log operations
+  createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
+  getAuditLogs(companyId: number, options?: { userId?: string; action?: string; limit?: number; offset?: number }): Promise<AuditLog[]>;
+  getAuditLogsByUser(companyId: number, userId: string): Promise<AuditLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2362,6 +2370,39 @@ export class DatabaseStorage implements IStorage {
   async createStoreOrderItem(item: InsertStoreOrderItem): Promise<StoreOrderItem> {
     const [newItem] = await db.insert(storeOrderItems).values(item).returning();
     return newItem;
+  }
+
+  // Audit Log operations
+  async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
+    const [newLog] = await db.insert(auditLogs).values(log).returning();
+    return newLog;
+  }
+
+  async getAuditLogs(companyId: number, options?: { userId?: string; action?: string; limit?: number; offset?: number }): Promise<AuditLog[]> {
+    const conditions = [eq(auditLogs.companyId, companyId)];
+    if (options?.userId) {
+      conditions.push(eq(auditLogs.userId, options.userId));
+    }
+    if (options?.action) {
+      conditions.push(eq(auditLogs.action, options.action));
+    }
+    
+    let query = db.select().from(auditLogs).where(and(...conditions)).orderBy(desc(auditLogs.createdAt));
+    
+    if (options?.limit) {
+      query = query.limit(options.limit) as typeof query;
+    }
+    if (options?.offset) {
+      query = query.offset(options.offset) as typeof query;
+    }
+    
+    return query;
+  }
+
+  async getAuditLogsByUser(companyId: number, userId: string): Promise<AuditLog[]> {
+    return db.select().from(auditLogs)
+      .where(and(eq(auditLogs.companyId, companyId), eq(auditLogs.userId, userId)))
+      .orderBy(desc(auditLogs.createdAt));
   }
 }
 
