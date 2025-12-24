@@ -55,6 +55,7 @@ import {
   Landmark,
   FileBadge,
   BookOpen,
+  Route,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -105,6 +106,11 @@ const vendasItems = [
     title: "Calendário",
     url: "/calendário",
     icon: Calendar,
+  },
+  {
+    title: "Rotas",
+    url: "/rotas",
+    icon: Route,
   },
   {
     title: "Ata Plano de Ação",
