@@ -40,6 +40,8 @@ import {
   insertBankAccountSchema,
   insertAccountingEntrySchema,
   insertBankIntegrationSchema,
+  insertOperationBillingEntrySchema,
+  insertOperationBillingGoalSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -2810,6 +2812,263 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting RFI:", error);
       res.status(500).json({ message: "Failed to delete RFI" });
+    }
+  });
+
+  // ============================================
+  // BILLING PACE (RITMO DE FATURAMENTO) ROUTES
+  // ============================================
+
+  // Get billing pace data for dashboard
+  app.get("/api/dashboard/billing-pace", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const monthParam = req.query.month as string; // YYYY-MM format
+      
+      // Parse the month or default to current month
+      const now = new Date();
+      let year: number, month: number;
+      
+      if (monthParam && /^\d{4}-\d{2}$/.test(monthParam)) {
+        [year, month] = monthParam.split("-").map(Number);
+      } else {
+        year = now.getFullYear();
+        month = now.getMonth() + 1;
+      }
+      
+      // Calculate date ranges
+      const currentMonthStart = new Date(year, month - 1, 1);
+      const currentMonthEnd = new Date(year, month, 0); // Last day of month
+      const daysInMonth = currentMonthEnd.getDate();
+      
+      // For "ritmo" calculation: sum from day 1 to day before today (or end of month if past)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      let ritmoEndDate: Date;
+      if (year === today.getFullYear() && month === today.getMonth() + 1) {
+        // Current month: use yesterday
+        ritmoEndDate = new Date(today);
+        ritmoEndDate.setDate(ritmoEndDate.getDate() - 1);
+      } else {
+        // Past or future month: use last day of that month
+        ritmoEndDate = new Date(currentMonthEnd);
+      }
+      
+      // Previous year same month
+      const prevYearStart = new Date(year - 1, month - 1, 1);
+      const prevYearEnd = new Date(year - 1, month, 0);
+      
+      // Last 3 months (not including current)
+      const threeMonthsAgo = new Date(year, month - 4, 1);
+      const oneMonthAgo = new Date(year, month - 1, 0);
+      
+      // Get all client operations for this company
+      const operations = await storage.getAllClientOperations(userCompanyId);
+      
+      // Get billing entries for various periods
+      const currentMonthEntries = await storage.getOperationBillingEntries(
+        userCompanyId,
+        currentMonthStart,
+        currentMonthEnd
+      );
+      
+      const prevYearEntries = await storage.getOperationBillingEntries(
+        userCompanyId,
+        prevYearStart,
+        prevYearEnd
+      );
+      
+      const last3MonthsEntries = await storage.getOperationBillingEntries(
+        userCompanyId,
+        threeMonthsAgo,
+        oneMonthAgo
+      );
+      
+      // Get goals for current month
+      const goalMonth = `${year}-${String(month).padStart(2, "0")}`;
+      const goals = await storage.getOperationBillingGoals(userCompanyId, goalMonth);
+      const goalsMap = new Map(goals.map(g => [g.operationId, Number(g.goalAmount)]));
+      
+      // Get clients for names
+      const clients = await storage.getClients(userCompanyId);
+      const clientsMap = new Map(clients.map(c => [c.id, c.name]));
+      
+      // Aggregate data by operation
+      const billingPaceData = operations.map(op => {
+        // Current month total
+        const currentMonthTotal = currentMonthEntries
+          .filter(e => e.operationId === op.id)
+          .reduce((sum, e) => sum + Number(e.amount), 0);
+        
+        // Entries up to ritmoEndDate for ritmo calculation
+        const ritmoEntries = currentMonthEntries.filter(e => {
+          const entryDate = new Date(e.billingDate);
+          return e.operationId === op.id && entryDate <= ritmoEndDate;
+        });
+        const ritmoSum = ritmoEntries.reduce((sum, e) => sum + Number(e.amount), 0);
+        
+        // Ritmo = (sum of days 1 to yesterday) / days in month * days in month = projected monthly total
+        // But user wants: sum / daysInMonth (the daily average projected over month)
+        const ritmo = daysInMonth > 0 ? (ritmoSum / daysInMonth) * daysInMonth : 0;
+        
+        // Previous year same month
+        const prevYearTotal = prevYearEntries
+          .filter(e => e.operationId === op.id)
+          .reduce((sum, e) => sum + Number(e.amount), 0);
+        
+        // Last 3 months average
+        const last3MonthsTotal = last3MonthsEntries
+          .filter(e => e.operationId === op.id)
+          .reduce((sum, e) => sum + Number(e.amount), 0);
+        const avg3Months = last3MonthsTotal / 3;
+        
+        // Goal
+        const goal = goalsMap.get(op.id) || 0;
+        
+        return {
+          operationId: op.id,
+          operationName: op.operationName,
+          clientId: op.clientId,
+          clientName: clientsMap.get(op.clientId) || "Cliente",
+          avg3Months,
+          prevYearSameMonth: prevYearTotal,
+          currentMonth: currentMonthTotal,
+          ritmo,
+          goal,
+        };
+      });
+      
+      res.json({
+        month: goalMonth,
+        daysInMonth,
+        ritmoCalculatedUntilDay: ritmoEndDate.getDate(),
+        data: billingPaceData,
+      });
+    } catch (error) {
+      console.error("Error fetching billing pace:", error);
+      res.status(500).json({ message: "Failed to fetch billing pace data" });
+    }
+  });
+
+  // Billing Entries CRUD
+  app.get("/api/billing-entries", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const { startDate, endDate } = req.query;
+      
+      const start = startDate ? new Date(startDate as string) : new Date(new Date().getFullYear(), 0, 1);
+      const end = endDate ? new Date(endDate as string) : new Date();
+      
+      const entries = await storage.getOperationBillingEntries(userCompanyId, start, end);
+      res.json(entries);
+    } catch (error) {
+      console.error("Error fetching billing entries:", error);
+      res.status(500).json({ message: "Failed to fetch billing entries" });
+    }
+  });
+
+  app.post("/api/billing-entries", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const parsed = insertOperationBillingEntrySchema.safeParse({
+        ...req.body,
+        companyId: userCompanyId,
+      });
+      
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      
+      const entry = await storage.createOperationBillingEntry(parsed.data);
+      res.status(201).json(entry);
+    } catch (error) {
+      console.error("Error creating billing entry:", error);
+      res.status(500).json({ message: "Failed to create billing entry" });
+    }
+  });
+
+  app.patch("/api/billing-entries/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const entry = await storage.updateOperationBillingEntry(id, req.body);
+      if (!entry) {
+        return res.status(404).json({ message: "Entry not found" });
+      }
+      res.json(entry);
+    } catch (error) {
+      console.error("Error updating billing entry:", error);
+      res.status(500).json({ message: "Failed to update billing entry" });
+    }
+  });
+
+  app.delete("/api/billing-entries/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteOperationBillingEntry(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting billing entry:", error);
+      res.status(500).json({ message: "Failed to delete billing entry" });
+    }
+  });
+
+  // Billing Goals CRUD
+  app.get("/api/billing-goals", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const goalMonth = req.query.month as string | undefined;
+      
+      const goals = await storage.getOperationBillingGoals(userCompanyId, goalMonth);
+      res.json(goals);
+    } catch (error) {
+      console.error("Error fetching billing goals:", error);
+      res.status(500).json({ message: "Failed to fetch billing goals" });
+    }
+  });
+
+  app.post("/api/billing-goals", isAuthenticated, async (req: any, res) => {
+    try {
+      const userCompanyId = req.user.companyId || 1;
+      const parsed = insertOperationBillingGoalSchema.safeParse({
+        ...req.body,
+        companyId: userCompanyId,
+      });
+      
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
+      }
+      
+      const goal = await storage.createOperationBillingGoal(parsed.data);
+      res.status(201).json(goal);
+    } catch (error) {
+      console.error("Error creating billing goal:", error);
+      res.status(500).json({ message: "Failed to create billing goal" });
+    }
+  });
+
+  app.patch("/api/billing-goals/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const goal = await storage.updateOperationBillingGoal(id, req.body);
+      if (!goal) {
+        return res.status(404).json({ message: "Goal not found" });
+      }
+      res.json(goal);
+    } catch (error) {
+      console.error("Error updating billing goal:", error);
+      res.status(500).json({ message: "Failed to update billing goal" });
+    }
+  });
+
+  app.delete("/api/billing-goals/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteOperationBillingGoal(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting billing goal:", error);
+      res.status(500).json({ message: "Failed to delete billing goal" });
     }
   });
 

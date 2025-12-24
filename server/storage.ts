@@ -11,6 +11,8 @@ import {
   commercialProposals,
   proposalRoutes,
   clientOperations,
+  operationBillingEntries,
+  operationBillingGoals,
   meetingRecords,
   meetingActionItems,
   meetingObjectives,
@@ -59,6 +61,10 @@ import {
   type InsertProposalRoute,
   type ClientOperation,
   type InsertClientOperation,
+  type OperationBillingEntry,
+  type InsertOperationBillingEntry,
+  type OperationBillingGoal,
+  type InsertOperationBillingGoal,
   type MeetingRecord,
   type InsertMeetingRecord,
   type MeetingObjective,
@@ -896,6 +902,76 @@ export class DatabaseStorage implements IStorage {
   async createClientOperation(operation: InsertClientOperation): Promise<ClientOperation> {
     const [newOperation] = await db.insert(clientOperations).values(operation).returning();
     return newOperation;
+  }
+
+  async getAllClientOperations(companyId: number): Promise<ClientOperation[]> {
+    return db.select().from(clientOperations).where(eq(clientOperations.companyId, companyId)).orderBy(desc(clientOperations.createdAt));
+  }
+
+  // Operation Billing Entries
+  async getOperationBillingEntries(companyId: number, startDate: Date, endDate: Date): Promise<OperationBillingEntry[]> {
+    return db.select().from(operationBillingEntries)
+      .where(
+        and(
+          eq(operationBillingEntries.companyId, companyId),
+          gte(operationBillingEntries.billingDate, startDate),
+          lte(operationBillingEntries.billingDate, endDate)
+        )
+      )
+      .orderBy(operationBillingEntries.billingDate);
+  }
+
+  async createOperationBillingEntry(entry: InsertOperationBillingEntry): Promise<OperationBillingEntry> {
+    const [newEntry] = await db.insert(operationBillingEntries).values(entry).returning();
+    return newEntry;
+  }
+
+  async updateOperationBillingEntry(id: number, entry: Partial<InsertOperationBillingEntry>): Promise<OperationBillingEntry | undefined> {
+    const [updated] = await db
+      .update(operationBillingEntries)
+      .set(entry)
+      .where(eq(operationBillingEntries.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteOperationBillingEntry(id: number): Promise<boolean> {
+    await db.delete(operationBillingEntries).where(eq(operationBillingEntries.id, id));
+    return true;
+  }
+
+  // Operation Billing Goals
+  async getOperationBillingGoals(companyId: number, goalMonth?: string): Promise<OperationBillingGoal[]> {
+    if (goalMonth) {
+      return db.select().from(operationBillingGoals)
+        .where(
+          and(
+            eq(operationBillingGoals.companyId, companyId),
+            eq(operationBillingGoals.goalMonth, goalMonth)
+          )
+        );
+    }
+    return db.select().from(operationBillingGoals)
+      .where(eq(operationBillingGoals.companyId, companyId));
+  }
+
+  async createOperationBillingGoal(goal: InsertOperationBillingGoal): Promise<OperationBillingGoal> {
+    const [newGoal] = await db.insert(operationBillingGoals).values(goal).returning();
+    return newGoal;
+  }
+
+  async updateOperationBillingGoal(id: number, goal: Partial<InsertOperationBillingGoal>): Promise<OperationBillingGoal | undefined> {
+    const [updated] = await db
+      .update(operationBillingGoals)
+      .set({ ...goal, updatedAt: new Date() })
+      .where(eq(operationBillingGoals.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteOperationBillingGoal(id: number): Promise<boolean> {
+    await db.delete(operationBillingGoals).where(eq(operationBillingGoals.id, id));
+    return true;
   }
 
   // Meeting objectives catalog
