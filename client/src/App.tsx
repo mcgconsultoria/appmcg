@@ -49,6 +49,8 @@ import AdminDRE from "@/pages/admin/AdminDRE";
 import AdminCentroCustos from "@/pages/admin/AdminCentroCustos";
 import AdminBancos from "@/pages/admin/AdminBancos";
 import AdminCertificados from "@/pages/admin/AdminCertificados";
+import AdminLancamentos from "@/pages/admin/AdminLancamentos";
+import AdminRelatorioDRE from "@/pages/admin/AdminRelatorioDRE";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import BibliotecaChecklists from "@/pages/BibliotecaChecklists";
@@ -128,6 +130,12 @@ function Router() {
       </Route>
       <Route path="/admin/certificados">
         {() => isAuthenticated && isAdmin ? <AdminCertificados /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/lancamentos">
+        {() => isAuthenticated && isAdmin ? <AdminLancamentos /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/relatorio-dre">
+        {() => isAuthenticated && isAdmin ? <AdminRelatorioDRE /> : <AdminLogin />}
       </Route>
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />

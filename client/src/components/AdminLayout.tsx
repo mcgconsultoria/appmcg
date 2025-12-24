@@ -35,6 +35,7 @@ import {
   Shield,
   PieChart,
   Landmark,
+  BarChart3,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 
@@ -119,6 +120,16 @@ const financeConfigItems = [
     title: "Certificados Digitais",
     url: "/admin/certificados",
     icon: Shield,
+  },
+  {
+    title: "Lancamentos",
+    url: "/admin/lancamentos",
+    icon: FileText,
+  },
+  {
+    title: "Relatorio DRE",
+    url: "/admin/relatorio-dre",
+    icon: BarChart3,
   },
 ];
 

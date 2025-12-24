@@ -4302,6 +4302,207 @@ export async function registerRoutes(
     }
   });
 
+  // ============ NFS-e (Nota Fiscal de Servicos Eletronica) ============
+  const { nfseService } = await import("./nfseService");
+
+  // Get NFS-e service status
+  app.get("/api/nfse/status", isAdmin, async (req, res) => {
+    try {
+      const status = await nfseService.getStatus();
+      res.json(status);
+    } catch (error) {
+      console.error("Error getting NFS-e status:", error);
+      res.status(500).json({ message: "Falha ao verificar status NFS-e" });
+    }
+  });
+
+  // Get available service codes
+  app.get("/api/nfse/codigos-servico", isAdmin, async (req, res) => {
+    try {
+      const codigos = nfseService.getCodigosServico();
+      res.json(codigos);
+    } catch (error) {
+      console.error("Error getting service codes:", error);
+      res.status(500).json({ message: "Falha ao buscar codigos de servico" });
+    }
+  });
+
+  // Emit NFS-e
+  app.post("/api/nfse/emitir", isAdmin, async (req, res) => {
+    try {
+      const result = await nfseService.emitirNfse(req.body);
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error) {
+      console.error("Error emitting NFS-e:", error);
+      res.status(500).json({ message: "Falha ao emitir NFS-e" });
+    }
+  });
+
+  // Query NFS-e by RPS
+  app.get("/api/nfse/consultar/:numero/:serie/:tipo", isAdmin, async (req, res) => {
+    try {
+      const { numero, serie, tipo } = req.params;
+      const result = await nfseService.consultarPorRps(
+        parseInt(numero),
+        serie,
+        parseInt(tipo)
+      );
+      res.json(result);
+    } catch (error) {
+      console.error("Error querying NFS-e:", error);
+      res.status(500).json({ message: "Falha ao consultar NFS-e" });
+    }
+  });
+
+  // Cancel NFS-e
+  app.post("/api/nfse/cancelar", isAdmin, async (req, res) => {
+    try {
+      const { numeroNfse, codigoVerificacao, motivoCancelamento } = req.body;
+      if (!numeroNfse || !codigoVerificacao || !motivoCancelamento) {
+        return res.status(400).json({ message: "Dados obrigatorios: numeroNfse, codigoVerificacao, motivoCancelamento" });
+      }
+      const result = await nfseService.cancelarNfse(
+        numeroNfse,
+        codigoVerificacao,
+        motivoCancelamento
+      );
+      res.json(result);
+    } catch (error) {
+      console.error("Error cancelling NFS-e:", error);
+      res.status(500).json({ message: "Falha ao cancelar NFS-e" });
+    }
+  });
+
+  // ============ C6 Bank Integration ============
+  // Import c6BankService
+  const { c6BankService } = await import("./c6BankService");
+
+  // Get C6 Bank integration status
+  app.get("/api/c6bank/status", isAdmin, async (req, res) => {
+    try {
+      const status = c6BankService.getStatus();
+      res.json(status);
+    } catch (error) {
+      console.error("Error getting C6 Bank status:", error);
+      res.status(500).json({ message: "Falha ao verificar status C6 Bank" });
+    }
+  });
+
+  // Sync transactions from C6 Bank
+  app.post("/api/c6bank/sync/:bankAccountId", isAdmin, async (req, res) => {
+    try {
+      const bankAccountId = parseInt(req.params.bankAccountId);
+      if (isNaN(bankAccountId)) {
+        return res.status(400).json({ message: "ID da conta bancaria invalido" });
+      }
+
+      const { externalAccountId, startDate, endDate } = req.body;
+      if (!externalAccountId) {
+        return res.status(400).json({ message: "externalAccountId e obrigatorio" });
+      }
+
+      if (!c6BankService.isConfigured()) {
+        return res.status(400).json({ 
+          message: "C6 Bank nao configurado. Configure as credenciais em Secrets." 
+        });
+      }
+
+      // Verify the bank account exists and is linked to the external account
+      const bankAccountsList = await storage.getBankAccounts();
+      const account = bankAccountsList.find(a => a.id === bankAccountId);
+      if (!account) {
+        return res.status(404).json({ message: "Conta bancaria nao encontrada" });
+      }
+
+      // Validate that the external account is linked to this bank account
+      const isLinked = await c6BankService.validateAccountLink(bankAccountId, externalAccountId, storage);
+      if (!isLinked) {
+        return res.status(400).json({ 
+          message: "ID da conta externa nao corresponde a conta bancaria. Configure o campo 'ID Externo' na conta bancaria com o ID fornecido pelo C6 Bank." 
+        });
+      }
+
+      // Sync and save transactions using the service
+      const result = await c6BankService.syncAndSaveTransactions(
+        bankAccountId,
+        externalAccountId,
+        startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+        endDate || new Date().toISOString().split("T")[0]
+      );
+
+      res.json({ 
+        success: true, 
+        saved: result.saved,
+        skipped: result.skipped,
+        errors: result.errors,
+        message: `${result.saved} transacoes sincronizadas${result.skipped > 0 ? `, ${result.skipped} duplicadas ignoradas` : ""}${result.errors > 0 ? `, ${result.errors} erros` : ""}`
+      });
+    } catch (error) {
+      console.error("Error syncing C6 Bank transactions:", error);
+      res.status(500).json({ message: "Falha ao sincronizar transacoes" });
+    }
+  });
+
+  // Get balance from C6 Bank
+  app.get("/api/c6bank/balance/:accountId", isAdmin, async (req, res) => {
+    try {
+      const { accountId } = req.params;
+
+      if (!c6BankService.isConfigured()) {
+        return res.status(400).json({ 
+          message: "C6 Bank nao configurado. Configure as credenciais em Secrets." 
+        });
+      }
+
+      const balance = await c6BankService.getBalance(accountId);
+      if (!balance) {
+        return res.status(500).json({ message: "Falha ao obter saldo" });
+      }
+
+      res.json(balance);
+    } catch (error) {
+      console.error("Error getting C6 Bank balance:", error);
+      res.status(500).json({ message: "Falha ao obter saldo" });
+    }
+  });
+
+  // C6 Bank webhook endpoint (public - no auth required)
+  // The rawBody is captured by express.json verify callback in index.ts
+  app.post("/api/webhooks/c6bank", async (req, res) => {
+    try {
+      const signature = req.headers["x-c6-signature"] as string;
+      
+      // Use raw body captured by express.json middleware verify callback
+      // This is set in server/index.ts via express.json({ verify: (req, _res, buf) => { req.rawBody = buf; } })
+      const rawBody = (req as any).rawBody as Buffer | undefined;
+      
+      // Verify webhook signature if configured and signature provided
+      if (c6BankService.isConfigured() && signature) {
+        if (!rawBody) {
+          console.warn("[C6 Bank] No raw body available for signature verification");
+          return res.status(401).json({ message: "Invalid signature - no raw body" });
+        }
+        // Pass raw Buffer directly to preserve exact bytes
+        const isValid = c6BankService.verifyWebhookSignature(rawBody, signature);
+        if (!isValid) {
+          console.warn("[C6 Bank] Invalid webhook signature");
+          return res.status(401).json({ message: "Invalid signature" });
+        }
+      }
+
+      // Process the webhook event - now with bank account mapping
+      const result = await c6BankService.processWebhookEvent(req.body, storage);
+      res.json(result);
+    } catch (error) {
+      console.error("Error processing C6 Bank webhook:", error);
+      res.status(500).json({ message: "Webhook processing failed" });
+    }
+  });
+
   // ============ Bank Transactions ============
   app.get("/api/bank-transactions", isAdmin, async (req, res) => {
     try {

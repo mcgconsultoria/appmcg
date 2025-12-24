@@ -1407,6 +1407,7 @@ export const bankAccounts = pgTable("bank_accounts", {
   pixKeyType: varchar("pix_key_type", { length: 20 }), // cpf, cnpj, email, telefone, aleatoria
   openBankingEnabled: boolean("open_banking_enabled").default(false),
   openBankingToken: text("open_banking_token"),
+  externalAccountId: varchar("external_account_id", { length: 100 }), // ID from bank API (e.g., C6 Bank account ID)
   isMain: boolean("is_main").default(false),
   isActive: boolean("is_active").default(true),
   notes: text("notes"),
