@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -64,7 +63,6 @@ const routeFormSchema = z.object({
   distanceKm: z.string().min(1, "Distância é obrigatória"),
   tollPerAxle: z.string().optional(),
   routeDate: z.string().optional(),
-  notes: z.string().optional(),
 });
 
 type RouteFormData = z.infer<typeof routeFormSchema>;
@@ -107,7 +105,6 @@ export default function SavedRoutes() {
       distanceKm: "",
       tollPerAxle: "0",
       routeDate: "",
-      notes: "",
     },
   });
 
@@ -215,7 +212,7 @@ export default function SavedRoutes() {
   };
 
   const onSubmit = (data: RouteFormData) => {
-    const generatedName = `${data.originCity} - ${data.destinationCity}`;
+    const generatedName = `${data.originCity}/${data.originState} - ${data.destinationCity}/${data.destinationState}`;
     const payload = {
       ...data,
       name: generatedName,
@@ -229,9 +226,11 @@ export default function SavedRoutes() {
   };
 
   const watchOriginCity = form.watch("originCity");
+  const watchOriginState = form.watch("originState");
   const watchDestinationCity = form.watch("destinationCity");
+  const watchDestinationState = form.watch("destinationState");
   const generatedRouteName = watchOriginCity && watchDestinationCity 
-    ? `${watchOriginCity} - ${watchDestinationCity}` 
+    ? `${watchOriginCity}/${watchOriginState} - ${watchDestinationCity}/${watchDestinationState}` 
     : "";
 
   const filteredRoutes = routes.filter((route) => {
@@ -517,7 +516,7 @@ export default function SavedRoutes() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="distanceKm"
@@ -545,39 +544,31 @@ export default function SavedRoutes() {
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="routeDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Data</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} data-testid="input-route-date" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
-              <FormField
-                control={form.control}
-                name="routeDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Data da Rota</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} data-testid="input-route-date" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Observações</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Informações adicionais sobre a rota..." 
-                        className="resize-none"
-                        {...field} 
-                        data-testid="input-notes"
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+              <div className="border rounded-md p-4 bg-muted/30">
+                <div className="flex items-center justify-center h-48 text-muted-foreground">
+                  <div className="text-center">
+                    <MapPin className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Mapa do percurso</p>
+                    <p className="text-xs mt-1">(Disponível após integração com QualP)</p>
+                  </div>
+                </div>
+              </div>
 
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
