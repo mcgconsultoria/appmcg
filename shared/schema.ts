@@ -496,6 +496,7 @@ export const anttFreightTable = pgTable("antt_freight_table", {
 export const savedRoutes = pgTable("saved_routes", {
   id: serial("id").primaryKey(),
   companyId: integer("company_id").notNull(),
+  routeNumber: integer("route_number"), // Numeração sequencial da rota
   name: varchar("name", { length: 255 }).notNull(), // Nome descritivo da rota
   originCity: varchar("origin_city", { length: 100 }).notNull(),
   originState: varchar("origin_state", { length: 2 }).notNull(),
@@ -504,6 +505,7 @@ export const savedRoutes = pgTable("saved_routes", {
   distanceKm: decimal("distance_km", { precision: 10, scale: 2 }).notNull(),
   tollPerAxle: decimal("toll_per_axle", { precision: 10, scale: 2 }).default("0"), // Pedágio por eixo (R$)
   routeDate: timestamp("route_date"), // Data da rota
+  itinerary: text("itinerary"), // Itinerário: cidades/estados intermediários
   // Legacy fields - kept for backward compatibility
   toll2Axles: decimal("toll_2_axles", { precision: 10, scale: 2 }).default("0"),
   toll3Axles: decimal("toll_3_axles", { precision: 10, scale: 2 }).default("0"),

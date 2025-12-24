@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -28,12 +28,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -43,7 +37,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, MoreVertical, Pencil, Trash2, Route, MapPin, Truck, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Route, MapPin, Truck, Search } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -63,6 +57,7 @@ const routeFormSchema = z.object({
   distanceKm: z.string().min(1, "Distância é obrigatória"),
   tollPerAxle: z.string().optional(),
   routeDate: z.string().optional(),
+  itinerary: z.string().optional(),
 });
 
 type RouteFormData = z.infer<typeof routeFormSchema>;
@@ -105,6 +100,7 @@ export default function SavedRoutes() {
       distanceKm: "",
       tollPerAxle: "0",
       routeDate: "",
+      itinerary: "",
     },
   });
 
@@ -169,7 +165,7 @@ export default function SavedRoutes() {
         distanceKm: route.distanceKm,
         tollPerAxle: route.tollPerAxle || "0",
         routeDate: route.routeDate ? new Date(route.routeDate).toISOString().split("T")[0] : "",
-        notes: route.notes || "",
+        itinerary: route.itinerary || "",
       });
       // Load cities for editing
       if (route.originState) {
@@ -330,16 +326,20 @@ export default function SavedRoutes() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-16">N°</TableHead>
                       <TableHead>Nome da Rota</TableHead>
                       <TableHead className="text-right">Distância (KM)</TableHead>
                       <TableHead className="text-right">Pedágio Por Rota (R$)</TableHead>
                       <TableHead>Data</TableHead>
-                      <TableHead className="w-10"></TableHead>
+                      <TableHead className="w-24">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredRoutes.map((route) => (
                       <TableRow key={route.id} data-testid={`row-route-${route.id}`}>
+                        <TableCell className="font-medium text-muted-foreground">
+                          {route.routeNumber?.toString().padStart(3, '0') || '-'}
+                        </TableCell>
                         <TableCell className="font-medium">{route.name}</TableCell>
                         <TableCell className="text-right">{parseFloat(route.distanceKm).toLocaleString("pt-BR")} km</TableCell>
                         <TableCell className="text-right">{formatCurrency(route.tollPerAxle)}</TableCell>
@@ -350,26 +350,26 @@ export default function SavedRoutes() {
                           }
                         </TableCell>
                         <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" data-testid={`button-actions-${route.id}`}>
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleOpenDialog(route)}>
-                                <Pencil className="h-4 w-4 mr-2" />
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={() => setDeleteRoute(route)}
-                                className="text-destructive"
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Excluir
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <div className="flex items-center gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleOpenDialog(route)}
+                              data-testid={`button-edit-${route.id}`}
+                            >
+                              <Pencil className="h-4 w-4 mr-1" />
+                              Editar
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => setDeleteRoute(route)}
+                              className="text-destructive"
+                              data-testid={`button-delete-${route.id}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -569,6 +569,25 @@ export default function SavedRoutes() {
                   </div>
                 </div>
               </div>
+
+              <FormField
+                control={form.control}
+                name="itinerary"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Itinerário (cidades e estados intermediários)</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Ex: Ponta Grossa/PR, Registro/SP, Juquiá/SP..."
+                        className="resize-none"
+                        rows={3}
+                        {...field} 
+                        data-testid="input-itinerary"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
 
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>

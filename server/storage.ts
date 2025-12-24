@@ -762,7 +762,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createSavedRoute(route: InsertSavedRoute): Promise<SavedRoute> {
-    const [newRoute] = await db.insert(savedRoutes).values(route).returning();
+    // Generate next route number for this company
+    const [maxResult] = await db
+      .select({ maxNumber: sql<number>`COALESCE(MAX(route_number), 0)` })
+      .from(savedRoutes)
+      .where(eq(savedRoutes.companyId, route.companyId));
+    const nextNumber = (maxResult?.maxNumber || 0) + 1;
+    
+    const [newRoute] = await db.insert(savedRoutes).values({
+      ...route,
+      routeNumber: nextNumber,
+    }).returning();
     return newRoute;
   }
 
