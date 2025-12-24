@@ -167,9 +167,8 @@ export default function Landing() {
               Modelo Completo de Gestão Comercial
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 max-w-4xl mx-auto">
-              Transforme sua{" "}
-              <span className="text-primary">operação comercial</span>{" "}
-              em logística
+              Gestão comercial inteligente para{" "}
+              <span className="text-primary">operações logísticas</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
               Sistema completo para gestão de empresas do setor logístico. CRM, calculadoras, 
