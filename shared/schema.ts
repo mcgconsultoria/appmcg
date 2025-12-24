@@ -455,6 +455,31 @@ export const clientOperations = pgTable("client_operations", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Operation Billing Entries (daily/invoice-level revenue per operation)
+export const operationBillingEntries = pgTable("operation_billing_entries", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  operationId: integer("operation_id").notNull(), // FK to clientOperations
+  clientId: integer("client_id").notNull(),
+  billingDate: timestamp("billing_date").notNull(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  description: varchar("description", { length: 255 }),
+  invoiceNumber: varchar("invoice_number", { length: 50 }),
+  source: varchar("source", { length: 50 }).default("manual"), // manual, import, api
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Operation Billing Goals (monthly targets per operation)
+export const operationBillingGoals = pgTable("operation_billing_goals", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  operationId: integer("operation_id").notNull(), // FK to clientOperations
+  goalMonth: varchar("goal_month", { length: 7 }).notNull(), // YYYY-MM format
+  goalAmount: decimal("goal_amount", { precision: 15, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // ANTT freight reference table
 export const anttFreightTable = pgTable("antt_freight_table", {
   id: serial("id").primaryKey(),
@@ -800,6 +825,17 @@ export const insertProposalRouteSchema = createInsertSchema(proposalRoutes).omit
 });
 
 export const insertClientOperationSchema = createInsertSchema(clientOperations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertOperationBillingEntrySchema = createInsertSchema(operationBillingEntries).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertOperationBillingGoalSchema = createInsertSchema(operationBillingGoals).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -1676,6 +1712,10 @@ export type ProposalRoute = typeof proposalRoutes.$inferSelect;
 export type InsertProposalRoute = z.infer<typeof insertProposalRouteSchema>;
 export type ClientOperation = typeof clientOperations.$inferSelect;
 export type InsertClientOperation = z.infer<typeof insertClientOperationSchema>;
+export type OperationBillingEntry = typeof operationBillingEntries.$inferSelect;
+export type InsertOperationBillingEntry = z.infer<typeof insertOperationBillingEntrySchema>;
+export type OperationBillingGoal = typeof operationBillingGoals.$inferSelect;
+export type InsertOperationBillingGoal = z.infer<typeof insertOperationBillingGoalSchema>;
 export type AnttFreightTable = typeof anttFreightTable.$inferSelect;
 export type InsertAnttFreightTable = z.infer<typeof insertAnttFreightTableSchema>;
 export type MeetingRecord = typeof meetingRecords.$inferSelect;
