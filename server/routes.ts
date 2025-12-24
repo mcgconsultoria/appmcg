@@ -391,9 +391,22 @@ export async function registerRoutes(
   });
 
   // Client routes
-  app.get("/api/clients", isAuthenticated, async (req, res) => {
+  app.get("/api/clients", isAuthenticated, async (req: any, res) => {
     try {
-      const clients = await storage.getClients();
+      const user = req.user;
+      const isAdministrador = user?.role === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
+      
+      let clients = await storage.getClients();
+      
+      // Filtrar por vendedor se nao for administrador
+      if (!isAdministrador && user?.email) {
+        clients = clients.filter(client => 
+          client.vendedor === user.email || 
+          client.vendedor === `${user.firstName} ${user.lastName}`.trim() ||
+          client.vendedor === user.firstName
+        );
+      }
+      
       res.json(clients);
     } catch (error) {
       console.error("Error fetching clients:", error);
