@@ -10,6 +10,7 @@ import {
   marketingMaterials,
   commercialProposals,
   proposalRoutes,
+  savedRoutes,
   clientOperations,
   operationBillingEntries,
   operationBillingGoals,
@@ -59,6 +60,8 @@ import {
   type InsertCommercialProposal,
   type ProposalRoute,
   type InsertProposalRoute,
+  type SavedRoute,
+  type InsertSavedRoute,
   type ClientOperation,
   type InsertClientOperation,
   type OperationBillingEntry,
@@ -199,6 +202,13 @@ export interface IStorage {
   // Storage calculation operations
   getStorageCalculations(companyId?: number): Promise<StorageCalculation[]>;
   createStorageCalculation(calc: InsertStorageCalculation): Promise<StorageCalculation>;
+
+  // Saved route operations
+  getSavedRoutes(companyId: number): Promise<SavedRoute[]>;
+  getSavedRoute(id: number): Promise<SavedRoute | undefined>;
+  createSavedRoute(route: InsertSavedRoute): Promise<SavedRoute>;
+  updateSavedRoute(id: number, route: Partial<InsertSavedRoute>): Promise<SavedRoute | undefined>;
+  deleteSavedRoute(id: number): Promise<boolean>;
 
   // Financial account operations
   getFinancialAccounts(companyId?: number): Promise<FinancialAccount[]>;
@@ -739,6 +749,35 @@ export class DatabaseStorage implements IStorage {
   async createStorageCalculation(calc: InsertStorageCalculation): Promise<StorageCalculation> {
     const [newCalc] = await db.insert(storageCalculations).values(calc).returning();
     return newCalc;
+  }
+
+  // Saved route operations
+  async getSavedRoutes(companyId: number): Promise<SavedRoute[]> {
+    return db.select().from(savedRoutes).where(eq(savedRoutes.companyId, companyId)).orderBy(desc(savedRoutes.createdAt));
+  }
+
+  async getSavedRoute(id: number): Promise<SavedRoute | undefined> {
+    const [route] = await db.select().from(savedRoutes).where(eq(savedRoutes.id, id));
+    return route;
+  }
+
+  async createSavedRoute(route: InsertSavedRoute): Promise<SavedRoute> {
+    const [newRoute] = await db.insert(savedRoutes).values(route).returning();
+    return newRoute;
+  }
+
+  async updateSavedRoute(id: number, route: Partial<InsertSavedRoute>): Promise<SavedRoute | undefined> {
+    const [updated] = await db
+      .update(savedRoutes)
+      .set({ ...route, updatedAt: new Date() })
+      .where(eq(savedRoutes.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteSavedRoute(id: number): Promise<boolean> {
+    await db.delete(savedRoutes).where(eq(savedRoutes.id, id));
+    return true;
   }
 
   // Financial account operations
