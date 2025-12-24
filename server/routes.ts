@@ -414,13 +414,27 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/clients/:id", isAuthenticated, async (req, res) => {
+  app.get("/api/clients/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      const user = req.user;
+      const isAdministrador = user?.role === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
+      
       const client = await storage.getClient(id);
       if (!client) {
         return res.status(404).json({ message: "Client not found" });
       }
+      
+      // Verificar acesso se nao for administrador
+      if (!isAdministrador && user?.email) {
+        const hasAccess = client.vendedor === user.email || 
+          client.vendedor === `${user.firstName} ${user.lastName}`.trim() ||
+          client.vendedor === user.firstName;
+        if (!hasAccess) {
+          return res.status(403).json({ message: "Acesso negado a este cliente" });
+        }
+      }
+      
       res.json(client);
     } catch (error) {
       console.error("Error fetching client:", error);
@@ -442,13 +456,28 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/clients/:id", isAuthenticated, async (req, res) => {
+  app.patch("/api/clients/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const client = await storage.updateClient(id, req.body);
-      if (!client) {
+      const user = req.user;
+      const isAdministrador = user?.role === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
+      
+      // Verificar acesso antes de atualizar
+      const existingClient = await storage.getClient(id);
+      if (!existingClient) {
         return res.status(404).json({ message: "Client not found" });
       }
+      
+      if (!isAdministrador && user?.email) {
+        const hasAccess = existingClient.vendedor === user.email || 
+          existingClient.vendedor === `${user.firstName} ${user.lastName}`.trim() ||
+          existingClient.vendedor === user.firstName;
+        if (!hasAccess) {
+          return res.status(403).json({ message: "Acesso negado a este cliente" });
+        }
+      }
+      
+      const client = await storage.updateClient(id, req.body);
       res.json(client);
     } catch (error) {
       console.error("Error updating client:", error);
@@ -456,9 +485,27 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/clients/:id", isAuthenticated, async (req, res) => {
+  app.delete("/api/clients/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      const user = req.user;
+      const isAdministrador = user?.role === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
+      
+      // Verificar acesso antes de deletar
+      const existingClient = await storage.getClient(id);
+      if (!existingClient) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      
+      if (!isAdministrador && user?.email) {
+        const hasAccess = existingClient.vendedor === user.email || 
+          existingClient.vendedor === `${user.firstName} ${user.lastName}`.trim() ||
+          existingClient.vendedor === user.firstName;
+        if (!hasAccess) {
+          return res.status(403).json({ message: "Acesso negado a este cliente" });
+        }
+      }
+      
       await storage.deleteClient(id);
       res.status(204).send();
     } catch (error) {
