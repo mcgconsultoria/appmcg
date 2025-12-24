@@ -1,16 +1,21 @@
+import { useState } from "react";
 import { useLocation, Link } from "wouter";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
   LayoutDashboard,
   Users,
@@ -19,7 +24,6 @@ import {
   Calculator,
   Warehouse,
   Kanban,
-  FileText,
   Settings,
   LogOut,
   FileEdit,
@@ -28,7 +32,6 @@ import {
   FolderKanban,
   CreditCard,
   Shield,
-  UserCog,
   HeadphonesIcon,
   BarChart3,
   UserRound,
@@ -37,6 +40,10 @@ import {
   TrendingUp,
   Megaphone,
   MessageSquareHeart,
+  ChevronDown,
+  ShoppingCart,
+  Handshake,
+  UserCog,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -169,6 +176,57 @@ const suporteItems = [
   },
 ];
 
+interface CollapsibleSectionProps {
+  title: string;
+  icon: React.ElementType;
+  items: Array<{ title: string; url: string; icon: React.ElementType }>;
+  location: string;
+  defaultOpen?: boolean;
+}
+
+function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = false }: CollapsibleSectionProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const hasActiveItem = items.some(item => location === item.url);
+
+  return (
+    <Collapsible open={isOpen || hasActiveItem} onOpenChange={setIsOpen}>
+      <SidebarGroup>
+        <CollapsibleTrigger asChild>
+          <button
+            className="flex items-center justify-between w-full px-3 py-2 text-base font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
+            data-testid={`section-${title.toLowerCase().replace(/\s+/g, '-')}`}
+          >
+            <div className="flex items-center gap-2">
+              <Icon className="h-5 w-5" />
+              <span>{title}</span>
+            </div>
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen || hasActiveItem ? 'rotate-180' : ''}`} />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarGroupContent className="mt-1">
+            <SidebarMenu>
+              {items.map((item) => {
+                const isActive = location === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </CollapsibleContent>
+      </SidebarGroup>
+    </Collapsible>
+  );
+}
+
 export function AppSidebar() {
   const [location] = useLocation();
   const { user } = useAuth();
@@ -178,6 +236,8 @@ export function AppSidebar() {
     const last = lastName?.charAt(0) || "";
     return (first + last).toUpperCase() || "U";
   };
+
+  const isAdmin = user?.role === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
 
   return (
     <Sidebar>
@@ -198,90 +258,35 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Pre-Vendas</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {preVendasItems.map((item) => {
-                const isActive = location === item.url;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <CollapsibleSection
+          title="Pre-Vendas"
+          icon={Megaphone}
+          items={preVendasItems}
+          location={location}
+        />
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Vendas</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {vendasItems.map((item) => {
-                const isActive = location === item.url;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <CollapsibleSection
+          title="Vendas"
+          icon={ShoppingCart}
+          items={vendasItems}
+          location={location}
+          defaultOpen={true}
+        />
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Pos-Vendas</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {posVendasItems.map((item) => {
-                const isActive = location === item.url;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <CollapsibleSection
+          title="Pos-Vendas"
+          icon={Handshake}
+          items={posVendasItems}
+          location={location}
+        />
 
-        {(user?.role === "administrador" || user?.role === "admin" || user?.role === "admin_mcg") && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Admin Cliente</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {adminClienteItems.map((item) => {
-                  const isActive = location === item.url;
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild isActive={isActive}>
-                        <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+        {isAdmin && (
+          <CollapsibleSection
+            title="Admin Cliente"
+            icon={UserCog}
+            items={adminClienteItems}
+            location={location}
+          />
         )}
 
         <SidebarGroup>
@@ -306,7 +311,6 @@ export function AppSidebar() {
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
           <SidebarGroup>
-            <SidebarGroupLabel>Administracao</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
