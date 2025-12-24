@@ -13,11 +13,11 @@ export function useAuth() {
 
   const logout = async () => {
     try {
-      await apiRequest("POST", "/api/auth/logout");
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     } catch (error) {
-      // Ignore errors, always redirect
+      // Ignore errors
     }
-    window.location.href = "/";
+    window.location.replace("/");
   };
 
   return {
