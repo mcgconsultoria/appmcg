@@ -58,6 +58,7 @@ import {
   Route,
   Store,
   Gift,
+  Activity,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -179,6 +180,11 @@ const adminClienteItems = [
     title: "Vendedores",
     url: "/vendedores",
     icon: UserRound,
+  },
+  {
+    title: "Logs de Auditoria",
+    url: "/logs-auditoria",
+    icon: Activity,
   },
 ];
 

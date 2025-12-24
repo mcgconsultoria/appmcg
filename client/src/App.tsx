@@ -20,6 +20,7 @@ import StorageCalculator from "@/pages/StorageCalculator";
 import Financial from "@/pages/Financial";
 import Marketing from "@/pages/Marketing";
 import Settings from "@/pages/Settings";
+import AuditLogs from "@/pages/AuditLogs";
 import Pricing from "@/pages/Pricing";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
@@ -179,6 +180,7 @@ function Router() {
           <Route path="/assinatura" component={Subscription} />
           <Route path="/pesquisas" component={Pesquisas} />
           <Route path="/admin-cliente" component={AdminCliente} />
+          <Route path="/logs-auditoria" component={AuditLogs} />
           <Route path="/suporte" component={Support} />
         </>
       )}

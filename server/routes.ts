@@ -1894,6 +1894,8 @@ export async function registerRoutes(
       }
       const record = await storage.createMeetingRecord(parsed.data);
       
+      await logAudit(req, "create", "meeting_record", record.id, `Ata criada: ${record.title}`);
+      
       // Create calendar event for meeting date
       if (record.meetingDate) {
         await storage.createCommercialEvent({
@@ -3848,6 +3850,9 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
       }
       const member = await storage.createCompanyTeamMember(parsed.data);
+      
+      await logAudit(req, "create", "team_member", member.id, `Membro adicionado: ${member.name}`);
+      
       res.status(201).json(member);
     } catch (error) {
       console.error("Error creating team member:", error);
