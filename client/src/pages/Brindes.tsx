@@ -44,7 +44,7 @@ export default function Brindes() {
   const [giftAcknowledged, setGiftAcknowledged] = useState(false);
 
   const { data: products, isLoading: productsLoading } = useQuery<StoreProduct[]>({
-    queryKey: ["/api/store/products", { productType: "merch" }],
+    queryKey: ["/api/store/products?productType=merch"],
   });
 
   const { data: categories } = useQuery<StoreProductCategory[]>({
