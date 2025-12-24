@@ -74,7 +74,7 @@ const roleLabels: Record<string, string> = {
 
 const departmentLabels: Record<string, string> = {
   Comercial: "Comercial",
-  Operacao: "Operacao",
+  Operacao: "Operação",
   Financeiro: "Financeiro",
   SAC: "SAC",
 };
@@ -476,7 +476,7 @@ export default function TeamManagement() {
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="Comercial">Comercial</SelectItem>
-                            <SelectItem value="Operacao">Operacao</SelectItem>
+                            <SelectItem value="Operação">Operacao</SelectItem>
                             <SelectItem value="Financeiro">Financeiro</SelectItem>
                             <SelectItem value="SAC">SAC</SelectItem>
                           </SelectContent>

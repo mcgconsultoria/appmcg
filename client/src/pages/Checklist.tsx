@@ -80,7 +80,7 @@ import type { Checklist, Client } from "@shared/schema";
 const sections = [
   { id: "perfil", label: "Perfil do Cliente", icon: Building2, group: "capa" },
   { id: "comercial", label: "Comercial", icon: Briefcase, group: "areas" },
-  { id: "direcao", label: "Direção", icon: Target, group: "areas" },
+  { id: "direção", label: "Direção", icon: Target, group: "areas" },
   { id: "qualidade", label: "Qualidade", icon: Award, group: "areas" },
   { id: "planejamento", label: "Planejamento", icon: Calculator, group: "areas" },
   { id: "financeiro", label: "Financeiro", icon: DollarSign, group: "areas" },
@@ -307,7 +307,7 @@ interface DocumentoEmpresa {
 
 interface AnexoDocumento {
   id?: number;
-  categoria: "contratos" | "tabelas" | "licencas" | "cnd" | "certificacoes";
+  categoria: "contratos" | "tabelas" | "licenças" | "cnd" | "certificações";
   nome: string;
   descrição: string;
   dataValidade: string;
@@ -318,9 +318,9 @@ interface AnexoDocumento {
 const categoriaAnexos = [
   { id: "contratos", label: "Contratos", icon: FileText },
   { id: "tabelas", label: "Tabelas", icon: FileText },
-  { id: "licencas", label: "Licenças", icon: FileText },
+  { id: "licenças", label: "Licenças", icon: FileText },
   { id: "cnd", label: "CND", icon: FileText },
-  { id: "certificacoes", label: "Certificações", icon: Award },
+  { id: "certificações", label: "Certificações", icon: Award },
 ] as const;
 
 export default function Checklist() {
@@ -1158,7 +1158,7 @@ export default function Checklist() {
                     <Input 
                       placeholder="Função"
                       value={contato.funcao}
-                      onChange={(e) => updateContato(index, "funcao", e.target.value)}
+                      onChange={(e) => updateContato(index, "função", e.target.value)}
                     />
                   </div>
                 </div>
@@ -1218,7 +1218,7 @@ export default function Checklist() {
                     <Input 
                       placeholder="Observação"
                       value={portal.observacao}
-                      onChange={(e) => updatePortal(index, "observacao", e.target.value)}
+                      onChange={(e) => updatePortal(index, "observação", e.target.value)}
                     />
                   </div>
                 </div>

@@ -38,8 +38,8 @@ const statusLabels: Record<string, string> = {
 
 const projectTypes = [
   "Diagnóstico",
-  "Implementacao",
-  "Execucao",
+  "Implementação",
+  "Execução",
   "Expansao",
 ];
 

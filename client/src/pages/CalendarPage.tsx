@@ -250,7 +250,7 @@ export default function CalendarPage() {
     const labels: Record<string, string> = {
       contratos: "Contrato",
       tabelas: "Tabela",
-      licencas: "Licenca",
+      licencas: "Licença",
       cnd: "CND",
       certificacoes: "Certificacao",
     };

@@ -133,7 +133,7 @@ const consultingPhases = [
     isExpansao: false,
   },
   {
-    id: "implementacao",
+    id: "implementação",
     name: "Implementação",
     badge: "2ª Fase",
     duration: "1 mês",
@@ -143,7 +143,7 @@ const consultingPhases = [
     isExpansao: false,
   },
   {
-    id: "execucao",
+    id: "execução",
     name: "Execução",
     badge: "3ª Fase",
     duration: "1 mês",

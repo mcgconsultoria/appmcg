@@ -573,7 +573,7 @@ export default function MeetingRecords() {
                       </div>
                       <div>
                         <Input
-                          placeholder="Responsavel"
+                          placeholder="Responsável"
                           value={item.responsible}
                           onChange={(e) => updateActionItem(index, "responsible", e.target.value)}
                           data-testid={`input-action-responsible-${index}`}

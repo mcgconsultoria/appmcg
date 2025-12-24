@@ -188,7 +188,7 @@ export default function DiagnósticoComercial() {
 
   const getMaturityLevel = (percentage: number) => {
     if (percentage >= 75) return "avancado";
-    if (percentage >= 50) return "intermediario";
+    if (percentage >= 50) return "intermediário";
     if (percentage >= 25) return "basico";
     return "iniciante";
   };

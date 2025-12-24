@@ -35,7 +35,7 @@ const partnerTypes = [
 ];
 
 const statusLabels: Record<string, string> = {
-  prospecting: "Prospecao",
+  prospecting: "Prospecção",
   negotiating: "Negociando",
   active: "Ativo",
   paused: "Pausado",

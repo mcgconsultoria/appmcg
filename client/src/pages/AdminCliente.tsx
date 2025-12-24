@@ -103,7 +103,7 @@ const roleLabels: Record<string, string> = {
 
 const departmentLabels: Record<string, string> = {
   comercial: "Comercial",
-  operacao: "Operacao",
+  operacao: "Operação",
   financeiro: "Financeiro",
   sac: "SAC",
 };
@@ -547,7 +547,7 @@ function TeamTab() {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="comercial">Comercial</SelectItem>
-                        <SelectItem value="operacao">Operacao</SelectItem>
+                        <SelectItem value="operação">Operacao</SelectItem>
                         <SelectItem value="financeiro">Financeiro</SelectItem>
                         <SelectItem value="sac">SAC</SelectItem>
                       </SelectContent>

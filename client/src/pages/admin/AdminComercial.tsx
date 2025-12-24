@@ -281,7 +281,7 @@ export default function AdminComercial() {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="website">Website</SelectItem>
-                              <SelectItem value="indicacao">Indicacao</SelectItem>
+                              <SelectItem value="indicação">Indicacao</SelectItem>
                               <SelectItem value="linkedin">LinkedIn</SelectItem>
                               <SelectItem value="evento">Evento</SelectItem>
                               <SelectItem value="outro">Outro</SelectItem>

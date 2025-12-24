@@ -34,7 +34,7 @@ const segments = [
     materials: [
       { id: 5, title: "Proposta Operação Integrada", type: "template" },
       { id: 6, title: "SLA de Serviços", type: "documento" },
-      { id: 7, title: "Apresentação Institucional", type: "apresentacao" },
+      { id: 7, title: "Apresentação Institucional", type: "apresentação" },
     ],
   },
   {
@@ -54,7 +54,7 @@ const segments = [
     materials: [
       { id: 11, title: "Proposta Fulfillment", type: "template" },
       { id: 12, title: "SLA Last Mile", type: "documento" },
-      { id: 13, title: "Integração de Sistemas", type: "apresentacao" },
+      { id: 13, title: "Integração de Sistemas", type: "apresentação" },
     ],
   },
   {

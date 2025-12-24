@@ -579,7 +579,7 @@ export default function RFI() {
                 <TabsTrigger value="estrutura" data-testid="tab-estrutura">Estrutura</TabsTrigger>
                 <TabsTrigger value="escopo" data-testid="tab-escopo">Escopo</TabsTrigger>
                 <TabsTrigger value="frota" data-testid="tab-frota">Frota</TabsTrigger>
-                <TabsTrigger value="responsavel" data-testid="tab-responsavel">Responsável</TabsTrigger>
+                <TabsTrigger value="responsável" data-testid="tab-responsavel">Responsável</TabsTrigger>
               </TabsList>
 
               <ScrollArea className="flex-1 pr-4">
@@ -1338,7 +1338,7 @@ export default function RFI() {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="responsavel" className="mt-4 space-y-6">
+                <TabsContent value="responsável" className="mt-4 space-y-6">
                   <div className="space-y-4">
                     <h3 className="font-semibold flex items-center gap-2">
                       <Users className="w-4 h-4" />

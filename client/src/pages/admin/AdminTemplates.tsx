@@ -48,42 +48,42 @@ import type { ChecklistTemplate } from "@shared/schema";
 const SEGMENTS = [
   "alimenticio",
   "embalagem",
-  "quimico",
-  "farmaceutico",
-  "cosmetico",
+  "químico",
+  "farmacêutico",
+  "cosmético",
   "automotivo",
-  "eletronico",
-  "textil",
-  "metalurgico",
-  "plastico",
+  "eletrônico",
+  "têxtil",
+  "metalúrgico",
+  "plástico",
   "papel_celulose",
   "bebidas",
   "agroindustria",
-  "construcao",
+  "construção",
   "outro",
 ];
 
 const SEGMENT_LABELS: Record<string, string> = {
   alimenticio: "Alimenticio",
   embalagem: "Embalagem",
-  quimico: "Quimico",
-  farmaceutico: "Farmaceutico",
-  cosmetico: "Cosmetico",
+  quimico: "Químico",
+  farmaceutico: "Farmacêutico",
+  cosmetico: "Cosmético",
   automotivo: "Automotivo",
-  eletronico: "Eletronico",
-  textil: "Textil",
-  metalurgico: "Metalurgico",
-  plastico: "Plastico",
+  eletronico: "Eletrônico",
+  textil: "Têxtil",
+  metalurgico: "Metalúrgico",
+  plastico: "Plástico",
   papel_celulose: "Papel e Celulose",
   bebidas: "Bebidas",
   agroindustria: "Agroindustria",
-  construcao: "Construcao",
+  construcao: "Construção",
   outro: "Outro",
 };
 
 const CHECKLIST_SECTIONS = [
   "comercial",
-  "direcao",
+  "direção",
   "qualidade",
   "planejamento",
   "financeiro",
@@ -104,7 +104,7 @@ const CHECKLIST_SECTIONS = [
 
 const SECTION_LABELS: Record<string, string> = {
   comercial: "Comercial",
-  direcao: "Direcao",
+  direcao: "Direção",
   qualidade: "Qualidade",
   planejamento: "Planejamento",
   financeiro: "Financeiro",
@@ -427,7 +427,7 @@ export default function AdminTemplates() {
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="info">Informações</TabsTrigger>
               <TabsTrigger value="perfil">Perfil Cliente</TabsTrigger>
-              <TabsTrigger value="secoes">Secoes (18)</TabsTrigger>
+              <TabsTrigger value="seções">Secoes (18)</TabsTrigger>
             </TabsList>
 
             <TabsContent value="info" className="space-y-4 mt-4">
@@ -633,7 +633,7 @@ export default function AdminTemplates() {
               </div>
             </TabsContent>
 
-            <TabsContent value="secoes" className="space-y-4 mt-4">
+            <TabsContent value="seções" className="space-y-4 mt-4">
               <div className="text-sm text-muted-foreground mb-4">
                 Preencha as informações de cada secao do checklist. Estes dados servirao de modelo para os clientes.
               </div>
@@ -658,7 +658,7 @@ export default function AdminTemplates() {
                         <Label className="text-xs">Responsavel</Label>
                         <Input
                           value={section.responsavel || ""}
-                          onChange={(e) => updateSection(index, "responsavel", e.target.value)}
+                          onChange={(e) => updateSection(index, "responsável", e.target.value)}
                           placeholder="Nome do responsavel"
                           className="h-8 text-sm"
                         />

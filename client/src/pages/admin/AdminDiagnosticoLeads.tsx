@@ -65,7 +65,7 @@ const statusConfig = {
 const maturityConfig = {
   iniciante: { label: "Iniciante", color: "text-red-600", icon: XCircle },
   basico: { label: "Basico", color: "text-orange-600", icon: AlertTriangle },
-  intermediario: { label: "Intermediario", color: "text-yellow-600", icon: Clock },
+  intermediario: { label: "Intermediário", color: "text-yellow-600", icon: Clock },
   avancado: { label: "Avancado", color: "text-green-600", icon: CheckCircle },
 };
 
@@ -268,7 +268,7 @@ export default function AdminDiagnósticoLeads() {
               <SelectItem value="all">Todas</SelectItem>
               <SelectItem value="iniciante">Iniciante</SelectItem>
               <SelectItem value="basico">Basico</SelectItem>
-              <SelectItem value="intermediario">Intermediario</SelectItem>
+              <SelectItem value="intermediário">Intermediario</SelectItem>
               <SelectItem value="avancado">Avancado</SelectItem>
             </SelectContent>
           </Select>

@@ -84,7 +84,7 @@ const defaultSegments = [
 ];
 
 const departamentos = [
-  { value: "direcao", label: "Direção" },
+  { value: "direção", label: "Direção" },
   { value: "comercial", label: "Comercial" },
   { value: "financeiro", label: "Financeiro" },
   { value: "compras", label: "Compras" },
@@ -181,7 +181,7 @@ export default function Register() {
   };
 
   const watchDepartamento = form.watch("departamento");
-  const showVendedor = watchDepartamento === "direcao" || watchDepartamento === "comercial";
+  const showVendedor = watchDepartamento === "direção" || watchDepartamento === "comercial";
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterData) => {

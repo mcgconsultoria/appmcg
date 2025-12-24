@@ -274,7 +274,7 @@ export default function AdminBancos() {
                   )}
                   <div className="flex items-center justify-between pt-2 border-t">
                     <Badge variant={account.accountType === "corrente" ? "default" : "secondary"}>
-                      {account.accountType === "corrente" ? "Conta Corrente" : "Poupanca"}
+                      {account.accountType === "corrente" ? "Conta Corrente" : "Poupança"}
                     </Badge>
                     <div className="flex items-center gap-1">
                       <Button
@@ -386,7 +386,7 @@ export default function AdminBancos() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="corrente">Conta Corrente</SelectItem>
-                    <SelectItem value="poupanca">Poupanca</SelectItem>
+                    <SelectItem value="poupança">Poupanca</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
