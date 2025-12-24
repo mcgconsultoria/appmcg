@@ -179,7 +179,7 @@ const adminClienteItems = [
   },
 ];
 
-const adminMcgItems = [
+const adminMcgComercialItems = [
   {
     title: "Dashboard Admin",
     url: "/admin",
@@ -196,24 +196,32 @@ const adminMcgItems = [
     icon: FolderKanban,
   },
   {
-    title: "Financeiro",
-    url: "/admin/financeiro",
-    icon: CreditCard,
-  },
-  {
     title: "Parcerias",
     url: "/admin/parcerias",
     icon: Handshake,
   },
   {
-    title: "Conteudo",
-    url: "/admin/conteudo",
-    icon: FileText,
-  },
-  {
     title: "Contratos",
     url: "/admin/contratos",
     icon: FileSignature,
+  },
+  {
+    title: "Campanha Piloto",
+    url: "/admin/campanha-piloto",
+    icon: Rocket,
+  },
+  {
+    title: "Diagnostico Leads",
+    url: "/admin/leads-diagnostico",
+    icon: Search,
+  },
+];
+
+const adminMcgMarketingItems = [
+  {
+    title: "Conteudo",
+    url: "/admin/conteudo",
+    icon: FileText,
   },
   {
     title: "Kit Marca",
@@ -225,15 +233,13 @@ const adminMcgItems = [
     url: "/admin/templates",
     icon: Library,
   },
+];
+
+const adminMcgFinanceiroItems = [
   {
-    title: "Campanha Piloto",
-    url: "/admin/campanha-piloto",
-    icon: Rocket,
-  },
-  {
-    title: "Diagnostico Leads",
-    url: "/admin/leads-diagnostico",
-    icon: Search,
+    title: "Financeiro",
+    url: "/admin/financeiro",
+    icon: CreditCard,
   },
   {
     title: "Plano de Contas (DRE)",
@@ -416,12 +422,32 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
-          <CollapsibleSection
-            title="Admin MCG"
-            icon={Shield}
-            items={adminMcgItems}
-            location={location}
-          />
+          <>
+            <div className="px-3 py-2 mt-2">
+              <div className="flex items-center gap-2 text-base font-semibold text-foreground">
+                <Shield className="h-5 w-5" />
+                <span>Admin MCG</span>
+              </div>
+            </div>
+            <CollapsibleSection
+              title="Comercial"
+              icon={Briefcase}
+              items={adminMcgComercialItems}
+              location={location}
+            />
+            <CollapsibleSection
+              title="Marketing"
+              icon={Megaphone}
+              items={adminMcgMarketingItems}
+              location={location}
+            />
+            <CollapsibleSection
+              title="Financeiro"
+              icon={Landmark}
+              items={adminMcgFinanceiroItems}
+              location={location}
+            />
+          </>
         )}
       </SidebarContent>
 
