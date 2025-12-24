@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AdminLayout } from "@/components/AdminLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -87,7 +87,7 @@ export default function AdminRelatorioDRE() {
   const lucroOperacional = totalReceitas - totalDespesas;
 
   return (
-    <AdminLayout>
+    <AppLayout title="Admin MCG">
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
@@ -254,6 +254,6 @@ export default function AdminRelatorioDRE() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </AppLayout>
   );
 }

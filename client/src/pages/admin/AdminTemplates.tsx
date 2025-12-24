@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { AdminLayout } from "@/components/AdminLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -319,7 +319,7 @@ export default function AdminTemplates() {
   const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <AdminLayout>
+    <AppLayout title="Admin MCG">
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
@@ -705,6 +705,6 @@ export default function AdminTemplates() {
           </div>
         </DialogContent>
       </Dialog>
-    </AdminLayout>
+    </AppLayout>
   );
 }

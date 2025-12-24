@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearch } from "wouter";
-import { AdminLayout } from "@/components/AdminLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -176,7 +176,7 @@ Equipe MCG`;
   };
 
   return (
-    <AdminLayout>
+    <AppLayout title="Admin MCG">
       <div className="p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Campanha Piloto</h1>
@@ -391,6 +391,6 @@ Equipe MCG`;
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </AppLayout>
   );
 }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { AdminLayout } from "@/components/AdminLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -254,7 +254,7 @@ export default function AdminDRE() {
   const rootAccounts = buildTree(accounts, null);
 
   return (
-    <AdminLayout>
+    <AppLayout title="Admin MCG">
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
@@ -399,6 +399,6 @@ export default function AdminDRE() {
           </DialogContent>
         </Dialog>
       </div>
-    </AdminLayout>
+    </AppLayout>
   );
 }

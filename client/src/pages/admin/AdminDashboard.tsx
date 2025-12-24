@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { AdminLayout } from "@/components/AdminLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, FolderKanban, CreditCard, DollarSign, AlertTriangle } from "lucide-react";
@@ -33,7 +33,7 @@ export default function AdminDashboard() {
   const activeProjects = projects.filter((p: any) => p.status === "active").slice(0, 5);
 
   return (
-    <AdminLayout>
+    <AppLayout title="Dashboard MCG" subtitle="Visao geral da gestao interna">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold" data-testid="text-admin-dashboard-title">Dashboard MCG</h1>
@@ -158,6 +158,6 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </AppLayout>
   );
 }

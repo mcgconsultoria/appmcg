@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { AdminLayout } from "@/components/AdminLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -169,16 +169,16 @@ export default function AdminDiagnosticoLeads() {
 
   if (isLoading) {
     return (
-      <AdminLayout>
+      <AppLayout title="Admin MCG">
         <div className="p-6 flex items-center justify-center min-h-[400px]">
           <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-      </AdminLayout>
+      </AppLayout>
     );
   }
 
   return (
-    <AdminLayout>
+    <AppLayout title="Admin MCG">
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
@@ -462,6 +462,6 @@ export default function AdminDiagnosticoLeads() {
           )}
         </DialogContent>
       </Dialog>
-    </AdminLayout>
+    </AppLayout>
   );
 }

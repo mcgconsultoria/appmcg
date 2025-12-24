@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { AdminLayout } from "@/components/AdminLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -212,7 +212,7 @@ export default function AdminLancamentos() {
   const saldo = totalCredito - totalDebito;
 
   return (
-    <AdminLayout>
+    <AppLayout title="Admin MCG">
       <div className="space-y-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-4">
@@ -627,6 +627,6 @@ export default function AdminLancamentos() {
           </div>
         </DialogContent>
       </Dialog>
-    </AdminLayout>
+    </AppLayout>
   );
 }
