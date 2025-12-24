@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { User } from "@shared/schema";
-import { getQueryFn } from "@/lib/queryClient";
+import { getQueryFn, apiRequest } from "@/lib/queryClient";
 
 export function useAuth() {
   const { data: user, isLoading } = useQuery<User | null>({
@@ -11,9 +11,19 @@ export function useAuth() {
     refetchOnWindowFocus: false,
   });
 
+  const logout = async () => {
+    try {
+      await apiRequest("POST", "/api/auth/logout");
+    } catch (error) {
+      // Ignore errors, always redirect
+    }
+    window.location.href = "/";
+  };
+
   return {
     user,
     isLoading,
     isAuthenticated: !!user,
+    logout,
   };
 }
