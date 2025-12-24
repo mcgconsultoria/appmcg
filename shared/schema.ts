@@ -1694,6 +1694,154 @@ export const insertBankTransactionSchema = createInsertSchema(bankTransactions).
   createdAt: true,
 });
 
+// ==========================================
+// MCG Store - E-commerce Module
+// ==========================================
+
+// Store Product Categories
+export const storeProductCategories = pgTable("store_product_categories", {
+  id: serial("id").primaryKey(),
+  slug: varchar("slug", { length: 100 }).unique().notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  displayOrder: integer("display_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Store Products
+export const storeProducts = pgTable("store_products", {
+  id: serial("id").primaryKey(),
+  categoryId: integer("category_id").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).unique().notNull(),
+  shortDescription: text("short_description"),
+  longDescription: text("long_description"),
+  productType: varchar("product_type", { length: 50 }).notNull(), // merch, ebook, manual
+  fulfillmentType: varchar("fulfillment_type", { length: 50 }).default("physical"), // physical, digital, hybrid
+  priceAmount: decimal("price_amount", { precision: 10, scale: 2 }).notNull(),
+  compareAtPrice: decimal("compare_at_price", { precision: 10, scale: 2 }),
+  priceCurrency: varchar("price_currency", { length: 3 }).default("BRL"),
+  inventoryQty: integer("inventory_qty"),
+  allowBackorder: boolean("allow_backorder").default(false),
+  sku: varchar("sku", { length: 100 }),
+  stripeProductId: varchar("stripe_product_id"),
+  stripePriceId: varchar("stripe_price_id"),
+  primaryImageUrl: text("primary_image_url"),
+  galleryUrls: jsonb("gallery_urls").$type<string[]>(),
+  isFeatured: boolean("is_featured").default(false),
+  isActive: boolean("is_active").default(false), // Only visible when activated by admin
+  seoTitle: varchar("seo_title", { length: 255 }),
+  seoDescription: text("seo_description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// E-book Volumes (for trilogy/series management)
+export const ebookVolumes = pgTable("ebook_volumes", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull(),
+  volumeNumber: integer("volume_number").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  subtitle: varchar("subtitle", { length: 255 }),
+  authorName: varchar("author_name", { length: 255 }),
+  authorBio: text("author_bio"),
+  teaserHtml: text("teaser_html"),
+  manuscriptStatus: varchar("manuscript_status", { length: 50 }).default("draft"), // draft, writing, review, published
+  releaseDate: date("release_date"),
+  digitalFileUrl: text("digital_file_url"),
+  printIsbn: varchar("print_isbn", { length: 20 }),
+  digitalIsbn: varchar("digital_isbn", { length: 20 }),
+  pageCount: integer("page_count"),
+  isPublished: boolean("is_published").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Store Orders
+export const storeOrders = pgTable("store_orders", {
+  id: serial("id").primaryKey(),
+  orderNumber: varchar("order_number", { length: 50 }).unique().notNull(),
+  companyId: integer("company_id"),
+  userId: varchar("user_id"),
+  status: varchar("status", { length: 50 }).default("pending"), // pending, paid, processing, shipped, delivered, completed, cancelled
+  subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+  taxAmount: decimal("tax_amount", { precision: 10, scale: 2 }).default("0"),
+  shippingAmount: decimal("shipping_amount", { precision: 10, scale: 2 }).default("0"),
+  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency", { length: 3 }).default("BRL"),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  stripeCheckoutSessionId: varchar("stripe_checkout_session_id"),
+  customerEmail: varchar("customer_email", { length: 255 }),
+  customerName: varchar("customer_name", { length: 255 }),
+  customerPhone: varchar("customer_phone", { length: 20 }),
+  shippingAddress: jsonb("shipping_address").$type<{
+    street: string;
+    number: string;
+    complement?: string;
+    neighborhood: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  }>(),
+  isGift: boolean("is_gift").default(false),
+  giftRecipientName: varchar("gift_recipient_name", { length: 255 }),
+  giftNote: text("gift_note"),
+  giftAcceptanceAcknowledged: boolean("gift_acceptance_acknowledged").default(false),
+  trackingCode: varchar("tracking_code", { length: 100 }),
+  trackingUrl: text("tracking_url"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Store Order Items
+export const storeOrderItems = pgTable("store_order_items", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").notNull(),
+  productId: integer("product_id").notNull(),
+  productSnapshot: jsonb("product_snapshot").$type<{
+    name: string;
+    sku?: string;
+    primaryImageUrl?: string;
+    productType: string;
+  }>(),
+  quantity: integer("quantity").notNull(),
+  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+  totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert schemas for Store
+export const insertStoreProductCategorySchema = createInsertSchema(storeProductCategories).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertStoreProductSchema = createInsertSchema(storeProducts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertEbookVolumeSchema = createInsertSchema(ebookVolumes).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertStoreOrderSchema = createInsertSchema(storeOrders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertStoreOrderItemSchema = createInsertSchema(storeOrderItems).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Auth schemas
 export const registerSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -1840,3 +1988,15 @@ export type BankIntegration = typeof bankIntegrations.$inferSelect;
 export type InsertBankIntegration = z.infer<typeof insertBankIntegrationSchema>;
 export type BankTransaction = typeof bankTransactions.$inferSelect;
 export type InsertBankTransaction = z.infer<typeof insertBankTransactionSchema>;
+
+// Store Types
+export type StoreProductCategory = typeof storeProductCategories.$inferSelect;
+export type InsertStoreProductCategory = z.infer<typeof insertStoreProductCategorySchema>;
+export type StoreProduct = typeof storeProducts.$inferSelect;
+export type InsertStoreProduct = z.infer<typeof insertStoreProductSchema>;
+export type EbookVolume = typeof ebookVolumes.$inferSelect;
+export type InsertEbookVolume = z.infer<typeof insertEbookVolumeSchema>;
+export type StoreOrder = typeof storeOrders.$inferSelect;
+export type InsertStoreOrder = z.infer<typeof insertStoreOrderSchema>;
+export type StoreOrderItem = typeof storeOrderItems.$inferSelect;
+export type InsertStoreOrderItem = z.infer<typeof insertStoreOrderItemSchema>;
