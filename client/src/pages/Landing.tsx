@@ -134,7 +134,7 @@ export default function Landing() {
           </div>
           <nav className="hidden md:flex items-center gap-6">
             <Link href="/diagnostico" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Diagn\u00f3stico Gr\u00e1tis
+              Diagnóstico Grátis
             </Link>
             <Link href="/calculadora-frete" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Calculadora Frete
@@ -178,7 +178,7 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/diagnostico">
                 <Button size="lg" className="gap-2" data-testid="button-diagnostic">
-                  Fazer Diagn\u00f3stico Gr\u00e1tis
+                  Fazer Diagnóstico Grátis
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
