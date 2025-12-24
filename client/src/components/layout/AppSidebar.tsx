@@ -298,11 +298,9 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
     }
     return location === itemUrl || location.startsWith(itemUrl + "/");
   };
-  
-  const hasActiveItem = items.some(item => isItemActive(item.url));
 
   return (
-    <Collapsible open={isOpen || hasActiveItem} onOpenChange={setIsOpen}>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <SidebarGroup>
         <CollapsibleTrigger asChild>
           <button
@@ -313,7 +311,7 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
               <Icon className="h-5 w-5" />
               <span>{title}</span>
             </div>
-            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen || hasActiveItem ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
@@ -342,14 +340,9 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
 
 function AdminMcgSection({ location }: { location: string }) {
   const [isOpen, setIsOpen] = useState(false);
-  
-  const allAdminItems = [...adminMcgComercialItems, ...adminMcgMarketingItems, ...adminMcgFinanceiroItems];
-  const hasActiveItem = allAdminItems.some(item => 
-    item.url === "/admin" ? location === "/admin" : (location === item.url || location.startsWith(item.url + "/"))
-  );
 
   return (
-    <Collapsible open={isOpen || hasActiveItem} onOpenChange={setIsOpen}>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <SidebarGroup>
         <CollapsibleTrigger asChild>
           <button
@@ -360,7 +353,7 @@ function AdminMcgSection({ location }: { location: string }) {
               <Shield className="h-5 w-5" />
               <span>Admin MCG</span>
             </div>
-            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen || hasActiveItem ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
