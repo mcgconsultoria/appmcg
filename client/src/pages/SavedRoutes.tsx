@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -63,13 +62,7 @@ const routeFormSchema = z.object({
   destinationCity: z.string().min(1, "Cidade de destino é obrigatória"),
   destinationState: z.string().min(1, "Estado de destino é obrigatório"),
   distanceKm: z.string().min(1, "Distância é obrigatória"),
-  toll2Axles: z.string().optional(),
-  toll3Axles: z.string().optional(),
-  toll4Axles: z.string().optional(),
-  toll5Axles: z.string().optional(),
-  toll6Axles: z.string().optional(),
-  toll7Axles: z.string().optional(),
-  toll9Axles: z.string().optional(),
+  tollPerAxle: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -111,13 +104,7 @@ export default function SavedRoutes() {
       destinationCity: "",
       destinationState: "",
       distanceKm: "",
-      toll2Axles: "0",
-      toll3Axles: "0",
-      toll4Axles: "0",
-      toll5Axles: "0",
-      toll6Axles: "0",
-      toll7Axles: "0",
-      toll9Axles: "0",
+      tollPerAxle: "0",
       notes: "",
     },
   });
@@ -181,13 +168,7 @@ export default function SavedRoutes() {
         destinationCity: route.destinationCity,
         destinationState: route.destinationState,
         distanceKm: route.distanceKm,
-        toll2Axles: route.toll2Axles || "0",
-        toll3Axles: route.toll3Axles || "0",
-        toll4Axles: route.toll4Axles || "0",
-        toll5Axles: route.toll5Axles || "0",
-        toll6Axles: route.toll6Axles || "0",
-        toll7Axles: route.toll7Axles || "0",
-        toll9Axles: route.toll9Axles || "0",
+        tollPerAxle: route.tollPerAxle || "0",
         notes: route.notes || "",
       });
       // Load cities for editing
@@ -339,7 +320,7 @@ export default function SavedRoutes() {
                       <TableHead>Origem</TableHead>
                       <TableHead>Destino</TableHead>
                       <TableHead className="text-right">KM</TableHead>
-                      <TableHead className="text-right">Pedágio 5 Eixos</TableHead>
+                      <TableHead className="text-right">Pedágio/Eixo</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="w-10"></TableHead>
                     </TableRow>
@@ -351,7 +332,7 @@ export default function SavedRoutes() {
                         <TableCell>{route.originCity}/{route.originState}</TableCell>
                         <TableCell>{route.destinationCity}/{route.destinationState}</TableCell>
                         <TableCell className="text-right">{parseFloat(route.distanceKm).toLocaleString("pt-BR")} km</TableCell>
-                        <TableCell className="text-right">{formatCurrency(route.toll5Axles)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(route.tollPerAxle)}</TableCell>
                         <TableCell>
                           <Badge variant={route.isActive ? "default" : "secondary"}>
                             {route.isActive ? "Ativa" : "Inativa"}
@@ -541,97 +522,19 @@ export default function SavedRoutes() {
                 )}
               />
 
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Pedágio por Eixo (R$)</Label>
-                <div className="grid grid-cols-4 gap-3">
-                  <FormField
-                    control={form.control}
-                    name="toll2Axles"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">2 Eixos</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-toll-2" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="toll3Axles"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">3 Eixos</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-toll-3" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="toll4Axles"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">4 Eixos</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-toll-4" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="toll5Axles"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">5 Eixos</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-toll-5" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="grid grid-cols-4 gap-3">
-                  <FormField
-                    control={form.control}
-                    name="toll6Axles"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">6 Eixos</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-toll-6" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="toll7Axles"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">7 Eixos</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-toll-7" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="toll9Axles"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-xs">9 Eixos</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-toll-9" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
+              <FormField
+                control={form.control}
+                name="tollPerAxle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Pedágio Por Eixo (R$)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.01" placeholder="0.00" {...field} data-testid="input-toll" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
