@@ -44,6 +44,17 @@ import {
   ShoppingCart,
   Handshake,
   UserCog,
+  Briefcase,
+  FileText,
+  Palette,
+  FileSignature,
+  Rocket,
+  Search,
+  PieChart,
+  Building2,
+  Landmark,
+  FileBadge,
+  BookOpen,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -168,6 +179,94 @@ const adminClienteItems = [
   },
 ];
 
+const adminMcgItems = [
+  {
+    title: "Dashboard Admin",
+    url: "/admin",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Comercial",
+    url: "/admin/comercial",
+    icon: Briefcase,
+  },
+  {
+    title: "Projetos",
+    url: "/admin/projetos",
+    icon: FolderKanban,
+  },
+  {
+    title: "Financeiro",
+    url: "/admin/financeiro",
+    icon: CreditCard,
+  },
+  {
+    title: "Parcerias",
+    url: "/admin/parcerias",
+    icon: Handshake,
+  },
+  {
+    title: "Conteudo",
+    url: "/admin/conteudo",
+    icon: FileText,
+  },
+  {
+    title: "Contratos",
+    url: "/admin/contratos",
+    icon: FileSignature,
+  },
+  {
+    title: "Kit Marca",
+    url: "/admin/kit-marca",
+    icon: Palette,
+  },
+  {
+    title: "Templates",
+    url: "/admin/templates",
+    icon: Library,
+  },
+  {
+    title: "Campanha Piloto",
+    url: "/admin/campanha-piloto",
+    icon: Rocket,
+  },
+  {
+    title: "Diagnostico Leads",
+    url: "/admin/leads-diagnostico",
+    icon: Search,
+  },
+  {
+    title: "Plano de Contas (DRE)",
+    url: "/admin/dre",
+    icon: PieChart,
+  },
+  {
+    title: "Centros de Custo",
+    url: "/admin/centros-custo",
+    icon: Building2,
+  },
+  {
+    title: "Bancos",
+    url: "/admin/bancos",
+    icon: Landmark,
+  },
+  {
+    title: "Certificados",
+    url: "/admin/certificados",
+    icon: FileBadge,
+  },
+  {
+    title: "Lancamentos",
+    url: "/admin/lancamentos",
+    icon: BookOpen,
+  },
+  {
+    title: "Relatorio DRE",
+    url: "/admin/relatorio-dre",
+    icon: BarChart3,
+  },
+];
+
 const suporteItems = [
   {
     title: "Suporte",
@@ -186,7 +285,15 @@ interface CollapsibleSectionProps {
 
 function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = false }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const hasActiveItem = items.some(item => location === item.url);
+  
+  const isItemActive = (itemUrl: string) => {
+    if (itemUrl === "/admin") {
+      return location === "/admin";
+    }
+    return location === itemUrl || location.startsWith(itemUrl + "/");
+  };
+  
+  const hasActiveItem = items.some(item => isItemActive(item.url));
 
   return (
     <Collapsible open={isOpen || hasActiveItem} onOpenChange={setIsOpen}>
@@ -207,7 +314,7 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
           <SidebarGroupContent className="mt-1">
             <SidebarMenu>
               {items.map((item) => {
-                const isActive = location === item.url;
+                const isActive = isItemActive(item.url);
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={isActive}>
@@ -309,20 +416,12 @@ export function AppSidebar() {
         </SidebarGroup>
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={location.startsWith("/admin")}>
-                    <Link href="/admin" data-testid="nav-admin">
-                      <Shield className="h-4 w-4" />
-                      <span>Admin MCG</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          <CollapsibleSection
+            title="Admin MCG"
+            icon={Shield}
+            items={adminMcgItems}
+            location={location}
+          />
         )}
       </SidebarContent>
 
