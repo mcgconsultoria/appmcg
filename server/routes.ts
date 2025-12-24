@@ -1188,6 +1188,23 @@ export async function registerRoutes(
       if (!parsed.success) {
         return res.status(400).json({ message: "Dados inválidos", errors: parsed.error.errors });
       }
+      
+      // Check for duplicate route (same origin, destination, and itinerary)
+      const existingRoutes = await storage.getSavedRoutes(user.companyId);
+      const isDuplicate = existingRoutes.some(r => 
+        r.originCity === parsed.data.originCity &&
+        r.originState === parsed.data.originState &&
+        r.destinationCity === parsed.data.destinationCity &&
+        r.destinationState === parsed.data.destinationState &&
+        (r.itinerary || "") === (parsed.data.itinerary || "")
+      );
+      
+      if (isDuplicate) {
+        return res.status(400).json({ 
+          message: "Já existe uma rota com a mesma origem, destino e itinerário" 
+        });
+      }
+      
       const route = await storage.createSavedRoute(parsed.data);
       res.status(201).json(route);
     } catch (error) {
@@ -1199,10 +1216,31 @@ export async function registerRoutes(
   app.patch("/api/saved-routes/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      const user = req.user as User;
       const body = { ...req.body };
       if (body.routeDate && typeof body.routeDate === "string") {
         body.routeDate = new Date(body.routeDate);
       }
+      
+      // Check for duplicate route on update (excluding current route)
+      if (user.companyId && body.originCity && body.destinationCity) {
+        const existingRoutes = await storage.getSavedRoutes(user.companyId);
+        const isDuplicate = existingRoutes.some(r => 
+          r.id !== id &&
+          r.originCity === body.originCity &&
+          r.originState === body.originState &&
+          r.destinationCity === body.destinationCity &&
+          r.destinationState === body.destinationState &&
+          (r.itinerary || "") === (body.itinerary || "")
+        );
+        
+        if (isDuplicate) {
+          return res.status(400).json({ 
+            message: "Já existe uma rota com a mesma origem, destino e itinerário" 
+          });
+        }
+      }
+      
       const route = await storage.updateSavedRoute(id, body);
       if (!route) {
         return res.status(404).json({ message: "Rota não encontrada" });
