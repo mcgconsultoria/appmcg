@@ -215,10 +215,14 @@ export default function SavedRoutes() {
   };
 
   const onSubmit = (data: RouteFormData) => {
+    const payload = {
+      ...data,
+      routeDate: data.routeDate ? new Date(data.routeDate).toISOString() : null,
+    };
     if (editingRoute) {
-      updateMutation.mutate({ id: editingRoute.id, data });
+      updateMutation.mutate({ id: editingRoute.id, data: payload });
     } else {
-      createMutation.mutate(data);
+      createMutation.mutate(payload);
     }
   };
 
