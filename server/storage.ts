@@ -149,6 +149,21 @@ import {
   type InsertBankIntegration,
   type BankTransaction,
   type InsertBankTransaction,
+  storeProductCategories,
+  storeProducts,
+  storeOrders,
+  storeOrderItems,
+  ebookVolumes,
+  type StoreProductCategory,
+  type InsertStoreProductCategory,
+  type StoreProduct,
+  type InsertStoreProduct,
+  type StoreOrder,
+  type InsertStoreOrder,
+  type StoreOrderItem,
+  type InsertStoreOrderItem,
+  type EbookVolume,
+  type InsertEbookVolume,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
@@ -493,6 +508,35 @@ export interface IStorage {
   getBankTransactions(bankAccountId?: number): Promise<BankTransaction[]>;
   createBankTransaction(transaction: InsertBankTransaction): Promise<BankTransaction | null>;
   reconcileBankTransaction(id: number, accountingEntryId: number): Promise<BankTransaction | undefined>;
+
+  // Store operations
+  getStoreProductCategories(): Promise<StoreProductCategory[]>;
+  getStoreProductCategory(id: number): Promise<StoreProductCategory | undefined>;
+  createStoreProductCategory(category: InsertStoreProductCategory): Promise<StoreProductCategory>;
+  updateStoreProductCategory(id: number, category: Partial<InsertStoreProductCategory>): Promise<StoreProductCategory | undefined>;
+  deleteStoreProductCategory(id: number): Promise<boolean>;
+
+  getStoreProducts(options?: { categoryId?: number; isActive?: boolean; productType?: string }): Promise<StoreProduct[]>;
+  getStoreProduct(id: number): Promise<StoreProduct | undefined>;
+  getStoreProductBySlug(slug: string): Promise<StoreProduct | undefined>;
+  createStoreProduct(product: InsertStoreProduct): Promise<StoreProduct>;
+  updateStoreProduct(id: number, product: Partial<InsertStoreProduct>): Promise<StoreProduct | undefined>;
+  deleteStoreProduct(id: number): Promise<boolean>;
+
+  getEbookVolumes(productId?: number): Promise<EbookVolume[]>;
+  getEbookVolume(id: number): Promise<EbookVolume | undefined>;
+  createEbookVolume(volume: InsertEbookVolume): Promise<EbookVolume>;
+  updateEbookVolume(id: number, volume: Partial<InsertEbookVolume>): Promise<EbookVolume | undefined>;
+  deleteEbookVolume(id: number): Promise<boolean>;
+
+  getStoreOrders(options?: { companyId?: number; userId?: string; status?: string }): Promise<StoreOrder[]>;
+  getStoreOrder(id: number): Promise<StoreOrder | undefined>;
+  getStoreOrderByNumber(orderNumber: string): Promise<StoreOrder | undefined>;
+  createStoreOrder(order: InsertStoreOrder): Promise<StoreOrder>;
+  updateStoreOrder(id: number, order: Partial<InsertStoreOrder>): Promise<StoreOrder | undefined>;
+
+  getStoreOrderItems(orderId: number): Promise<StoreOrderItem[]>;
+  createStoreOrderItem(item: InsertStoreOrderItem): Promise<StoreOrderItem>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2153,6 +2197,171 @@ export class DatabaseStorage implements IStorage {
       .where(eq(bankTransactions.id, id))
       .returning();
     return updated;
+  }
+
+  // Store Product Categories
+  async getStoreProductCategories(): Promise<StoreProductCategory[]> {
+    return db.select().from(storeProductCategories).orderBy(storeProductCategories.displayOrder);
+  }
+
+  async getStoreProductCategory(id: number): Promise<StoreProductCategory | undefined> {
+    const [category] = await db.select().from(storeProductCategories).where(eq(storeProductCategories.id, id));
+    return category;
+  }
+
+  async createStoreProductCategory(category: InsertStoreProductCategory): Promise<StoreProductCategory> {
+    const [newCategory] = await db.insert(storeProductCategories).values(category).returning();
+    return newCategory;
+  }
+
+  async updateStoreProductCategory(id: number, category: Partial<InsertStoreProductCategory>): Promise<StoreProductCategory | undefined> {
+    const [updated] = await db
+      .update(storeProductCategories)
+      .set(category)
+      .where(eq(storeProductCategories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteStoreProductCategory(id: number): Promise<boolean> {
+    await db.delete(storeProductCategories).where(eq(storeProductCategories.id, id));
+    return true;
+  }
+
+  // Store Products
+  async getStoreProducts(options?: { categoryId?: number; isActive?: boolean; productType?: string }): Promise<StoreProduct[]> {
+    let query = db.select().from(storeProducts);
+    const conditions = [];
+    
+    if (options?.categoryId) {
+      conditions.push(eq(storeProducts.categoryId, options.categoryId));
+    }
+    if (options?.isActive !== undefined) {
+      conditions.push(eq(storeProducts.isActive, options.isActive));
+    }
+    if (options?.productType) {
+      conditions.push(eq(storeProducts.productType, options.productType));
+    }
+    
+    if (conditions.length > 0) {
+      return db.select().from(storeProducts).where(and(...conditions)).orderBy(desc(storeProducts.createdAt));
+    }
+    return db.select().from(storeProducts).orderBy(desc(storeProducts.createdAt));
+  }
+
+  async getStoreProduct(id: number): Promise<StoreProduct | undefined> {
+    const [product] = await db.select().from(storeProducts).where(eq(storeProducts.id, id));
+    return product;
+  }
+
+  async getStoreProductBySlug(slug: string): Promise<StoreProduct | undefined> {
+    const [product] = await db.select().from(storeProducts).where(eq(storeProducts.slug, slug));
+    return product;
+  }
+
+  async createStoreProduct(product: InsertStoreProduct): Promise<StoreProduct> {
+    const [newProduct] = await db.insert(storeProducts).values(product).returning();
+    return newProduct;
+  }
+
+  async updateStoreProduct(id: number, product: Partial<InsertStoreProduct>): Promise<StoreProduct | undefined> {
+    const [updated] = await db
+      .update(storeProducts)
+      .set({ ...product, updatedAt: new Date() })
+      .where(eq(storeProducts.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteStoreProduct(id: number): Promise<boolean> {
+    await db.delete(storeProducts).where(eq(storeProducts.id, id));
+    return true;
+  }
+
+  // E-book Volumes
+  async getEbookVolumes(productId?: number): Promise<EbookVolume[]> {
+    if (productId) {
+      return db.select().from(ebookVolumes).where(eq(ebookVolumes.productId, productId)).orderBy(ebookVolumes.volumeNumber);
+    }
+    return db.select().from(ebookVolumes).orderBy(ebookVolumes.volumeNumber);
+  }
+
+  async getEbookVolume(id: number): Promise<EbookVolume | undefined> {
+    const [volume] = await db.select().from(ebookVolumes).where(eq(ebookVolumes.id, id));
+    return volume;
+  }
+
+  async createEbookVolume(volume: InsertEbookVolume): Promise<EbookVolume> {
+    const [newVolume] = await db.insert(ebookVolumes).values(volume).returning();
+    return newVolume;
+  }
+
+  async updateEbookVolume(id: number, volume: Partial<InsertEbookVolume>): Promise<EbookVolume | undefined> {
+    const [updated] = await db
+      .update(ebookVolumes)
+      .set({ ...volume, updatedAt: new Date() })
+      .where(eq(ebookVolumes.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteEbookVolume(id: number): Promise<boolean> {
+    await db.delete(ebookVolumes).where(eq(ebookVolumes.id, id));
+    return true;
+  }
+
+  // Store Orders
+  async getStoreOrders(options?: { companyId?: number; userId?: string; status?: string }): Promise<StoreOrder[]> {
+    const conditions = [];
+    
+    if (options?.companyId) {
+      conditions.push(eq(storeOrders.companyId, options.companyId));
+    }
+    if (options?.userId) {
+      conditions.push(eq(storeOrders.userId, options.userId));
+    }
+    if (options?.status) {
+      conditions.push(eq(storeOrders.status, options.status));
+    }
+    
+    if (conditions.length > 0) {
+      return db.select().from(storeOrders).where(and(...conditions)).orderBy(desc(storeOrders.createdAt));
+    }
+    return db.select().from(storeOrders).orderBy(desc(storeOrders.createdAt));
+  }
+
+  async getStoreOrder(id: number): Promise<StoreOrder | undefined> {
+    const [order] = await db.select().from(storeOrders).where(eq(storeOrders.id, id));
+    return order;
+  }
+
+  async getStoreOrderByNumber(orderNumber: string): Promise<StoreOrder | undefined> {
+    const [order] = await db.select().from(storeOrders).where(eq(storeOrders.orderNumber, orderNumber));
+    return order;
+  }
+
+  async createStoreOrder(order: InsertStoreOrder): Promise<StoreOrder> {
+    const [newOrder] = await db.insert(storeOrders).values(order).returning();
+    return newOrder;
+  }
+
+  async updateStoreOrder(id: number, order: Partial<InsertStoreOrder>): Promise<StoreOrder | undefined> {
+    const [updated] = await db
+      .update(storeOrders)
+      .set({ ...order, updatedAt: new Date() })
+      .where(eq(storeOrders.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Store Order Items
+  async getStoreOrderItems(orderId: number): Promise<StoreOrderItem[]> {
+    return db.select().from(storeOrderItems).where(eq(storeOrderItems.orderId, orderId));
+  }
+
+  async createStoreOrderItem(item: InsertStoreOrderItem): Promise<StoreOrderItem> {
+    const [newItem] = await db.insert(storeOrderItems).values(item).returning();
+    return newItem;
   }
 }
 
