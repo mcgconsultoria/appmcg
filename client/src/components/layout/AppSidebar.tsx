@@ -289,6 +289,16 @@ const lojaMcgItems = [
     url: "/biblioteca",
     icon: Library,
   },
+  {
+    title: "E-book",
+    url: "/ebook",
+    icon: BookOpen,
+  },
+  {
+    title: "Manual APP",
+    url: "/manual-app",
+    icon: FileText,
+  },
 ];
 
 interface CollapsibleSectionProps {

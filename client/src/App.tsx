@@ -59,6 +59,8 @@ import AdminRelatorioDRE from "@/pages/admin/AdminRelatorioDRE";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import BibliotecaChecklists from "@/pages/BibliotecaChecklists";
+import Ebook from "@/pages/Ebook";
+import ManualApp from "@/pages/ManualApp";
 import DiagnósticoComercial from "@/pages/DiagnosticoComercial";
 import CampanhaPiloto from "@/pages/CampanhaPiloto";
 
@@ -156,6 +158,8 @@ function Router() {
           <Route path="/atas" component={MeetingRecords} />
           <Route path="/checklist" component={Checklist} />
           <Route path="/biblioteca" component={BibliotecaChecklists} />
+          <Route path="/ebook" component={Ebook} />
+          <Route path="/manual-app" component={ManualApp} />
           <Route path="/rfi" component={RFI} />
           <Route path="/tarefas" component={TasksPage} />
           <Route path="/projetos" component={ProjectsPage} />
