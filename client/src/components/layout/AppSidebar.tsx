@@ -366,19 +366,19 @@ function AdminMcgSection({ location }: { location: string }) {
         <CollapsibleContent>
           <div className="pl-2">
             <CollapsibleSection
-              title="MKT (Pré Vendas)"
-              icon={Megaphone}
-              items={adminMcgMarketingItems}
-              location={location}
-            />
-            <CollapsibleSection
-              title="COM (Vendas)"
+              title="Comercial"
               icon={Briefcase}
               items={adminMcgComercialItems}
               location={location}
             />
             <CollapsibleSection
-              title="CAC (Pós Vendas)"
+              title="Marketing"
+              icon={Megaphone}
+              items={adminMcgMarketingItems}
+              location={location}
+            />
+            <CollapsibleSection
+              title="Financeiro"
               icon={Landmark}
               items={adminMcgFinanceiroItems}
               location={location}
