@@ -77,12 +77,12 @@ const preVendasItems = [
 
 const vendasItems = [
   {
-    title: "Calculadora de Frete",
+    title: "Calcule Frete",
     url: "/calculadora-frete",
     icon: Calculator,
   },
   {
-    title: "Calculadora de Armazenagem",
+    title: "Calcule Armazenagem",
     url: "/calculadora-armazenagem",
     icon: Warehouse,
   },
