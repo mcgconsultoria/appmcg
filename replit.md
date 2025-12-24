@@ -204,3 +204,42 @@ MCG Consultoria is a commercial management platform for logistics, filling the g
 - **Architecture ready**: REST APIs and multi-company structure already support future integration
 - **Legal note**: Integration must only proceed after formal authorization from NStech to avoid any legal issues
 - **Focus**: Primary integration target, as KMM clients (carriers and logistics operators) are MCG's main audience
+
+### WhatsApp Business Integration (AiSensy)
+- **Status**: Infrastructure implemented, awaiting AiSensy account configuration
+- **Purpose**: Automated customer support journey via WhatsApp Business API
+- **Provider**: AiSensy (free plan available)
+- **Database Schema**:
+  - `whatsappJourneySteps`: Support journey flowchart steps (welcome, menu, faq, human, goodbye)
+  - `whatsappConfig`: AiSensy API configuration (apiKey, projectId, phone number)
+  - `whatsappAgents`: Support team members for human handoff
+  - `whatsappConversations`: Active customer conversations
+  - `whatsappMessages`: Message history per conversation
+- **Admin MCG Features**:
+  - Visual journey designer with hierarchical step management
+  - Configuration tab for AiSensy integration
+  - Agents tab for team management
+  - Conversations tab for monitoring active chats
+- **Step Types**: welcome, menu, faq, human, goodbye
+- **Hierarchical Structure**: Parent-child relationships for menu options
+- **API Routes**: Full CRUD under `/api/admin/whatsapp/*`
+- **Support Page**: Already has WhatsApp button with direct link
+
+### Mobile App (PWA)
+- **Status**: Implemented via Progressive Web App approach
+- **Distribution Strategy**: Free deployment to app stores via PWA
+  - Google Play: $25 one-time developer fee
+  - Apple App Store: Via PWA capability (no native app needed)
+- **Configuration Files**:
+  - `client/public/manifest.json`: PWA manifest with app metadata
+  - `client/public/sw.js`: Service worker for offline caching
+  - `client/public/offline.html`: Offline fallback page
+  - `client/index.html`: Apple/Android meta tags
+  - `client/src/main.tsx`: Service worker registration
+- **Features**:
+  - Standalone app experience on mobile
+  - Offline fallback page
+  - Install prompts on supported browsers
+  - App icons using existing favicon
+- **Landing Page**: Download buttons for Google Play and App Store (URLs pending)
+- **Note**: Store URLs will be updated once apps are published
