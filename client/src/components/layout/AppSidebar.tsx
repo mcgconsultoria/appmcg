@@ -18,7 +18,6 @@ import {
   ClipboardList,
   Calculator,
   Warehouse,
-  DollarSign,
   Kanban,
   FileText,
   Settings,
@@ -27,7 +26,6 @@ import {
   Calendar,
   ListTodo,
   FolderKanban,
-  Palette,
   CreditCard,
   Shield,
   UserCog,
@@ -37,6 +35,8 @@ import {
   Settings2,
   Library,
   TrendingUp,
+  Megaphone,
+  MessageSquareHeart,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 
-const mainMenuItems = [
+const preVendasItems = [
+  {
+    title: "Marketing",
+    url: "/marketing",
+    icon: Megaphone,
+  },
+];
+
+const vendasItems = [
+  {
+    title: "Calculadora de Frete",
+    url: "/calculadora-frete",
+    icon: Calculator,
+  },
+  {
+    title: "Calculadora de Armazenagem",
+    url: "/calculadora-armazenagem",
+    icon: Warehouse,
+  },
   {
     title: "Dashboard",
     url: "/dashboard",
@@ -105,17 +123,6 @@ const mainMenuItems = [
     url: "/operacoes",
     icon: Settings2,
   },
-];
-
-const teamMenuItems = [
-  {
-    title: "Vendedores",
-    url: "/vendedores",
-    icon: UserRound,
-  },
-];
-
-const resourceMenuItems = [
   {
     title: "Biblioteca",
     url: "/biblioteca",
@@ -123,43 +130,33 @@ const resourceMenuItems = [
   },
 ];
 
-const calculatorMenuItems = [
+const posVendasItems = [
   {
-    title: "Calculadora de Frete",
-    url: "/calculadora-frete",
-    icon: Calculator,
-  },
-  {
-    title: "Calculadora de Armazenagem",
-    url: "/calculadora-armazenagem",
-    icon: Warehouse,
+    title: "Pesquisas de Satisfacao",
+    url: "/pesquisas",
+    icon: MessageSquareHeart,
   },
 ];
 
-const managementMenuItems = [
+const adminClienteItems = [
   {
-    title: "Financeiro",
-    url: "/financeiro",
-    icon: DollarSign,
-  },
-  {
-    title: "Marketing",
-    url: "/marketing",
-    icon: FileText,
+    title: "Vendedores",
+    url: "/vendedores",
+    icon: UserRound,
   },
   {
     title: "Meu Plano",
     url: "/assinatura",
     icon: CreditCard,
   },
-];
-
-const adminMenuItems = [
   {
     title: "Admin Cliente",
     url: "/admin-cliente",
     icon: UserCog,
   },
+];
+
+const suporteItems = [
   {
     title: "Suporte",
     url: "/suporte",
@@ -197,10 +194,10 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
+          <SidebarGroupLabel>Pre-Vendas</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainMenuItems.map((item) => {
+              {preVendasItems.map((item) => {
                 const isActive = location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -218,10 +215,10 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Equipe</SidebarGroupLabel>
+          <SidebarGroupLabel>Vendas</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {teamMenuItems.map((item) => {
+              {vendasItems.map((item) => {
                 const isActive = location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -239,52 +236,10 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>Recursos</SidebarGroupLabel>
+          <SidebarGroupLabel>Pos-Vendas</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {resourceMenuItems.map((item) => {
-                const isActive = location === item.url;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Calculadoras</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {calculatorMenuItems.map((item) => {
-                const isActive = location === item.url;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Gestão</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {managementMenuItems.map((item) => {
+              {posVendasItems.map((item) => {
                 const isActive = location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -305,7 +260,27 @@ export function AppSidebar() {
           <SidebarGroupLabel>Admin Cliente</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {adminMenuItems.map((item) => {
+              {adminClienteItems.map((item) => {
+                const isActive = location === item.url;
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {suporteItems.map((item) => {
                 const isActive = location === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -324,7 +299,7 @@ export function AppSidebar() {
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
           <SidebarGroup>
-            <SidebarGroupLabel>Administração</SidebarGroupLabel>
+            <SidebarGroupLabel>Administracao</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -351,7 +326,7 @@ export function AppSidebar() {
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">
-              {user?.firstName || user?.email || "Usuário"}
+              {user?.firstName || user?.email || "Usuario"}
             </p>
             <p className="text-xs text-muted-foreground truncate">
               {user?.email}
@@ -362,7 +337,7 @@ export function AppSidebar() {
           <Button variant="ghost" size="sm" className="flex-1 justify-start" asChild>
             <Link href="/configuracoes">
               <Settings className="h-4 w-4 mr-2" />
-              Configurações
+              Configuracoes
             </Link>
           </Button>
           <Button
