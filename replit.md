@@ -78,6 +78,29 @@ Preferred communication style: Simple, everyday language.
   - Status tracking: draft, completed, submitted
   - Uses JSONB fields for flexible complex data structures (unidades, fornecedores, frota, etc.)
 
+### Loja MCG (E-commerce)
+- **Status**: Infrastructure implemented, products managed via Admin MCG
+- **Product Types**: 
+  - `merch` - Brindes corporativos (corporate gifts)
+  - `ebook` - E-books (CEO-authored trilogy about commercial logistics)
+  - `manual` - App documentation and guides
+- **Fulfillment Types**: physical, digital, hybrid
+- **Key Features**:
+  - Product catalog with categories, pricing, inventory
+  - Gift compliance warnings (corporate policy reminders)
+  - Products only visible when activated by admin (isActive flag)
+  - Admin panel for product/category/order management
+- **E-book Vision**: CEO-authored trilogy "A Arte do Comercial em Logistica"
+  - Volume I: A Jornada Comercial (available)
+  - Volume II: Estrategias Avancadas (2025)
+  - Volume III: Lideranca Comercial (2026)
+- **Future Enhancement - M. Veste**:
+  - Fashion/uniform arm of MCG e-commerce
+  - Separate branding within Loja MCG
+  - User has existing domain for M. Veste
+  - Will include uniforms and fashion items
+  - **Status**: Pending implementation
+
 ### Dashboard Indicators
 - **ABC Curve Analysis**: Client classification following Pareto principle (80/20 rule)
 - **Clients by State**: Geographic distribution bar chart
