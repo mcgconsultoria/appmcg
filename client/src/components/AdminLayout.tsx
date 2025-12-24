@@ -262,7 +262,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <Button
                 size="icon"
                 variant="ghost"
-                onClick={logout}
+                onClick={() => logout()}
                 data-testid="button-admin-logout"
               >
                 <LogOut className="h-4 w-4" />
