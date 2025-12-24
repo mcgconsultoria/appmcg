@@ -1180,7 +1180,11 @@ export async function registerRoutes(
       if (!user.companyId) {
         return res.status(400).json({ message: "Usuário não vinculado a uma empresa" });
       }
-      const parsed = insertSavedRouteSchema.safeParse({ ...req.body, companyId: user.companyId });
+      const body = { ...req.body, companyId: user.companyId };
+      if (body.routeDate && typeof body.routeDate === "string") {
+        body.routeDate = new Date(body.routeDate);
+      }
+      const parsed = insertSavedRouteSchema.safeParse(body);
       if (!parsed.success) {
         return res.status(400).json({ message: "Dados inválidos", errors: parsed.error.errors });
       }
@@ -1195,7 +1199,11 @@ export async function registerRoutes(
   app.patch("/api/saved-routes/:id", isAuthenticated, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const route = await storage.updateSavedRoute(id, req.body);
+      const body = { ...req.body };
+      if (body.routeDate && typeof body.routeDate === "string") {
+        body.routeDate = new Date(body.routeDate);
+      }
+      const route = await storage.updateSavedRoute(id, body);
       if (!route) {
         return res.status(404).json({ message: "Rota não encontrada" });
       }

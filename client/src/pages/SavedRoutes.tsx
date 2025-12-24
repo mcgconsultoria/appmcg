@@ -56,7 +56,7 @@ import type { SavedRoute } from "@shared/schema";
 import { brazilStates } from "@/lib/brazilStates";
 
 const routeFormSchema = z.object({
-  name: z.string().min(1, "Nome é obrigatório"),
+  name: z.string().optional(),
   originCity: z.string().min(1, "Cidade de origem é obrigatória"),
   originState: z.string().min(1, "Estado de origem é obrigatório"),
   destinationCity: z.string().min(1, "Cidade de destino é obrigatória"),
@@ -215,8 +215,10 @@ export default function SavedRoutes() {
   };
 
   const onSubmit = (data: RouteFormData) => {
+    const generatedName = `${data.originCity} - ${data.destinationCity}`;
     const payload = {
       ...data,
+      name: generatedName,
       routeDate: data.routeDate ? new Date(data.routeDate).toISOString() : null,
     };
     if (editingRoute) {
@@ -225,6 +227,12 @@ export default function SavedRoutes() {
       createMutation.mutate(payload);
     }
   };
+
+  const watchOriginCity = form.watch("originCity");
+  const watchDestinationCity = form.watch("destinationCity");
+  const generatedRouteName = watchOriginCity && watchDestinationCity 
+    ? `${watchOriginCity} - ${watchDestinationCity}` 
+    : "";
 
   const filteredRoutes = routes.filter((route) => {
     const search = searchTerm.toLowerCase();
@@ -384,20 +392,6 @@ export default function SavedRoutes() {
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome da Rota</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: Curitiba - São Paulo" {...field} data-testid="input-route-name" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-4">
                   <h4 className="font-medium text-sm">Origem</h4>
@@ -510,6 +504,17 @@ export default function SavedRoutes() {
                     )}
                   />
                 </div>
+              </div>
+
+              <div>
+                <FormLabel>Nome da Rota (gerado automaticamente)</FormLabel>
+                <Input 
+                  value={generatedRouteName} 
+                  disabled 
+                  placeholder="Selecione as cidades de origem e destino"
+                  className="mt-2 bg-muted"
+                  data-testid="input-route-name"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
