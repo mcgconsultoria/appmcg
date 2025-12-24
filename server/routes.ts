@@ -3807,6 +3807,17 @@ export async function registerRoutes(
       const companyId = req.user?.companyId;
       if (!companyId) return res.status(400).json({ message: "Company not found" });
       
+      // Check if company enforces email domain
+      const company = await storage.getCompany(companyId);
+      if (company?.enforceEmailDomain && company.allowedEmailDomain && req.body.email) {
+        const emailDomain = req.body.email.split('@')[1]?.toLowerCase();
+        if (emailDomain !== company.allowedEmailDomain.toLowerCase()) {
+          return res.status(400).json({ 
+            message: `Email deve usar o dominio @${company.allowedEmailDomain}` 
+          });
+        }
+      }
+      
       // If userId is provided, validate it belongs to the same company
       if (req.body.userId) {
         const targetUser = await storage.getUser(req.body.userId);
