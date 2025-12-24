@@ -58,6 +58,7 @@ import AdminCertificados from "@/pages/admin/AdminCertificados";
 import AdminLançamentos from "@/pages/admin/AdminLancamentos";
 import AdminRelatorioDRE from "@/pages/admin/AdminRelatorioDRE";
 import AdminLoja from "@/pages/admin/AdminLoja";
+import AdminWhatsApp from "@/pages/admin/AdminWhatsApp";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import BibliotecaChecklists from "@/pages/BibliotecaChecklists";
@@ -149,6 +150,9 @@ function Router() {
       </Route>
       <Route path="/admin/loja">
         {() => isAuthenticated && isAdmin ? <AdminLoja /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/whatsapp">
+        {() => isAuthenticated && isAdmin ? <AdminWhatsApp /> : <AdminLogin />}
       </Route>
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />

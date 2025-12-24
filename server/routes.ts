@@ -5300,5 +5300,132 @@ export async function registerRoutes(
     }
   });
 
+  // WhatsApp Support Journey API
+  app.get("/api/admin/whatsapp/journey-steps", isAdmin, async (req, res) => {
+    try {
+      const steps = await storage.getWhatsappJourneySteps();
+      res.json(steps);
+    } catch (error) {
+      console.error("Error fetching journey steps:", error);
+      res.status(500).json({ message: "Falha ao buscar etapas" });
+    }
+  });
+
+  app.post("/api/admin/whatsapp/journey-steps", isAdmin, async (req, res) => {
+    try {
+      const step = await storage.createWhatsappJourneyStep(req.body);
+      res.json(step);
+    } catch (error) {
+      console.error("Error creating journey step:", error);
+      res.status(500).json({ message: "Falha ao criar etapa" });
+    }
+  });
+
+  app.patch("/api/admin/whatsapp/journey-steps/:id", isAdmin, async (req, res) => {
+    try {
+      const step = await storage.updateWhatsappJourneyStep(parseInt(req.params.id), req.body);
+      if (!step) return res.status(404).json({ message: "Etapa nao encontrada" });
+      res.json(step);
+    } catch (error) {
+      console.error("Error updating journey step:", error);
+      res.status(500).json({ message: "Falha ao atualizar etapa" });
+    }
+  });
+
+  app.delete("/api/admin/whatsapp/journey-steps/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteWhatsappJourneyStep(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting journey step:", error);
+      res.status(500).json({ message: "Falha ao excluir etapa" });
+    }
+  });
+
+  // WhatsApp Config
+  app.get("/api/admin/whatsapp/config", isAdmin, async (req, res) => {
+    try {
+      const config = await storage.getWhatsappConfig();
+      res.json(config || null);
+    } catch (error) {
+      console.error("Error fetching whatsapp config:", error);
+      res.status(500).json({ message: "Falha ao buscar configuracao" });
+    }
+  });
+
+  app.post("/api/admin/whatsapp/config", isAdmin, async (req, res) => {
+    try {
+      const config = await storage.createWhatsappConfig(req.body);
+      res.json(config);
+    } catch (error) {
+      console.error("Error creating whatsapp config:", error);
+      res.status(500).json({ message: "Falha ao criar configuracao" });
+    }
+  });
+
+  app.patch("/api/admin/whatsapp/config/:id", isAdmin, async (req, res) => {
+    try {
+      const config = await storage.updateWhatsappConfig(parseInt(req.params.id), req.body);
+      if (!config) return res.status(404).json({ message: "Configuracao nao encontrada" });
+      res.json(config);
+    } catch (error) {
+      console.error("Error updating whatsapp config:", error);
+      res.status(500).json({ message: "Falha ao atualizar configuracao" });
+    }
+  });
+
+  // WhatsApp Agents
+  app.get("/api/admin/whatsapp/agents", isAdmin, async (req, res) => {
+    try {
+      const agents = await storage.getWhatsappAgents();
+      res.json(agents);
+    } catch (error) {
+      console.error("Error fetching whatsapp agents:", error);
+      res.status(500).json({ message: "Falha ao buscar agentes" });
+    }
+  });
+
+  app.post("/api/admin/whatsapp/agents", isAdmin, async (req, res) => {
+    try {
+      const agent = await storage.createWhatsappAgent(req.body);
+      res.json(agent);
+    } catch (error) {
+      console.error("Error creating whatsapp agent:", error);
+      res.status(500).json({ message: "Falha ao criar agente" });
+    }
+  });
+
+  app.patch("/api/admin/whatsapp/agents/:id", isAdmin, async (req, res) => {
+    try {
+      const agent = await storage.updateWhatsappAgent(parseInt(req.params.id), req.body);
+      if (!agent) return res.status(404).json({ message: "Agente nao encontrado" });
+      res.json(agent);
+    } catch (error) {
+      console.error("Error updating whatsapp agent:", error);
+      res.status(500).json({ message: "Falha ao atualizar agente" });
+    }
+  });
+
+  app.delete("/api/admin/whatsapp/agents/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteWhatsappAgent(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting whatsapp agent:", error);
+      res.status(500).json({ message: "Falha ao excluir agente" });
+    }
+  });
+
+  // WhatsApp Conversations
+  app.get("/api/admin/whatsapp/conversations", isAdmin, async (req, res) => {
+    try {
+      const conversations = await storage.getWhatsappConversations();
+      res.json(conversations);
+    } catch (error) {
+      console.error("Error fetching whatsapp conversations:", error);
+      res.status(500).json({ message: "Falha ao buscar conversas" });
+    }
+  });
+
   return httpServer;
 }

@@ -167,6 +167,21 @@ import {
   type InsertEbookVolume,
   type AuditLog,
   type InsertAuditLog,
+  whatsappJourneySteps,
+  whatsappConfig,
+  whatsappAgents,
+  whatsappConversations,
+  whatsappMessages,
+  type WhatsappJourneyStep,
+  type InsertWhatsappJourneyStep,
+  type WhatsappConfig,
+  type InsertWhatsappConfig,
+  type WhatsappAgent,
+  type InsertWhatsappAgent,
+  type WhatsappConversation,
+  type InsertWhatsappConversation,
+  type WhatsappMessage,
+  type InsertWhatsappMessage,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
@@ -545,6 +560,29 @@ export interface IStorage {
   createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
   getAuditLogs(companyId: number, options?: { userId?: string; action?: string; limit?: number; offset?: number }): Promise<AuditLog[]>;
   getAuditLogsByUser(companyId: number, userId: string): Promise<AuditLog[]>;
+
+  // WhatsApp Support Journey operations
+  getWhatsappJourneySteps(): Promise<WhatsappJourneyStep[]>;
+  getWhatsappJourneyStep(id: number): Promise<WhatsappJourneyStep | undefined>;
+  createWhatsappJourneyStep(step: InsertWhatsappJourneyStep): Promise<WhatsappJourneyStep>;
+  updateWhatsappJourneyStep(id: number, step: Partial<InsertWhatsappJourneyStep>): Promise<WhatsappJourneyStep | undefined>;
+  deleteWhatsappJourneyStep(id: number): Promise<boolean>;
+
+  getWhatsappConfig(): Promise<WhatsappConfig | undefined>;
+  createWhatsappConfig(config: InsertWhatsappConfig): Promise<WhatsappConfig>;
+  updateWhatsappConfig(id: number, config: Partial<InsertWhatsappConfig>): Promise<WhatsappConfig | undefined>;
+
+  getWhatsappAgents(): Promise<WhatsappAgent[]>;
+  createWhatsappAgent(agent: InsertWhatsappAgent): Promise<WhatsappAgent>;
+  updateWhatsappAgent(id: number, agent: Partial<InsertWhatsappAgent>): Promise<WhatsappAgent | undefined>;
+  deleteWhatsappAgent(id: number): Promise<boolean>;
+
+  getWhatsappConversations(): Promise<WhatsappConversation[]>;
+  createWhatsappConversation(conversation: InsertWhatsappConversation): Promise<WhatsappConversation>;
+  updateWhatsappConversation(id: number, conversation: Partial<InsertWhatsappConversation>): Promise<WhatsappConversation | undefined>;
+
+  createWhatsappMessage(message: InsertWhatsappMessage): Promise<WhatsappMessage>;
+  getWhatsappMessages(conversationId: number): Promise<WhatsappMessage[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2403,6 +2441,106 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(auditLogs)
       .where(and(eq(auditLogs.companyId, companyId), eq(auditLogs.userId, userId)))
       .orderBy(desc(auditLogs.createdAt));
+  }
+
+  // WhatsApp Support Journey operations
+  async getWhatsappJourneySteps(): Promise<WhatsappJourneyStep[]> {
+    return db.select().from(whatsappJourneySteps).orderBy(whatsappJourneySteps.order);
+  }
+
+  async getWhatsappJourneyStep(id: number): Promise<WhatsappJourneyStep | undefined> {
+    const [step] = await db.select().from(whatsappJourneySteps).where(eq(whatsappJourneySteps.id, id));
+    return step;
+  }
+
+  async createWhatsappJourneyStep(step: InsertWhatsappJourneyStep): Promise<WhatsappJourneyStep> {
+    const [newStep] = await db.insert(whatsappJourneySteps).values(step).returning();
+    return newStep;
+  }
+
+  async updateWhatsappJourneyStep(id: number, step: Partial<InsertWhatsappJourneyStep>): Promise<WhatsappJourneyStep | undefined> {
+    const [updated] = await db
+      .update(whatsappJourneySteps)
+      .set({ ...step, updatedAt: new Date() })
+      .where(eq(whatsappJourneySteps.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteWhatsappJourneyStep(id: number): Promise<boolean> {
+    await db.delete(whatsappJourneySteps).where(eq(whatsappJourneySteps.id, id));
+    return true;
+  }
+
+  async getWhatsappConfig(): Promise<WhatsappConfig | undefined> {
+    const [config] = await db.select().from(whatsappConfig).limit(1);
+    return config;
+  }
+
+  async createWhatsappConfig(config: InsertWhatsappConfig): Promise<WhatsappConfig> {
+    const [newConfig] = await db.insert(whatsappConfig).values(config).returning();
+    return newConfig;
+  }
+
+  async updateWhatsappConfig(id: number, config: Partial<InsertWhatsappConfig>): Promise<WhatsappConfig | undefined> {
+    const [updated] = await db
+      .update(whatsappConfig)
+      .set({ ...config, updatedAt: new Date() })
+      .where(eq(whatsappConfig.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getWhatsappAgents(): Promise<WhatsappAgent[]> {
+    return db.select().from(whatsappAgents).orderBy(whatsappAgents.name);
+  }
+
+  async createWhatsappAgent(agent: InsertWhatsappAgent): Promise<WhatsappAgent> {
+    const [newAgent] = await db.insert(whatsappAgents).values(agent).returning();
+    return newAgent;
+  }
+
+  async updateWhatsappAgent(id: number, agent: Partial<InsertWhatsappAgent>): Promise<WhatsappAgent | undefined> {
+    const [updated] = await db
+      .update(whatsappAgents)
+      .set({ ...agent, updatedAt: new Date() })
+      .where(eq(whatsappAgents.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteWhatsappAgent(id: number): Promise<boolean> {
+    await db.delete(whatsappAgents).where(eq(whatsappAgents.id, id));
+    return true;
+  }
+
+  async getWhatsappConversations(): Promise<WhatsappConversation[]> {
+    return db.select().from(whatsappConversations).orderBy(desc(whatsappConversations.lastMessageAt));
+  }
+
+  async createWhatsappConversation(conversation: InsertWhatsappConversation): Promise<WhatsappConversation> {
+    const [newConv] = await db.insert(whatsappConversations).values(conversation).returning();
+    return newConv;
+  }
+
+  async updateWhatsappConversation(id: number, conversation: Partial<InsertWhatsappConversation>): Promise<WhatsappConversation | undefined> {
+    const [updated] = await db
+      .update(whatsappConversations)
+      .set({ ...conversation, updatedAt: new Date() })
+      .where(eq(whatsappConversations.id, id))
+      .returning();
+    return updated;
+  }
+
+  async createWhatsappMessage(message: InsertWhatsappMessage): Promise<WhatsappMessage> {
+    const [newMsg] = await db.insert(whatsappMessages).values(message).returning();
+    return newMsg;
+  }
+
+  async getWhatsappMessages(conversationId: number): Promise<WhatsappMessage[]> {
+    return db.select().from(whatsappMessages)
+      .where(eq(whatsappMessages.conversationId, conversationId))
+      .orderBy(whatsappMessages.createdAt);
   }
 }
 
