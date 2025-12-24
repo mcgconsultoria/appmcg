@@ -6,9 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Truck,
   CreditCard,
-  Settings,
   ExternalLink,
   Loader2,
   CheckCircle,
@@ -18,7 +16,7 @@ import {
   Zap,
   Building2,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { apiRequest } from "@/lib/queryClient";
 import type { User } from "@shared/schema";
 
@@ -120,47 +118,18 @@ export default function Subscription() {
 
   if (userLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <AppLayout title="Meu Plano" subtitle="Gerencie sua assinatura">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border">
-        <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-md bg-primary flex items-center justify-center">
-              <Truck className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-lg leading-tight">MCG</span>
-              <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
-            </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Link href="/dashboard">
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4 mr-2" />
-                Dashboard
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 py-12">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Minha Assinatura</h1>
-            <p className="text-muted-foreground">
-              Gerencie seu plano e informações de pagamento
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
+    <AppLayout title="Meu Plano" subtitle="Gerencie sua assinatura">
+      <div className="max-w-4xl mx-auto">
+        <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -284,8 +253,7 @@ export default function Subscription() {
               </CardContent>
             </Card>
           )}
-        </div>
-      </main>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

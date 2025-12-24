@@ -28,6 +28,7 @@ import { Plus, ListTodo, Trash2, Edit2, Loader2, Calendar, User, Flag } from "lu
 import { format, isPast, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Task, Project } from "@shared/schema";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 const priorityOptions = [
   { value: "low", label: "Baixa", color: "secondary" },
@@ -195,20 +196,19 @@ export default function TasksPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <AppLayout title="Tarefas" subtitle="Gerencie suas atividades">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="text-page-title">Tarefas</h1>
-          <p className="text-muted-foreground">Gerencie suas atividades e prazos</p>
-        </div>
-        <div className="flex items-center gap-2">
+    <AppLayout title="Tarefas" subtitle="Gerencie suas atividades">
+      <div className="space-y-6">
+        <div className="flex items-center justify-end gap-4 flex-wrap">
+          <div className="flex items-center gap-2">
           <Select value={filterStatus} onValueChange={setFilterStatus}>
             <SelectTrigger className="w-[150px]" data-testid="select-filter-status">
               <SelectValue placeholder="Filtrar" />
@@ -494,6 +494,7 @@ export default function TasksPage() {
           )}
         </div>
       )}
-    </div>
+      </div>
+    </AppLayout>
   );
 }

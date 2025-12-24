@@ -29,6 +29,7 @@ import { format, startOfWeek, addDays, isSameDay, parseISO, getWeek } from "date
 import { ptBR } from "date-fns/locale";
 import type { CommercialEvent, Client, ChecklistAttachment } from "@shared/schema";
 import { ClientCombobox } from "@/components/ClientCombobox";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 const eventTypes = [
   { value: "meeting", label: "Reuniao", color: "bg-primary" },
@@ -273,20 +274,19 @@ export default function CalendarPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <AppLayout title="Calendario Comercial" subtitle="Agende eventos e compromissos">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="text-page-title">Calendario Comercial</h1>
-          <p className="text-muted-foreground">Planeje suas atividades comerciais</p>
-        </div>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+    <AppLayout title="Calendario Comercial" subtitle="Agende eventos e compromissos">
+      <div className="space-y-6">
+        <div className="flex items-center justify-end gap-4 flex-wrap">
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) resetForm();
         }}>
@@ -572,6 +572,7 @@ export default function CalendarPage() {
           <span className="text-muted-foreground">Vencimento de Documento</span>
         </div>
       </div>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

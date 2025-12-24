@@ -29,6 +29,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Project, Task, Client } from "@shared/schema";
 import { ClientCombobox } from "@/components/ClientCombobox";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 const statusOptions = [
   { value: "planning", label: "Planejamento", color: "secondary" },
@@ -171,20 +172,19 @@ export default function ProjectsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <AppLayout title="Projetos" subtitle="Acompanhe seus projetos">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="text-page-title">Projetos</h1>
-          <p className="text-muted-foreground">Gerencie seus projetos e iniciativas</p>
-        </div>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+    <AppLayout title="Projetos" subtitle="Acompanhe seus projetos">
+      <div className="space-y-6">
+        <div className="flex items-center justify-end gap-4 flex-wrap">
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) resetForm();
         }}>
@@ -387,6 +387,7 @@ export default function ProjectsPage() {
           })}
         </div>
       )}
-    </div>
+      </div>
+    </AppLayout>
   );
 }

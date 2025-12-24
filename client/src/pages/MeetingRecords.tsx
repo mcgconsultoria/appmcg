@@ -38,6 +38,7 @@ import type { MeetingRecord, MeetingActionItem, Client, Company, MeetingObjectiv
 import { ClientCombobox } from "@/components/ClientCombobox";
 import { Checkbox } from "@/components/ui/checkbox";
 import { X, Mail } from "lucide-react";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 interface Participant {
   name: string;
@@ -335,20 +336,19 @@ export default function MeetingRecords() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <AppLayout title="Ata Plano de Acao" subtitle="Registre reunioes e decisoes">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-bold" data-testid="text-page-title">Ata Plano de Acao</h1>
-          <p className="text-muted-foreground">Registre reunioes e acompanhe planos de acao</p>
-        </div>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+    <AppLayout title="Ata Plano de Acao" subtitle="Registre reunioes e decisoes">
+      <div className="space-y-6">
+        <div className="flex items-center justify-end gap-4 flex-wrap">
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) resetForm();
         }}>
@@ -862,6 +862,7 @@ export default function MeetingRecords() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </AppLayout>
   );
 }
