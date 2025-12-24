@@ -56,6 +56,7 @@ import {
   FileBadge,
   BookOpen,
   Route,
+  Store,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -151,11 +152,6 @@ const vendasItems = [
     title: "Metas",
     url: "/operações",
     icon: Settings2,
-  },
-  {
-    title: "Biblioteca",
-    url: "/biblioteca",
-    icon: Library,
   },
 ];
 
@@ -284,6 +280,14 @@ const suporteItems = [
     title: "Suporte",
     url: "/suporte",
     icon: HeadphonesIcon,
+  },
+];
+
+const lojaMcgItems = [
+  {
+    title: "Biblioteca",
+    url: "/biblioteca",
+    icon: Library,
   },
 ];
 
@@ -438,6 +442,13 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <CollapsibleSection
+          title="Loja MCG"
+          icon={Store}
+          items={lojaMcgItems}
+          location={location}
+        />
 
         <CollapsibleSection
           title="MKT (Pré Vendas)"
