@@ -5019,5 +5019,211 @@ export async function registerRoutes(
     }
   });
 
+  // ============ MCG Store API ============
+  
+  // Product Categories (Admin)
+  app.get("/api/store/categories", async (req, res) => {
+    try {
+      const categories = await storage.getStoreProductCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching store categories:", error);
+      res.status(500).json({ message: "Falha ao buscar categorias" });
+    }
+  });
+
+  app.post("/api/admin/store/categories", isAdmin, async (req, res) => {
+    try {
+      const category = await storage.createStoreProductCategory(req.body);
+      res.json(category);
+    } catch (error) {
+      console.error("Error creating store category:", error);
+      res.status(500).json({ message: "Falha ao criar categoria" });
+    }
+  });
+
+  app.patch("/api/admin/store/categories/:id", isAdmin, async (req, res) => {
+    try {
+      const category = await storage.updateStoreProductCategory(parseInt(req.params.id), req.body);
+      if (!category) {
+        return res.status(404).json({ message: "Categoria nao encontrada" });
+      }
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating store category:", error);
+      res.status(500).json({ message: "Falha ao atualizar categoria" });
+    }
+  });
+
+  app.delete("/api/admin/store/categories/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteStoreProductCategory(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting store category:", error);
+      res.status(500).json({ message: "Falha ao excluir categoria" });
+    }
+  });
+
+  // Store Products (Public - only active products)
+  app.get("/api/store/products", async (req, res) => {
+    try {
+      const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
+      const productType = req.query.productType as string | undefined;
+      const products = await storage.getStoreProducts({ 
+        categoryId, 
+        isActive: true,
+        productType 
+      });
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching store products:", error);
+      res.status(500).json({ message: "Falha ao buscar produtos" });
+    }
+  });
+
+  app.get("/api/store/products/:slug", async (req, res) => {
+    try {
+      const product = await storage.getStoreProductBySlug(req.params.slug);
+      if (!product || !product.isActive) {
+        return res.status(404).json({ message: "Produto nao encontrado" });
+      }
+      res.json(product);
+    } catch (error) {
+      console.error("Error fetching store product:", error);
+      res.status(500).json({ message: "Falha ao buscar produto" });
+    }
+  });
+
+  // Store Products (Admin - all products)
+  app.get("/api/admin/store/products", isAdmin, async (req, res) => {
+    try {
+      const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
+      const productType = req.query.productType as string | undefined;
+      const products = await storage.getStoreProducts({ categoryId, productType });
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching admin store products:", error);
+      res.status(500).json({ message: "Falha ao buscar produtos" });
+    }
+  });
+
+  app.post("/api/admin/store/products", isAdmin, async (req, res) => {
+    try {
+      const product = await storage.createStoreProduct(req.body);
+      res.json(product);
+    } catch (error) {
+      console.error("Error creating store product:", error);
+      res.status(500).json({ message: "Falha ao criar produto" });
+    }
+  });
+
+  app.patch("/api/admin/store/products/:id", isAdmin, async (req, res) => {
+    try {
+      const product = await storage.updateStoreProduct(parseInt(req.params.id), req.body);
+      if (!product) {
+        return res.status(404).json({ message: "Produto nao encontrado" });
+      }
+      res.json(product);
+    } catch (error) {
+      console.error("Error updating store product:", error);
+      res.status(500).json({ message: "Falha ao atualizar produto" });
+    }
+  });
+
+  app.delete("/api/admin/store/products/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteStoreProduct(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting store product:", error);
+      res.status(500).json({ message: "Falha ao excluir produto" });
+    }
+  });
+
+  // E-book Volumes (Admin)
+  app.get("/api/admin/store/ebook-volumes", isAdmin, async (req, res) => {
+    try {
+      const productId = req.query.productId ? parseInt(req.query.productId as string) : undefined;
+      const volumes = await storage.getEbookVolumes(productId);
+      res.json(volumes);
+    } catch (error) {
+      console.error("Error fetching ebook volumes:", error);
+      res.status(500).json({ message: "Falha ao buscar volumes" });
+    }
+  });
+
+  app.post("/api/admin/store/ebook-volumes", isAdmin, async (req, res) => {
+    try {
+      const volume = await storage.createEbookVolume(req.body);
+      res.json(volume);
+    } catch (error) {
+      console.error("Error creating ebook volume:", error);
+      res.status(500).json({ message: "Falha ao criar volume" });
+    }
+  });
+
+  app.patch("/api/admin/store/ebook-volumes/:id", isAdmin, async (req, res) => {
+    try {
+      const volume = await storage.updateEbookVolume(parseInt(req.params.id), req.body);
+      if (!volume) {
+        return res.status(404).json({ message: "Volume nao encontrado" });
+      }
+      res.json(volume);
+    } catch (error) {
+      console.error("Error updating ebook volume:", error);
+      res.status(500).json({ message: "Falha ao atualizar volume" });
+    }
+  });
+
+  app.delete("/api/admin/store/ebook-volumes/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteEbookVolume(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting ebook volume:", error);
+      res.status(500).json({ message: "Falha ao excluir volume" });
+    }
+  });
+
+  // Store Orders (Admin)
+  app.get("/api/admin/store/orders", isAdmin, async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const orders = await storage.getStoreOrders({ status });
+      res.json(orders);
+    } catch (error) {
+      console.error("Error fetching store orders:", error);
+      res.status(500).json({ message: "Falha ao buscar pedidos" });
+    }
+  });
+
+  app.get("/api/admin/store/orders/:id", isAdmin, async (req, res) => {
+    try {
+      const order = await storage.getStoreOrder(parseInt(req.params.id));
+      if (!order) {
+        return res.status(404).json({ message: "Pedido nao encontrado" });
+      }
+      const items = await storage.getStoreOrderItems(order.id);
+      res.json({ ...order, items });
+    } catch (error) {
+      console.error("Error fetching store order:", error);
+      res.status(500).json({ message: "Falha ao buscar pedido" });
+    }
+  });
+
+  app.patch("/api/admin/store/orders/:id", isAdmin, async (req, res) => {
+    try {
+      const order = await storage.updateStoreOrder(parseInt(req.params.id), req.body);
+      if (!order) {
+        return res.status(404).json({ message: "Pedido nao encontrado" });
+      }
+      res.json(order);
+    } catch (error) {
+      console.error("Error updating store order:", error);
+      res.status(500).json({ message: "Falha ao atualizar pedido" });
+    }
+  });
+
   return httpServer;
 }

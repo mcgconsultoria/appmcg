@@ -57,6 +57,7 @@ import {
   BookOpen,
   Route,
   Store,
+  Gift,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -298,6 +299,11 @@ const lojaMcgItems = [
     title: "Manual APP",
     url: "/manual-app",
     icon: FileText,
+  },
+  {
+    title: "Brindes",
+    url: "/brindes",
+    icon: Gift,
   },
 ];
 
