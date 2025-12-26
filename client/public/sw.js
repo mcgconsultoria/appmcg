@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mcg-consultoria-v1';
+const CACHE_NAME = 'mcg-consultoria-v2';
 const OFFLINE_URL = '/offline.html';
 
 const urlsToCache = [
@@ -33,6 +33,14 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  
+  // Never cache API requests - always go to network
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+  
   if (event.request.mode === 'navigate') {
     event.respondWith(
       fetch(event.request)
