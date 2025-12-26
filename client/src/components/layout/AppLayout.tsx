@@ -1,9 +1,10 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Bell, ArrowLeft } from "lucide-react";
+import { Bell, ArrowLeft, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { Link } from "wouter";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -58,6 +59,12 @@ export function AppLayout({ children, title, subtitle, showBackButton = true }: 
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" data-testid="button-notifications">
                 <Bell className="h-5 w-5" />
+              </Button>
+              <Button variant="outline" size="sm" asChild data-testid="button-new-account">
+                <a href="/login" title="Acessar outra conta">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Nova Conta
+                </a>
               </Button>
               <ThemeToggle />
             </div>

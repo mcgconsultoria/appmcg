@@ -444,7 +444,7 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4 border-b border-sidebar-border">
-        <Link href="/dashboard">
+        <a href="/" title="Ir para página inicial">
           <div className="flex items-center gap-3 cursor-pointer">
             <img 
               src={logoMcg} 
@@ -456,7 +456,7 @@ export function AppSidebar() {
               <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
             </div>
           </div>
-        </Link>
+        </a>
       </SidebarHeader>
 
       <SidebarContent>
