@@ -1,24 +1,16 @@
-import { useEffect } from "react";
-import { queryClient } from "@/lib/queryClient";
+import { useEffect, useRef } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Logout() {
+  const { logout } = useAuth();
+  const hasLoggedOut = useRef(false);
+
   useEffect(() => {
-    const doLogout = async () => {
-      try {
-        await fetch("/api/auth/logout", { 
-          method: "POST", 
-          credentials: "include" 
-        });
-      } catch (e) {
-        // Ignore errors
-      }
-      // Clear all React Query cache
-      queryClient.clear();
-      // Force full page reload to clear all state
-      window.location.href = "/";
-    };
-    doLogout();
-  }, []);
+    if (!hasLoggedOut.current) {
+      hasLoggedOut.current = true;
+      logout();
+    }
+  }, [logout]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">
