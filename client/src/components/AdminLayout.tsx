@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Sidebar,
   SidebarContent,
@@ -259,15 +260,20 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   Administrador
                 </p>
               </div>
-              <Link href="/logout">
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center h-9 w-9 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                  data-testid="button-admin-logout"
-                >
-                  <LogOut className="h-4 w-4" />
-                </button>
-              </Link>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link href="/logout">
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center h-9 w-9 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                      data-testid="button-admin-logout"
+                    >
+                      <LogOut className="h-4 w-4" />
+                    </button>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>Sair</TooltipContent>
+              </Tooltip>
             </div>
           </SidebarFooter>
         </Sidebar>
@@ -275,7 +281,12 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         <div className="flex flex-col flex-1 overflow-hidden">
           <header className="flex items-center justify-between gap-2 p-3 border-b border-border bg-background">
             <div className="flex items-center gap-2">
-              <SidebarTrigger data-testid="button-admin-sidebar-toggle" />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <SidebarTrigger data-testid="button-admin-sidebar-toggle" />
+                </TooltipTrigger>
+                <TooltipContent>Menu</TooltipContent>
+              </Tooltip>
               <h1 className="text-lg font-semibold">ADMIN MCG</h1>
             </div>
             <ThemeToggle />

@@ -63,6 +63,7 @@ import {
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -548,15 +549,20 @@ export function AppSidebar() {
               Configurações
             </Link>
           </Button>
-          <Link href="/logout">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center h-9 w-9 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-              data-testid="button-logout"
-            >
-              <LogOut className="h-4 w-4" />
-            </button>
-          </Link>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link href="/logout">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                  data-testid="button-logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>Sair</TooltipContent>
+          </Tooltip>
         </div>
       </SidebarFooter>
     </Sidebar>

@@ -1,10 +1,10 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Bell, ArrowLeft, UserPlus } from "lucide-react";
+import { Bell, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLocation } from "wouter";
-import { Link } from "wouter";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -37,17 +37,26 @@ export function AppLayout({ children, title, subtitle, showBackButton = true }: 
         <div className="flex flex-col flex-1 min-w-0">
           <header className="h-16 flex items-center justify-between gap-4 px-4 md:px-6 border-b border-border bg-background sticky top-0 z-40">
             <div className="flex items-center gap-4">
-              <SidebarTrigger data-testid="button-sidebar-toggle" />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <SidebarTrigger data-testid="button-sidebar-toggle" />
+                </TooltipTrigger>
+                <TooltipContent>Menu</TooltipContent>
+              </Tooltip>
               {showBackButton && !isDashboard && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleBack}
-                  data-testid="button-back"
-                  title="Voltar"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleBack}
+                      data-testid="button-back"
+                    >
+                      <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Voltar</TooltipContent>
+                </Tooltip>
               )}
               <div>
                 <h1 className="text-lg font-semibold" data-testid="text-page-title">{title}</h1>
@@ -57,15 +66,25 @@ export function AppLayout({ children, title, subtitle, showBackButton = true }: 
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" data-testid="button-notifications">
-                <Bell className="h-5 w-5" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" data-testid="button-notifications">
+                    <Bell className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Notificações</TooltipContent>
+              </Tooltip>
               <ThemeToggle />
-              <Button variant="outline" size="sm" asChild data-testid="button-new-access">
-                <a href="/login" title="Acessar outra conta">
-                  Novo Acesso
-                </a>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="sm" asChild data-testid="button-new-access">
+                    <a href="/login">
+                      Novo Acesso
+                    </a>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Acessar outra conta</TooltipContent>
+              </Tooltip>
             </div>
           </header>
           <main className="flex-1 overflow-auto p-4 md:p-6 bg-background">
