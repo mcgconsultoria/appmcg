@@ -311,11 +311,6 @@ const lojaMcgItems = [
     icon: BookOpen,
   },
   {
-    title: "Manual APP",
-    url: "/manual-app",
-    icon: FileText,
-  },
-  {
     title: "Brindes",
     url: "/brindes",
     icon: Gift,
@@ -476,6 +471,18 @@ export function AppSidebar() {
                   >
                     <HeadphonesIcon className="h-5 w-5" />
                     <span>Suporte</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={location === "/manual-app"}>
+                  <Link 
+                    href="/manual-app" 
+                    data-testid="nav-manual-app"
+                    className="flex items-center gap-2 px-3 py-2 text-base font-semibold"
+                  >
+                    <FileText className="h-5 w-5" />
+                    <span>Manual APP</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
