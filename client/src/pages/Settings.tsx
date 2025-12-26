@@ -475,7 +475,7 @@ export default function Settings() {
             </div>
             <Separator />
             <div>
-              <form action="/api/auth/logout" method="POST" style={{ display: 'inline' }}>
+              <form action="/api/auth/logout" method="POST" target="_top" style={{ display: 'inline' }}>
                 <button
                   type="submit"
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90"

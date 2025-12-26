@@ -259,7 +259,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   Administrador
                 </p>
               </div>
-              <form action="/api/auth/logout" method="POST" style={{ display: 'inline' }}>
+              <form action="/api/auth/logout" method="POST" target="_top" style={{ display: 'inline' }}>
                 <button
                   type="submit"
                   className="inline-flex items-center justify-center h-9 w-9 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground"
