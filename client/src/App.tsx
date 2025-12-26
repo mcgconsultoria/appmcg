@@ -67,6 +67,7 @@ import ManualApp from "@/pages/ManualApp";
 import Brindes from "@/pages/Brindes";
 import DiagnósticoComercial from "@/pages/DiagnosticoComercial";
 import CampanhaPiloto from "@/pages/CampanhaPiloto";
+import Logout from "@/pages/Logout";
 
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -96,6 +97,7 @@ function Router() {
       <Route path="/registro" component={Register} />
       <Route path="/esqueci-senha" component={ForgotPassword} />
       <Route path="/redefinir-senha" component={ResetPassword} />
+      <Route path="/logout" component={Logout} />
       {/* Admin routes - show login if not authenticated or not admin */}
       <Route path="/admin">
         {() => isAuthenticated && isAdmin ? <AdminDashboard /> : <AdminLogin />}

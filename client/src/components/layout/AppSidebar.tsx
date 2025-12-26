@@ -545,15 +545,15 @@ export function AppSidebar() {
               Configurações
             </Link>
           </Button>
-          <form action="/api/auth/logout" method="POST" target="_top" style={{ display: 'inline' }}>
+          <Link href="/logout">
             <button
-              type="submit"
+              type="button"
               className="inline-flex items-center justify-center h-9 w-9 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground"
               data-testid="button-logout"
             >
               <LogOut className="h-4 w-4" />
             </button>
-          </form>
+          </Link>
         </div>
       </SidebarFooter>
     </Sidebar>

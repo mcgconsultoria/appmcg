@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -475,15 +476,15 @@ export default function Settings() {
             </div>
             <Separator />
             <div>
-              <form action="/api/auth/logout" method="POST" target="_top" style={{ display: 'inline' }}>
+              <Link href="/logout">
                 <button
-                  type="submit"
+                  type="button"
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   data-testid="button-logout-settings"
                 >
                   Sair da Conta
                 </button>
-              </form>
+              </Link>
             </div>
           </CardContent>
         </Card>
