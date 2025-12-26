@@ -259,21 +259,16 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   Administrador
                 </p>
               </div>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  fetch("/api/auth/logout", { method: "POST", credentials: "include" })
-                    .finally(() => {
-                      window.location.replace(window.location.origin);
-                    });
-                }}
-                data-testid="button-admin-logout"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <form action="/api/auth/logout" method="POST" style={{ display: 'inline' }}>
+                <Button
+                  type="submit"
+                  size="icon"
+                  variant="ghost"
+                  data-testid="button-admin-logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </form>
             </div>
           </SidebarFooter>
         </Sidebar>

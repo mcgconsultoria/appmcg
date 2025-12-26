@@ -475,20 +475,15 @@ export default function Settings() {
             </div>
             <Separator />
             <div>
-              <Button 
-                variant="destructive" 
-                data-testid="button-logout-settings"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  fetch("/api/auth/logout", { method: "POST", credentials: "include" })
-                    .finally(() => {
-                      window.location.replace(window.location.origin);
-                    });
-                }}
-              >
-                Sair da Conta
-              </Button>
+              <form action="/api/auth/logout" method="POST" style={{ display: 'inline' }}>
+                <Button 
+                  type="submit"
+                  variant="destructive" 
+                  data-testid="button-logout-settings"
+                >
+                  Sair da Conta
+                </Button>
+              </form>
             </div>
           </CardContent>
         </Card>

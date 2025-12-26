@@ -545,21 +545,16 @@ export function AppSidebar() {
               Configurações
             </Link>
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            data-testid="button-logout"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              fetch("/api/auth/logout", { method: "POST", credentials: "include" })
-                .finally(() => {
-                  window.location.replace(window.location.origin);
-                });
-            }}
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
+          <form action="/api/auth/logout" method="POST" style={{ display: 'inline' }}>
+            <Button
+              type="submit"
+              variant="ghost"
+              size="icon"
+              data-testid="button-logout"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </form>
         </div>
       </SidebarFooter>
     </Sidebar>
