@@ -230,7 +230,8 @@ export async function registerRoutes(
       await storage.setPasswordResetToken(user.id, resetToken, resetTokenExpiry);
 
       const { emailService } = await import("./emailService");
-      const resetUrl = `${process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'https://www.mcgconsultoria.com.br'}/redefinir-senha?token=${resetToken}`;
+      // Always use production URL for password reset emails
+      const resetUrl = `https://www.mcgconsultoria.com.br/redefinir-senha?token=${resetToken}`;
       
       console.log("Attempting to send password reset email to:", email);
       console.log("Email service configured:", emailService.isConfigured());
