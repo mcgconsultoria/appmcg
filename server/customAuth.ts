@@ -52,12 +52,16 @@ export async function registerUser(data: RegisterData): Promise<{ user: User; se
 }
 
 export async function loginUser(data: LoginData): Promise<{ user: User; sessionToken: string } | { error: string }> {
+  console.log("Login attempt for:", data.email);
   const user = await storage.getUserByEmail(data.email);
   if (!user || !user.password) {
+    console.log("User not found or no password:", data.email);
     return { error: "Email ou senha inválidos" };
   }
 
+  console.log("User found, verifying password. Hash starts with:", user.password?.substring(0, 20));
   const isValid = await verifyPassword(data.password, user.password);
+  console.log("Password verification result:", isValid);
   if (!isValid) {
     return { error: "Email ou senha inválidos" };
   }

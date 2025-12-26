@@ -284,10 +284,17 @@ export async function registerRoutes(
       }
 
       const bcrypt = await import("bcryptjs");
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, 12);
+      
+      console.log("Resetting password for user:", user.id, user.email);
+      console.log("New password hash generated (first 20 chars):", hashedPassword.substring(0, 20));
       
       await storage.updateUserPassword(user.id, hashedPassword);
       await storage.clearPasswordResetToken(user.id);
+      
+      // Verify the password was saved correctly
+      const updatedUser = await storage.getUser(user.id);
+      console.log("Password updated successfully:", updatedUser?.password?.substring(0, 20));
 
       res.json({ message: "Senha redefinida com sucesso" });
     } catch (error) {
