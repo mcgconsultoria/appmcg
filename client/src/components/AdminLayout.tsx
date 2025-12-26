@@ -262,9 +262,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <Button
                 size="icon"
                 variant="ghost"
-                onClick={() => {
-                  fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-                  setTimeout(() => { window.location.href = "/"; }, 100);
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  fetch("/api/auth/logout", { method: "POST", credentials: "include" })
+                    .finally(() => {
+                      window.location.replace(window.location.origin);
+                    });
                 }}
                 data-testid="button-admin-logout"
               >

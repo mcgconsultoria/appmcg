@@ -478,13 +478,13 @@ export default function Settings() {
               <Button 
                 variant="destructive" 
                 data-testid="button-logout-settings"
-                onClick={async () => {
-                  try {
-                    await apiRequest("POST", "/api/auth/logout");
-                    window.location.href = "/";
-                  } catch (error) {
-                    window.location.href = "/";
-                  }
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  fetch("/api/auth/logout", { method: "POST", credentials: "include" })
+                    .finally(() => {
+                      window.location.replace(window.location.origin);
+                    });
                 }}
               >
                 Sair da Conta
