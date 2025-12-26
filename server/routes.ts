@@ -180,7 +180,13 @@ export async function registerRoutes(
       if (req.user?.id) {
         await logoutUser(req.user.id);
       }
-      res.clearCookie(SESSION_COOKIE_NAME);
+      // Clear cookie with same options used when setting
+      res.clearCookie(SESSION_COOKIE_NAME, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+      });
       // Check if it's a form submit (no Accept: application/json header)
       const acceptHeader = req.headers.accept || '';
       if (acceptHeader.includes('application/json')) {
@@ -190,7 +196,12 @@ export async function registerRoutes(
       }
     } catch (error) {
       console.error("Error logging out:", error);
-      res.clearCookie(SESSION_COOKIE_NAME);
+      res.clearCookie(SESSION_COOKIE_NAME, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+      });
       const acceptHeader = req.headers.accept || '';
       if (acceptHeader.includes('application/json')) {
         res.json({ message: "Logout realizado com sucesso" });
