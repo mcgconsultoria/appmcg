@@ -262,7 +262,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <Button
                 size="icon"
                 variant="ghost"
-                onClick={() => logout()}
+                onClick={() => {
+                  fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+                  setTimeout(() => { window.location.href = "/"; }, 100);
+                }}
                 data-testid="button-admin-logout"
               >
                 <LogOut className="h-4 w-4" />

@@ -549,7 +549,10 @@ export function AppSidebar() {
             variant="ghost"
             size="icon"
             data-testid="button-logout"
-            onClick={() => logout()}
+            onClick={() => {
+              fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+              setTimeout(() => { window.location.href = "/"; }, 100);
+            }}
           >
             <LogOut className="h-4 w-4" />
           </Button>
