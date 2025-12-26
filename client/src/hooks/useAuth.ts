@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { User } from "@shared/schema";
-import { getQueryFn, apiRequest } from "@/lib/queryClient";
+import { getQueryFn, queryClient } from "@/lib/queryClient";
 
 export function useAuth() {
   const { data: user, isLoading } = useQuery<User | null>({
@@ -17,7 +17,10 @@ export function useAuth() {
     } catch (error) {
       // Ignore errors
     }
-    window.location.replace("/");
+    // Clear React Query cache
+    queryClient.clear();
+    // Force full page reload to landing
+    window.location.href = "/?logout=" + Date.now();
   };
 
   return {
