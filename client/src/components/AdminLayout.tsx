@@ -260,14 +260,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 </p>
               </div>
               <form action="/api/auth/logout" method="POST" style={{ display: 'inline' }}>
-                <Button
+                <button
                   type="submit"
-                  size="icon"
-                  variant="ghost"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground"
                   data-testid="button-admin-logout"
                 >
                   <LogOut className="h-4 w-4" />
-                </Button>
+                </button>
               </form>
             </div>
           </SidebarFooter>
