@@ -125,7 +125,7 @@ export default function Landing() {
     <div className="min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2" data-testid="link-logo-header">
             <img 
               src={logoMcg} 
               alt="MCG Consultoria" 
@@ -135,7 +135,7 @@ export default function Landing() {
               <span className="font-bold text-lg leading-tight">MCG</span>
               <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
             </div>
-          </div>
+          </Link>
           <nav className="hidden md:flex items-center gap-6">
             <Link href="/diagnóstico" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Diagnóstico Grátis
@@ -436,7 +436,7 @@ export default function Landing() {
         <div className="max-w-screen-xl mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <div className="flex items-center gap-2 mb-4">
+              <Link href="/" className="flex items-center gap-2 mb-4" data-testid="link-logo-footer">
                 <img 
                   src={logoMcg} 
                   alt="MCG Consultoria" 
@@ -446,7 +446,7 @@ export default function Landing() {
                   <span className="font-bold text-lg leading-tight">MCG</span>
                   <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
                 </div>
-              </div>
+              </Link>
               <p className="text-sm text-muted-foreground mb-2">
                 Consultoria especializada em logística com foco na área comercial.
               </p>
