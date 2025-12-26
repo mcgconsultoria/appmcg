@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { sendEmailViaGmail, isGoogleIntegrationAvailable } from "./googleServices";
 
 interface EmailAttachment {
@@ -21,6 +22,7 @@ interface EmailResult {
 
 class EmailService {
   private resend: Resend | null = null;
+  private smtpTransporter: nodemailer.Transporter | null = null;
 
   constructor() {
     this.initialize();
@@ -31,10 +33,24 @@ class EmailService {
     if (resendApiKey) {
       this.resend = new Resend(resendApiKey);
     }
+
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPassword = process.env.SMTP_PASSWORD;
+    if (smtpUser && smtpPassword) {
+      this.smtpTransporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+        auth: {
+          user: smtpUser,
+          pass: smtpPassword,
+        },
+      });
+    }
   }
 
   isConfigured(): boolean {
-    return this.resend !== null || isGoogleIntegrationAvailable();
+    return this.smtpTransporter !== null || this.resend !== null || isGoogleIntegrationAvailable();
   }
 
   isGmailConfigured(): boolean {
@@ -45,7 +61,15 @@ class EmailService {
     return this.resend !== null;
   }
 
+  isSmtpConfigured(): boolean {
+    return this.smtpTransporter !== null;
+  }
+
   async send(options: SendEmailOptions): Promise<EmailResult> {
+    if (this.smtpTransporter) {
+      return this.sendViaSmtp(options);
+    }
+
     if (isGoogleIntegrationAvailable()) {
       return this.sendViaGmail(options);
     }
@@ -57,8 +81,41 @@ class EmailService {
     return {
       success: false,
       message: "Servico de email nao configurado",
-      error: "Configure a integracao com Gmail ou RESEND_API_KEY para habilitar o envio de emails",
+      error: "Configure SMTP_USER/SMTP_PASSWORD, integracao Gmail ou RESEND_API_KEY para habilitar envio de emails",
     };
+  }
+
+  private async sendViaSmtp(options: SendEmailOptions): Promise<EmailResult> {
+    try {
+      const smtpUser = process.env.SMTP_USER || "";
+      const fromName = process.env.SMTP_FROM_NAME || "MCG Consultoria";
+      
+      const mailOptions: nodemailer.SendMailOptions = {
+        from: `${fromName} <${smtpUser}>`,
+        to: options.to.join(", "),
+        subject: options.subject,
+        html: options.html,
+        attachments: options.attachments?.map(a => ({
+          filename: a.filename,
+          content: a.content,
+        })),
+      };
+
+      await this.smtpTransporter!.sendMail(mailOptions);
+      
+      console.log("Email sent successfully via SMTP to:", options.to);
+      return {
+        success: true,
+        message: `Email enviado com sucesso via SMTP para ${options.to.length} destinatario(s)`,
+      };
+    } catch (error: any) {
+      console.error("SMTP send error:", error);
+      return {
+        success: false,
+        message: "Erro ao enviar email via SMTP",
+        error: error.message || "Erro desconhecido",
+      };
+    }
   }
 
   private async sendViaGmail(options: SendEmailOptions): Promise<EmailResult> {
