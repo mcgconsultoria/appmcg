@@ -60,13 +60,12 @@ export function AppLayout({ children, title, subtitle, showBackButton = true }: 
               <Button variant="ghost" size="icon" data-testid="button-notifications">
                 <Bell className="h-5 w-5" />
               </Button>
-              <Button variant="outline" size="sm" asChild data-testid="button-new-account">
+              <ThemeToggle />
+              <Button variant="outline" size="sm" asChild data-testid="button-new-access">
                 <a href="/login" title="Acessar outra conta">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Nova Conta
+                  Novo Acesso
                 </a>
               </Button>
-              <ThemeToggle />
             </div>
           </header>
           <main className="flex-1 overflow-auto p-4 md:p-6 bg-background">

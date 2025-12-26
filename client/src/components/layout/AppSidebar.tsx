@@ -444,19 +444,21 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader className="p-4 border-b border-sidebar-border">
-        <a href="/" title="Ir para página inicial">
-          <div className="flex items-center gap-3 cursor-pointer">
-            <img 
-              src={logoMcg} 
-              alt="MCG Consultoria" 
-              className="h-10 w-10 object-contain"
-            />
-            <div className="flex flex-col">
-              <span className="font-bold text-lg leading-tight">MCG</span>
-              <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
-            </div>
+        <div 
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={() => window.location.href = '/landing'}
+          title="Ir para página inicial"
+        >
+          <img 
+            src={logoMcg} 
+            alt="MCG Consultoria" 
+            className="h-10 w-10 object-contain"
+          />
+          <div className="flex flex-col">
+            <span className="font-bold text-lg leading-tight">MCG</span>
+            <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
           </div>
-        </a>
+        </div>
       </SidebarHeader>
 
       <SidebarContent>

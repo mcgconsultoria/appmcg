@@ -156,6 +156,7 @@ function Router() {
       <Route path="/admin/whatsapp">
         {() => isAuthenticated && isAdmin ? <AdminWhatsApp /> : <AdminLogin />}
       </Route>
+      <Route path="/landing" component={Landing} />
       {!isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (
