@@ -149,9 +149,9 @@ export default function Landing() {
             <Link href="/planos" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Planos
             </Link>
-            <a href="#contato" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Contato
-            </a>
+            <Link href="/faleconosco" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              Fale Conosco
+            </Link>
             <div className="flex items-center gap-2 ml-2">
               <a
                 href="https://play.google.com/store"
@@ -500,7 +500,7 @@ export default function Landing() {
               <h4 className="font-semibold mb-4">Suporte</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>Central de Ajuda</li>
-                <li>Contato</li>
+                <li><Link href="/faleconosco" className="hover:text-foreground">Fale Conosco</Link></li>
                 <li><Link href="/termos" className="hover:text-foreground">Termos de Uso</Link></li>
                 <li><Link href="/privacidade" className="hover:text-foreground">Privacidade</Link></li>
               </ul>

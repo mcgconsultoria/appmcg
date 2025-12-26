@@ -189,6 +189,7 @@ function Router() {
           <Route path="/admin-cliente" component={AdminCliente} />
           <Route path="/logs-auditoria" component={AuditLogs} />
           <Route path="/suporte" component={Support} />
+          <Route path="/faleconosco" component={Support} />
         </>
       )}
       <Route component={NotFound} />
