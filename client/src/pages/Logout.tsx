@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { queryClient } from "@/lib/queryClient";
 
 export default function Logout() {
   useEffect(() => {
@@ -11,6 +12,8 @@ export default function Logout() {
       } catch (e) {
         // Ignore errors
       }
+      // Clear all React Query cache
+      queryClient.clear();
       // Force full page reload to clear all state
       window.location.href = "/";
     };
