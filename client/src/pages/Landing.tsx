@@ -17,9 +17,11 @@ import {
   Mail,
   Handshake,
   Smartphone,
+  UserCheck,
 } from "lucide-react";
 import { SiFacebook, SiInstagram, SiLinkedin, SiWhatsapp, SiGoogle, SiYoutube } from "react-icons/si";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useAuth } from "@/hooks/useAuth";
 import logoMcg from "@assets/logo_mcg_principal.png";
 
 const features = [
@@ -101,6 +103,8 @@ const services = [
 ];
 
 export default function Landing() {
+  const { user, isAuthenticated } = useAuth();
+
   useEffect(() => {
     const existingScript = document.getElementById("ra-embed-reputation");
     if (!existingScript) {
@@ -151,9 +155,21 @@ export default function Landing() {
           </nav>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Link href="/login">
-              <Button data-testid="button-login">Entrar</Button>
-            </Link>
+            {isAuthenticated && user ? (
+              <Link href="/dashboard">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-muted/50 cursor-pointer" data-testid="button-logged-in">
+                  <UserCheck className="h-4 w-4 text-green-600" />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">Logado</span>
+                    <span className="text-xs text-muted-foreground">{user.email}</span>
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <Link href="/login">
+                <Button data-testid="button-login">Entrar</Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>
