@@ -20,7 +20,7 @@ export function useAuth() {
     // Clear React Query cache
     queryClient.clear();
     // Force full page reload to landing
-    window.location.href = "/?logout=" + Date.now();
+    window.location.href = "/";
   };
 
   return {
