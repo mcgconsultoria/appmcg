@@ -35,8 +35,8 @@ export function AppLayout({ children, title, subtitle, showBackButton = true }: 
       <div className="flex h-screen w-full">
         <AppSidebar />
         <div className="flex flex-col flex-1 min-w-0">
-          <header className="h-16 flex items-center justify-between gap-4 px-4 md:px-6 border-b border-border bg-background sticky top-0 z-40">
-            <div className="flex items-center gap-4">
+          <header className="h-14 md:h-16 flex items-center justify-between gap-2 md:gap-4 px-3 md:px-6 border-b border-border bg-background sticky top-0 z-40">
+            <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <SidebarTrigger data-testid="button-sidebar-toggle" />
@@ -58,17 +58,17 @@ export function AppLayout({ children, title, subtitle, showBackButton = true }: 
                   <TooltipContent>Voltar</TooltipContent>
                 </Tooltip>
               )}
-              <div>
-                <h1 className="text-lg font-semibold" data-testid="text-page-title">{title}</h1>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-base md:text-lg font-semibold truncate" data-testid="text-page-title">{title}</h1>
                 {subtitle && (
-                  <p className="text-sm text-muted-foreground">{subtitle}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground truncate hidden sm:block">{subtitle}</p>
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" data-testid="button-notifications">
+                  <Button variant="ghost" size="icon" data-testid="button-notifications" className="hidden sm:flex">
                     <Bell className="h-5 w-5" />
                   </Button>
                 </TooltipTrigger>
@@ -77,7 +77,7 @@ export function AppLayout({ children, title, subtitle, showBackButton = true }: 
               <ThemeToggle />
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="outline" size="sm" asChild data-testid="button-new-access">
+                  <Button variant="outline" size="sm" asChild data-testid="button-new-access" className="hidden md:flex">
                     <a href="/login">
                       Novo Acesso
                     </a>

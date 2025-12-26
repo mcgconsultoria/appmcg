@@ -208,10 +208,10 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2">
-            <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
-              <CardTitle className="text-lg">Clientes Recentes</CardTitle>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <Card className="md:col-span-2 lg:col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between gap-2 sm:gap-4 pb-4">
+              <CardTitle className="text-base sm:text-lg">Clientes Recentes</CardTitle>
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/clientes">
                   Ver todos
@@ -257,8 +257,8 @@ export default function Dashboard() {
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
-              <CardTitle className="text-lg">Pipeline de Vendas</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between gap-2 sm:gap-4 pb-4">
+              <CardTitle className="text-base sm:text-lg">Pipeline de Vendas</CardTitle>
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/pipeline">
                   <ChevronRight className="h-4 w-4" />
@@ -285,13 +285,13 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-4 md:gap-6">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
-              <CardTitle className="text-lg">Ações Rápidas</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between gap-2 sm:gap-4 pb-4">
+              <CardTitle className="text-base sm:text-lg">Ações Rápidas</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
                 <Button variant="outline" className="h-auto py-4 flex-col gap-2" asChild>
                   <Link href="/clientes">
                     <Users className="h-5 w-5" />
@@ -321,13 +321,13 @@ export default function Dashboard() {
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
-              <CardTitle className="text-lg flex items-center gap-2">
+            <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 pb-4">
+              <CardTitle className="text-base sm:text-lg flex items-center gap-2">
                 <Target className="h-5 w-5" />
                 Ritmo de Faturamento
               </CardTitle>
               <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="w-[180px]" data-testid="select-billing-month">
+                <SelectTrigger className="w-full sm:w-[180px]" data-testid="select-billing-month">
                   <SelectValue placeholder="Selecione o mês" />
                 </SelectTrigger>
                 <SelectContent>
@@ -408,14 +408,14 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-4 md:gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
+              <CardTitle className="text-base sm:text-lg flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
                 Clientes por Estado
               </CardTitle>
-              <CardDescription>Distribuição geografica dos clientes</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">Distribuição geografica dos clientes</CardDescription>
             </CardHeader>
             <CardContent>
               {stateChartData.length > 0 ? (
