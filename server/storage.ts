@@ -182,6 +182,36 @@ import {
   type InsertWhatsappConversation,
   type WhatsappMessage,
   type InsertWhatsappMessage,
+  personalCategories,
+  personalAccounts,
+  personalTransactions,
+  irpfDeclarations,
+  irpfIncomes,
+  irpfDeductions,
+  irpfDependents,
+  irpfAssets,
+  irpjSummaries,
+  irpjDasPayments,
+  type PersonalCategory,
+  type InsertPersonalCategory,
+  type PersonalAccount,
+  type InsertPersonalAccount,
+  type PersonalTransaction,
+  type InsertPersonalTransaction,
+  type IrpfDeclaration,
+  type InsertIrpfDeclaration,
+  type IrpfIncome,
+  type InsertIrpfIncome,
+  type IrpfDeduction,
+  type InsertIrpfDeduction,
+  type IrpfDependent,
+  type InsertIrpfDependent,
+  type IrpfAsset,
+  type InsertIrpfAsset,
+  type IrpjSummary,
+  type InsertIrpjSummary,
+  type IrpjDasPayment,
+  type InsertIrpjDasPayment,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
@@ -2541,6 +2571,251 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(whatsappMessages)
       .where(eq(whatsappMessages.conversationId, conversationId))
       .orderBy(whatsappMessages.createdAt);
+  }
+
+  // ==================== Personal Finance Operations ====================
+  
+  async getPersonalCategories(userId: string): Promise<PersonalCategory[]> {
+    return db.select().from(personalCategories)
+      .where(eq(personalCategories.userId, userId))
+      .orderBy(personalCategories.name);
+  }
+
+  async createPersonalCategory(category: InsertPersonalCategory): Promise<PersonalCategory> {
+    const [newCategory] = await db.insert(personalCategories).values(category).returning();
+    return newCategory;
+  }
+
+  async updatePersonalCategory(id: number, category: Partial<InsertPersonalCategory>): Promise<PersonalCategory | undefined> {
+    const [updated] = await db.update(personalCategories)
+      .set(category)
+      .where(eq(personalCategories.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePersonalCategory(id: number): Promise<boolean> {
+    await db.delete(personalCategories).where(eq(personalCategories.id, id));
+    return true;
+  }
+
+  async getPersonalAccounts(userId: string): Promise<PersonalAccount[]> {
+    return db.select().from(personalAccounts)
+      .where(eq(personalAccounts.userId, userId))
+      .orderBy(personalAccounts.name);
+  }
+
+  async createPersonalAccount(account: InsertPersonalAccount): Promise<PersonalAccount> {
+    const [newAccount] = await db.insert(personalAccounts).values(account).returning();
+    return newAccount;
+  }
+
+  async updatePersonalAccount(id: number, account: Partial<InsertPersonalAccount>): Promise<PersonalAccount | undefined> {
+    const [updated] = await db.update(personalAccounts)
+      .set({ ...account, updatedAt: new Date() })
+      .where(eq(personalAccounts.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePersonalAccount(id: number): Promise<boolean> {
+    await db.delete(personalAccounts).where(eq(personalAccounts.id, id));
+    return true;
+  }
+
+  async getPersonalTransactions(userId: string, filters?: { accountId?: number; startDate?: string; endDate?: string }): Promise<PersonalTransaction[]> {
+    const conditions = [eq(personalTransactions.userId, userId)];
+    if (filters?.accountId) conditions.push(eq(personalTransactions.accountId, filters.accountId));
+    if (filters?.startDate) conditions.push(gte(personalTransactions.date, filters.startDate));
+    if (filters?.endDate) conditions.push(lte(personalTransactions.date, filters.endDate));
+    return db.select().from(personalTransactions)
+      .where(and(...conditions))
+      .orderBy(desc(personalTransactions.date));
+  }
+
+  async createPersonalTransaction(transaction: InsertPersonalTransaction): Promise<PersonalTransaction> {
+    const [newTransaction] = await db.insert(personalTransactions).values(transaction).returning();
+    return newTransaction;
+  }
+
+  async updatePersonalTransaction(id: number, transaction: Partial<InsertPersonalTransaction>): Promise<PersonalTransaction | undefined> {
+    const [updated] = await db.update(personalTransactions)
+      .set({ ...transaction, updatedAt: new Date() })
+      .where(eq(personalTransactions.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePersonalTransaction(id: number): Promise<boolean> {
+    await db.delete(personalTransactions).where(eq(personalTransactions.id, id));
+    return true;
+  }
+
+  // ==================== IRPF Operations ====================
+
+  async getIrpfDeclarations(userId: string): Promise<IrpfDeclaration[]> {
+    return db.select().from(irpfDeclarations)
+      .where(eq(irpfDeclarations.userId, userId))
+      .orderBy(desc(irpfDeclarations.year));
+  }
+
+  async getIrpfDeclaration(id: number): Promise<IrpfDeclaration | undefined> {
+    const [declaration] = await db.select().from(irpfDeclarations).where(eq(irpfDeclarations.id, id));
+    return declaration;
+  }
+
+  async createIrpfDeclaration(declaration: InsertIrpfDeclaration): Promise<IrpfDeclaration> {
+    const [newDeclaration] = await db.insert(irpfDeclarations).values(declaration).returning();
+    return newDeclaration;
+  }
+
+  async updateIrpfDeclaration(id: number, declaration: Partial<InsertIrpfDeclaration>): Promise<IrpfDeclaration | undefined> {
+    const [updated] = await db.update(irpfDeclarations)
+      .set({ ...declaration, updatedAt: new Date() })
+      .where(eq(irpfDeclarations.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteIrpfDeclaration(id: number): Promise<boolean> {
+    await db.delete(irpfIncomes).where(eq(irpfIncomes.declarationId, id));
+    await db.delete(irpfDeductions).where(eq(irpfDeductions.declarationId, id));
+    await db.delete(irpfDependents).where(eq(irpfDependents.declarationId, id));
+    await db.delete(irpfAssets).where(eq(irpfAssets.declarationId, id));
+    await db.delete(irpfDeclarations).where(eq(irpfDeclarations.id, id));
+    return true;
+  }
+
+  async getIrpfIncomes(declarationId: number): Promise<IrpfIncome[]> {
+    return db.select().from(irpfIncomes).where(eq(irpfIncomes.declarationId, declarationId));
+  }
+
+  async createIrpfIncome(income: InsertIrpfIncome): Promise<IrpfIncome> {
+    const [newIncome] = await db.insert(irpfIncomes).values(income).returning();
+    return newIncome;
+  }
+
+  async updateIrpfIncome(id: number, income: Partial<InsertIrpfIncome>): Promise<IrpfIncome | undefined> {
+    const [updated] = await db.update(irpfIncomes).set(income).where(eq(irpfIncomes.id, id)).returning();
+    return updated;
+  }
+
+  async deleteIrpfIncome(id: number): Promise<boolean> {
+    await db.delete(irpfIncomes).where(eq(irpfIncomes.id, id));
+    return true;
+  }
+
+  async getIrpfDeductions(declarationId: number): Promise<IrpfDeduction[]> {
+    return db.select().from(irpfDeductions).where(eq(irpfDeductions.declarationId, declarationId));
+  }
+
+  async createIrpfDeduction(deduction: InsertIrpfDeduction): Promise<IrpfDeduction> {
+    const [newDeduction] = await db.insert(irpfDeductions).values(deduction).returning();
+    return newDeduction;
+  }
+
+  async updateIrpfDeduction(id: number, deduction: Partial<InsertIrpfDeduction>): Promise<IrpfDeduction | undefined> {
+    const [updated] = await db.update(irpfDeductions).set(deduction).where(eq(irpfDeductions.id, id)).returning();
+    return updated;
+  }
+
+  async deleteIrpfDeduction(id: number): Promise<boolean> {
+    await db.delete(irpfDeductions).where(eq(irpfDeductions.id, id));
+    return true;
+  }
+
+  async getIrpfDependents(declarationId: number): Promise<IrpfDependent[]> {
+    return db.select().from(irpfDependents).where(eq(irpfDependents.declarationId, declarationId));
+  }
+
+  async createIrpfDependent(dependent: InsertIrpfDependent): Promise<IrpfDependent> {
+    const [newDependent] = await db.insert(irpfDependents).values(dependent).returning();
+    return newDependent;
+  }
+
+  async updateIrpfDependent(id: number, dependent: Partial<InsertIrpfDependent>): Promise<IrpfDependent | undefined> {
+    const [updated] = await db.update(irpfDependents).set(dependent).where(eq(irpfDependents.id, id)).returning();
+    return updated;
+  }
+
+  async deleteIrpfDependent(id: number): Promise<boolean> {
+    await db.delete(irpfDependents).where(eq(irpfDependents.id, id));
+    return true;
+  }
+
+  async getIrpfAssets(declarationId: number): Promise<IrpfAsset[]> {
+    return db.select().from(irpfAssets).where(eq(irpfAssets.declarationId, declarationId));
+  }
+
+  async createIrpfAsset(asset: InsertIrpfAsset): Promise<IrpfAsset> {
+    const [newAsset] = await db.insert(irpfAssets).values(asset).returning();
+    return newAsset;
+  }
+
+  async updateIrpfAsset(id: number, asset: Partial<InsertIrpfAsset>): Promise<IrpfAsset | undefined> {
+    const [updated] = await db.update(irpfAssets).set(asset).where(eq(irpfAssets.id, id)).returning();
+    return updated;
+  }
+
+  async deleteIrpfAsset(id: number): Promise<boolean> {
+    await db.delete(irpfAssets).where(eq(irpfAssets.id, id));
+    return true;
+  }
+
+  // ==================== IRPJ Operations ====================
+
+  async getIrpjSummaries(): Promise<IrpjSummary[]> {
+    return db.select().from(irpjSummaries).orderBy(desc(irpjSummaries.year));
+  }
+
+  async getIrpjSummary(id: number): Promise<IrpjSummary | undefined> {
+    const [summary] = await db.select().from(irpjSummaries).where(eq(irpjSummaries.id, id));
+    return summary;
+  }
+
+  async getIrpjSummaryByYear(year: number): Promise<IrpjSummary | undefined> {
+    const [summary] = await db.select().from(irpjSummaries).where(eq(irpjSummaries.year, year));
+    return summary;
+  }
+
+  async createIrpjSummary(summary: InsertIrpjSummary): Promise<IrpjSummary> {
+    const [newSummary] = await db.insert(irpjSummaries).values(summary).returning();
+    return newSummary;
+  }
+
+  async updateIrpjSummary(id: number, summary: Partial<InsertIrpjSummary>): Promise<IrpjSummary | undefined> {
+    const [updated] = await db.update(irpjSummaries)
+      .set({ ...summary, updatedAt: new Date() })
+      .where(eq(irpjSummaries.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteIrpjSummary(id: number): Promise<boolean> {
+    await db.delete(irpjDasPayments).where(eq(irpjDasPayments.summaryId, id));
+    await db.delete(irpjSummaries).where(eq(irpjSummaries.id, id));
+    return true;
+  }
+
+  async getIrpjDasPayments(summaryId: number): Promise<IrpjDasPayment[]> {
+    return db.select().from(irpjDasPayments)
+      .where(eq(irpjDasPayments.summaryId, summaryId))
+      .orderBy(irpjDasPayments.competenceMonth);
+  }
+
+  async createIrpjDasPayment(payment: InsertIrpjDasPayment): Promise<IrpjDasPayment> {
+    const [newPayment] = await db.insert(irpjDasPayments).values(payment).returning();
+    return newPayment;
+  }
+
+  async updateIrpjDasPayment(id: number, payment: Partial<InsertIrpjDasPayment>): Promise<IrpjDasPayment | undefined> {
+    const [updated] = await db.update(irpjDasPayments).set(payment).where(eq(irpjDasPayments.id, id)).returning();
+    return updated;
+  }
+
+  async deleteIrpjDasPayment(id: number): Promise<boolean> {
+    await db.delete(irpjDasPayments).where(eq(irpjDasPayments.id, id));
+    return true;
   }
 }
 

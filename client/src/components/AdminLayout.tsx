@@ -37,6 +37,9 @@ import {
   PieChart,
   Landmark,
   BarChart3,
+  Wallet,
+  Receipt,
+  Calculator,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 
@@ -134,6 +137,24 @@ const financeConfigItems = [
   },
 ];
 
+const personalFinanceItems = [
+  {
+    title: "Gestao Pessoal",
+    url: "/admin/gestao-pessoal",
+    icon: Wallet,
+  },
+  {
+    title: "IRPF",
+    url: "/admin/irpf",
+    icon: Receipt,
+  },
+  {
+    title: "IRPJ",
+    url: "/admin/irpj",
+    icon: Calculator,
+  },
+];
+
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
@@ -213,6 +234,27 @@ export function AdminLayout({ children }: AdminLayoutProps) {
               <SidebarGroupContent>
                 <SidebarMenu>
                   {financeConfigItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={location === item.url || location.startsWith(item.url)}
+                      >
+                        <Link href={item.url}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>Finanças Pessoais</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {personalFinanceItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild

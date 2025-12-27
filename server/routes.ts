@@ -5460,5 +5460,464 @@ export async function registerRoutes(
     }
   });
 
+  // ==================== GESTÃO FINANCEIRA PESSOAL ====================
+
+  // Personal Categories
+  app.get("/api/admin/personal/categories", isAdmin, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const categories = await storage.getPersonalCategories(userId);
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching personal categories:", error);
+      res.status(500).json({ message: "Falha ao buscar categorias" });
+    }
+  });
+
+  app.post("/api/admin/personal/categories", isAdmin, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const category = await storage.createPersonalCategory({ ...req.body, userId });
+      res.json(category);
+    } catch (error) {
+      console.error("Error creating personal category:", error);
+      res.status(500).json({ message: "Falha ao criar categoria" });
+    }
+  });
+
+  app.patch("/api/admin/personal/categories/:id", isAdmin, async (req, res) => {
+    try {
+      const category = await storage.updatePersonalCategory(parseInt(req.params.id), req.body);
+      if (!category) return res.status(404).json({ message: "Categoria nao encontrada" });
+      res.json(category);
+    } catch (error) {
+      console.error("Error updating personal category:", error);
+      res.status(500).json({ message: "Falha ao atualizar categoria" });
+    }
+  });
+
+  app.delete("/api/admin/personal/categories/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deletePersonalCategory(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting personal category:", error);
+      res.status(500).json({ message: "Falha ao excluir categoria" });
+    }
+  });
+
+  // Personal Accounts
+  app.get("/api/admin/personal/accounts", isAdmin, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const accounts = await storage.getPersonalAccounts(userId);
+      res.json(accounts);
+    } catch (error) {
+      console.error("Error fetching personal accounts:", error);
+      res.status(500).json({ message: "Falha ao buscar contas" });
+    }
+  });
+
+  app.post("/api/admin/personal/accounts", isAdmin, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const account = await storage.createPersonalAccount({ ...req.body, userId });
+      res.json(account);
+    } catch (error) {
+      console.error("Error creating personal account:", error);
+      res.status(500).json({ message: "Falha ao criar conta" });
+    }
+  });
+
+  app.patch("/api/admin/personal/accounts/:id", isAdmin, async (req, res) => {
+    try {
+      const account = await storage.updatePersonalAccount(parseInt(req.params.id), req.body);
+      if (!account) return res.status(404).json({ message: "Conta nao encontrada" });
+      res.json(account);
+    } catch (error) {
+      console.error("Error updating personal account:", error);
+      res.status(500).json({ message: "Falha ao atualizar conta" });
+    }
+  });
+
+  app.delete("/api/admin/personal/accounts/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deletePersonalAccount(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting personal account:", error);
+      res.status(500).json({ message: "Falha ao excluir conta" });
+    }
+  });
+
+  // Personal Transactions
+  app.get("/api/admin/personal/transactions", isAdmin, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const { accountId, startDate, endDate } = req.query;
+      const transactions = await storage.getPersonalTransactions(userId, {
+        accountId: accountId ? parseInt(accountId as string) : undefined,
+        startDate: startDate as string,
+        endDate: endDate as string,
+      });
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching personal transactions:", error);
+      res.status(500).json({ message: "Falha ao buscar transacoes" });
+    }
+  });
+
+  app.post("/api/admin/personal/transactions", isAdmin, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const transaction = await storage.createPersonalTransaction({ ...req.body, userId });
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error creating personal transaction:", error);
+      res.status(500).json({ message: "Falha ao criar transacao" });
+    }
+  });
+
+  app.patch("/api/admin/personal/transactions/:id", isAdmin, async (req, res) => {
+    try {
+      const transaction = await storage.updatePersonalTransaction(parseInt(req.params.id), req.body);
+      if (!transaction) return res.status(404).json({ message: "Transacao nao encontrada" });
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error updating personal transaction:", error);
+      res.status(500).json({ message: "Falha ao atualizar transacao" });
+    }
+  });
+
+  app.delete("/api/admin/personal/transactions/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deletePersonalTransaction(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting personal transaction:", error);
+      res.status(500).json({ message: "Falha ao excluir transacao" });
+    }
+  });
+
+  // ==================== IRPF ====================
+
+  app.get("/api/admin/irpf/declarations", isAdmin, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const declarations = await storage.getIrpfDeclarations(userId);
+      res.json(declarations);
+    } catch (error) {
+      console.error("Error fetching IRPF declarations:", error);
+      res.status(500).json({ message: "Falha ao buscar declaracoes" });
+    }
+  });
+
+  app.get("/api/admin/irpf/declarations/:id", isAdmin, async (req, res) => {
+    try {
+      const declaration = await storage.getIrpfDeclaration(parseInt(req.params.id));
+      if (!declaration) return res.status(404).json({ message: "Declaracao nao encontrada" });
+      res.json(declaration);
+    } catch (error) {
+      console.error("Error fetching IRPF declaration:", error);
+      res.status(500).json({ message: "Falha ao buscar declaracao" });
+    }
+  });
+
+  app.post("/api/admin/irpf/declarations", isAdmin, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const declaration = await storage.createIrpfDeclaration({ ...req.body, userId });
+      res.json(declaration);
+    } catch (error) {
+      console.error("Error creating IRPF declaration:", error);
+      res.status(500).json({ message: "Falha ao criar declaracao" });
+    }
+  });
+
+  app.patch("/api/admin/irpf/declarations/:id", isAdmin, async (req, res) => {
+    try {
+      const declaration = await storage.updateIrpfDeclaration(parseInt(req.params.id), req.body);
+      if (!declaration) return res.status(404).json({ message: "Declaracao nao encontrada" });
+      res.json(declaration);
+    } catch (error) {
+      console.error("Error updating IRPF declaration:", error);
+      res.status(500).json({ message: "Falha ao atualizar declaracao" });
+    }
+  });
+
+  app.delete("/api/admin/irpf/declarations/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteIrpfDeclaration(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting IRPF declaration:", error);
+      res.status(500).json({ message: "Falha ao excluir declaracao" });
+    }
+  });
+
+  // IRPF Incomes
+  app.get("/api/admin/irpf/declarations/:declarationId/incomes", isAdmin, async (req, res) => {
+    try {
+      const incomes = await storage.getIrpfIncomes(parseInt(req.params.declarationId));
+      res.json(incomes);
+    } catch (error) {
+      console.error("Error fetching IRPF incomes:", error);
+      res.status(500).json({ message: "Falha ao buscar rendimentos" });
+    }
+  });
+
+  app.post("/api/admin/irpf/incomes", isAdmin, async (req, res) => {
+    try {
+      const income = await storage.createIrpfIncome(req.body);
+      res.json(income);
+    } catch (error) {
+      console.error("Error creating IRPF income:", error);
+      res.status(500).json({ message: "Falha ao criar rendimento" });
+    }
+  });
+
+  app.patch("/api/admin/irpf/incomes/:id", isAdmin, async (req, res) => {
+    try {
+      const income = await storage.updateIrpfIncome(parseInt(req.params.id), req.body);
+      if (!income) return res.status(404).json({ message: "Rendimento nao encontrado" });
+      res.json(income);
+    } catch (error) {
+      console.error("Error updating IRPF income:", error);
+      res.status(500).json({ message: "Falha ao atualizar rendimento" });
+    }
+  });
+
+  app.delete("/api/admin/irpf/incomes/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteIrpfIncome(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting IRPF income:", error);
+      res.status(500).json({ message: "Falha ao excluir rendimento" });
+    }
+  });
+
+  // IRPF Deductions
+  app.get("/api/admin/irpf/declarations/:declarationId/deductions", isAdmin, async (req, res) => {
+    try {
+      const deductions = await storage.getIrpfDeductions(parseInt(req.params.declarationId));
+      res.json(deductions);
+    } catch (error) {
+      console.error("Error fetching IRPF deductions:", error);
+      res.status(500).json({ message: "Falha ao buscar deducoes" });
+    }
+  });
+
+  app.post("/api/admin/irpf/deductions", isAdmin, async (req, res) => {
+    try {
+      const deduction = await storage.createIrpfDeduction(req.body);
+      res.json(deduction);
+    } catch (error) {
+      console.error("Error creating IRPF deduction:", error);
+      res.status(500).json({ message: "Falha ao criar deducao" });
+    }
+  });
+
+  app.patch("/api/admin/irpf/deductions/:id", isAdmin, async (req, res) => {
+    try {
+      const deduction = await storage.updateIrpfDeduction(parseInt(req.params.id), req.body);
+      if (!deduction) return res.status(404).json({ message: "Deducao nao encontrada" });
+      res.json(deduction);
+    } catch (error) {
+      console.error("Error updating IRPF deduction:", error);
+      res.status(500).json({ message: "Falha ao atualizar deducao" });
+    }
+  });
+
+  app.delete("/api/admin/irpf/deductions/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteIrpfDeduction(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting IRPF deduction:", error);
+      res.status(500).json({ message: "Falha ao excluir deducao" });
+    }
+  });
+
+  // IRPF Dependents
+  app.get("/api/admin/irpf/declarations/:declarationId/dependents", isAdmin, async (req, res) => {
+    try {
+      const dependents = await storage.getIrpfDependents(parseInt(req.params.declarationId));
+      res.json(dependents);
+    } catch (error) {
+      console.error("Error fetching IRPF dependents:", error);
+      res.status(500).json({ message: "Falha ao buscar dependentes" });
+    }
+  });
+
+  app.post("/api/admin/irpf/dependents", isAdmin, async (req, res) => {
+    try {
+      const dependent = await storage.createIrpfDependent(req.body);
+      res.json(dependent);
+    } catch (error) {
+      console.error("Error creating IRPF dependent:", error);
+      res.status(500).json({ message: "Falha ao criar dependente" });
+    }
+  });
+
+  app.patch("/api/admin/irpf/dependents/:id", isAdmin, async (req, res) => {
+    try {
+      const dependent = await storage.updateIrpfDependent(parseInt(req.params.id), req.body);
+      if (!dependent) return res.status(404).json({ message: "Dependente nao encontrado" });
+      res.json(dependent);
+    } catch (error) {
+      console.error("Error updating IRPF dependent:", error);
+      res.status(500).json({ message: "Falha ao atualizar dependente" });
+    }
+  });
+
+  app.delete("/api/admin/irpf/dependents/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteIrpfDependent(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting IRPF dependent:", error);
+      res.status(500).json({ message: "Falha ao excluir dependente" });
+    }
+  });
+
+  // IRPF Assets
+  app.get("/api/admin/irpf/declarations/:declarationId/assets", isAdmin, async (req, res) => {
+    try {
+      const assets = await storage.getIrpfAssets(parseInt(req.params.declarationId));
+      res.json(assets);
+    } catch (error) {
+      console.error("Error fetching IRPF assets:", error);
+      res.status(500).json({ message: "Falha ao buscar bens" });
+    }
+  });
+
+  app.post("/api/admin/irpf/assets", isAdmin, async (req, res) => {
+    try {
+      const asset = await storage.createIrpfAsset(req.body);
+      res.json(asset);
+    } catch (error) {
+      console.error("Error creating IRPF asset:", error);
+      res.status(500).json({ message: "Falha ao criar bem" });
+    }
+  });
+
+  app.patch("/api/admin/irpf/assets/:id", isAdmin, async (req, res) => {
+    try {
+      const asset = await storage.updateIrpfAsset(parseInt(req.params.id), req.body);
+      if (!asset) return res.status(404).json({ message: "Bem nao encontrado" });
+      res.json(asset);
+    } catch (error) {
+      console.error("Error updating IRPF asset:", error);
+      res.status(500).json({ message: "Falha ao atualizar bem" });
+    }
+  });
+
+  app.delete("/api/admin/irpf/assets/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteIrpfAsset(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting IRPF asset:", error);
+      res.status(500).json({ message: "Falha ao excluir bem" });
+    }
+  });
+
+  // ==================== IRPJ ====================
+
+  app.get("/api/admin/irpj/summaries", isAdmin, async (req, res) => {
+    try {
+      const summaries = await storage.getIrpjSummaries();
+      res.json(summaries);
+    } catch (error) {
+      console.error("Error fetching IRPJ summaries:", error);
+      res.status(500).json({ message: "Falha ao buscar resumos" });
+    }
+  });
+
+  app.get("/api/admin/irpj/summaries/:id", isAdmin, async (req, res) => {
+    try {
+      const summary = await storage.getIrpjSummary(parseInt(req.params.id));
+      if (!summary) return res.status(404).json({ message: "Resumo nao encontrado" });
+      res.json(summary);
+    } catch (error) {
+      console.error("Error fetching IRPJ summary:", error);
+      res.status(500).json({ message: "Falha ao buscar resumo" });
+    }
+  });
+
+  app.post("/api/admin/irpj/summaries", isAdmin, async (req, res) => {
+    try {
+      const summary = await storage.createIrpjSummary(req.body);
+      res.json(summary);
+    } catch (error) {
+      console.error("Error creating IRPJ summary:", error);
+      res.status(500).json({ message: "Falha ao criar resumo" });
+    }
+  });
+
+  app.patch("/api/admin/irpj/summaries/:id", isAdmin, async (req, res) => {
+    try {
+      const summary = await storage.updateIrpjSummary(parseInt(req.params.id), req.body);
+      if (!summary) return res.status(404).json({ message: "Resumo nao encontrado" });
+      res.json(summary);
+    } catch (error) {
+      console.error("Error updating IRPJ summary:", error);
+      res.status(500).json({ message: "Falha ao atualizar resumo" });
+    }
+  });
+
+  app.delete("/api/admin/irpj/summaries/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteIrpjSummary(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting IRPJ summary:", error);
+      res.status(500).json({ message: "Falha ao excluir resumo" });
+    }
+  });
+
+  // IRPJ DAS Payments
+  app.get("/api/admin/irpj/summaries/:summaryId/das", isAdmin, async (req, res) => {
+    try {
+      const payments = await storage.getIrpjDasPayments(parseInt(req.params.summaryId));
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching IRPJ DAS payments:", error);
+      res.status(500).json({ message: "Falha ao buscar pagamentos DAS" });
+    }
+  });
+
+  app.post("/api/admin/irpj/das", isAdmin, async (req, res) => {
+    try {
+      const payment = await storage.createIrpjDasPayment(req.body);
+      res.json(payment);
+    } catch (error) {
+      console.error("Error creating IRPJ DAS payment:", error);
+      res.status(500).json({ message: "Falha ao criar pagamento DAS" });
+    }
+  });
+
+  app.patch("/api/admin/irpj/das/:id", isAdmin, async (req, res) => {
+    try {
+      const payment = await storage.updateIrpjDasPayment(parseInt(req.params.id), req.body);
+      if (!payment) return res.status(404).json({ message: "Pagamento nao encontrado" });
+      res.json(payment);
+    } catch (error) {
+      console.error("Error updating IRPJ DAS payment:", error);
+      res.status(500).json({ message: "Falha ao atualizar pagamento DAS" });
+    }
+  });
+
+  app.delete("/api/admin/irpj/das/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteIrpjDasPayment(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting IRPJ DAS payment:", error);
+      res.status(500).json({ message: "Falha ao excluir pagamento DAS" });
+    }
+  });
+
   return httpServer;
 }

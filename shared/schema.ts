@@ -2133,3 +2133,247 @@ export type WhatsappMessage = typeof whatsappMessages.$inferSelect;
 export type InsertWhatsappMessage = z.infer<typeof insertWhatsappMessageSchema>;
 export type WhatsappAgent = typeof whatsappAgents.$inferSelect;
 export type InsertWhatsappAgent = z.infer<typeof insertWhatsappAgentSchema>;
+
+// ==================== GESTÃO FINANCEIRA PESSOAL ====================
+
+// Personal Finance Categories (Categorias de Despesas/Receitas Pessoais)
+export const personalCategories = pgTable("personal_categories", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  type: varchar("type", { length: 20 }).notNull(), // 'income' | 'expense'
+  icon: varchar("icon", { length: 50 }),
+  color: varchar("color", { length: 20 }),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertPersonalCategorySchema = createInsertSchema(personalCategories).omit({ id: true, createdAt: true });
+export type PersonalCategory = typeof personalCategories.$inferSelect;
+export type InsertPersonalCategory = z.infer<typeof insertPersonalCategorySchema>;
+
+// Personal Bank Accounts (Contas Bancárias Pessoais)
+export const personalAccounts = pgTable("personal_accounts", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  bankName: varchar("bank_name", { length: 100 }),
+  accountType: varchar("account_type", { length: 50 }), // 'checking' | 'savings' | 'credit_card' | 'investment' | 'cash'
+  initialBalance: decimal("initial_balance", { precision: 15, scale: 2 }).default("0"),
+  currentBalance: decimal("current_balance", { precision: 15, scale: 2 }).default("0"),
+  color: varchar("color", { length: 20 }),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPersonalAccountSchema = createInsertSchema(personalAccounts).omit({ id: true, createdAt: true, updatedAt: true });
+export type PersonalAccount = typeof personalAccounts.$inferSelect;
+export type InsertPersonalAccount = z.infer<typeof insertPersonalAccountSchema>;
+
+// Personal Transactions (Transações Pessoais)
+export const personalTransactions = pgTable("personal_transactions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  accountId: integer("account_id").notNull(),
+  categoryId: integer("category_id"),
+  type: varchar("type", { length: 20 }).notNull(), // 'income' | 'expense' | 'transfer'
+  description: varchar("description", { length: 255 }).notNull(),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  date: date("date").notNull(),
+  isPaid: boolean("is_paid").default(true),
+  isRecurring: boolean("is_recurring").default(false),
+  recurringType: varchar("recurring_type", { length: 20 }), // 'monthly' | 'weekly' | 'yearly'
+  notes: text("notes"),
+  // Vinculação com MCG (pró-labore, dividendos)
+  linkedToMcg: boolean("linked_to_mcg").default(false),
+  mcgRecordId: integer("mcg_record_id"), // referência ao adminFinancialRecords
+  mcgRecordType: varchar("mcg_record_type", { length: 50 }), // 'prolabore' | 'dividendo' | 'reembolso'
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPersonalTransactionSchema = createInsertSchema(personalTransactions).omit({ id: true, createdAt: true, updatedAt: true });
+export type PersonalTransaction = typeof personalTransactions.$inferSelect;
+export type InsertPersonalTransaction = z.infer<typeof insertPersonalTransactionSchema>;
+
+// ==================== IRPF - IMPOSTO DE RENDA PESSOA FÍSICA ====================
+
+// IRPF Annual Declaration (Declaração Anual)
+export const irpfDeclarations = pgTable("irpf_declarations", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  year: integer("year").notNull(),
+  status: varchar("status", { length: 20 }).default("draft"), // 'draft' | 'ready' | 'submitted'
+  cpf: varchar("cpf", { length: 14 }),
+  fullName: varchar("full_name", { length: 255 }),
+  birthDate: date("birth_date"),
+  occupation: varchar("occupation", { length: 100 }),
+  // Totals (calculated)
+  totalIncome: decimal("total_income", { precision: 15, scale: 2 }).default("0"),
+  totalDeductions: decimal("total_deductions", { precision: 15, scale: 2 }).default("0"),
+  totalTaxPaid: decimal("total_tax_paid", { precision: 15, scale: 2 }).default("0"),
+  estimatedTax: decimal("estimated_tax", { precision: 15, scale: 2 }).default("0"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertIrpfDeclarationSchema = createInsertSchema(irpfDeclarations).omit({ id: true, createdAt: true, updatedAt: true });
+export type IrpfDeclaration = typeof irpfDeclarations.$inferSelect;
+export type InsertIrpfDeclaration = z.infer<typeof insertIrpfDeclarationSchema>;
+
+// IRPF Income Sources (Rendimentos)
+export const irpfIncomes = pgTable("irpf_incomes", {
+  id: serial("id").primaryKey(),
+  declarationId: integer("declaration_id").notNull(),
+  type: varchar("type", { length: 50 }).notNull(), // 'salario' | 'prolabore' | 'aluguel' | 'dividendos' | 'outros'
+  sourceName: varchar("source_name", { length: 255 }).notNull(), // Nome da fonte pagadora
+  sourceCnpj: varchar("source_cnpj", { length: 18 }),
+  grossAmount: decimal("gross_amount", { precision: 15, scale: 2 }).notNull(),
+  taxWithheld: decimal("tax_withheld", { precision: 15, scale: 2 }).default("0"), // IRRF
+  inssWithheld: decimal("inss_withheld", { precision: 15, scale: 2 }).default("0"),
+  thirteenthSalary: decimal("thirteenth_salary", { precision: 15, scale: 2 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertIrpfIncomeSchema = createInsertSchema(irpfIncomes).omit({ id: true, createdAt: true });
+export type IrpfIncome = typeof irpfIncomes.$inferSelect;
+export type InsertIrpfIncome = z.infer<typeof insertIrpfIncomeSchema>;
+
+// IRPF Deductions (Deduções)
+export const irpfDeductions = pgTable("irpf_deductions", {
+  id: serial("id").primaryKey(),
+  declarationId: integer("declaration_id").notNull(),
+  type: varchar("type", { length: 50 }).notNull(), // 'saude' | 'educacao' | 'previdencia' | 'pensao' | 'dependente'
+  description: varchar("description", { length: 255 }).notNull(),
+  beneficiaryName: varchar("beneficiary_name", { length: 255 }),
+  beneficiaryCpfCnpj: varchar("beneficiary_cpf_cnpj", { length: 18 }),
+  amount: decimal("amount", { precision: 15, scale: 2 }).notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertIrpfDeductionSchema = createInsertSchema(irpfDeductions).omit({ id: true, createdAt: true });
+export type IrpfDeduction = typeof irpfDeductions.$inferSelect;
+export type InsertIrpfDeduction = z.infer<typeof insertIrpfDeductionSchema>;
+
+// IRPF Dependents (Dependentes)
+export const irpfDependents = pgTable("irpf_dependents", {
+  id: serial("id").primaryKey(),
+  declarationId: integer("declaration_id").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  cpf: varchar("cpf", { length: 14 }),
+  birthDate: date("birth_date"),
+  relationship: varchar("relationship", { length: 50 }), // 'filho' | 'conjuge' | 'pai' | 'mae' | 'outro'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertIrpfDependentSchema = createInsertSchema(irpfDependents).omit({ id: true, createdAt: true });
+export type IrpfDependent = typeof irpfDependents.$inferSelect;
+export type InsertIrpfDependent = z.infer<typeof insertIrpfDependentSchema>;
+
+// IRPF Assets (Bens e Direitos)
+export const irpfAssets = pgTable("irpf_assets", {
+  id: serial("id").primaryKey(),
+  declarationId: integer("declaration_id").notNull(),
+  code: varchar("code", { length: 10 }), // Código do bem na declaração
+  type: varchar("type", { length: 50 }).notNull(), // 'imovel' | 'veiculo' | 'conta_corrente' | 'investimento' | 'participacao'
+  description: varchar("description", { length: 500 }).notNull(),
+  location: varchar("location", { length: 100 }), // País/UF
+  acquisitionDate: date("acquisition_date"),
+  acquisitionValue: decimal("acquisition_value", { precision: 15, scale: 2 }),
+  currentValue: decimal("current_value", { precision: 15, scale: 2 }),
+  previousYearValue: decimal("previous_year_value", { precision: 15, scale: 2 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertIrpfAssetSchema = createInsertSchema(irpfAssets).omit({ id: true, createdAt: true });
+export type IrpfAsset = typeof irpfAssets.$inferSelect;
+export type InsertIrpfAsset = z.infer<typeof insertIrpfAssetSchema>;
+
+// ==================== IRPJ - IMPOSTO DE RENDA PESSOA JURÍDICA ====================
+
+// IRPJ Annual Summary (Resumo Anual PJ)
+export const irpjSummaries = pgTable("irpj_summaries", {
+  id: serial("id").primaryKey(),
+  year: integer("year").notNull(),
+  status: varchar("status", { length: 20 }).default("draft"), // 'draft' | 'ready' | 'submitted'
+  // Company Info
+  cnpj: varchar("cnpj", { length: 18 }),
+  razaoSocial: varchar("razao_social", { length: 255 }),
+  regimeTributario: varchar("regime_tributario", { length: 50 }), // 'simples' | 'lucro_presumido' | 'lucro_real'
+  // Faturamento
+  totalRevenue: decimal("total_revenue", { precision: 15, scale: 2 }).default("0"),
+  totalExpenses: decimal("total_expenses", { precision: 15, scale: 2 }).default("0"),
+  netProfit: decimal("net_profit", { precision: 15, scale: 2 }).default("0"),
+  // Impostos (Simples Nacional - DAS)
+  totalDas: decimal("total_das", { precision: 15, scale: 2 }).default("0"),
+  // Pró-labore e Distribuição
+  totalProlabore: decimal("total_prolabore", { precision: 15, scale: 2 }).default("0"),
+  totalDividends: decimal("total_dividends", { precision: 15, scale: 2 }).default("0"),
+  totalInss: decimal("total_inss", { precision: 15, scale: 2 }).default("0"),
+  // Monthly breakdown
+  monthlyData: jsonb("monthly_data").$type<{
+    month: number;
+    revenue: number;
+    expenses: number;
+    das: number;
+    prolabore: number;
+  }[]>(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertIrpjSummarySchema = createInsertSchema(irpjSummaries).omit({ id: true, createdAt: true, updatedAt: true });
+export type IrpjSummary = typeof irpjSummaries.$inferSelect;
+export type InsertIrpjSummary = z.infer<typeof insertIrpjSummarySchema>;
+
+// IRPJ DAS Payments (Pagamentos mensais do Simples Nacional)
+export const irpjDasPayments = pgTable("irpj_das_payments", {
+  id: serial("id").primaryKey(),
+  summaryId: integer("summary_id").notNull(),
+  competenceMonth: integer("competence_month").notNull(), // 1-12
+  competenceYear: integer("competence_year").notNull(),
+  revenueBase: decimal("revenue_base", { precision: 15, scale: 2 }).notNull(),
+  aliquot: decimal("aliquot", { precision: 5, scale: 4 }), // ex: 0.0600 = 6%
+  dasValue: decimal("das_value", { precision: 15, scale: 2 }).notNull(),
+  dueDate: date("due_date"),
+  paymentDate: date("payment_date"),
+  isPaid: boolean("is_paid").default(false),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertIrpjDasPaymentSchema = createInsertSchema(irpjDasPayments).omit({ id: true, createdAt: true });
+export type IrpjDasPayment = typeof irpjDasPayments.$inferSelect;
+export type InsertIrpjDasPayment = z.infer<typeof insertIrpjDasPaymentSchema>;
+
+// Personal Finance Types
+export type PersonalCategoryType = typeof personalCategories.$inferSelect;
+export type InsertPersonalCategoryType = z.infer<typeof insertPersonalCategorySchema>;
+export type PersonalAccountType = typeof personalAccounts.$inferSelect;
+export type InsertPersonalAccountType = z.infer<typeof insertPersonalAccountSchema>;
+export type PersonalTransactionType = typeof personalTransactions.$inferSelect;
+export type InsertPersonalTransactionType = z.infer<typeof insertPersonalTransactionSchema>;
+
+// IRPF Types
+export type IrpfDeclarationType = typeof irpfDeclarations.$inferSelect;
+export type InsertIrpfDeclarationType = z.infer<typeof insertIrpfDeclarationSchema>;
+export type IrpfIncomeType = typeof irpfIncomes.$inferSelect;
+export type InsertIrpfIncomeType = z.infer<typeof insertIrpfIncomeSchema>;
+export type IrpfDeductionType = typeof irpfDeductions.$inferSelect;
+export type InsertIrpfDeductionType = z.infer<typeof insertIrpfDeductionSchema>;
+export type IrpfDependentType = typeof irpfDependents.$inferSelect;
+export type InsertIrpfDependentType = z.infer<typeof insertIrpfDependentSchema>;
+export type IrpfAssetType = typeof irpfAssets.$inferSelect;
+export type InsertIrpfAssetType = z.infer<typeof insertIrpfAssetSchema>;
+
+// IRPJ Types
+export type IrpjSummaryType = typeof irpjSummaries.$inferSelect;
+export type InsertIrpjSummaryType = z.infer<typeof insertIrpjSummarySchema>;
+export type IrpjDasPaymentType = typeof irpjDasPayments.$inferSelect;
+export type InsertIrpjDasPaymentType = z.infer<typeof insertIrpjDasPaymentSchema>;

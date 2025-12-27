@@ -59,6 +59,9 @@ import AdminLançamentos from "@/pages/admin/AdminLancamentos";
 import AdminRelatorioDRE from "@/pages/admin/AdminRelatorioDRE";
 import AdminLoja from "@/pages/admin/AdminLoja";
 import AdminWhatsApp from "@/pages/admin/AdminWhatsApp";
+import GestãoPessoal from "@/pages/admin/GestãoPessoal";
+import IRPF from "@/pages/admin/IRPF";
+import IRPJ from "@/pages/admin/IRPJ";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import BibliotecaChecklists from "@/pages/BibliotecaChecklists";
@@ -155,6 +158,15 @@ function Router() {
       </Route>
       <Route path="/admin/whatsapp">
         {() => isAuthenticated && isAdmin ? <AdminWhatsApp /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/gestao-pessoal">
+        {() => isAuthenticated && isAdmin ? <GestãoPessoal /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/irpf">
+        {() => isAuthenticated && isAdmin ? <IRPF /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/irpj">
+        {() => isAuthenticated && isAdmin ? <IRPJ /> : <AdminLogin />}
       </Route>
       <Route path="/landing" component={Landing} />
       {!isAuthenticated ? (
