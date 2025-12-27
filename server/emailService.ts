@@ -23,6 +23,8 @@ interface EmailResult {
 class EmailService {
   private resend: Resend | null = null;
   private smtpTransporter: nodemailer.Transporter | null = null;
+  private lastSmtpUser: string | undefined;
+  private lastSmtpPassword: string | undefined;
 
   constructor() {
     this.initialize();
@@ -34,9 +36,16 @@ class EmailService {
       this.resend = new Resend(resendApiKey);
     }
 
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPassword = process.env.SMTP_PASSWORD;
-    if (smtpUser && smtpPassword) {
+    this.refreshSmtpTransporter();
+  }
+
+  private refreshSmtpTransporter() {
+    const smtpUser = process.env.SMTP_USER?.trim();
+    const smtpPassword = process.env.SMTP_PASSWORD?.trim();
+    
+    if (smtpUser && smtpPassword && 
+        (smtpUser !== this.lastSmtpUser || smtpPassword !== this.lastSmtpPassword)) {
+      console.log("Configuring SMTP transporter for:", smtpUser);
       this.smtpTransporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 587,
@@ -46,6 +55,8 @@ class EmailService {
           pass: smtpPassword,
         },
       });
+      this.lastSmtpUser = smtpUser;
+      this.lastSmtpPassword = smtpPassword;
     }
   }
 
@@ -66,6 +77,8 @@ class EmailService {
   }
 
   async send(options: SendEmailOptions): Promise<EmailResult> {
+    this.refreshSmtpTransporter();
+    
     if (this.smtpTransporter) {
       return this.sendViaSmtp(options);
     }
@@ -78,6 +91,8 @@ class EmailService {
       return this.sendViaResend(options);
     }
 
+    console.log("Email service not configured. SMTP_USER:", process.env.SMTP_USER ? "set" : "not set", 
+                "SMTP_PASSWORD:", process.env.SMTP_PASSWORD ? "set" : "not set");
     return {
       success: false,
       message: "Servico de email nao configurado",
