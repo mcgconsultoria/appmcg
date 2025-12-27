@@ -232,6 +232,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             </SidebarGroup>
 
             <SidebarGroup>
+              <SidebarGroupLabel>Finanças do CEO</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarMenuItem>
@@ -242,6 +243,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
                       <Link href="/dashboard">
