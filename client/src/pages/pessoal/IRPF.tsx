@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { AdminLayout } from "@/components/AdminLayout";
+import { AdminPessoalLayout } from "@/components/AdminPessoalLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -219,7 +219,7 @@ export default function IRPF() {
 
   if (!selectedDeclaration) {
     return (
-      <AdminLayout>
+      <AdminPessoalLayout>
         <div className="space-y-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
@@ -298,12 +298,12 @@ export default function IRPF() {
             </div>
           )}
         </div>
-      </AdminLayout>
+      </AdminPessoalLayout>
     );
   }
 
   return (
-    <AdminLayout>
+    <AdminPessoalLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
@@ -698,6 +698,6 @@ export default function IRPF() {
           </TabsContent>
         </Tabs>
       </div>
-    </AdminLayout>
+    </AdminPessoalLayout>
   );
 }

@@ -1,7 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -19,130 +18,46 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import {
-  LayoutDashboard,
-  Users,
-  Briefcase,
-  FolderKanban,
-  DollarSign,
-  Handshake,
-  FileText,
+  Wallet,
+  Receipt,
+  Calculator,
   ArrowLeft,
   LogOut,
-  Megaphone,
-  Palette,
-  PenTool,
-  Library,
-  Building2,
-  Shield,
-  PieChart,
-  Landmark,
-  BarChart3,
+  LayoutDashboard,
   User,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 
-const adminMenuItems = [
+const menuItems = [
   {
-    title: "Dashboard",
-    url: "/admin",
+    title: "Visao Geral",
+    url: "/pessoal",
     icon: LayoutDashboard,
   },
   {
-    title: "Gestão Comercial",
-    url: "/admin/comercial",
-    icon: Users,
+    title: "Gestao Financeira",
+    url: "/pessoal/gestao",
+    icon: Wallet,
   },
   {
-    title: "Projetos",
-    url: "/admin/projetos",
-    icon: FolderKanban,
+    title: "IRPF",
+    url: "/pessoal/irpf",
+    icon: Receipt,
   },
   {
-    title: "Financeiro",
-    url: "/admin/financeiro",
-    icon: DollarSign,
-  },
-  {
-    title: "Parcerias",
-    url: "/admin/parcerias",
-    icon: Handshake,
-  },
-  {
-    title: "Conteúdo",
-    url: "/admin/conteudo",
-    icon: FileText,
-  },
-  {
-    title: "Contratos Digitais",
-    url: "/admin/contratos",
-    icon: PenTool,
-  },
-  {
-    title: "Biblioteca Templates",
-    url: "/admin/templates",
-    icon: Library,
+    title: "IRPJ",
+    url: "/pessoal/irpj",
+    icon: Calculator,
   },
 ];
 
-const marketingMenuItems = [
-  {
-    title: "Kit da Marca",
-    url: "/admin/kit-marca",
-    icon: Palette,
-  },
-  {
-    title: "Campanha Piloto",
-    url: "/admin/campanha-piloto",
-    icon: Megaphone,
-  },
-  {
-    title: "Leads Diagnóstico",
-    url: "/admin/leads-diagnóstico",
-    icon: Users,
-  },
-];
-
-const financeConfigItems = [
-  {
-    title: "Plano de Contas DRE",
-    url: "/admin/dre",
-    icon: PieChart,
-  },
-  {
-    title: "Centros de Custo",
-    url: "/admin/centros-custo",
-    icon: Building2,
-  },
-  {
-    title: "Contas Bancarias",
-    url: "/admin/bancos",
-    icon: Landmark,
-  },
-  {
-    title: "Certificados Digitais",
-    url: "/admin/certificados",
-    icon: Shield,
-  },
-  {
-    title: "Lançamentos",
-    url: "/admin/lançamentos",
-    icon: FileText,
-  },
-  {
-    title: "Relatorio DRE",
-    url: "/admin/relatorio-dre",
-    icon: BarChart3,
-  },
-];
-
-
-interface AdminLayoutProps {
+interface AdminPessoalLayoutProps {
   children: React.ReactNode;
 }
 
-export function AdminLayout({ children }: AdminLayoutProps) {
+export function AdminPessoalLayout({ children }: AdminPessoalLayoutProps) {
   const [location] = useLocation();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   const sidebarStyle = {
     "--sidebar-width": "16rem",
@@ -155,70 +70,26 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         <Sidebar>
           <SidebarHeader className="p-4 border-b border-border">
             <div className="flex items-center gap-2">
-              <img
-                src={logoMcg}
-                alt="MCG"
-                className="h-8 w-8 object-contain"
-              />
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <User className="h-4 w-4 text-primary" />
+              </div>
               <div className="flex flex-col">
-                <span className="font-bold text-sm leading-tight">MCG Admin</span>
-                <span className="text-xs text-muted-foreground leading-tight">Gestão Interna</span>
+                <span className="font-bold text-sm leading-tight">Admin Pessoal</span>
+                <span className="text-xs text-muted-foreground leading-tight">Finanças do CEO</span>
               </div>
             </div>
           </SidebarHeader>
 
           <SidebarContent>
             <SidebarGroup>
-              <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
+              <SidebarGroupLabel>Menu</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {adminMenuItems.map((item) => (
+                  {menuItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         asChild
-                        isActive={location === item.url || (item.url !== "/admin" && location.startsWith(item.url))}
-                      >
-                        <Link href={item.url}>
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Marketing</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {marketingMenuItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={location === item.url || location.startsWith(item.url)}
-                      >
-                        <Link href={item.url}>
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Config. Financeiras</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {financeConfigItems.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={location === item.url || location.startsWith(item.url)}
+                        isActive={location === item.url || (item.url !== "/pessoal" && location.startsWith(item.url))}
                       >
                         <Link href={item.url}>
                           <item.icon className="h-4 w-4" />
@@ -236,9 +107,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <Link href="/pessoal">
-                        <User className="h-4 w-4" />
-                        <span>Admin Pessoal</span>
+                      <Link href="/admin">
+                        <img src={logoMcg} alt="MCG" className="h-4 w-4 object-contain" />
+                        <span>Admin MCG</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -267,7 +138,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                   {user?.firstName || user?.email}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  Administrador
+                  CEO
                 </p>
               </div>
               <Tooltip>
@@ -276,7 +147,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     <button
                       type="button"
                       className="inline-flex items-center justify-center h-9 w-9 rounded-md text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                      data-testid="button-admin-logout"
+                      data-testid="button-pessoal-logout"
                     >
                       <LogOut className="h-4 w-4" />
                     </button>
@@ -293,11 +164,11 @@ export function AdminLayout({ children }: AdminLayoutProps) {
             <div className="flex items-center gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <SidebarTrigger data-testid="button-admin-sidebar-toggle" />
+                  <SidebarTrigger data-testid="button-pessoal-sidebar-toggle" />
                 </TooltipTrigger>
                 <TooltipContent>Menu</TooltipContent>
               </Tooltip>
-              <h1 className="text-lg font-semibold">ADMIN MCG</h1>
+              <h1 className="text-lg font-semibold">ADMIN PESSOAL</h1>
             </div>
             <ThemeToggle />
           </header>

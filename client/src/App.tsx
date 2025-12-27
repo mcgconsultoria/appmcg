@@ -59,9 +59,10 @@ import AdminLançamentos from "@/pages/admin/AdminLancamentos";
 import AdminRelatorioDRE from "@/pages/admin/AdminRelatorioDRE";
 import AdminLoja from "@/pages/admin/AdminLoja";
 import AdminWhatsApp from "@/pages/admin/AdminWhatsApp";
-import GestãoPessoal from "@/pages/admin/GestãoPessoal";
-import IRPF from "@/pages/admin/IRPF";
-import IRPJ from "@/pages/admin/IRPJ";
+import PessoalDashboard from "@/pages/pessoal/PessoalDashboard";
+import GestaoFinanceira from "@/pages/pessoal/GestaoFinanceira";
+import PessoalIRPF from "@/pages/pessoal/IRPF";
+import PessoalIRPJ from "@/pages/pessoal/IRPJ";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import BibliotecaChecklists from "@/pages/BibliotecaChecklists";
@@ -159,14 +160,17 @@ function Router() {
       <Route path="/admin/whatsapp">
         {() => isAuthenticated && isAdmin ? <AdminWhatsApp /> : <AdminLogin />}
       </Route>
-      <Route path="/admin/gestao-pessoal">
-        {() => isAuthenticated && isAdmin ? <GestãoPessoal /> : <AdminLogin />}
+      <Route path="/pessoal">
+        {() => isAuthenticated && isAdmin ? <PessoalDashboard /> : <AdminLogin />}
       </Route>
-      <Route path="/admin/irpf">
-        {() => isAuthenticated && isAdmin ? <IRPF /> : <AdminLogin />}
+      <Route path="/pessoal/gestao">
+        {() => isAuthenticated && isAdmin ? <GestaoFinanceira /> : <AdminLogin />}
       </Route>
-      <Route path="/admin/irpj">
-        {() => isAuthenticated && isAdmin ? <IRPJ /> : <AdminLogin />}
+      <Route path="/pessoal/irpf">
+        {() => isAuthenticated && isAdmin ? <PessoalIRPF /> : <AdminLogin />}
+      </Route>
+      <Route path="/pessoal/irpj">
+        {() => isAuthenticated && isAdmin ? <PessoalIRPJ /> : <AdminLogin />}
       </Route>
       <Route path="/landing" component={Landing} />
       {!isAuthenticated ? (
