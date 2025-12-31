@@ -63,6 +63,8 @@ import PessoalDashboard from "@/pages/pessoal/PessoalDashboard";
 import GestaoFinanceira from "@/pages/pessoal/GestaoFinanceira";
 import PessoalIRPF from "@/pages/pessoal/IRPF";
 import PessoalIRPJ from "@/pages/pessoal/IRPJ";
+import ContasBancariasPF from "@/pages/pessoal/ContasBancariasPF";
+import CentrosCustoPF from "@/pages/pessoal/CentrosCustoPF";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import BibliotecaChecklists from "@/pages/BibliotecaChecklists";
@@ -163,8 +165,14 @@ function Router() {
       <Route path="/pessoal">
         {() => isAuthenticated && isAdmin ? <PessoalDashboard /> : <AdminLogin />}
       </Route>
-      <Route path="/pessoal/gestao">
+      <Route path="/pessoal/gestao-financeira">
         {() => isAuthenticated && isAdmin ? <GestaoFinanceira /> : <AdminLogin />}
+      </Route>
+      <Route path="/pessoal/contas">
+        {() => isAuthenticated && isAdmin ? <ContasBancariasPF /> : <AdminLogin />}
+      </Route>
+      <Route path="/pessoal/centros-custo">
+        {() => isAuthenticated && isAdmin ? <CentrosCustoPF /> : <AdminLogin />}
       </Route>
       <Route path="/pessoal/irpf">
         {() => isAuthenticated && isAdmin ? <PessoalIRPF /> : <AdminLogin />}
