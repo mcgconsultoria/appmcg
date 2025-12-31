@@ -192,11 +192,6 @@ const adminClienteItems = [
 
 const adminMcgComercialItems = [
   {
-    title: "Dashboard Admin",
-    url: "/admin",
-    icon: LayoutDashboard,
-  },
-  {
     title: "Comercial",
     url: "/admin/comercial",
     icon: Briefcase,
@@ -247,6 +242,11 @@ const adminMcgMarketingItems = [
 ];
 
 const adminMcgFinanceiroItems = [
+  {
+    title: "Dashboard Admin",
+    url: "/admin",
+    icon: LayoutDashboard,
+  },
   {
     title: "Financeiro",
     url: "/admin/financeiro",
