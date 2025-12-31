@@ -2158,10 +2158,15 @@ export const personalAccounts = pgTable("personal_accounts", {
   userId: varchar("user_id").notNull(),
   name: varchar("name", { length: 100 }).notNull(),
   bankName: varchar("bank_name", { length: 100 }),
-  accountType: varchar("account_type", { length: 50 }), // 'checking' | 'savings' | 'credit_card' | 'investment' | 'cash'
+  agency: varchar("agency", { length: 20 }),
+  accountNumber: varchar("account_number", { length: 30 }),
+  accountType: varchar("account_type", { length: 50 }), // 'corrente' | 'poupanca' | 'investimento'
   initialBalance: decimal("initial_balance", { precision: 15, scale: 2 }).default("0"),
   currentBalance: decimal("current_balance", { precision: 15, scale: 2 }).default("0"),
+  pixKey: varchar("pix_key", { length: 100 }),
   color: varchar("color", { length: 20 }),
+  notes: text("notes"),
+  isMain: boolean("is_main").default(false),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

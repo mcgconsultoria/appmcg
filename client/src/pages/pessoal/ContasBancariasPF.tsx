@@ -74,15 +74,15 @@ export default function ContasBancariasPF() {
   });
 
   const { data: accounts = [], isLoading } = useQuery<PersonalAccount[]>({
-    queryKey: ["/api/personal-accounts"],
+    queryKey: ["/api/admin/personal/accounts"],
   });
 
   const createAccount = useMutation({
     mutationFn: async (data: typeof formData) => {
-      return apiRequest("POST", "/api/personal-accounts", data);
+      return apiRequest("POST", "/api/admin/personal/accounts", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/personal-accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/personal/accounts"] });
       setDialogOpen(false);
       resetForm();
       toast({ title: "Conta bancaria criada com sucesso" });
@@ -91,10 +91,10 @@ export default function ContasBancariasPF() {
 
   const updateAccount = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: typeof formData }) => {
-      return apiRequest("PATCH", `/api/personal-accounts/${id}`, data);
+      return apiRequest("PATCH", `/api/admin/personal/accounts/${id}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/personal-accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/personal/accounts"] });
       setDialogOpen(false);
       setEditingAccount(null);
       resetForm();
@@ -104,10 +104,10 @@ export default function ContasBancariasPF() {
 
   const deleteAccount = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest("DELETE", `/api/personal-accounts/${id}`);
+      return apiRequest("DELETE", `/api/admin/personal/accounts/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/personal-accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/personal/accounts"] });
       toast({ title: "Conta bancaria removida com sucesso" });
     },
   });
@@ -160,8 +160,8 @@ export default function ContasBancariasPF() {
   };
 
   return (
-    <AdminPessoalLayout title="Contas Bancarias PF">
-      <div className="p-6 space-y-6">
+    <AdminPessoalLayout>
+      <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">

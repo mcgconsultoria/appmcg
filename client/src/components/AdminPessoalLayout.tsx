@@ -24,6 +24,7 @@ import {
   LogOut,
   LayoutDashboard,
   User,
+  Landmark,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 
@@ -37,6 +38,11 @@ const menuItems = [
     title: "Financeiro Pessoal",
     url: "/pessoal/financeiro",
     icon: Wallet,
+  },
+  {
+    title: "Bancos",
+    url: "/pessoal/bancos",
+    icon: Landmark,
   },
   {
     title: "IRPF",
