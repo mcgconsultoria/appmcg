@@ -185,6 +185,14 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild data-testid="link-admin-pessoal">
+                      <Link href="/pessoal">
+                        <User className="h-4 w-4" />
+                        <span>Admin Pessoal (CEO)</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -227,22 +235,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup>
-              <SidebarGroupLabel>Finanças do CEO</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link href="/pessoal">
-                        <User className="h-4 w-4" />
-                        <span>Admin Pessoal</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
