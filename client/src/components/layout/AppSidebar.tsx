@@ -196,11 +196,6 @@ const adminMcgComercialItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Finanças CEO",
-    url: "/pessoal",
-    icon: UserRound,
-  },
-  {
     title: "Comercial",
     url: "/admin/comercial",
     icon: Briefcase,
@@ -534,6 +529,23 @@ export function AppSidebar() {
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
           <AdminMcgSection location={location} />
+        )}
+
+        {(user?.role === "admin" || user?.role === "admin_mcg") && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={location.startsWith("/pessoal")}>
+                    <Link href="/pessoal" data-testid="nav-pessoal">
+                      <UserRound className="h-4 w-4" />
+                      <span>Admin Pessoal</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
         )}
       </SidebarContent>
 
