@@ -284,7 +284,7 @@ const adminMcgFinanceiroItems = [
   },
   {
     title: "IRPJ",
-    url: "/pessoal/irpj",
+    url: "/admin/irpj",
     icon: FileText,
   },
 ];

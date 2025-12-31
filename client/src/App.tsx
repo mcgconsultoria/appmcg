@@ -62,7 +62,7 @@ import AdminWhatsApp from "@/pages/admin/AdminWhatsApp";
 import PessoalDashboard from "@/pages/pessoal/PessoalDashboard";
 import GestaoFinanceira from "@/pages/pessoal/GestaoFinanceira";
 import PessoalIRPF from "@/pages/pessoal/IRPF";
-import PessoalIRPJ from "@/pages/pessoal/IRPJ";
+import AdminIRPJ from "@/pages/admin/IRPJ";
 import ContasBancariasPF from "@/pages/pessoal/ContasBancariasPF";
 import CentrosCustoPF from "@/pages/pessoal/CentrosCustoPF";
 import ForgotPassword from "@/pages/ForgotPassword";
@@ -177,8 +177,8 @@ function Router() {
       <Route path="/pessoal/irpf">
         {() => isAuthenticated && isAdmin ? <PessoalIRPF /> : <AdminLogin />}
       </Route>
-      <Route path="/pessoal/irpj">
-        {() => isAuthenticated && isAdmin ? <PessoalIRPJ /> : <AdminLogin />}
+      <Route path="/admin/irpj">
+        {() => isAuthenticated && isAdmin ? <AdminIRPJ /> : <AdminLogin />}
       </Route>
       <Route path="/landing" component={Landing} />
       {!isAuthenticated ? (
