@@ -48,6 +48,11 @@ const adminMenuItems = [
     icon: LayoutDashboard,
   },
   {
+    title: "Finanças CEO",
+    url: "/pessoal",
+    icon: User,
+  },
+  {
     title: "Gestão Comercial",
     url: "/admin/comercial",
     icon: Users,
@@ -81,11 +86,6 @@ const adminMenuItems = [
     title: "Biblioteca Templates",
     url: "/admin/templates",
     icon: Library,
-  },
-  {
-    title: "Admin Pessoal (CEO)",
-    url: "/pessoal",
-    icon: User,
   },
 ];
 
