@@ -65,6 +65,7 @@ import PessoalIRPF from "@/pages/pessoal/IRPF";
 import AdminIRPJ from "@/pages/admin/IRPJ";
 import ContasBancariasPF from "@/pages/pessoal/ContasBancariasPF";
 import CentrosCustoPF from "@/pages/pessoal/CentrosCustoPF";
+import PlanoContasPF from "@/pages/pessoal/PlanoContasPF";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import BibliotecaChecklists from "@/pages/BibliotecaChecklists";
@@ -173,6 +174,9 @@ function Router() {
       </Route>
       <Route path="/pessoal/centros-custo">
         {() => isAuthenticated && isAdmin ? <CentrosCustoPF /> : <AdminLogin />}
+      </Route>
+      <Route path="/pessoal/plano-contas">
+        {() => isAuthenticated && isAdmin ? <PlanoContasPF /> : <AdminLogin />}
       </Route>
       <Route path="/pessoal/irpf">
         {() => isAuthenticated && isAdmin ? <PessoalIRPF /> : <AdminLogin />}

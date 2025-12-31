@@ -25,6 +25,8 @@ import {
   LayoutDashboard,
   User,
   Landmark,
+  Building2,
+  PieChart,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 
@@ -35,9 +37,19 @@ const menuItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Financeiro Pessoal",
+    title: "Gestao Financeira",
     url: "/pessoal/financeiro",
     icon: Wallet,
+  },
+  {
+    title: "Plano de Contas",
+    url: "/pessoal/plano-contas",
+    icon: PieChart,
+  },
+  {
+    title: "Centros de Custo",
+    url: "/pessoal/centros-custo",
+    icon: Building2,
   },
   {
     title: "Bancos",
