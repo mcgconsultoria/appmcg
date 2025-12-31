@@ -82,6 +82,11 @@ const adminMenuItems = [
     url: "/admin/templates",
     icon: Library,
   },
+  {
+    title: "Admin Pessoal (CEO)",
+    url: "/pessoal",
+    icon: User,
+  },
 ];
 
 const marketingMenuItems = [
@@ -177,6 +182,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                       <SidebarMenuButton
                         asChild
                         isActive={location === item.url || (item.url !== "/admin" && location.startsWith(item.url))}
+                        data-testid={item.url === "/pessoal" ? "link-admin-pessoal" : undefined}
                       >
                         <Link href={item.url}>
                           <item.icon className="h-4 w-4" />
@@ -185,14 +191,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild data-testid="link-admin-pessoal">
-                      <Link href="/pessoal">
-                        <User className="h-4 w-4" />
-                        <span>Admin Pessoal (CEO)</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
