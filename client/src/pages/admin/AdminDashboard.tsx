@@ -3,6 +3,8 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, FolderKanban, CreditCard, DollarSign, AlertTriangle } from "lucide-react";
+import { FinancialCalendar } from "@/components/FinancialCalendar";
+import type { AccountingEntry } from "@shared/schema";
 
 export default function AdminDashboard() {
   const { data: stats, isLoading } = useQuery<{
@@ -20,6 +22,10 @@ export default function AdminDashboard() {
 
   const { data: projects = [] } = useQuery<any[]>({
     queryKey: ["/api/admin/projects"],
+  });
+
+  const { data: accountingEntries = [] } = useQuery<AccountingEntry[]>({
+    queryKey: ["/api/admin/accounting-entries"],
   });
 
   const formatCurrency = (value: number) => {
@@ -145,6 +151,17 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        <FinancialCalendar
+          title="Calendario Financeiro MCG"
+          transactions={accountingEntries.map(e => ({
+            id: e.id,
+            date: e.date,
+            description: e.description,
+            amount: e.amount,
+            type: e.type === "receita" ? "income" : "expense"
+          }))}
+        />
 
         <Card>
           <CardHeader className="flex flex-row items-center gap-2">

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { Wallet, Receipt, Calculator, TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
+import { FinancialCalendar } from "@/components/FinancialCalendar";
 import type { PersonalTransaction, PersonalAccount, IrpfDeclaration, IrpjSummary } from "@shared/schema";
 
 export default function PessoalDashboard() {
@@ -192,6 +193,17 @@ export default function PessoalDashboard() {
           </Card>
         </div>
 
+        <FinancialCalendar
+          title="Calendario Financeiro Pessoal"
+          transactions={transactions.map(t => ({
+            id: t.id,
+            date: t.date,
+            description: t.description,
+            amount: t.amount,
+            type: t.type
+          }))}
+        />
+
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between gap-2">
@@ -202,7 +214,7 @@ export default function PessoalDashboard() {
                 </CardTitle>
                 <CardDescription>Movimentacoes recentes</CardDescription>
               </div>
-              <Link href="/pessoal/gestao">
+              <Link href="/pessoal/gestao-financeira">
                 <Button variant="outline" size="sm">
                   Ver Todas <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
