@@ -59,6 +59,7 @@ import {
   Store,
   Gift,
   Activity,
+  Wallet,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -379,7 +380,7 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
   );
 }
 
-function AdminMcgSection({ location }: { location: string }) {
+function AdminPJSection({ location }: { location: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -387,12 +388,12 @@ function AdminMcgSection({ location }: { location: string }) {
       <SidebarGroup>
         <CollapsibleTrigger asChild>
           <button
-            className="flex items-center justify-between w-full px-3 py-2 text-base font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
-            data-testid="section-admin-mcg"
+            className="flex items-center justify-between w-full px-3 py-2 text-base font-bold text-foreground hover-elevate rounded-md cursor-pointer"
+            data-testid="section-admin-pj"
           >
             <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              <span>Admin MCG</span>
+              <Building2 className="h-5 w-5" />
+              <span>ADMIN PJ</span>
             </div>
             <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
           </button>
@@ -424,6 +425,83 @@ function AdminMcgSection({ location }: { location: string }) {
               location={location}
             />
           </div>
+        </CollapsibleContent>
+      </SidebarGroup>
+    </Collapsible>
+  );
+}
+
+const adminPfItems = [
+  {
+    title: "Dashboard PF",
+    url: "/pessoal",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Gestão Financeira",
+    url: "/pessoal/gestao-financeira",
+    icon: Wallet,
+  },
+  {
+    title: "Contas Bancárias",
+    url: "/pessoal/contas",
+    icon: Landmark,
+  },
+  {
+    title: "Centros de Custo",
+    url: "/pessoal/centros-custo",
+    icon: Building2,
+  },
+  {
+    title: "IRPF",
+    url: "/pessoal/irpf",
+    icon: FileText,
+  },
+];
+
+function AdminPFSection({ location }: { location: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const isItemActive = (itemUrl: string) => {
+    if (itemUrl === "/pessoal") {
+      return location === "/pessoal";
+    }
+    return location === itemUrl || location.startsWith(itemUrl + "/");
+  };
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <SidebarGroup>
+        <CollapsibleTrigger asChild>
+          <button
+            className="flex items-center justify-between w-full px-3 py-2 text-base font-bold text-foreground hover-elevate rounded-md cursor-pointer"
+            data-testid="section-admin-pf"
+          >
+            <div className="flex items-center gap-2">
+              <UserRound className="h-5 w-5" />
+              <span>ADMIN PF</span>
+            </div>
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarGroupContent className="mt-1">
+            <SidebarMenu>
+              {adminPfItems.map((item) => {
+                const isActive = isItemActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
         </CollapsibleContent>
       </SidebarGroup>
     </Collapsible>
@@ -533,24 +611,11 @@ export function AppSidebar() {
         )}
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
-          <AdminMcgSection location={location} />
+          <AdminPJSection location={location} />
         )}
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={location.startsWith("/pessoal")}>
-                    <Link href="/pessoal" data-testid="nav-pessoal">
-                      <UserRound className="h-4 w-4" />
-                      <span>Admin Pessoal</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          <AdminPFSection location={location} />
         )}
       </SidebarContent>
 
