@@ -263,7 +263,7 @@ const adminMcgFinanceiroItems = [
     icon: Building2,
   },
   {
-    title: "Bancos",
+    title: "Contas Bancarias",
     url: "/admin/bancos",
     icon: Landmark,
   },
