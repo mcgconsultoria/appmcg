@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { Wallet, Receipt, Calculator, TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
 import { FinancialCalendar } from "@/components/FinancialCalendar";
-import type { PersonalTransaction, PersonalAccount, IrpfDeclaration, IrpjSummary } from "@shared/schema";
+import type { PersonalTransaction, PersonalAccount, IrpfDeclaration } from "@shared/schema";
 
 export default function PessoalDashboard() {
   const { data: transactions = [] } = useQuery<PersonalTransaction[]>({
@@ -21,9 +21,6 @@ export default function PessoalDashboard() {
     queryKey: ["/api/admin/irpf/declarations"],
   });
 
-  const { data: irpjSummaries = [] } = useQuery<IrpjSummary[]>({
-    queryKey: ["/api/admin/irpj/summaries"],
-  });
 
   const totalBalance = accounts.reduce((sum, acc) => sum + Number(acc.currentBalance || 0), 0);
   
@@ -44,7 +41,6 @@ export default function PessoalDashboard() {
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
   const latestIrpf = irpfDeclarations.sort((a, b) => b.year - a.year)[0];
-  const latestIrpj = irpjSummaries.sort((a, b) => b.year - a.year)[0];
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -111,7 +107,7 @@ export default function PessoalDashboard() {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between gap-2">
@@ -153,44 +149,6 @@ export default function PessoalDashboard() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calculator className="h-5 w-5" />
-                    IRPJ
-                  </CardTitle>
-                  <CardDescription>Imposto de Renda Pessoa Juridica</CardDescription>
-                </div>
-                <Link href="/pessoal/irpj">
-                  <Button variant="outline" size="sm">
-                    Acessar <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </Link>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {latestIrpj ? (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium">Resumo {latestIrpj.year}</span>
-                    <Badge variant="outline">{latestIrpj.regimeTributario?.toUpperCase() || "SIMPLES"}</Badge>
-                  </div>
-                  {latestIrpj.totalRevenue && (
-                    <p className="text-sm text-muted-foreground">
-                      Faturamento: {formatCurrency(Number(latestIrpj.totalRevenue))}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    {irpjSummaries.length} resumo(s) cadastrado(s)
-                  </p>
-                </div>
-              ) : (
-                <p className="text-muted-foreground text-sm">Nenhum resumo cadastrado</p>
-              )}
-            </CardContent>
-          </Card>
         </div>
 
         <FinancialCalendar
