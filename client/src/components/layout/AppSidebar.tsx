@@ -196,6 +196,11 @@ const adminMcgComercialItems = [
     icon: LayoutDashboard,
   },
   {
+    title: "Finanças CEO",
+    url: "/pessoal",
+    icon: UserRound,
+  },
+  {
     title: "Comercial",
     url: "/admin/comercial",
     icon: Briefcase,
