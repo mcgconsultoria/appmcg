@@ -20,7 +20,6 @@ import {
 import {
   Wallet,
   Receipt,
-  Calculator,
   ArrowLeft,
   LogOut,
   LayoutDashboard,
@@ -35,19 +34,14 @@ const menuItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Gestao Financeira",
-    url: "/pessoal/gestao",
+    title: "Financeiro Pessoal",
+    url: "/pessoal/financeiro",
     icon: Wallet,
   },
   {
     title: "IRPF",
     url: "/pessoal/irpf",
     icon: Receipt,
-  },
-  {
-    title: "IRPJ",
-    url: "/pessoal/irpj",
-    icon: Calculator,
   },
 ];
 

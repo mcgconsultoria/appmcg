@@ -165,7 +165,7 @@ function Router() {
       <Route path="/pessoal">
         {() => isAuthenticated && isAdmin ? <PessoalDashboard /> : <AdminLogin />}
       </Route>
-      <Route path="/pessoal/gestao-financeira">
+      <Route path="/pessoal/financeiro">
         {() => isAuthenticated && isAdmin ? <GestaoFinanceira /> : <AdminLogin />}
       </Route>
       <Route path="/pessoal/contas">

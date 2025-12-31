@@ -172,7 +172,7 @@ export default function PessoalDashboard() {
                 </CardTitle>
                 <CardDescription>Movimentacoes recentes</CardDescription>
               </div>
-              <Link href="/pessoal/gestao-financeira">
+              <Link href="/pessoal/financeiro">
                 <Button variant="outline" size="sm">
                   Ver Todas <ArrowRight className="h-4 w-4 ml-1" />
                 </Button>
