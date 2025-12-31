@@ -24,7 +24,7 @@ export default function PessoalDashboard() {
     queryKey: ["/api/admin/irpj/summaries"],
   });
 
-  const totalBalance = accounts.reduce((sum, acc) => sum + Number(acc.balance || 0), 0);
+  const totalBalance = accounts.reduce((sum, acc) => sum + Number(acc.currentBalance || 0), 0);
   
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -176,9 +176,9 @@ export default function PessoalDashboard() {
                     <span className="font-medium">Resumo {latestIrpj.year}</span>
                     <Badge variant="outline">{latestIrpj.regimeTributario?.toUpperCase() || "SIMPLES"}</Badge>
                   </div>
-                  {latestIrpj.faturamentoAnual && (
+                  {latestIrpj.totalRevenue && (
                     <p className="text-sm text-muted-foreground">
-                      Faturamento: {formatCurrency(Number(latestIrpj.faturamentoAnual))}
+                      Faturamento: {formatCurrency(Number(latestIrpj.totalRevenue))}
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
