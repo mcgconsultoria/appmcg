@@ -281,6 +281,11 @@ const adminMcgFinanceiroItems = [
     url: "/admin/relatorio-dre",
     icon: BarChart3,
   },
+  {
+    title: "IRPJ",
+    url: "/pessoal/irpj",
+    icon: FileText,
+  },
 ];
 
 const adminMcgLojaItems = [
