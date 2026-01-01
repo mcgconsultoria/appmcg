@@ -191,6 +191,8 @@ import {
   irpfDependents,
   irpfAssets,
   irpjSummaries,
+  commercialFlowcharts,
+  type CommercialFlowchart,
   irpjDasPayments,
   type PersonalCategory,
   type InsertPersonalCategory,
@@ -613,6 +615,10 @@ export interface IStorage {
 
   createWhatsappMessage(message: InsertWhatsappMessage): Promise<WhatsappMessage>;
   getWhatsappMessages(conversationId: number): Promise<WhatsappMessage[]>;
+
+  // Commercial Flowchart operations
+  getCommercialFlowchart(userId: string): Promise<CommercialFlowchart | undefined>;
+  saveCommercialFlowchart(userId: string, nodes: any[], edges: any[]): Promise<CommercialFlowchart>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2816,6 +2822,29 @@ export class DatabaseStorage implements IStorage {
   async deleteIrpjDasPayment(id: number): Promise<boolean> {
     await db.delete(irpjDasPayments).where(eq(irpjDasPayments.id, id));
     return true;
+  }
+
+  // ==================== Commercial Flowchart Operations ====================
+
+  async getCommercialFlowchart(userId: string): Promise<CommercialFlowchart | undefined> {
+    const [flowchart] = await db.select().from(commercialFlowcharts).where(eq(commercialFlowcharts.userId, userId));
+    return flowchart;
+  }
+
+  async saveCommercialFlowchart(userId: string, nodes: any[], edges: any[]): Promise<CommercialFlowchart> {
+    const existing = await this.getCommercialFlowchart(userId);
+    if (existing) {
+      const [updated] = await db.update(commercialFlowcharts)
+        .set({ nodes, edges, updatedAt: new Date() })
+        .where(eq(commercialFlowcharts.userId, userId))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(commercialFlowcharts)
+        .values({ userId, nodes, edges })
+        .returning();
+      return created;
+    }
   }
 }
 

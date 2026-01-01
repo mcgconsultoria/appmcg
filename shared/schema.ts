@@ -2382,3 +2382,19 @@ export type IrpjSummaryType = typeof irpjSummaries.$inferSelect;
 export type InsertIrpjSummaryType = z.infer<typeof insertIrpjSummarySchema>;
 export type IrpjDasPaymentType = typeof irpjDasPayments.$inferSelect;
 export type InsertIrpjDasPaymentType = z.infer<typeof insertIrpjDasPaymentSchema>;
+
+// Commercial Flowchart (Fluxograma Comercial)
+export const commercialFlowcharts = pgTable("commercial_flowcharts", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  companyId: integer("company_id"),
+  name: varchar("name", { length: 255 }).default("Fluxograma Principal"),
+  nodes: jsonb("nodes").$type<any[]>().default([]),
+  edges: jsonb("edges").$type<any[]>().default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertCommercialFlowchartSchema = createInsertSchema(commercialFlowcharts).omit({ id: true, createdAt: true, updatedAt: true });
+export type CommercialFlowchart = typeof commercialFlowcharts.$inferSelect;
+export type InsertCommercialFlowchart = z.infer<typeof insertCommercialFlowchartSchema>;

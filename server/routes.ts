@@ -5919,5 +5919,32 @@ export async function registerRoutes(
     }
   });
 
+  // ==================== FLUXOGRAMA COMERCIAL ====================
+  app.get("/api/flowchart", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const flowchart = await storage.getCommercialFlowchart(userId);
+      if (!flowchart) {
+        return res.json({ nodes: [], edges: [] });
+      }
+      res.json({ nodes: flowchart.nodes, edges: flowchart.edges });
+    } catch (error) {
+      console.error("Error fetching flowchart:", error);
+      res.status(500).json({ message: "Falha ao buscar fluxograma" });
+    }
+  });
+
+  app.post("/api/flowchart", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const { nodes, edges } = req.body;
+      const flowchart = await storage.saveCommercialFlowchart(userId, nodes, edges);
+      res.json(flowchart);
+    } catch (error) {
+      console.error("Error saving flowchart:", error);
+      res.status(500).json({ message: "Falha ao salvar fluxograma" });
+    }
+  });
+
   return httpServer;
 }

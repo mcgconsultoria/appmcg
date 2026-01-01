@@ -60,6 +60,7 @@ import {
   Gift,
   Activity,
   Wallet,
+  GitBranch,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -566,6 +567,18 @@ export function AppSidebar() {
                   >
                     <FileText className="h-5 w-5" />
                     <span>Manual APP</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={location === "/fluxograma"}>
+                  <Link 
+                    href="/fluxograma" 
+                    data-testid="nav-fluxograma"
+                    className="flex items-center gap-2 px-3 py-2 text-base font-semibold"
+                  >
+                    <GitBranch className="h-5 w-5" />
+                    <span>Fluxograma Comercial</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

@@ -71,6 +71,7 @@ import ResetPassword from "@/pages/ResetPassword";
 import BibliotecaChecklists from "@/pages/BibliotecaChecklists";
 import Ebook from "@/pages/Ebook";
 import ManualApp from "@/pages/ManualApp";
+import FluxogramaComercial from "@/pages/FluxogramaComercial";
 import Brindes from "@/pages/Brindes";
 import DiagnósticoComercial from "@/pages/DiagnosticoComercial";
 import CampanhaPiloto from "@/pages/CampanhaPiloto";
@@ -201,6 +202,7 @@ function Router() {
           <Route path="/biblioteca" component={BibliotecaChecklists} />
           <Route path="/ebook" component={Ebook} />
           <Route path="/manual-app" component={ManualApp} />
+          <Route path="/fluxograma" component={FluxogramaComercial} />
           <Route path="/brindes" component={Brindes} />
           <Route path="/rfi" component={RFI} />
           <Route path="/tarefas" component={TasksPage} />
