@@ -3990,6 +3990,23 @@ export async function registerRoutes(
       
       // Check if company enforces email domain
       const company = await storage.getCompany(companyId);
+      
+      // Check user limit before adding new team member
+      if (company) {
+        const maxUsers = company.maxUsers || 1;
+        const currentUsers = company.currentUsers || 1;
+        if (currentUsers >= maxUsers) {
+          const planName = company.selectedPlan === 'enterprise' ? 'Corporativo' : 
+                          company.selectedPlan === 'professional' ? 'Profissional' : 'Gratuito';
+          return res.status(403).json({ 
+            message: `Limite de usuarios atingido para o plano ${planName}. Seu plano permite ${maxUsers} usuario(s). Para adicionar mais usuarios, faca upgrade do plano ou contrate usuarios adicionais por R$69/mes cada.`,
+            code: 'USER_LIMIT_REACHED',
+            currentUsers,
+            maxUsers,
+            selectedPlan: company.selectedPlan
+          });
+        }
+      }
       if (company?.enforceEmailDomain && company.allowedEmailDomain && req.body.email) {
         const emailDomain = req.body.email.split('@')[1]?.toLowerCase();
         if (emailDomain !== company.allowedEmailDomain.toLowerCase()) {
@@ -4020,6 +4037,13 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Invalid data", errors: parsed.error.errors });
       }
       const member = await storage.createCompanyTeamMember(parsed.data);
+      
+      // Increment currentUsers counter for the company
+      if (company) {
+        await storage.updateCompany(companyId, {
+          currentUsers: (company.currentUsers || 1) + 1
+        });
+      }
       
       await logAudit(req, "create", "team_member", member.id, `Membro adicionado: ${member.name}`);
       
@@ -4068,6 +4092,15 @@ export async function registerRoutes(
       if (!companyId) return res.status(400).json({ message: "Company not found" });
       
       await storage.deleteCompanyTeamMember(parseInt(req.params.id), companyId);
+      
+      // Decrement currentUsers counter for the company
+      const company = await storage.getCompany(companyId);
+      if (company && (company.currentUsers || 1) > 1) {
+        await storage.updateCompany(companyId, {
+          currentUsers: (company.currentUsers || 1) - 1
+        });
+      }
+      
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting team member:", error);
