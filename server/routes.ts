@@ -119,6 +119,54 @@ export async function registerRoutes(
     }
   });
 
+  // Debug: test forgot-password flow
+  app.post('/api/debug/forgot-password', async (req, res) => {
+    try {
+      const email = 'marciacguimaraes@gmail.com';
+      const user = await storage.getUserByEmail(email);
+      
+      if (!user) {
+        return res.json({ error: "User not found", email });
+      }
+
+      const crypto = await import("crypto");
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const resetTokenExpiry = new Date(Date.now() + 3600000);
+
+      await storage.setPasswordResetToken(user.id, resetToken, resetTokenExpiry);
+
+      const { emailService } = await import("./emailService");
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://www.mcgconsultoria.com.br'
+        : 'http://localhost:5000';
+      const resetUrl = `${baseUrl}/redefinir-senha?token=${resetToken}`;
+      
+      const emailResult = await emailService.send({
+        to: [email],
+        subject: "Redefinir Senha - MCG Consultoria",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #0EA5E9;">Redefinir Senha</h2>
+            <p>Você solicitou a redefinição da sua senha. Clique no link abaixo para criar uma nova senha:</p>
+            <p><a href="${resetUrl}" style="background-color: #0EA5E9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Redefinir Senha</a></p>
+            <p style="color: #666; font-size: 14px;">Este link expira em 1 hora.</p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="color: #999; font-size: 12px;">MCG Consultoria - Gestão Comercial Logística</p>
+          </div>
+        `,
+      });
+
+      res.json({
+        nodeEnv: process.env.NODE_ENV,
+        userFound: true,
+        tokenGenerated: resetToken.substring(0, 10) + "...",
+        emailResult
+      });
+    } catch (error: any) {
+      res.json({ error: error.message, stack: error.stack });
+    }
+  });
+
   app.post('/api/auth/register', async (req, res) => {
     try {
       const parsed = registerSchema.safeParse(req.body);
