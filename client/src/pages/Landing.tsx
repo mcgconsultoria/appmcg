@@ -19,7 +19,7 @@ import {
   Smartphone,
   UserCheck,
 } from "lucide-react";
-import { SiFacebook, SiInstagram, SiLinkedin, SiWhatsapp, SiGoogle, SiYoutube } from "react-icons/si";
+import { SiFacebook, SiInstagram, SiLinkedin, SiWhatsapp, SiGoogle, SiYoutube, SiX } from "react-icons/si";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import logoMcg from "@assets/logo_mcg_principal.png";
@@ -267,6 +267,19 @@ export default function Landing() {
                   </div>
                 </div>
                 <div className="flex flex-row gap-3">
+                  <a
+                    href="https://wa.me/5511999999999"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:opacity-90 transition-opacity"
+                    data-testid="link-whatsapp-app"
+                  >
+                    <SiWhatsapp className="h-5 w-5" />
+                    <div className="text-left">
+                      <div className="text-[10px] leading-none opacity-80">Fale pelo</div>
+                      <div className="text-sm font-semibold leading-tight">WhatsApp</div>
+                    </div>
+                  </a>
                   <a
                     href="https://play.google.com/store"
                     target="_blank"
@@ -542,6 +555,16 @@ export default function Landing() {
                   aria-label="LinkedIn"
                 >
                   <SiLinkedin className="h-4 w-4 text-muted-foreground" />
+                </a>
+                <a
+                  href="https://x.com/mcgconsultoriac"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-md bg-muted/50 flex items-center justify-center hover-elevate"
+                  data-testid="link-x-twitter"
+                  aria-label="X (Twitter)"
+                >
+                  <SiX className="h-4 w-4 text-muted-foreground" />
                 </a>
                 <a
                   href="https://www.google.com/maps/place/MCG+Consultoria"
