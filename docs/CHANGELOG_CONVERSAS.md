@@ -4,7 +4,49 @@ Este arquivo documenta as principais discussoes e decisoes tomadas durante o des
 
 ---
 
-## 02 de Janeiro de 2026
+## 02 de Janeiro de 2026 (Parte 2) - Modelo de Usuarios e Seguranca
+
+### Topicos Discutidos
+1. **Modelo de Precificacao de Usuarios** - Definicao de usuarios inclusos e adicionais
+2. **Seguranca por CNPJ Raiz** - Agrupamento de matriz/filiais pelos 8 primeiros digitos
+3. **Controle de Sessao Unica** - Impedir login simultaneo do mesmo usuario
+4. **Fluxo de Aprovacao MCG** - Todos os cadastros precisam aprovacao antes de liberar acesso
+5. **Plano Consultoria** - Modelo temporario com 2 acessos durante projeto
+
+### Decisoes Tomadas - Modelo de Planos
+
+| Plano | Valor Base | Usuarios Inclusos | Usuario Extra |
+|-------|-----------|-------------------|---------------|
+| Free | R$ 0 | 1 | N/A |
+| Professional | R$ 499/mes | 1 | +R$ 69/mes cada |
+| Enterprise | R$ 1.499/mes | 1 | +R$ 69/mes cada |
+| Consultoria (temp) | Valor a parte | 2 | Apos fim -> plano normal |
+
+### Regras de Negocio Definidas
+1. **Sessao Unica**: Um usuario nao pode estar logado em 2 dispositivos ao mesmo tempo
+2. **Cobranca Pro-Rata**: Ao adicionar/remover usuarios, calcular proporcional ao dia
+3. **Aprovacao MCG**: Todos os planos (inclusive Free) precisam aprovacao MCG para liberar acesso
+4. **CNPJ Raiz**: Campo completo no formulario, mas sistema agrupa por 8 primeiros digitos (matriz/filiais)
+5. **1 Admin por CNPJ Raiz**: Apenas 1 administrador principal por grupo empresarial
+6. **Consultoria Temporaria**: 2 acessos inclusos durante projeto, depois migra para plano pago
+
+### Fluxo de Cadastro Proposto
+1. Usuario escolhe plano na landing page
+2. Faz pagamento via Stripe (exceto Free)
+3. Preenche formulario de cadastro
+4. MCG recebe solicitacao no Admin MCG
+5. MCG aprova -> usuario recebe email de confirmacao e acesso liberado
+
+### Proximos Passos
+- [ ] Implementar controle de sessao unica
+- [ ] Criar campo cnpjRaiz na tabela companies
+- [ ] Criar fluxo de aprovacao no Admin MCG
+- [ ] Integrar limites de usuarios com Stripe
+- [ ] Implementar cobranca pro-rata
+
+---
+
+## 02 de Janeiro de 2026 (Parte 1)
 
 ### Topicos Discutidos
 1. **Avaliacao Tecnica e de Negocios** - Analise completa do produto como referencia de mercado
