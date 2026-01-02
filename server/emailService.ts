@@ -79,15 +79,28 @@ class EmailService {
   async send(options: SendEmailOptions): Promise<EmailResult> {
     this.refreshSmtpTransporter();
     
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    // In production, prioritize Gmail OAuth (more reliable than SMTP from cloud servers)
+    if (isProduction && isGoogleIntegrationAvailable()) {
+      console.log("Using Gmail OAuth for production email");
+      return this.sendViaGmail(options);
+    }
+    
+    // In development, SMTP works fine
     if (this.smtpTransporter) {
+      console.log("Using SMTP for email");
       return this.sendViaSmtp(options);
     }
 
+    // Fallback to Gmail OAuth if available
     if (isGoogleIntegrationAvailable()) {
+      console.log("Using Gmail OAuth as fallback");
       return this.sendViaGmail(options);
     }
 
     if (this.resend) {
+      console.log("Using Resend for email");
       return this.sendViaResend(options);
     }
 
