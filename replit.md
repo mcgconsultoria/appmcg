@@ -1,245 +1,47 @@
 # MCG Consultoria
 
 ## Overview
-
-MCG Consultoria is a B2B SaaS platform for logistics consulting in Brazil. It provides commercial management tools for logistics companies including CRM, freight and storage calculators, operational checklists across 15 departments, financial management, and marketing materials. The application is built with a React frontend and Express backend, targeting Portuguese-speaking logistics professionals.
+MCG Consultoria is a B2B SaaS platform for logistics consulting in Brazil. It provides commercial management tools including CRM, freight and storage calculators, operational checklists, financial management, and marketing tools. The platform aims to bridge the gap between operational ERPs (WMS/TMS) and the commercial/sales needs of logistics companies. The project targets Portuguese-speaking logistics professionals, with a vision to integrate with leading logistics ERPs like KMM and become a central hub for commercial management in the sector. Key capabilities include a comprehensive 18-section diagnostic checklist, automated meeting record generation, commercial calendar with Google sync, and a detailed RFI module for bids. The platform also features an e-commerce section ("Loja MCG") for corporate gifts, e-books, and manuals, with future plans for a fashion/uniform line ("M. Veste").
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 
-### Frontend Architecture
-- **Framework**: React 18 with TypeScript
-- **Routing**: Wouter (lightweight client-side routing)
-- **State Management**: TanStack React Query for server state, local React state for UI
-- **Styling**: Tailwind CSS with shadcn/ui component library (New York style variant)
-- **Build Tool**: Vite with path aliases (@/ for client/src, @shared/ for shared)
-- **Theming**: CSS variables with light/dark mode support via ThemeProvider
+### Core Technologies
+-   **Frontend**: React 18 with TypeScript, Wouter for routing, TanStack React Query for server state, Tailwind CSS with shadcn/ui (New York style), Vite.
+-   **Backend**: Express.js with TypeScript, PostgreSQL with Drizzle ORM.
+-   **Authentication**: Custom session-based authentication with bcrypt and HTTP-only cookies.
+-   **Monorepo Structure**: `client/`, `server/`, and `shared/` for shared types.
 
-### Backend Architecture
-- **Framework**: Express.js with TypeScript
-- **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: Custom session-based auth with bcrypt password hashing and secure HTTP-only cookies
-- **Session Storage**: PostgreSQL-backed sessions via connect-pg-simple
-- **API Pattern**: RESTful JSON APIs under /api prefix
+### Key Features & Modules
+-   **CRM**: Client management, sales pipeline, ABC curve analysis, client segmentation (by state, segment).
+-   **Calculators**: Freight (with ICMS) and storage calculators.
+-   **Checklist**: An 18-section diagnostic tool covering various departments (e.g., Commercial, Operations, Finance) with progress tracking and client profiling.
+-   **Meeting Records (Ata Plano de Acao)**: CRUD operations for meetings, action item tracking, PDF generation, and email distribution.
+-   **Calendar (Calendario Comercial)**: Weekly commercial calendar with events (meetings, calls, visits) and Google Calendar synchronization.
+-   **Tasks & Projects**: Task management with priorities, due dates, assignees; project tracking with status and progress calculation.
+-   **RFI (Request for Information)**: Comprehensive company technical profile for bids, supporting complex data structures.
+-   **Loja MCG (E-commerce)**: Infrastructure for selling corporate gifts, e-books (CEO-authored trilogy "A Arte do Comercial em Logística"), and manuals, with admin product/category/order management.
+-   **Dashboard**: Provides key performance indicators like client ABC curve, geographic distribution, and pipeline overview.
+-   **PWA (Progressive Web App)**: Mobile app capabilities for standalone experience, offline fallback, and install prompts.
 
-### Key Design Patterns
-- **Monorepo Structure**: Client (client/), Server (server/), Shared types (shared/)
-- **Schema Sharing**: Drizzle schemas in shared/schema.ts used by both frontend validation (drizzle-zod) and backend database operations
-- **Query Pattern**: TanStack Query with custom queryFn that handles 401 responses gracefully
-- **Layout System**: AppLayout component wraps authenticated pages with sidebar navigation
-
-### Authentication Flow
-- Custom email/password authentication (not Replit Auth)
-- Single active session per user enforced via activeSessionToken field
-- Session token stored in HTTP-only cookie named "mcg_session"
-- 7-day session expiration
-
-### Page Structure
-- **Public Pages**: Landing, Login, Register, Pricing, Privacy, Terms, Calculators (Freight/Storage)
-- **Authenticated Pages**: Dashboard, Clients, Pipeline, Calendar, Meeting Records (Ata), Checklist, RFI, Tasks, Projects, Financial, Marketing, Settings, Subscription
-
-### New Modules (Phase 2)
-- **Meeting Records (Ata Plano de Acao)**: Document meetings with action items, participants, decisions, and next steps. Full CRUD with action item tracking.
-  - Selectable meeting objectives (Visita Comercial, Apresentacao Indicadores, Visita Operacional) with custom objective creation
-  - Structured participants with name + email fields (JSON format)
-  - Auto-create tasks from action items with due dates
-  - PDF generation with company logo and full meeting details
-  - Send meeting record via email with PDF attachment
-- **Calendar (Calendario Comercial)**: Weekly commercial calendar with events linked to clients. Event types include meetings, calls, visits, proposals, and follow-ups.
-- **Tasks**: Task management with priorities (low/medium/high/urgent), due dates, assignees, and project assignment. Checkbox toggle for completion.
-  - Email reminders sent 1 day before due date (when email configured)
-  - Linked to meeting action items with assignedEmail field
-- **Projects**: Project management with status tracking (planning/active/on hold/completed), date ranges, and progress calculation based on linked tasks.
-- **Checklist (Enhanced)**: Complete client diagnostic tool with 18 sections following commercial workflow.
-  - **Capa/Perfil do Cliente**: Client profile with 5 tabs (Dados, História, Mercado, Contatos, Portais)
-    - Client data, CNPJ, Focal Point (internal commercial responsible)
-    - Company history, location, segment, products, numbers, news
-    - Market share, position, opportunities (BID, Cotação, Projetos, Spot)
-    - Pipeline overview (segment, product, volume, target)
-    - Client contacts by sector with birthdays
-    - Portals and passwords for client systems
-  - **18 Sections**: Comercial, Direção, Qualidade, Planejamento, Financeiro, Op. Transporte, Op. Distribuição, Op. Armazenagem, GRISCO, T.I, Compras, Contábil/Fiscal, RH, Jurídico, Cliente em Teste, Boas Vindas, Relacionamento
-  - **Responsável com Parecer**: Each section has responsible party with dates, "É Perfil?" decision, and written opinion
-  - Progress tracking per section and overall
-  - Links to CRM clients for auto-fill
-- **RFI (Request for Information)**: Company technical profile for participation in BIDs and logistics bids.
-  - Comprehensive company data: Razão Social, CNPJ/CPF, address, contacts
-  - Annual revenue by year (faturamento anual)
-  - Units/branches with contact details
-  - Main suppliers, competitors, and clients
-  - Regional coverage (27 Brazilian states)
-  - Regional details: deadlines, average values, volumes by region
-  - Operational requirements: third-party permissions, vehicle types, XML availability, payment terms
-  - Scope of operation: market segments, transportation modes, cargo types, operation types
-  - Fleet information: vehicle types, quantities, average age
-  - Status tracking: draft, completed, submitted
-  - Uses JSONB fields for flexible complex data structures (unidades, fornecedores, frota, etc.)
-
-### Loja MCG (E-commerce)
-- **Status**: Infrastructure implemented, products managed via Admin MCG
-- **Product Types**: 
-  - `merch` - Brindes corporativos (corporate gifts)
-  - `ebook` - E-books (CEO-authored trilogy about commercial logistics)
-  - `manual` - App documentation and guides
-- **Fulfillment Types**: physical, digital, hybrid
-- **Key Features**:
-  - Product catalog with categories, pricing, inventory
-  - Gift compliance warnings (corporate policy reminders)
-  - Products only visible when activated by admin (isActive flag)
-  - Admin panel for product/category/order management
-- **E-book Vision**: CEO-authored trilogy "A Arte do Comercial em Logistica"
-  - Volume I: A Jornada Comercial (available)
-  - Volume II: Estrategias Avancadas (2025)
-  - Volume III: Lideranca Comercial (2026)
-- **Future Enhancement - M. Veste**:
-  - Fashion/uniform arm of MCG e-commerce
-  - Separate branding within Loja MCG
-  - User has existing domain for M. Veste
-  - Will include uniforms and fashion items
-  - **Status**: Pending implementation
-
-### Dashboard Indicators
-- **ABC Curve Analysis**: Client classification following Pareto principle (80/20 rule)
-- **Clients by State**: Geographic distribution bar chart
-- **Clients by Segment**: Market segment distribution pie chart
-- **Pipeline Overview**: Real-time funnel statistics
+### Design Patterns & UI/UX
+-   **Schema Sharing**: Drizzle schemas are shared between frontend validation and backend database operations.
+-   **Query Pattern**: TanStack Query custom query functions handle API responses, including authentication.
+-   **Layout**: `AppLayout` provides consistent navigation for authenticated users.
+-   **Theming**: Light/dark mode support using CSS variables.
+-   **UI Components**: Utilizes Radix UI headless components and shadcn/ui for styled elements, with Lucide React for icons.
+-   **Brazilian Localization**: Full Portuguese UI, ICMS tax rates for all states, and LGPD compliance.
 
 ## External Dependencies
 
-### Payment Processing
-- **Stripe**: Subscription billing with stripe-replit-sync for webhook management
-- Products/prices synced from Stripe with plans: Free, Professional, Enterprise
-- Customer portal integration for subscription management
-
-### Database
-- **PostgreSQL**: Primary data store (requires DATABASE_URL environment variable)
-- **Drizzle ORM**: Type-safe database queries with schema migrations via drizzle-kit
-
-### UI Components
-- **Radix UI**: Headless accessible components (dialog, dropdown, tabs, etc.)
-- **shadcn/ui**: Pre-styled component library built on Radix
-- **Lucide React**: Icon library
-
-### Environment Variables Required
-- `DATABASE_URL`: PostgreSQL connection string
-- `SESSION_SECRET`: Secret for session encryption
-- Stripe credentials are fetched dynamically via Replit Connectors API
-
-### Brazilian Localization
-- ICMS tax rates for all 27 Brazilian states
-- Portuguese language throughout UI
-- LGPD (Brazilian data protection law) compliance with cookie consent
-
-## Business Context
-
-### Vision
-MCG Consultoria is a commercial management platform for logistics, filling the gap between operational ERPs (WMS/TMS) and commercial/sales needs. Created by experienced logistics professionals who understand the pain points between commercial and operational areas.
-
-### Strategic Partnership - Grupo NStech
-- **KMM**: ERP for logistics (WMS/TMS) - MCG created the first CRM prototype for KMM
-- **QualP**: Route calculation API (distance, tolls, freight tables) - owned by NStech
-- **Goal**: Full integration with KMM ecosystem, with potential reseller partnership for QualP API
-
-### Target Market
-- Logistics companies (both operators and service providers)
-- Industries with logistics operations
-- Commercial teams in logistics sector
-
-## Pending Integrations
-
-### QualP API (Grupo NStech)
-- **Status**: Pending partnership negotiation
-- **Purpose**: Automatic calculation of distance and tolls in freight calculator
-- **Environment Variable**: QUALP_ACCESS_TOKEN (to be configured after partnership)
-- **Endpoint Ready**: POST /api/route-calculation (code implemented, waiting for API token)
-- **Note**: System works fully in manual mode without API configured
-
-### Google Workspace Integration (Active)
-- **Status**: Fully implemented via Replit OAuth Connectors
-- **Services Integrated**:
-  - **Gmail**: Primary email provider for sending meeting records, reminders
-  - **Google Calendar**: Sync commercial events (meetings, visits, calls) with one-click
-  - **Google Drive**: File storage integration ready
-  - **Google Sheets**: Export clients, tasks, and events to spreadsheets
-- **Implementation**:
-  - `server/googleServices.ts`: Unified API clients for all Google services
-  - `server/emailService.ts`: Gmail as primary provider, Resend as fallback
-  - OAuth tokens managed automatically by Replit Connectors
-- **Endpoints**:
-  - `POST /api/commercial-events/:id/sync-google-calendar`: Sync event to Google Calendar
-  - `POST /api/export/google-sheets`: Export data (clients, tasks, events) to Sheets
-  - `GET /api/google/status`: Check integration availability
-- **UI Features**:
-  - Calendar page: "Exportar Sheets" button to export all events
-  - Event cards: Google icon to sync individual events to Calendar
-- **Usage Limits**:
-  - Gmail: 500 emails/day (personal), 2000/day (Workspace)
-  - Calendar/Sheets/Drive: Free within normal usage quotas
-- **Note**: Integration is OAuth-based and free for normal usage
-
-### Email Service (Resend - Fallback)
-- **Status**: Available as fallback if Gmail not configured
-- **Purpose**: Send meeting records (Ata) as PDF to participants, task reminders 1 day before due date
-- **Priority**: Gmail is preferred when Google integration is available
-- **To activate fallback**: Set RESEND_API_KEY secret
-- **Note**: System uses Gmail first; falls back to Resend if Gmail unavailable
-
-### KMM ERP Integration (Grupo NStech)
-- **Status**: Pending formal partnership agreement
-- **Purpose**: Full integration between MCG (commercial/CRM) and KMM (operational/WMS/TMS)
-- **Requirements for integration**:
-  1. Official API documentation from NStech (partner access)
-  2. Formal partnership contract authorizing integration
-  3. Developer credentials and sandbox environment
-  4. Data mapping agreement (which fields sync between systems)
-- **Potential sync entities**:
-  - Clients (MCG) <-> Customers (KMM)
-  - Commercial Proposals (MCG) <-> Transport Orders (KMM)
-  - Freight Calculations (MCG) <-> Freight Quotes (KMM)
-  - Client Operations (MCG) <-> Service Types (KMM)
-  - Financial Accounts (MCG) <-> Billing (KMM)
-- **Architecture ready**: REST APIs and multi-company structure already support future integration
-- **Legal note**: Integration must only proceed after formal authorization from NStech to avoid any legal issues
-- **Focus**: Primary integration target, as KMM clients (carriers and logistics operators) are MCG's main audience
-
-### WhatsApp Business Integration (AiSensy)
-- **Status**: Infrastructure implemented, awaiting AiSensy account configuration
-- **Purpose**: Automated customer support journey via WhatsApp Business API
-- **Provider**: AiSensy (free plan available)
-- **Database Schema**:
-  - `whatsappJourneySteps`: Support journey flowchart steps (welcome, menu, faq, human, goodbye)
-  - `whatsappConfig`: AiSensy API configuration (apiKey, projectId, phone number)
-  - `whatsappAgents`: Support team members for human handoff
-  - `whatsappConversations`: Active customer conversations
-  - `whatsappMessages`: Message history per conversation
-- **Admin MCG Features**:
-  - Visual journey designer with hierarchical step management
-  - Configuration tab for AiSensy integration
-  - Agents tab for team management
-  - Conversations tab for monitoring active chats
-- **Step Types**: welcome, menu, faq, human, goodbye
-- **Hierarchical Structure**: Parent-child relationships for menu options
-- **API Routes**: Full CRUD under `/api/admin/whatsapp/*`
-- **Support Page**: Already has WhatsApp button with direct link
-
-### Mobile App (PWA)
-- **Status**: Implemented via Progressive Web App approach
-- **Distribution Strategy**: Free deployment to app stores via PWA
-  - Google Play: $25 one-time developer fee
-  - Apple App Store: Via PWA capability (no native app needed)
-- **Configuration Files**:
-  - `client/public/manifest.json`: PWA manifest with app metadata
-  - `client/public/sw.js`: Service worker for offline caching
-  - `client/public/offline.html`: Offline fallback page
-  - `client/index.html`: Apple/Android meta tags
-  - `client/src/main.tsx`: Service worker registration
-- **Features**:
-  - Standalone app experience on mobile
-  - Offline fallback page
-  - Install prompts on supported browsers
-  - App icons using existing favicon
-- **Landing Page**: Download buttons for Google Play and App Store (URLs pending)
-- **Note**: Store URLs will be updated once apps are published
+-   **Payment Processing**: Stripe for subscription billing, integrated with `stripe-replit-sync` for webhooks.
+-   **Database**: PostgreSQL as the primary data store, managed with Drizzle ORM.
+-   **Email Services**: Google Workspace (Gmail) as the primary provider, with Resend as a fallback. Integrated via Replit OAuth Connectors for seamless authentication.
+-   **Google Services**:
+    -   **Google Calendar**: For syncing commercial events.
+    -   **Google Drive**: For file storage integration.
+    -   **Google Sheets**: For exporting data (clients, tasks, events).
+-   **WhatsApp Business**: AiSensy for automated customer support journeys (requires API key configuration).
+-   **ERP Integration (Pending)**: QualP API (Grupo NStech) for automatic freight calculation (distance, tolls) and KMM ERP (Grupo NStech) for comprehensive operational integration.
