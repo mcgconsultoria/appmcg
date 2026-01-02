@@ -50,11 +50,11 @@ const registerSchema = z.object({
 type RegisterData = z.infer<typeof registerSchema>;
 
 const userCategoryOptions = [
-  { key: "embarcador", label: "Embarcador", desc: "Indústrias, distribuidores - busca prestadores de serviços" },
-  { key: "servicos", label: "Serviços", desc: "Prestadores de serviço - busca clientes" },
-  { key: "operador", label: "Operador Logístico", desc: "Operador logístico completo" },
-  { key: "parceiro", label: "Parceiros", desc: "Influencers, contadores, advogados, softwares" },
-  { key: "motorista", label: "Motoristas", desc: "Motoristas autônomos" },
+  { key: "embarcador", label: "Embarcador", desc: "Busca prestadores de serviço" },
+  { key: "servicos", label: "Serviços", desc: "Busca clientes" },
+  { key: "operador", label: "Operador Logístico", desc: "Busca clientes e prestadores de serviço" },
+  { key: "parceiro", label: "Parceiros", desc: "Serviços Autônomos" },
+  { key: "motorista", label: "Motoristas", desc: "Terceiros, Agregados, Autônomos" },
 ];
 
 const defaultBusinessTypes = [
