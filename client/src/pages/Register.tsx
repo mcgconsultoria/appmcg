@@ -307,49 +307,50 @@ export default function Register() {
                 <FormField
                   control={form.control}
                   name="userCategories"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Você é: *</FormLabel>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
-                        {Object.entries(userCategoryLabels).map(([key, { label, desc }]) => (
-                          <div
-                            key={key}
-                            className={`flex items-start gap-2 p-3 rounded-md border cursor-pointer transition-colors ${
-                              field.value?.includes(key)
-                                ? "border-primary bg-primary/5"
-                                : "border-border hover:border-primary/50"
-                            }`}
-                            onClick={() => {
-                              const current = field.value || [];
-                              if (current.includes(key)) {
-                                field.onChange(current.filter(v => v !== key));
-                              } else {
-                                field.onChange([...current, key]);
-                              }
-                            }}
-                            data-testid={`checkbox-category-${key}`}
-                          >
-                            <Checkbox
-                              checked={field.value?.includes(key)}
-                              onCheckedChange={(checked) => {
-                                const current = field.value || [];
-                                if (checked) {
-                                  field.onChange([...current, key]);
-                                } else {
-                                  field.onChange(current.filter(v => v !== key));
-                                }
-                              }}
-                            />
-                            <div className="flex flex-col">
-                              <span className="text-sm font-medium">{label}</span>
-                              <span className="text-xs text-muted-foreground">{desc}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const toggleCategory = (key: string) => {
+                      const current = field.value || [];
+                      if (current.includes(key)) {
+                        field.onChange(current.filter((v: string) => v !== key));
+                      } else {
+                        field.onChange([...current, key]);
+                      }
+                    };
+                    
+                    return (
+                      <FormItem>
+                        <FormLabel>Você é: *</FormLabel>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                          {Object.entries(userCategoryLabels).map(([key, { label, desc }]) => {
+                            const isChecked = field.value?.includes(key) || false;
+                            return (
+                              <label
+                                key={key}
+                                htmlFor={`category-${key}`}
+                                className={`flex items-start gap-2 p-3 rounded-md border cursor-pointer transition-colors ${
+                                  isChecked
+                                    ? "border-primary bg-primary/5"
+                                    : "border-border hover:border-primary/50"
+                                }`}
+                                data-testid={`checkbox-category-${key}`}
+                              >
+                                <Checkbox
+                                  id={`category-${key}`}
+                                  checked={isChecked}
+                                  onCheckedChange={() => toggleCategory(key)}
+                                />
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-medium">{label}</span>
+                                  <span className="text-xs text-muted-foreground">{desc}</span>
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormField
