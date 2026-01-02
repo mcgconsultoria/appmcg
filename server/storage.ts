@@ -223,6 +223,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByCnpj(cnpj: string): Promise<User | undefined>;
   getUserBySessionToken(token: string): Promise<User | undefined>;
   createUserWithPassword(userData: Partial<UpsertUser>): Promise<User>;
   updateUserSessionToken(userId: string, token: string | null): Promise<void>;
@@ -645,6 +646,15 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async getUserByCnpj(cnpj: string): Promise<User | undefined> {
+    const cleanCnpj = cnpj.replace(/[^\d]/g, "");
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(sql`REPLACE(REPLACE(REPLACE(${users.cnpj}, '.', ''), '-', ''), '/', '') = ${cleanCnpj}`);
     return user;
   }
 

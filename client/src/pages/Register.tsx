@@ -23,6 +23,7 @@ const registerSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(8, "Senha deve ter no mínimo 8 caracteres"),
   confirmPassword: z.string(),
+  userCategories: z.array(z.string()).min(1, "Selecione pelo menos uma categoria"),
   cnpj: z.string().optional(),
   inscriçãoEstadual: z.string().optional(),
   inscriçãoEstadualIsento: z.boolean().optional().default(false),
@@ -32,6 +33,7 @@ const registerSchema = z.object({
   firstName: z.string().min(1, "Nome é obrigatório"),
   lastName: z.string().optional(),
   tipoEmpresa: z.string().optional(),
+  segmentos: z.array(z.string()).optional(),
   segmento: z.string().optional(),
   departamento: z.string().optional(),
   vendedor: z.string().optional(),
@@ -46,6 +48,14 @@ const registerSchema = z.object({
 });
 
 type RegisterData = z.infer<typeof registerSchema>;
+
+const userCategoryLabels = {
+  embarcador: { label: "Embarcador", desc: "Indústrias, distribuidores - busca prestadores de serviços" },
+  servicos: { label: "Serviços", desc: "Prestadores de serviço - busca clientes" },
+  operador: { label: "Operador Logístico", desc: "Operador logístico completo" },
+  parceiro: { label: "Parceiros", desc: "Influencers, contadores, advogados, softwares" },
+  motorista: { label: "Motoristas", desc: "Motoristas autônomos" },
+};
 
 const defaultBusinessTypes = [
   "Indústria",
@@ -135,6 +145,7 @@ export default function Register() {
       email: "",
       password: "",
       confirmPassword: "",
+      userCategories: [],
       cnpj: "",
       inscriçãoEstadual: "",
       inscriçãoEstadualIsento: false,
@@ -144,6 +155,7 @@ export default function Register() {
       firstName: "",
       lastName: "",
       tipoEmpresa: "",
+      segmentos: [],
       segmento: "",
       departamento: "",
       vendedor: "",
@@ -165,16 +177,30 @@ export default function Register() {
       const response = await fetch(`/api/cnpj/${cleanCnpj}`);
       if (response.ok) {
         const data = await response.json();
-        form.setValue("razaoSocial", data.razaoSocial || "");
-        form.setValue("nomeFantasia", data.nomeFantasia || "");
+        // Backend retorna em snake_case
+        const razaoSocial = data.razao_social || data.razaoSocial || "";
+        const nomeFantasia = data.nome_fantasia || data.nomeFantasia || "";
+        form.setValue("razaoSocial", razaoSocial);
+        form.setValue("nomeFantasia", nomeFantasia);
         setCnpjFound(true);
         toast({
           title: "CNPJ encontrado",
-          description: `Dados de ${data.razaoSocial} carregados automaticamente`,
+          description: `Dados de ${razaoSocial} carregados automaticamente`,
+        });
+      } else {
+        toast({
+          title: "CNPJ não encontrado",
+          description: "Não foi possível encontrar dados para este CNPJ",
+          variant: "destructive",
         });
       }
     } catch (error) {
       console.error("Erro ao buscar CNPJ:", error);
+      toast({
+        title: "Erro ao buscar CNPJ",
+        description: "Tente novamente mais tarde",
+        variant: "destructive",
+      });
     } finally {
       setCnpjLoading(false);
     }
@@ -277,6 +303,55 @@ export default function Register() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                {/* Categorias de Usuário */}
+                <FormField
+                  control={form.control}
+                  name="userCategories"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Você é: *</FormLabel>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                        {Object.entries(userCategoryLabels).map(([key, { label, desc }]) => (
+                          <div
+                            key={key}
+                            className={`flex items-start gap-2 p-3 rounded-md border cursor-pointer transition-colors ${
+                              field.value?.includes(key)
+                                ? "border-primary bg-primary/5"
+                                : "border-border hover:border-primary/50"
+                            }`}
+                            onClick={() => {
+                              const current = field.value || [];
+                              if (current.includes(key)) {
+                                field.onChange(current.filter(v => v !== key));
+                              } else {
+                                field.onChange([...current, key]);
+                              }
+                            }}
+                            data-testid={`checkbox-category-${key}`}
+                          >
+                            <Checkbox
+                              checked={field.value?.includes(key)}
+                              onCheckedChange={(checked) => {
+                                const current = field.value || [];
+                                if (checked) {
+                                  field.onChange([...current, key]);
+                                } else {
+                                  field.onChange(current.filter(v => v !== key));
+                                }
+                              }}
+                            />
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium">{label}</span>
+                              <span className="text-xs text-muted-foreground">{desc}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="cnpj"
@@ -501,52 +576,82 @@ export default function Register() {
 
                   <FormField
                     control={form.control}
-                    name="segmento"
+                    name="segmentos"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Segmento</FormLabel>
-                        <div className="flex gap-2">
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger data-testid="select-segmento" className="flex-1">
-                                <SelectValue placeholder="Selecione..." />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {allSegments.map((segment) => (
-                                <SelectItem key={segment} value={segment}>
-                                  {segment}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Dialog open={segmentDialogOpen} onOpenChange={setSegmentDialogOpen}>
-                            <DialogTrigger asChild>
-                              <Button type="button" variant="outline" size="icon">
-                                <Plus className="h-4 w-4" />
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Novo Segmento</DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <Input
-                                  placeholder="Nome do segmento"
-                                  value={newSegmentName}
-                                  onChange={(e) => setNewSegmentName(e.target.value)}
-                                  data-testid="input-new-segment"
-                                />
-                                <Button
-                                  onClick={() => createSegmentMutation.mutate(newSegmentName)}
-                                  disabled={!newSegmentName || createSegmentMutation.isPending}
-                                  data-testid="button-create-segment"
-                                >
-                                  {createSegmentMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Criar"}
+                        <FormLabel>Segmentos (múltipla escolha)</FormLabel>
+                        <div className="flex flex-col gap-2">
+                          <div className="flex gap-2">
+                            <Select 
+                              onValueChange={(value) => {
+                                const current = field.value || [];
+                                if (!current.includes(value)) {
+                                  field.onChange([...current, value]);
+                                }
+                              }} 
+                              value=""
+                            >
+                              <FormControl>
+                                <SelectTrigger data-testid="select-segmento" className="flex-1">
+                                  <SelectValue placeholder="Adicionar segmento..." />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {allSegments.filter(s => !(field.value || []).includes(s)).map((segment) => (
+                                  <SelectItem key={segment} value={segment}>
+                                    {segment}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Dialog open={segmentDialogOpen} onOpenChange={setSegmentDialogOpen}>
+                              <DialogTrigger asChild>
+                                <Button type="button" variant="outline" size="icon">
+                                  <Plus className="h-4 w-4" />
                                 </Button>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Novo Segmento</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <Input
+                                    placeholder="Nome do segmento"
+                                    value={newSegmentName}
+                                    onChange={(e) => setNewSegmentName(e.target.value)}
+                                    data-testid="input-new-segment"
+                                  />
+                                  <Button
+                                    onClick={() => createSegmentMutation.mutate(newSegmentName)}
+                                    disabled={!newSegmentName || createSegmentMutation.isPending}
+                                    data-testid="button-create-segment"
+                                  >
+                                    {createSegmentMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Criar"}
+                                  </Button>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                          {(field.value || []).length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {(field.value || []).map((seg: string) => (
+                                <span 
+                                  key={seg}
+                                  className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-primary/10 text-primary"
+                                >
+                                  {seg}
+                                  <button
+                                    type="button"
+                                    onClick={() => field.onChange(field.value?.filter((s: string) => s !== seg))}
+                                    className="ml-1 hover:text-destructive"
+                                    data-testid={`remove-segment-${seg}`}
+                                  >
+                                    x
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                         <FormMessage />
                       </FormItem>

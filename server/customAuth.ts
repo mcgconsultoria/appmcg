@@ -18,26 +18,51 @@ export function generateSessionToken(): string {
 }
 
 export async function registerUser(data: RegisterData): Promise<{ user: User; sessionToken: string } | { error: string }> {
+  // Verificar email duplicado
   const existingUser = await storage.getUserByEmail(data.email);
   if (existingUser) {
     return { error: "Email já cadastrado" };
   }
 
+  // Verificar CNPJ/CPF duplicado (se informado)
+  if (data.cnpj) {
+    const cleanCnpj = data.cnpj.replace(/[^\d]/g, "");
+    if (cleanCnpj.length >= 11) {
+      const existingCnpj = await storage.getUserByCnpj(cleanCnpj);
+      if (existingCnpj) {
+        return { error: "CNPJ/CPF já cadastrado" };
+      }
+    }
+  }
+
   const hashedPassword = await hashPassword(data.password);
   const sessionToken = generateSessionToken();
 
-  // Emails @mcgconsultoria.com.br recebem role admin_mcg automaticamente
+  // Determinar role baseado no perfil e email
   const isMcgEmail = data.email.toLowerCase().endsWith("@mcgconsultoria.com.br");
-  const role = isMcgEmail ? "admin_mcg" : undefined;
+  let role: string;
+  if (isMcgEmail) {
+    role = "admin_mcg";
+  } else if (data.perfilConta === "administrador") {
+    role = "admin";
+  } else {
+    role = "user";
+  }
 
   const user = await storage.createUserWithPassword({
     email: data.email,
     password: hashedPassword,
     razaoSocial: data.razaoSocial || null,
+    nomeFantasia: data.nomeFantasia || null,
     cnpj: data.cnpj || null,
+    inscricaoEstadual: data.inscricaoEstadual || null,
+    inscricaoEstadualIsento: data.inscricaoEstadualIsento || false,
+    inscricaoMunicipal: data.inscricaoMunicipal || null,
     firstName: data.firstName,
     lastName: data.lastName || null,
+    userCategories: data.userCategories || null,
     tipoEmpresa: data.tipoEmpresa || null,
+    segmentos: data.segmentos || null,
     segmento: data.segmento || null,
     departamento: data.departamento || null,
     vendedor: data.vendedor || null,
@@ -45,7 +70,7 @@ export async function registerUser(data: RegisterData): Promise<{ user: User; se
     phone: data.phone || null,
     activeSessionToken: sessionToken,
     subscriptionStatus: "free",
-    ...(role && { role }),
+    role,
   });
 
   return { user, sessionToken };

@@ -27,6 +27,17 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
+// User categories for registration
+export const userCategoryOptions = [
+  "embarcador",      // Indústrias, distribuidores - quem busca prestadores
+  "servicos",        // Prestadores de serviço - quem busca clientes  
+  "operador",        // Operador Logístico
+  "parceiro",        // Autônomos: influencers, contadores, advogados, softwares
+  "motorista",       // Motoristas
+] as const;
+
+export type UserCategory = typeof userCategoryOptions[number];
+
 // Users table with custom authentication
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -40,7 +51,9 @@ export const users = pgTable("users", {
   nomeFantasia: varchar("nome_fantasia", { length: 255 }),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
+  userCategories: text("user_categories").array(),
   tipoEmpresa: varchar("tipo_empresa", { length: 100 }),
+  segmentos: text("segmentos").array(),
   segmento: varchar("segmento", { length: 100 }),
   departamento: varchar("departamento", { length: 100 }),
   vendedor: varchar("vendedor", { length: 255 }),
@@ -1967,11 +1980,17 @@ export const insertWhatsappAgentSchema = createInsertSchema(whatsappAgents).omit
 export const registerSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(8, "Senha deve ter no mínimo 8 caracteres"),
-  razaoSocial: z.string().optional(),
   cnpj: z.string().optional(),
+  inscricaoEstadual: z.string().optional(),
+  inscricaoEstadualIsento: z.boolean().optional().default(false),
+  inscricaoMunicipal: z.string().optional(),
+  razaoSocial: z.string().optional(),
+  nomeFantasia: z.string().optional(),
   firstName: z.string().min(1, "Nome é obrigatório"),
   lastName: z.string().optional(),
+  userCategories: z.array(z.string()).optional(),
   tipoEmpresa: z.string().optional(),
+  segmentos: z.array(z.string()).optional(),
   segmento: z.string().optional(),
   departamento: z.string().optional(),
   vendedor: z.string().optional(),
