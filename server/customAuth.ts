@@ -221,6 +221,7 @@ export async function loginUser(data: LoginData): Promise<{ user: User; sessionT
     return { error: "Email ou senha inválidos" };
   }
 
+  console.log("User found:", user.email, "accountStatus:", user.accountStatus, "role:", user.role);
   console.log("User found, verifying password. Hash starts with:", user.password?.substring(0, 20));
   const isValid = await verifyPassword(data.password, user.password);
   console.log("Password verification result:", isValid);

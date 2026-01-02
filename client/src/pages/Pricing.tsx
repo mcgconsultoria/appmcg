@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Check, Loader2, Briefcase, ArrowRight, Lock, Percent, Save, ArrowLeft } from "lucide-react";
+import { Check, Loader2, Briefcase, ArrowRight, Lock, Send, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,8 +12,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { ClientCombobox } from "@/components/ClientCombobox";
-import type { Client } from "@shared/schema";
 
 interface Price {
   id: string;
@@ -137,7 +135,6 @@ const consultingPhases = [
     badge: "1ª Fase",
     duration: "1 mês",
     description: "Escopo, Estruturação In Loco, Acompanhamento On Line",
-    price: 5000,
     requiresDiagnóstico: false,
     isExpansao: false,
   },
@@ -147,7 +144,6 @@ const consultingPhases = [
     badge: "2ª Fase",
     duration: "1 mês",
     description: "In Loco, On Line",
-    price: 5000,
     requiresDiagnóstico: true,
     isExpansao: false,
   },
@@ -157,7 +153,6 @@ const consultingPhases = [
     badge: "3ª Fase",
     duration: "1 mês",
     description: "In Loco, On Line",
-    price: 5000,
     requiresDiagnóstico: true,
     isExpansao: false,
   },
@@ -167,8 +162,6 @@ const consultingPhases = [
     badge: "4ª Fase",
     duration: "Contínuo",
     description: "On Line + Comissão sobre negócios fechados",
-    price: 2000,
-    commission: 5,
     requiresDiagnóstico: false,
     isExpansao: true,
   },
@@ -233,67 +226,47 @@ export default function Pricing() {
     });
   };
 
-  const calculateTotal = () => {
-    let total = 0;
-    let hasCommission = false;
-    let commissionPercent = 0;
-
-    selectedPhases.forEach(phaseId => {
+  const getSelectedPhasesInfo = () => {
+    const phases = selectedPhases.map(phaseId => {
       const phase = consultingPhases.find(p => p.id === phaseId);
-      if (phase) {
-        total += phase.price;
-        if (phase.isExpansao && phase.commission) {
-          hasCommission = true;
-          commissionPercent = phase.commission;
-        }
-      }
-    });
-
-    return { total, hasCommission, commissionPercent };
+      return phase;
+    }).filter(Boolean);
+    
+    const hasExpansao = phases.some(p => p?.isExpansao);
+    
+    return { phases, hasExpansao };
   };
 
   const consultingProposalMutation = useMutation({
     mutationFn: async () => {
-      const { total, hasCommission, commissionPercent } = calculateTotal();
-      const selectedClient = clients?.find(c => c.id.toString() === selectedClientId);
+      const { hasExpansao } = getSelectedPhasesInfo();
       
       const payload = {
-        companyId: 1,
-        clientId: selectedClientId ? parseInt(selectedClientId) : undefined,
-        proposalType: "consulting",
-        clientName: selectedClient?.name || "",
-        clientEmail: consultingForm.email,
-        clientPhone: consultingForm.phone,
-        validityDays: 30,
-        notes: consultingForm.message,
-        totalValue: total.toString(),
-        proposalData: {
-          phases: selectedPhases.map(phaseId => {
-            const phase = consultingPhases.find(p => p.id === phaseId);
-            return {
-              id: phaseId,
-              name: phase?.name,
-              price: phase?.price,
-              commission: phase?.commission,
-            };
-          }),
-          contactName: consultingForm.contactName,
-          hasCommission,
-          commissionPercent,
-        },
+        proposalType: "consulting_quote",
+        contactName: consultingForm.contactName,
+        email: consultingForm.email,
+        phone: consultingForm.phone,
+        message: consultingForm.message,
+        phases: selectedPhases.map(phaseId => {
+          const phase = consultingPhases.find(p => p.id === phaseId);
+          return {
+            id: phaseId,
+            name: phase?.name,
+            duration: phase?.duration,
+          };
+        }),
+        hasExpansao,
       };
-      return apiRequest("POST", "/api/commercial-proposals", payload);
+      return apiRequest("POST", "/api/consulting-quote-request", payload);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/commercial-proposals"] });
-      const { total, hasCommission, commissionPercent } = calculateTotal();
+      queryClient.invalidateQueries({ queryKey: ["/api/consulting-quote-requests"] });
       toast({
-        title: "Proposta de consultoria criada com sucesso!",
-        description: `Total estimado: R$ ${total.toLocaleString('pt-BR')}${hasCommission ? ` + ${commissionPercent}% sobre negócios fechados` : ''}`,
+        title: "Solicitação enviada com sucesso!",
+        description: "Nossa equipe entrará em contato em breve com um orçamento personalizado.",
       });
       setConsultingDialogOpen(false);
       setSelectedPhases([]);
-      setSelectedClientId("");
       setConsultingForm({
         contactName: "",
         email: "",
@@ -302,7 +275,7 @@ export default function Pricing() {
       });
     },
     onError: () => {
-      toast({ title: "Erro ao criar proposta", variant: "destructive" });
+      toast({ title: "Erro ao enviar solicitação", variant: "destructive" });
     },
   });
 
@@ -316,10 +289,10 @@ export default function Pricing() {
       return;
     }
 
-    if (!selectedClientId || !consultingForm.contactName || !consultingForm.email) {
+    if (!consultingForm.contactName || !consultingForm.email) {
       toast({
         title: "Preencha os campos obrigatórios",
-        description: "Cliente, contato e email são obrigatórios.",
+        description: "Nome e email são obrigatórios.",
         variant: "destructive",
       });
       return;
@@ -669,18 +642,7 @@ export default function Pricing() {
                             <p className="text-xs text-muted-foreground mt-1">
                               {phase.description}
                             </p>
-                            <div className="mt-2 flex items-center gap-1">
-                              <span className="text-sm font-bold">
-                                R$ {phase.price.toLocaleString('pt-BR')}
-                              </span>
-                              {phase.isExpansao && phase.commission && (
-                                <span className="text-xs text-primary flex items-center gap-1">
-                                  <Percent className="h-3 w-3" />
-                                  +{phase.commission}%
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-muted-foreground">{phase.duration}</p>
+                            <p className="text-xs text-primary mt-2 font-medium">{phase.duration}</p>
                           </div>
                         </div>
                         {isLocked && (
@@ -694,20 +656,13 @@ export default function Pricing() {
                 </div>
                 
                 {selectedPhases.length > 0 && (
-                  <div className="mt-4 p-4 bg-muted/50 rounded-md">
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">Total Estimado:</span>
-                      <div className="text-right">
-                        <span className="text-xl font-bold">
-                          R$ {calculateTotal().total.toLocaleString('pt-BR')}
-                        </span>
-                        {calculateTotal().hasCommission && (
-                          <span className="text-sm text-primary block">
-                            + {calculateTotal().commissionPercent}% sobre negócios fechados
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                  <div className="mt-4 p-4 bg-primary/10 rounded-md text-center">
+                    <p className="text-sm text-muted-foreground">
+                      {selectedPhases.length} fase(s) selecionada(s)
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Você receberá um orçamento personalizado por email
+                    </p>
                   </div>
                 )}
               </div>
@@ -726,19 +681,7 @@ export default function Pricing() {
                 <Label className="text-base font-semibold mb-4 block">Dados para Contato</Label>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Cliente *</Label>
-                    <ClientCombobox
-                      clients={clients || []}
-                      value={selectedClientId}
-                      onValueChange={setSelectedClientId}
-                      placeholder="Buscar ou cadastrar cliente..."
-                      allowNone={false}
-                      showAddButton={true}
-                      data-testid="select-client"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="contactName">Nome do Contato *</Label>
+                    <Label htmlFor="contactName">Nome Completo *</Label>
                     <Input
                       id="contactName"
                       value={consultingForm.contactName}
@@ -758,8 +701,8 @@ export default function Pricing() {
                       data-testid="input-email"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Telefone</Label>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="phone">Telefone / WhatsApp</Label>
                     <Input
                       id="phone"
                       value={consultingForm.phone}
