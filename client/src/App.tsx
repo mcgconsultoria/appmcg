@@ -41,6 +41,7 @@ import IndicadoresVendas from "@/pages/IndicadoresVendas";
 import IndicadoresPosVendas from "@/pages/IndicadoresPosVendas";
 import Pesquisas from "@/pages/Pesquisas";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
+import PendingApprovals from "@/pages/admin/PendingApprovals";
 import AdminComercial from "@/pages/admin/AdminComercial";
 import AdminProjetos from "@/pages/admin/AdminProjetos";
 import AdminFinanceiro from "@/pages/admin/AdminFinanceiro";
@@ -80,6 +81,7 @@ import Logout from "@/pages/Logout";
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
   const isAdmin = user?.role === "admin" || user?.role === "admin_mcg";
+  const isMcgAdmin = user?.role === "admin_mcg";
 
   if (isLoading) {
     return (
@@ -109,6 +111,9 @@ function Router() {
       {/* Admin routes - show login if not authenticated or not admin */}
       <Route path="/admin">
         {() => isAuthenticated && isAdmin ? <AdminDashboard /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/aguardando-aprovacao">
+        {() => isAuthenticated && isMcgAdmin ? <PendingApprovals /> : <AdminLogin />}
       </Route>
       <Route path="/admin/comercial">
         {() => isAuthenticated && isAdmin ? <AdminComercial /> : <AdminLogin />}

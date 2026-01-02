@@ -61,6 +61,7 @@ import {
   Activity,
   Wallet,
   GitBranch,
+  UserCheck,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -192,6 +193,11 @@ const adminClienteItems = [
 ];
 
 const adminMcgComercialItems = [
+  {
+    title: "Aguardando Aprovação",
+    url: "/admin/aguardando-aprovacao",
+    icon: UserCheck,
+  },
   {
     title: "Comercial",
     url: "/admin/comercial",
@@ -381,8 +387,13 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
   );
 }
 
-function AdminPJSection({ location }: { location: string }) {
+function AdminPJSection({ location, userRole }: { location: string; userRole?: string }) {
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Filter comercial items - only admin_mcg can see "Aguardando Aprovação"
+  const filteredComercialItems = userRole === 'admin_mcg' 
+    ? adminMcgComercialItems 
+    : adminMcgComercialItems.filter(item => item.url !== '/admin/aguardando-aprovacao');
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -404,7 +415,7 @@ function AdminPJSection({ location }: { location: string }) {
             <CollapsibleSection
               title="Comercial"
               icon={Briefcase}
-              items={adminMcgComercialItems}
+              items={filteredComercialItems}
               location={location}
             />
             <CollapsibleSection
@@ -624,7 +635,7 @@ export function AppSidebar() {
         )}
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
-          <AdminPJSection location={location} />
+          <AdminPJSection location={location} userRole={user?.role} />
         )}
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (

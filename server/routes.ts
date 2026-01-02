@@ -86,6 +86,16 @@ function isAdmin(req: Request, res: Response, next: NextFunction) {
     return res.status(401).json({ message: "Não autorizado" });
   }
   if (req.user.role !== 'admin' && req.user.role !== 'admin_mcg') {
+    return res.status(403).json({ message: "Acesso restrito a administradores" });
+  }
+  next();
+}
+
+function isMcgAdmin(req: Request, res: Response, next: NextFunction) {
+  if (!req.user) {
+    return res.status(401).json({ message: "Não autorizado" });
+  }
+  if (req.user.role !== 'admin_mcg') {
     return res.status(403).json({ message: "Acesso restrito a administradores MCG" });
   }
   next();
@@ -131,13 +141,26 @@ export async function registerRoutes(
         return res.status(400).json({ message: result.error });
       }
 
-      res.cookie(SESSION_COOKIE_NAME, result.sessionToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: SESSION_MAX_AGE,
-        path: '/',
-      });
+      // Se o cadastro está pendente de aprovação, não cria sessão
+      if ('pendingApproval' in result && result.pendingApproval) {
+        const { password, ...userWithoutPassword } = result.user;
+        return res.status(201).json({ 
+          user: userWithoutPassword, 
+          pendingApproval: true,
+          message: "Cadastro realizado com sucesso! Sua conta está aguardando aprovação. Você receberá um email quando for aprovada."
+        });
+      }
+
+      // Usuário MCG - cria sessão normalmente
+      if (result.sessionToken) {
+        res.cookie(SESSION_COOKIE_NAME, result.sessionToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: SESSION_MAX_AGE,
+          path: '/',
+        });
+      }
 
       const { password, ...userWithoutPassword } = result.user;
       res.status(201).json({ user: userWithoutPassword });
@@ -3271,6 +3294,117 @@ export async function registerRoutes(
   // ============================================
   // ADMIN MCG ROUTES
   // ============================================
+
+  // Pending Approval Users - for Admin MCG > Comercial > Aguardando Aprovação
+  // ONLY MCG admins can approve/reject users
+  app.get("/api/admin/pending-approvals", isMcgAdmin, async (req: any, res) => {
+    try {
+      const pendingUsers = await storage.getPendingApprovalUsers();
+      const safeUsers = pendingUsers.map(u => {
+        const { password, activeSessionToken, ...user } = u;
+        return user;
+      });
+      res.json(safeUsers);
+    } catch (error) {
+      console.error("Error fetching pending approvals:", error);
+      res.status(500).json({ message: "Erro ao buscar aprovações pendentes" });
+    }
+  });
+
+  app.post("/api/admin/approve-user/:userId", isMcgAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const approvedBy = req.user?.email || 'admin';
+      
+      const user = await storage.approveUser(userId, approvedBy);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      // Enviar email de aprovação para o usuário
+      const { emailService } = await import("./emailService");
+      await emailService.send({
+        to: [user.email],
+        subject: "[MCG Consultoria] Sua conta foi aprovada!",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #1a365d;">Bem-vindo à MCG Consultoria!</h2>
+            <p>Olá ${user.firstName},</p>
+            <p>Sua conta foi aprovada com sucesso. Agora você pode acessar o sistema com seu email e senha cadastrados.</p>
+            <p style="margin-top: 20px;">
+              <a href="https://mcg-consultoria.replit.app/login" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
+                Acessar o Sistema
+              </a>
+            </p>
+            <p style="color: #718096; font-size: 12px; margin-top: 30px;">
+              Atenciosamente,<br>Equipe MCG Consultoria
+            </p>
+          </div>
+        `,
+      });
+
+      const { password, activeSessionToken, ...safeUser } = user;
+      res.json({ message: "Usuário aprovado com sucesso", user: safeUser });
+    } catch (error) {
+      console.error("Error approving user:", error);
+      res.status(500).json({ message: "Erro ao aprovar usuário" });
+    }
+  });
+
+  app.post("/api/admin/reject-user/:userId", isMcgAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { reason } = req.body;
+      
+      const user = await storage.rejectUser(userId, reason || "Solicitação não aprovada");
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      // Enviar email de rejeição para o usuário
+      const { emailService } = await import("./emailService");
+      await emailService.send({
+        to: [user.email],
+        subject: "[MCG Consultoria] Atualização sobre sua solicitação",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #1a365d;">MCG Consultoria</h2>
+            <p>Olá ${user.firstName},</p>
+            <p>Infelizmente sua solicitação de cadastro não foi aprovada no momento.</p>
+            ${reason ? `<p><strong>Motivo:</strong> ${reason}</p>` : ''}
+            <p>Se você acredita que isso foi um erro ou deseja mais informações, entre em contato conosco pelo email comercial@mcgconsultoria.com.br</p>
+            <p style="color: #718096; font-size: 12px; margin-top: 30px;">
+              Atenciosamente,<br>Equipe MCG Consultoria
+            </p>
+          </div>
+        `,
+      });
+
+      const { password, activeSessionToken, ...safeUser } = user;
+      res.json({ message: "Usuário rejeitado", user: safeUser });
+    } catch (error) {
+      console.error("Error rejecting user:", error);
+      res.status(500).json({ message: "Erro ao rejeitar usuário" });
+    }
+  });
+
+  app.post("/api/admin/suspend-user/:userId", isMcgAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { reason } = req.body;
+      
+      const user = await storage.suspendUser(userId, reason || "Conta suspensa");
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      const { password, activeSessionToken, ...safeUser } = user;
+      res.json({ message: "Usuário suspenso", user: safeUser });
+    } catch (error) {
+      console.error("Error suspending user:", error);
+      res.status(500).json({ message: "Erro ao suspender usuário" });
+    }
+  });
 
   // Admin Dashboard
   app.get("/api/admin/dashboard", isAdmin, async (req: any, res) => {

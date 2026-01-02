@@ -209,19 +209,29 @@ export default function Register() {
   const watchDepartamento = form.watch("departamento");
   const showVendedor = watchDepartamento === "direção" || watchDepartamento === "comercial";
 
+  const [pendingApproval, setPendingApproval] = useState(false);
+
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterData) => {
       const { confirmPassword, acceptTerms, ...registerData } = data;
       const response = await apiRequest("POST", "/api/auth/register", registerData);
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      toast({
-        title: "Conta criada",
-        description: "Sua conta foi criada com sucesso!",
-      });
-      setLocation("/dashboard");
+    onSuccess: (data) => {
+      if (data.pendingApproval) {
+        setPendingApproval(true);
+        toast({
+          title: "Cadastro realizado!",
+          description: "Sua conta está aguardando aprovação. Você receberá um email quando for aprovada.",
+        });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        toast({
+          title: "Conta criada",
+          description: "Sua conta foi criada com sucesso!",
+        });
+        setLocation("/dashboard");
+      }
     },
     onError: (error: any) => {
       toast({
@@ -293,6 +303,37 @@ export default function Register() {
       </header>
 
       <main className="flex-1 flex items-center justify-center p-6">
+        {pendingApproval ? (
+          <Card className="w-full max-w-md">
+            <CardContent className="pt-8 pb-8 text-center space-y-6">
+              <div className="mx-auto w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                <CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-2xl font-bold">Cadastro Realizado!</h2>
+                <p className="text-muted-foreground">
+                  Sua conta foi criada e está aguardando aprovação.
+                </p>
+              </div>
+              <div className="bg-muted/50 rounded-lg p-4 text-left space-y-2">
+                <p className="text-sm font-medium">O que acontece agora?</p>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>1. Nossa equipe irá analisar seu cadastro</li>
+                  <li>2. Você receberá um email quando sua conta for aprovada</li>
+                  <li>3. Após aprovação, você poderá acessar o sistema normalmente</li>
+                </ul>
+              </div>
+              <div className="pt-4 space-y-3">
+                <Button onClick={() => setLocation("/login")} className="w-full" data-testid="button-go-to-login">
+                  Ir para Login
+                </Button>
+                <Button variant="outline" onClick={() => setLocation("/")} className="w-full" data-testid="button-go-home">
+                  Voltar para o Início
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
         <Card className="w-full max-w-2xl">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Criar Conta</CardTitle>
@@ -886,6 +927,7 @@ export default function Register() {
             </div>
           </CardContent>
         </Card>
+        )}
       </main>
     </div>
   );

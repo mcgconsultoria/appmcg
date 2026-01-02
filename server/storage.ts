@@ -228,9 +228,14 @@ export interface IStorage {
   createUserWithPassword(userData: Partial<UpsertUser>): Promise<User>;
   updateUserSessionToken(userId: string, token: string | null): Promise<void>;
   updateUserProfile(userId: string, data: { profileImageUrl?: string; firstName?: string; lastName?: string }): Promise<User | undefined>;
+  getPendingApprovalUsers(): Promise<User[]>;
+  approveUser(userId: string, approvedBy: string): Promise<User | undefined>;
+  rejectUser(userId: string, reason: string): Promise<User | undefined>;
+  suspendUser(userId: string, reason: string): Promise<User | undefined>;
 
   // Company operations
   getCompany(id: number): Promise<Company | undefined>;
+  getCompanyByCnpjRaiz(cnpjRaiz: string): Promise<Company | undefined>;
   createCompany(company: InsertCompany): Promise<Company>;
   updateCompany(id: number, company: Partial<InsertCompany>): Promise<Company | undefined>;
 
@@ -684,6 +689,51 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getPendingApprovalUsers(): Promise<User[]> {
+    return await db.select().from(users).where(eq(users.accountStatus, "pending")).orderBy(desc(users.createdAt));
+  }
+
+  async approveUser(userId: string, approvedBy: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        accountStatus: "approved", 
+        approvedAt: new Date(), 
+        approvedBy,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async rejectUser(userId: string, reason: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        accountStatus: "rejected", 
+        accountStatusReason: reason,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async suspendUser(userId: string, reason: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        accountStatus: "suspended", 
+        accountStatusReason: reason,
+        activeSessionToken: null,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
   async setPasswordResetToken(userId: string, token: string, expiry: Date): Promise<void> {
     await db
       .update(users)
@@ -716,6 +766,11 @@ export class DatabaseStorage implements IStorage {
   // Company operations
   async getCompany(id: number): Promise<Company | undefined> {
     const [company] = await db.select().from(companies).where(eq(companies.id, id));
+    return company;
+  }
+
+  async getCompanyByCnpjRaiz(cnpjRaiz: string): Promise<Company | undefined> {
+    const [company] = await db.select().from(companies).where(eq(companies.cnpjRaiz, cnpjRaiz));
     return company;
   }
 
