@@ -268,7 +268,7 @@ export default function Landing() {
                 </div>
                 <div className="flex flex-row gap-3">
                   <a
-                    href="https://wa.me/5511999999999"
+                    href="https://wa.me/5541995323362"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:opacity-90 transition-opacity"
