@@ -154,6 +154,16 @@ export default function Landing() {
             </Link>
             <div className="flex items-center gap-2 ml-2">
               <a
+                href="https://wa.me/5541995323362"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 transition-colors"
+                title="WhatsApp"
+                data-testid="link-whatsapp-header"
+              >
+                <SiWhatsapp className="h-4 w-4 text-white" />
+              </a>
+              <a
                 href="https://play.google.com/store"
                 target="_blank"
                 rel="noopener noreferrer"
