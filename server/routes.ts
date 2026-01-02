@@ -119,18 +119,6 @@ export async function registerRoutes(
     }
   });
 
-  // Debug: list all users emails
-  app.get('/api/debug/users', async (req, res) => {
-    try {
-      const { db } = await import("./db");
-      const { users } = await import("@shared/schema");
-      const allUsers = await db.select({ email: users.email, firstName: users.firstName }).from(users);
-      res.json({ count: allUsers.length, users: allUsers });
-    } catch (error: any) {
-      res.json({ error: error.message });
-    }
-  });
-
   app.post('/api/auth/register', async (req, res) => {
     try {
       const parsed = registerSchema.safeParse(req.body);
@@ -232,7 +220,7 @@ export async function registerRoutes(
 
       const user = await storage.getUserByEmail(email);
       if (!user) {
-        return res.json({ message: "Se o email existir, você receberá as instruções" });
+        return res.status(404).json({ message: "Email não cadastrado. Verifique o email ou faça um novo cadastro." });
       }
 
       const crypto = await import("crypto");
