@@ -127,11 +127,35 @@ export async function registerRoutes(
       smtp: emailService.isSmtpConfigured(),
       gmail: emailService.isGmailConfigured(),
       resend: emailService.isResendConfigured(),
+      nodeEnv: process.env.NODE_ENV,
       env: {
         smtpUser: process.env.SMTP_USER ? "set" : "not set",
         smtpPassword: process.env.SMTP_PASSWORD ? "set" : "not set",
+        replitConnectorsHostname: process.env.REPLIT_CONNECTORS_HOSTNAME ? "set" : "not set",
       }
     });
+  });
+
+  // Temporary test email endpoint - remove after debugging
+  app.post('/api/test-email', async (req, res) => {
+    try {
+      const { emailService } = await import("./emailService");
+      const isProduction = process.env.NODE_ENV === 'production';
+      const result = await emailService.send({
+        to: ['marciacguimaraes@gmail.com'],
+        subject: 'Teste de Email MCG',
+        html: '<p>Este é um email de teste do sistema MCG.</p>'
+      });
+      res.json({
+        isProduction,
+        result
+      });
+    } catch (error: any) {
+      res.json({
+        error: error.message || 'Unknown error',
+        stack: error.stack
+      });
+    }
   });
 
   app.post('/api/auth/register', async (req, res) => {
