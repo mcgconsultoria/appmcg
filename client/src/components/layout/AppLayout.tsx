@@ -1,10 +1,13 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Bell, ArrowLeft } from "lucide-react";
+import { Bell, ArrowLeft, AlertTriangle, RefreshCw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -13,8 +16,24 @@ interface AppLayoutProps {
   showBackButton?: boolean;
 }
 
+interface SubscriptionStatus {
+  daysUntilAccessLoss: number | null;
+  renewalDue: boolean;
+  renewalDueDate: string | null;
+  renewalPrice: number | null;
+  cancellationEffectiveDate: string | null;
+}
+
 export function AppLayout({ children, title, subtitle, showBackButton = true }: AppLayoutProps) {
   const [location, setLocation] = useLocation();
+  const [dismissedAccessWarning, setDismissedAccessWarning] = useState(false);
+  const [dismissedRenewalAlert, setDismissedRenewalAlert] = useState(false);
+  
+  const { data: subscription } = useQuery<SubscriptionStatus>({
+    queryKey: ["/api/subscription/status"],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+  
   const style = {
     "--sidebar-width": "16rem",
     "--sidebar-width-icon": "3rem",
@@ -29,6 +48,16 @@ export function AppLayout({ children, title, subtitle, showBackButton = true }: 
   };
 
   const isDashboard = location === "/dashboard";
+  
+  // Show global alerts for access loss or renewal (tracked separately)
+  const showAccessWarning = !dismissedAccessWarning && 
+    subscription?.daysUntilAccessLoss !== null && 
+    subscription?.daysUntilAccessLoss !== undefined &&
+    subscription.daysUntilAccessLoss <= 7;
+    
+  const showRenewalAlert = !dismissedRenewalAlert &&
+    subscription?.renewalDue &&
+    !showAccessWarning;
 
   return (
     <SidebarProvider style={style as React.CSSProperties}>
@@ -88,6 +117,48 @@ export function AppLayout({ children, title, subtitle, showBackButton = true }: 
             </div>
           </header>
           <main className="flex-1 overflow-auto p-4 md:p-6 bg-background">
+            {showAccessWarning && (
+              <Alert variant="destructive" className="mb-4" data-testid="alert-global-access-warning">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className="flex items-center justify-between gap-2 flex-wrap">
+                  <span>
+                    {subscription?.daysUntilAccessLoss !== null && subscription.daysUntilAccessLoss <= 0 
+                      ? "Seu acesso expirou. Entre em contato com o suporte."
+                      : `Seu acesso expira em ${subscription?.daysUntilAccessLoss} dia(s). Após essa data, você não poderá mais acessar o sistema.`
+                    }
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" asChild>
+                      <Link href="/admin/meu-plano">Ver Detalhes</Link>
+                    </Button>
+                    <Button size="icon" variant="ghost" onClick={() => setDismissedAccessWarning(true)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+            {showRenewalAlert && (
+              <Alert className="mb-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20" data-testid="alert-global-renewal">
+                <RefreshCw className="h-4 w-4 text-yellow-600" />
+                <AlertDescription className="flex items-center justify-between gap-2 flex-wrap text-yellow-800 dark:text-yellow-200">
+                  <span>
+                    Sua assinatura vence em breve. Aprove a renovação para continuar usando o sistema.
+                    {subscription?.renewalPrice && (
+                      <span className="font-medium"> Novo valor: R$ {(subscription.renewalPrice / 100).toFixed(2)}/mês</span>
+                    )}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" asChild>
+                      <Link href="/admin/meu-plano">Aprovar Renovação</Link>
+                    </Button>
+                    <Button size="icon" variant="ghost" onClick={() => setDismissedRenewalAlert(true)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
             {children}
           </main>
         </div>
