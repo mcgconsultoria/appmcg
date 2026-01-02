@@ -209,7 +209,8 @@ export default function Support() {
   const openTickets = tickets.filter((t) => t.status === "open" || t.status === "in_progress");
   const resolvedTickets = tickets.filter((t) => t.status === "resolved" || t.status === "closed");
 
-  const WHATSAPP_NUMBER = "5511999999999";
+  const WHATSAPP_NUMBER = "5541995323362";
+  const WHATSAPP_MESSAGE = encodeURIComponent("Olá! Preciso de suporte com o sistema MCG Consultoria.");
 
   return (
     <AppLayout title="Suporte e Contato" subtitle="Abra chamados e entre em contato com nossa equipe">
@@ -226,7 +227,7 @@ export default function Support() {
           <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}`, "_blank")}
+              onClick={() => window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`, "_blank")}
               data-testid="button-whatsapp"
             >
               <SiWhatsapp className="h-4 w-4 mr-2" />
@@ -297,7 +298,7 @@ export default function Support() {
                 <div>
                   <p className="text-sm font-medium">Contato Direto</p>
                   <a
-                    href={`https://wa.me/${WHATSAPP_NUMBER}`}
+                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-primary hover:underline"

@@ -754,9 +754,9 @@ function SupportTab() {
     (t) => t.status === "resolved" || t.status === "closed"
   );
 
-  const whatsappNumber = "5511999999999";
+  const whatsappNumber = "5541995323362";
   const whatsappMessage = encodeURIComponent(
-    "Ola! Preciso de suporte com o sistema MCG Consultoria."
+    "Olá! Preciso de suporte com o sistema MCG Consultoria."
   );
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 

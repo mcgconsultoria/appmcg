@@ -154,7 +154,7 @@ export default function Landing() {
             </Link>
             <div className="flex items-center gap-2 ml-2">
               <a
-                href="https://wa.me/5541995323362"
+                href="https://wa.me/5541995323362?text=Estou%20vindo%20da%20sua%20pagina%20inicial%20e%20gostaria%20de%20conhecer%20mais%20sobre%20a%20MCG%20Consultoria"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 transition-colors"
@@ -278,7 +278,7 @@ export default function Landing() {
                 </div>
                 <div className="flex flex-row gap-3">
                   <a
-                    href="https://wa.me/5541995323362"
+                    href="https://wa.me/5541995323362?text=Estou%20vindo%20da%20sua%20pagina%20inicial%20e%20gostaria%20de%20conhecer%20mais%20sobre%20a%20MCG%20Consultoria"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:opacity-90 transition-opacity"
@@ -417,7 +417,7 @@ export default function Landing() {
               <p className="text-muted-foreground">Fale conosco para saber mais sobre nossos serviços</p>
             </div>
             <div className="grid md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-              <a href="https://wa.me/5541995323362" target="_blank" rel="noopener noreferrer">
+              <a href="https://wa.me/5541995323362?text=Estou%20vindo%20da%20sua%20pagina%20inicial%20e%20gostaria%20de%20conhecer%20mais%20sobre%20a%20MCG%20Consultoria" target="_blank" rel="noopener noreferrer">
                 <Card className="hover-elevate cursor-pointer">
                   <CardContent className="p-6 flex flex-col items-center text-center">
                     <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
