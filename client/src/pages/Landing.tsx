@@ -23,6 +23,7 @@ import { SiFacebook, SiInstagram, SiLinkedin, SiWhatsapp, SiGoogle, SiYoutube, S
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import logoMcg from "@assets/logo_mcg_principal.png";
+import ChatWidget from "@/components/ChatWidget";
 
 const features = [
   {
@@ -620,6 +621,14 @@ export default function Landing() {
           </div>
         </div>
       </footer>
+
+      <ChatWidget 
+        isAuthenticated={isAuthenticated} 
+        userId={user?.id}
+        companyId={user?.companyId}
+        userEmail={user?.email}
+        userName={user?.firstName || user?.email}
+      />
     </div>
   );
 }

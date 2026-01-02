@@ -8,6 +8,8 @@ import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/hooks/useAuth";
+import ChatWidget from "@/components/ChatWidget";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -28,6 +30,7 @@ export function AppLayout({ children, title, subtitle, showBackButton = true }: 
   const [location, setLocation] = useLocation();
   const [dismissedAccessWarning, setDismissedAccessWarning] = useState(false);
   const [dismissedRenewalAlert, setDismissedRenewalAlert] = useState(false);
+  const { user, isAuthenticated } = useAuth();
   
   const { data: subscription } = useQuery<SubscriptionStatus>({
     queryKey: ["/api/subscription/status"],
@@ -163,6 +166,14 @@ export function AppLayout({ children, title, subtitle, showBackButton = true }: 
           </main>
         </div>
       </div>
+      
+      <ChatWidget 
+        isAuthenticated={isAuthenticated} 
+        userId={user?.id}
+        companyId={user?.companyId}
+        userEmail={user?.email}
+        userName={user?.firstName || user?.email}
+      />
     </SidebarProvider>
   );
 }
