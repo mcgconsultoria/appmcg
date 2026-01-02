@@ -119,6 +119,40 @@ export async function registerRoutes(
     }
   });
 
+  // Temporary debug endpoint for password reset
+  app.post('/api/debug/test-reset-email', async (req, res) => {
+    try {
+      const email = 'marciacguimaraes@gmail.com';
+      const { emailService } = await import("./emailService");
+      
+      const result = await emailService.send({
+        to: [email],
+        subject: "Redefinir Senha - MCG Consultoria",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #0EA5E9;">Redefinir Senha</h2>
+            <p>Você solicitou a redefinição da sua senha. Clique no link abaixo para criar uma nova senha:</p>
+            <p><a href="https://www.mcgconsultoria.com.br/redefinir-senha?token=test123" style="background-color: #0EA5E9; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Redefinir Senha</a></p>
+            <p style="color: #666; font-size: 14px;">Este link expira em 1 hora.</p>
+            <p style="color: #666; font-size: 14px;">Se você não solicitou esta redefinição, ignore este email.</p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="color: #999; font-size: 12px;">MCG Consultoria - Gestão Comercial Logística</p>
+          </div>
+        `,
+      });
+      
+      res.json({
+        nodeEnv: process.env.NODE_ENV,
+        result
+      });
+    } catch (error: any) {
+      res.json({
+        error: error.message,
+        stack: error.stack
+      });
+    }
+  });
+
   app.post('/api/auth/register', async (req, res) => {
     try {
       const parsed = registerSchema.safeParse(req.body);
