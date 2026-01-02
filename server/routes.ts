@@ -119,6 +119,21 @@ export async function registerRoutes(
     }
   });
 
+  // Temporary diagnostic endpoint - remove after debugging
+  app.get('/api/email-status', async (req, res) => {
+    const { emailService } = await import("./emailService");
+    res.json({
+      configured: emailService.isConfigured(),
+      smtp: emailService.isSmtpConfigured(),
+      gmail: emailService.isGmailConfigured(),
+      resend: emailService.isResendConfigured(),
+      env: {
+        smtpUser: process.env.SMTP_USER ? "set" : "not set",
+        smtpPassword: process.env.SMTP_PASSWORD ? "set" : "not set",
+      }
+    });
+  });
+
   app.post('/api/auth/register', async (req, res) => {
     try {
       const parsed = registerSchema.safeParse(req.body);
