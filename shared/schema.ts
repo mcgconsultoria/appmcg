@@ -127,6 +127,17 @@ export const companies = pgTable("companies", {
   primaryAdminId: varchar("primary_admin_id"),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
+  // Cancellation fields
+  cancellationRequestedAt: timestamp("cancellation_requested_at"),
+  cancellationEffectiveDate: timestamp("cancellation_effective_date"),
+  cancellationReason: text("cancellation_reason"),
+  // Renewal fields
+  renewalPrice: integer("renewal_price"),
+  renewalDueDate: timestamp("renewal_due_date"),
+  renewalApproved: boolean("renewal_approved").default(false),
+  renewalApprovedAt: timestamp("renewal_approved_at"),
+  contractStartDate: timestamp("contract_start_date"),
+  lastAccessWarningEmailSent: timestamp("last_access_warning_email_sent"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

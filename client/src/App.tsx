@@ -64,6 +64,7 @@ import PessoalDashboard from "@/pages/pessoal/PessoalDashboard";
 import GestaoFinanceira from "@/pages/pessoal/GestaoFinanceira";
 import PessoalIRPF from "@/pages/pessoal/IRPF";
 import AdminIRPJ from "@/pages/admin/IRPJ";
+import MeuPlano from "@/pages/admin/MeuPlano";
 import ContasBancariasPF from "@/pages/pessoal/ContasBancariasPF";
 import CentrosCustoPF from "@/pages/pessoal/CentrosCustoPF";
 import PlanoContasPF from "@/pages/pessoal/PlanoContasPF";
@@ -168,6 +169,9 @@ function Router() {
       </Route>
       <Route path="/admin/whatsapp">
         {() => isAuthenticated && isAdmin ? <AdminWhatsApp /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/meu-plano">
+        {() => isAuthenticated && isAdmin ? <MeuPlano /> : <AdminLogin />}
       </Route>
       <Route path="/pessoal">
         {() => isAuthenticated && isAdmin ? <PessoalDashboard /> : <AdminLogin />}

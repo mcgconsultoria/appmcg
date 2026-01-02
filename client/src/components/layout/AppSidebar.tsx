@@ -177,7 +177,7 @@ const posVendasItems = [
 const adminClienteItems = [
   {
     title: "Meu Plano",
-    url: "/assinatura",
+    url: "/admin/meu-plano",
     icon: CreditCard,
   },
   {

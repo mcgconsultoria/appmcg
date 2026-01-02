@@ -644,6 +644,191 @@ export async function registerRoutes(
     }
   });
 
+  // Subscription management routes
+  app.post("/api/subscription/cancel", isAuthenticated, async (req: any, res) => {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "Company not found" });
+      }
+      
+      const company = await storage.getCompany(companyId);
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      
+      // Check if already has a cancellation request
+      if (company.cancellationRequestedAt) {
+        return res.status(400).json({ 
+          message: "Já existe uma solicitação de cancelamento pendente",
+          code: "CANCELLATION_PENDING"
+        });
+      }
+      
+      const { reason } = req.body;
+      const now = new Date();
+      
+      // Calculate effective date: end of current month + 1 month
+      const endOfCurrentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      const effectiveDate = new Date(endOfCurrentMonth);
+      effectiveDate.setMonth(effectiveDate.getMonth() + 1);
+      
+      await storage.updateCompany(companyId, {
+        cancellationRequestedAt: now,
+        cancellationEffectiveDate: effectiveDate,
+        cancellationReason: reason || "Solicitado pelo cliente",
+        subscriptionStatus: "cancelling"
+      });
+      
+      await logAudit(req, "subscription_cancel_request", "company", companyId, 
+        `Cancelamento solicitado. Data efetiva: ${effectiveDate.toLocaleDateString('pt-BR')}`);
+      
+      res.json({
+        message: "Solicitação de cancelamento registrada",
+        effectiveDate: effectiveDate.toISOString(),
+        accessUntil: effectiveDate.toLocaleDateString('pt-BR')
+      });
+    } catch (error) {
+      console.error("Error processing cancellation:", error);
+      res.status(500).json({ message: "Failed to process cancellation" });
+    }
+  });
+  
+  // Get subscription status for current company
+  app.get("/api/subscription/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "Company not found" });
+      }
+      
+      const company = await storage.getCompany(companyId);
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      
+      // Calculate days until access loss if cancellation pending
+      let daysUntilAccessLoss = null;
+      if (company.cancellationEffectiveDate) {
+        const now = new Date();
+        const effectiveDate = new Date(company.cancellationEffectiveDate);
+        daysUntilAccessLoss = Math.ceil((effectiveDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      }
+      
+      // Check if renewal is due (1 month before contract anniversary)
+      let renewalDue = false;
+      let renewalDueDate = null;
+      if (company.contractStartDate) {
+        const contractStart = new Date(company.contractStartDate);
+        const anniversaryDate = new Date(contractStart);
+        anniversaryDate.setFullYear(anniversaryDate.getFullYear() + 1);
+        
+        const now = new Date();
+        const oneMonthBefore = new Date(anniversaryDate);
+        oneMonthBefore.setMonth(oneMonthBefore.getMonth() - 1);
+        
+        if (now >= oneMonthBefore && now < anniversaryDate && !company.renewalApproved) {
+          renewalDue = true;
+          renewalDueDate = anniversaryDate.toISOString();
+        }
+      }
+      
+      res.json({
+        plan: company.selectedPlan,
+        status: company.subscriptionStatus,
+        maxUsers: company.maxUsers,
+        currentUsers: company.currentUsers,
+        cancellationRequestedAt: company.cancellationRequestedAt,
+        cancellationEffectiveDate: company.cancellationEffectiveDate,
+        daysUntilAccessLoss,
+        renewalDue,
+        renewalDueDate,
+        renewalPrice: company.renewalPrice,
+        renewalApproved: company.renewalApproved,
+        contractStartDate: company.contractStartDate
+      });
+    } catch (error) {
+      console.error("Error fetching subscription status:", error);
+      res.status(500).json({ message: "Failed to fetch subscription status" });
+    }
+  });
+  
+  // Approve renewal (client action)
+  app.post("/api/subscription/approve-renewal", isAuthenticated, async (req: any, res) => {
+    try {
+      const companyId = req.user?.companyId;
+      if (!companyId) {
+        return res.status(400).json({ message: "Company not found" });
+      }
+      
+      const company = await storage.getCompany(companyId);
+      if (!company) {
+        return res.status(404).json({ message: "Company not found" });
+      }
+      
+      if (!company.renewalPrice) {
+        return res.status(400).json({ 
+          message: "Valor de renovação ainda não definido pela MCG",
+          code: "RENEWAL_PRICE_NOT_SET"
+        });
+      }
+      
+      const now = new Date();
+      const newContractStart = new Date(company.contractStartDate || now);
+      newContractStart.setFullYear(newContractStart.getFullYear() + 1);
+      
+      await storage.updateCompany(companyId, {
+        renewalApproved: true,
+        renewalApprovedAt: now,
+        contractStartDate: newContractStart
+      });
+      
+      await logAudit(req, "renewal_approved", "company", companyId, 
+        `Renovação aprovada. Novo valor: R$ ${(company.renewalPrice / 100).toFixed(2)}`);
+      
+      res.json({ message: "Renovação aprovada com sucesso" });
+    } catch (error) {
+      console.error("Error approving renewal:", error);
+      res.status(500).json({ message: "Failed to approve renewal" });
+    }
+  });
+  
+  // MCG Admin: Set renewal price for a company
+  app.post("/api/admin/companies/:id/renewal-price", isMcgAdmin, async (req: any, res) => {
+    try {
+      const companyId = parseInt(req.params.id);
+      const { price } = req.body;
+      
+      if (!price || typeof price !== 'number' || price < 0) {
+        return res.status(400).json({ message: "Preço de renovação inválido" });
+      }
+      
+      const company = await storage.getCompany(companyId);
+      if (!company) {
+        return res.status(404).json({ message: "Empresa não encontrada" });
+      }
+      
+      // Calculate renewal due date (1 year from contract start)
+      const contractStart = company.contractStartDate || company.createdAt;
+      const renewalDueDate = new Date(contractStart);
+      renewalDueDate.setFullYear(renewalDueDate.getFullYear() + 1);
+      
+      await storage.updateCompany(companyId, {
+        renewalPrice: Math.round(price * 100), // Store in cents
+        renewalDueDate,
+        renewalApproved: false
+      });
+      
+      await logAudit(req, "set_renewal_price", "company", companyId, 
+        `Preço de renovação definido: R$ ${price.toFixed(2)}`);
+      
+      res.json({ message: "Preço de renovação atualizado" });
+    } catch (error) {
+      console.error("Error setting renewal price:", error);
+      res.status(500).json({ message: "Failed to set renewal price" });
+    }
+  });
+
   // Checklist routes
   app.get("/api/checklists", isAuthenticated, async (req, res) => {
     try {
