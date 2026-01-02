@@ -245,13 +245,16 @@ export async function registerRoutes(
       await storage.setPasswordResetToken(user.id, resetToken, resetTokenExpiry);
 
       const { emailService } = await import("./emailService");
-      // Always use production URL for password reset emails
-      const resetUrl = `https://www.mcgconsultoria.com.br/redefinir-senha?token=${resetToken}`;
+      // Use environment-specific URL for password reset
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://www.mcgconsultoria.com.br'
+        : (process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000');
+      const resetUrl = `${baseUrl}/redefinir-senha?token=${resetToken}`;
       
       console.log("Attempting to send password reset email to:", email);
+      console.log("Reset URL:", resetUrl);
       console.log("Email service configured:", emailService.isConfigured());
-      console.log("Gmail configured:", emailService.isGmailConfigured());
-      console.log("Resend configured:", emailService.isResendConfigured());
+      console.log("SMTP configured:", emailService.isSmtpConfigured());
       
       const emailResult = await emailService.send({
         to: [email],
@@ -291,12 +294,12 @@ export async function registerRoutes(
 
       const user = await storage.getUserByResetToken(token);
       if (!user) {
-        return res.status(400).json({ message: "Link inválido ou expirado" });
+        return res.status(400).json({ message: "Link inválido. O link pode ter sido usado anteriormente ou não existe. Solicite um novo link de redefinição." });
       }
 
       if (user.passwordResetExpiry && new Date() > new Date(user.passwordResetExpiry)) {
         await storage.clearPasswordResetToken(user.id);
-        return res.status(400).json({ message: "Link expirado. Solicite um novo." });
+        return res.status(400).json({ message: "Este link expirou (validade de 1 hora). Solicite um novo link de redefinição." });
       }
 
       const bcrypt = await import("bcryptjs");
