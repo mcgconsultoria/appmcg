@@ -49,13 +49,13 @@ const registerSchema = z.object({
 
 type RegisterData = z.infer<typeof registerSchema>;
 
-const userCategoryLabels = {
-  embarcador: { label: "Embarcador", desc: "Indústrias, distribuidores - busca prestadores de serviços" },
-  servicos: { label: "Serviços", desc: "Prestadores de serviço - busca clientes" },
-  operador: { label: "Operador Logístico", desc: "Operador logístico completo" },
-  parceiro: { label: "Parceiros", desc: "Influencers, contadores, advogados, softwares" },
-  motorista: { label: "Motoristas", desc: "Motoristas autônomos" },
-};
+const userCategoryOptions = [
+  { key: "embarcador", label: "Embarcador", desc: "Indústrias, distribuidores - busca prestadores de serviços" },
+  { key: "servicos", label: "Serviços", desc: "Prestadores de serviço - busca clientes" },
+  { key: "operador", label: "Operador Logístico", desc: "Operador logístico completo" },
+  { key: "parceiro", label: "Parceiros", desc: "Influencers, contadores, advogados, softwares" },
+  { key: "motorista", label: "Motoristas", desc: "Motoristas autônomos" },
+];
 
 const defaultBusinessTypes = [
   "Indústria",
@@ -308,42 +308,44 @@ export default function Register() {
                   control={form.control}
                   name="userCategories"
                   render={({ field }) => {
-                    const toggleCategory = (key: string) => {
-                      const current = field.value || [];
-                      if (current.includes(key)) {
-                        field.onChange(current.filter((v: string) => v !== key));
-                      } else {
-                        field.onChange([...current, key]);
-                      }
+                    const currentValues = Array.isArray(field.value) ? field.value : [];
+                    
+                    const handleToggle = (categoryKey: string) => {
+                      const newValues = currentValues.includes(categoryKey)
+                        ? currentValues.filter((v) => v !== categoryKey)
+                        : [...currentValues, categoryKey];
+                      field.onChange(newValues);
                     };
                     
                     return (
                       <FormItem>
                         <FormLabel>Você é: *</FormLabel>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
-                          {Object.entries(userCategoryLabels).map(([key, { label, desc }]) => {
-                            const isChecked = field.value?.includes(key) || false;
+                          {userCategoryOptions.map((category) => {
+                            const isChecked = currentValues.includes(category.key);
                             return (
-                              <label
-                                key={key}
-                                htmlFor={`category-${key}`}
+                              <div
+                                key={category.key}
                                 className={`flex items-start gap-2 p-3 rounded-md border cursor-pointer transition-colors ${
                                   isChecked
                                     ? "border-primary bg-primary/5"
                                     : "border-border hover:border-primary/50"
                                 }`}
-                                data-testid={`checkbox-category-${key}`}
+                                onClick={() => handleToggle(category.key)}
+                                data-testid={`checkbox-category-${category.key}`}
                               >
-                                <Checkbox
-                                  id={`category-${key}`}
-                                  checked={isChecked}
-                                  onCheckedChange={() => toggleCategory(key)}
-                                />
-                                <div className="flex flex-col">
-                                  <span className="text-sm font-medium">{label}</span>
-                                  <span className="text-xs text-muted-foreground">{desc}</span>
+                                <div className="pt-0.5">
+                                  <Checkbox
+                                    checked={isChecked}
+                                    tabIndex={-1}
+                                    className="pointer-events-none"
+                                  />
                                 </div>
-                              </label>
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-medium">{category.label}</span>
+                                  <span className="text-xs text-muted-foreground">{category.desc}</span>
+                                </div>
+                              </div>
                             );
                           })}
                         </div>
