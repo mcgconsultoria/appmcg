@@ -59,7 +59,7 @@ const features = [
     icon: Shield,
     title: "Multi-empresas",
     description: "Arquitetura segura com isolamento completo de dados entre empresas",
-    href: "/planos",
+    href: "/login",
   },
 ];
 
