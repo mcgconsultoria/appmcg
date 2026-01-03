@@ -1696,6 +1696,123 @@ export async function registerRoutes(
     }
   });
 
+  // Consulting quote request (public endpoint - no auth required)
+  app.post("/api/consulting-quote-request", async (req, res) => {
+    try {
+      const { contactName, email, phone, message, phases, hasExpansao } = req.body;
+
+      if (!contactName || !email || !phases || phases.length === 0) {
+        return res.status(400).json({ message: "Campos obrigatórios não preenchidos" });
+      }
+
+      // Format phases for email
+      const phasesText = phases.map((p: any) => `- ${p.name} (${p.duration})`).join("\n");
+
+      // Send email to MCG
+      const { emailService } = await import("./emailService");
+      await emailService.send({
+        to: ["comercial@mcgconsultoria.com.br"],
+        subject: `[MCG] Nova Solicitação de Consultoria - ${contactName}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #1e3a5f;">Nova Solicitação de Orçamento de Consultoria</h2>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+              <tr>
+                <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold; background: #f8fafc;">Nome</td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0;">${contactName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold; background: #f8fafc;">Email</td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0;">${email}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold; background: #f8fafc;">Telefone</td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0;">${phone || "Não informado"}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold; background: #f8fafc;">Fases Selecionadas</td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0; white-space: pre-line;">${phasesText}</td>
+              </tr>
+              ${hasExpansao ? `
+              <tr>
+                <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold; background: #f8fafc;">Fase de Expansão</td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0; color: #059669;">Incluída (com comissão sobre negócios fechados)</td>
+              </tr>
+              ` : ""}
+              <tr>
+                <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold; background: #f8fafc;">Mensagem</td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0;">${message || "Nenhuma mensagem adicional"}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px; border: 1px solid #e2e8f0; font-weight: bold; background: #f8fafc;">Data da Solicitação</td>
+                <td style="padding: 10px; border: 1px solid #e2e8f0;">${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}</td>
+              </tr>
+            </table>
+            
+            <p style="margin-top: 20px; color: #718096; font-size: 12px;">
+              Este é um email automático do sistema MCG Consultoria.
+            </p>
+          </div>
+        `,
+      });
+
+      // Create a record in the database for ADMIN PJ to respond
+      await storage.createConsultingQuoteRequest({
+        contactName,
+        email,
+        phone: phone || null,
+        message: message || null,
+        phases: JSON.stringify(phases),
+        hasExpansao: hasExpansao || false,
+        status: "pending",
+      });
+
+      res.status(201).json({ 
+        message: "Solicitação enviada com sucesso! Nossa equipe entrará em contato em breve." 
+      });
+    } catch (error) {
+      console.error("Error creating consulting quote request:", error);
+      res.status(500).json({ message: "Erro ao enviar solicitação" });
+    }
+  });
+
+  // Get consulting quote requests (for ADMIN MCG)
+  app.get("/api/consulting-quote-requests", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== "admin_mcg") {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      const requests = await storage.getConsultingQuoteRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching consulting quote requests:", error);
+      res.status(500).json({ message: "Erro ao buscar solicitações" });
+    }
+  });
+
+  // Update consulting quote request status
+  app.patch("/api/consulting-quote-requests/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      if (req.user.role !== "admin_mcg") {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      const id = parseInt(req.params.id);
+      const { status, responseNotes, quotedValue } = req.body;
+      const updated = await storage.updateConsultingQuoteRequest(id, {
+        status,
+        responseNotes,
+        quotedValue,
+        respondedAt: new Date(),
+        respondedBy: req.user.id,
+      });
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating consulting quote request:", error);
+      res.status(500).json({ message: "Erro ao atualizar solicitação" });
+    }
+  });
+
   // Commercial proposals routes
   app.get("/api/commercial-proposals", isAuthenticated, async (req: any, res) => {
     try {

@@ -194,6 +194,9 @@ import {
   commercialFlowcharts,
   type CommercialFlowchart,
   irpjDasPayments,
+  consultingQuoteRequests,
+  type ConsultingQuoteRequest,
+  type InsertConsultingQuoteRequest,
   type PersonalCategory,
   type InsertPersonalCategory,
   type PersonalAccount,
@@ -625,6 +628,11 @@ export interface IStorage {
   // Commercial Flowchart operations
   getCommercialFlowchart(userId: string): Promise<CommercialFlowchart | undefined>;
   saveCommercialFlowchart(userId: string, nodes: any[], edges: any[]): Promise<CommercialFlowchart>;
+
+  // Consulting Quote Request operations
+  createConsultingQuoteRequest(data: InsertConsultingQuoteRequest): Promise<ConsultingQuoteRequest>;
+  getConsultingQuoteRequests(): Promise<ConsultingQuoteRequest[]>;
+  updateConsultingQuoteRequest(id: number, data: Partial<InsertConsultingQuoteRequest>): Promise<ConsultingQuoteRequest | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2910,6 +2918,25 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return created;
     }
+  }
+
+  // ==================== Consulting Quote Request Operations ====================
+
+  async createConsultingQuoteRequest(data: InsertConsultingQuoteRequest): Promise<ConsultingQuoteRequest> {
+    const [request] = await db.insert(consultingQuoteRequests).values(data).returning();
+    return request;
+  }
+
+  async getConsultingQuoteRequests(): Promise<ConsultingQuoteRequest[]> {
+    return db.select().from(consultingQuoteRequests).orderBy(desc(consultingQuoteRequests.createdAt));
+  }
+
+  async updateConsultingQuoteRequest(id: number, data: Partial<InsertConsultingQuoteRequest>): Promise<ConsultingQuoteRequest | undefined> {
+    const [updated] = await db.update(consultingQuoteRequests)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(consultingQuoteRequests.id, id))
+      .returning();
+    return updated;
   }
 }
 

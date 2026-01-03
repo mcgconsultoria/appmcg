@@ -1903,6 +1903,33 @@ export const insertStoreOrderItemSchema = createInsertSchema(storeOrderItems).om
   createdAt: true,
 });
 
+// Consulting Quote Requests - Solicitações de Orçamento de Consultoria
+export const consultingQuoteRequests = pgTable("consulting_quote_requests", {
+  id: serial("id").primaryKey(),
+  contactName: varchar("contact_name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  phone: varchar("phone", { length: 50 }),
+  message: text("message"),
+  phases: text("phases").notNull(), // JSON string of selected phases
+  hasExpansao: boolean("has_expansao").default(false),
+  status: varchar("status", { length: 50 }).default("pending"), // pending, contacted, quoted, converted, rejected
+  responseNotes: text("response_notes"),
+  quotedValue: decimal("quoted_value", { precision: 15, scale: 2 }),
+  respondedAt: timestamp("responded_at"),
+  respondedBy: varchar("responded_by", { length: 36 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertConsultingQuoteRequestSchema = createInsertSchema(consultingQuoteRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type ConsultingQuoteRequest = typeof consultingQuoteRequests.$inferSelect;
+export type InsertConsultingQuoteRequest = z.infer<typeof insertConsultingQuoteRequestSchema>;
+
 // WhatsApp Support Journey - Jornada de Atendimento
 export const whatsappJourneySteps = pgTable("whatsapp_journey_steps", {
   id: serial("id").primaryKey(),
