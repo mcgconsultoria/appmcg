@@ -26,40 +26,46 @@ import ChatWidget from "@/components/ChatWidget";
 
 const features = [
   {
-    icon: ClipboardCheck,
-    title: "Checklist Completo",
-    description: "15 departamentos com questões estruturadas para diagnóstico completo da operação",
-    href: "/login",
-  },
-  {
     icon: Calculator,
     title: "Calculadoras",
     description: "Cálculo preciso de frete e armazenagem com ICMS, GRIS, ADV e impostos",
     href: "/calculadoras",
+    highlighted: true,
+  },
+  {
+    icon: ClipboardCheck,
+    title: "Checklist Completo",
+    description: "15 departamentos com questões estruturadas para diagnóstico completo da operação",
+    href: "/login",
+    highlighted: false,
   },
   {
     icon: Users,
     title: "CRM Integrado",
     description: "Gestão completa de clientes com pipeline visual e acompanhamento de propostas",
     href: "/login",
+    highlighted: false,
   },
   {
     icon: BarChart3,
     title: "Dashboard Gerencial",
     description: "Visualização em tempo real dos indicadores da sua operação comercial",
     href: "/login",
+    highlighted: false,
   },
   {
     icon: TrendingUp,
     title: "Módulo Financeiro",
     description: "Controle de contas a pagar e receber com gestão de encargos contábeis",
     href: "/login",
+    highlighted: false,
   },
   {
     icon: Shield,
     title: "Multi-empresas",
     description: "Arquitetura segura com isolamento completo de dados entre empresas",
     href: "/login",
+    highlighted: false,
   },
 ];
 
@@ -318,10 +324,10 @@ export default function Landing() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {features.map((feature) => (
                 <Link key={feature.title} href={feature.href}>
-                  <Card className="hover-elevate cursor-pointer h-full">
+                  <Card className={`hover-elevate cursor-pointer h-full ${feature.highlighted ? 'ring-2 ring-green-500 dark:ring-green-400' : ''}`}>
                     <CardContent className="p-6">
-                      <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                        <feature.icon className="h-6 w-6 text-primary" />
+                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${feature.highlighted ? 'bg-green-500 dark:bg-green-600' : 'bg-primary/10'}`}>
+                        <feature.icon className={`h-6 w-6 ${feature.highlighted ? 'text-white' : 'text-primary'}`} />
                       </div>
                       <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
                       <p className="text-sm text-muted-foreground">{feature.description}</p>
