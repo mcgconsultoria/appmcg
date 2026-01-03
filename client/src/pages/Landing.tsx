@@ -35,7 +35,7 @@ const features = [
     icon: Calculator,
     title: "Calculadoras",
     description: "Cálculo preciso de frete e armazenagem com ICMS, GRIS, ADV e impostos",
-    href: "/calculadora-frete",
+    href: "/calculadoras",
   },
   {
     icon: Users,

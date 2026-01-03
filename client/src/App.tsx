@@ -73,6 +73,7 @@ import ResetPassword from "@/pages/ResetPassword";
 import BibliotecaChecklists from "@/pages/BibliotecaChecklists";
 import Ebook from "@/pages/Ebook";
 import ManualApp from "@/pages/ManualApp";
+import Calculadoras from "@/pages/Calculadoras";
 import FluxogramaComercial from "@/pages/FluxogramaComercial";
 import Brindes from "@/pages/Brindes";
 import DiagnósticoComercial from "@/pages/DiagnosticoComercial";
@@ -99,6 +100,7 @@ function Router() {
     <Switch>
       <Route path="/diagnóstico" component={DiagnósticoComercial} />
       <Route path="/campanha-piloto" component={CampanhaPiloto} />
+      <Route path="/calculadoras" component={Calculadoras} />
       <Route path="/calculadora-frete" component={FreightCalculator} />
       <Route path="/calculadora-armazenagem" component={StorageCalculator} />
       <Route path="/planos" component={Pricing} />
