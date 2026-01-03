@@ -117,8 +117,8 @@ export default function Terms() {
               Para dúvidas sobre estes termos, entre em contato:
             </p>
             <p>
-              <strong>Email:</strong> contato@mcgconsultoria.com.br<br />
-              <strong>Telefone:</strong> (11) 99999-9999
+              <strong>Email:</strong> comercial@mcgconsultoria.com.br<br />
+              <strong>Telefone:</strong> +55 41 9 9532 3362
             </p>
           </CardContent>
         </Card>

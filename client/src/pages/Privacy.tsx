@@ -103,8 +103,8 @@ export default function Privacy() {
               de dados pessoais, entre em contato:
             </p>
             <p>
-              <strong>Email:</strong> privacidade@mcgconsultoria.com.br<br />
-              <strong>Telefone:</strong> (11) 99999-9999
+              <strong>Email:</strong> comercial@mcgconsultoria.com.br<br />
+              <strong>Telefone:</strong> +55 41 9 9532 3362
             </p>
 
             <h2>10. Alterações nesta Política</h2>
