@@ -221,6 +221,63 @@ export async function registerRoutes(
   });
 
   // Endpoint para atualizar role do usuário via setup
+  app.post('/api/setup/run-backup', async (req, res) => {
+    try {
+      const { owner, repo, setupKey } = req.body;
+      
+      const validSetupKey = process.env.SETUP_KEY;
+      if (!validSetupKey || setupKey !== validSetupKey) {
+        return res.status(403).json({ message: "Chave de setup inválida" });
+      }
+      
+      if (!owner || !repo) {
+        return res.status(400).json({ message: "owner e repo são obrigatórios" });
+      }
+      
+      const { setBackupConfig, runDatabaseBackup, isGitHubIntegrationAvailable, createRepository, getRepositoryInfo } = await import("./githubService");
+      
+      if (!isGitHubIntegrationAvailable()) {
+        return res.status(400).json({ message: "GitHub não configurado no Replit" });
+      }
+      
+      // Check if repository exists, create if not
+      const repoInfo = await getRepositoryInfo(owner, repo);
+      if (!repoInfo) {
+        console.log(`Repository ${owner}/${repo} not found, creating...`);
+        const createResult = await createRepository(repo, "MCG Consultoria - Backup automatico de dados", true);
+        if (!createResult.success) {
+          return res.status(400).json({ 
+            message: "Erro ao criar repositorio", 
+            error: createResult.error,
+            hint: "Verifique se voce tem permissao para criar repositorios na conta GitHub conectada"
+          });
+        }
+        console.log(`Repository created: ${createResult.url}`);
+      }
+      
+      setBackupConfig({
+        enabled: true,
+        repositoryOwner: owner,
+        repositoryName: repo
+      });
+      
+      const result = await runDatabaseBackup();
+      
+      if (result.success) {
+        res.json({ 
+          message: "Backup realizado com sucesso", 
+          files: result.files,
+          repository: `https://github.com/${owner}/${repo}`
+        });
+      } else {
+        res.status(500).json({ message: "Erro no backup", error: result.error });
+      }
+    } catch (error: any) {
+      console.error("Error in setup run-backup:", error);
+      res.status(500).json({ message: "Erro ao executar backup", error: error.message });
+    }
+  });
+
   app.post('/api/setup/update-role', async (req, res) => {
     try {
       const { email, role, setupKey } = req.body;

@@ -229,7 +229,7 @@ export async function runDatabaseBackup(): Promise<{ success: boolean; error?: s
     if (tasksResult.success) files.push('tasks');
 
     // Backup financial records
-    const financial = await storage.getFinancialRecords();
+    const financial = await storage.getAdminFinancialRecords();
     const financialResult = await createBackupFile(
       backupConfig.repositoryOwner,
       backupConfig.repositoryName,
