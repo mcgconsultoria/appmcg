@@ -163,11 +163,11 @@ export default function Landing() {
                 href="https://wa.me/5541995323362?text=Estou%20vindo%20da%20sua%20pagina%20inicial%20e%20gostaria%20de%20conhecer%20mais%20sobre%20a%20MCG%20Consultoria"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 transition-colors"
+                className="p-1.5 rounded-md bg-foreground/10 hover:bg-foreground/20 transition-colors"
                 title="WhatsApp"
                 data-testid="link-whatsapp-header"
               >
-                <SiWhatsapp className="h-4 w-4 text-white" />
+                <SiWhatsapp className="h-4 w-4" />
               </a>
               <a
                 href="https://play.google.com/store"
