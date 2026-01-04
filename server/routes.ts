@@ -220,6 +220,40 @@ export async function registerRoutes(
     }
   });
 
+  // Endpoint para atualizar role do usuário via setup
+  app.post('/api/setup/update-role', async (req, res) => {
+    try {
+      const { email, role, setupKey } = req.body;
+      
+      const validSetupKey = process.env.SETUP_KEY;
+      if (!validSetupKey || setupKey !== validSetupKey) {
+        return res.status(403).json({ message: "Chave de setup inválida" });
+      }
+      
+      if (!email || !role) {
+        return res.status(400).json({ message: "Email e role são obrigatórios" });
+      }
+      
+      const validRoles = ['user', 'admin', 'admin_mcg'];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ message: "Role inválido. Use: user, admin, admin_mcg" });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      await storage.updateUser(user.id, { role });
+      console.log(`Setup: User ${email} role updated to ${role}`);
+      
+      res.json({ message: "Role atualizado com sucesso", email, role });
+    } catch (error) {
+      console.error("Error in setup update role:", error);
+      res.status(500).json({ message: "Erro ao atualizar role" });
+    }
+  });
+
   app.post('/api/auth/register', async (req, res) => {
     try {
       const parsed = registerSchema.safeParse(req.body);
