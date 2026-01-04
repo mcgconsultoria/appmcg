@@ -26,6 +26,10 @@ export default function Login() {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
 
+  // Get redirect URL from query params
+  const urlParams = new URLSearchParams(window.location.search);
+  const redirectUrl = urlParams.get('redirect') || '/dashboard';
+
   const form = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -45,7 +49,8 @@ export default function Login() {
         title: "Login realizado",
         description: "Bem-vindo de volta!",
       });
-      setLocation("/dashboard");
+      // Redirect to the original URL or dashboard
+      setLocation(redirectUrl);
     },
     onError: (error: any) => {
       toast({

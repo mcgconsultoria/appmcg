@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Check, Loader2, Briefcase, ArrowRight, Lock, Send, ArrowLeft, Save } from "lucide-react";
 import type { Client } from "@shared/schema";
@@ -181,6 +181,7 @@ export default function Pricing() {
     phone: "",
     message: "",
   });
+  const [pendingSubscribe, setPendingSubscribe] = useState<string | null>(null);
 
   const { data: productsData } = useQuery<{ data: Product[] }>({
     queryKey: ["/api/stripe/products"],
@@ -201,7 +202,27 @@ export default function Pricing() {
         window.location.href = data.url;
       }
     },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao processar assinatura",
+        description: error.message || "Tente novamente mais tarde",
+        variant: "destructive",
+      });
+    },
   });
+
+  // Check for subscribe param after login redirect
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const subscribeParam = urlParams.get('subscribe');
+    if (subscribeParam && isAuthenticated) {
+      // Clear the URL param and trigger checkout
+      window.history.replaceState({}, '', '/planos');
+      checkoutMutation.mutate(subscribeParam);
+    } else if (subscribeParam) {
+      setPendingSubscribe(subscribeParam);
+    }
+  }, [isAuthenticated]);
 
   const togglePhase = (phaseId: string) => {
     const phase = consultingPhases.find(p => p.id === phaseId);
@@ -334,7 +355,8 @@ export default function Pricing() {
       return;
     }
     if (!isAuthenticated) {
-      window.location.href = "/api/login";
+      // Redirect to custom login page with return URL
+      window.location.href = `/login?redirect=${encodeURIComponent(`/planos?subscribe=${priceId}`)}`;
       return;
     }
     checkoutMutation.mutate(priceId);
