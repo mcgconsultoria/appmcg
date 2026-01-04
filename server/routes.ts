@@ -39,6 +39,7 @@ import {
   insertDiagnosticLeadSchema,
   insertDreAccountSchema,
   insertCostCenterSchema,
+  insertPersonalCostCenterSchema,
   insertBankAccountSchema,
   insertAccountingEntrySchema,
   insertBankIntegrationSchema,
@@ -5325,6 +5326,88 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error deleting cost center:", error);
       res.status(500).json({ message: "Falha ao excluir centro de custo" });
+    }
+  });
+
+  // Personal Cost Centers routes (ADMIN PF)
+  app.get("/api/personal-cost-centers", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuario nao autenticado" });
+      }
+      const centers = await storage.getPersonalCostCenters(userId);
+      res.json(centers);
+    } catch (error) {
+      console.error("Error fetching personal cost centers:", error);
+      res.status(500).json({ message: "Falha ao buscar centros de custo pessoais" });
+    }
+  });
+
+  app.post("/api/personal-cost-centers", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuario nao autenticado" });
+      }
+      const parsed = insertPersonalCostCenterSchema.safeParse({ ...req.body, ownerUserId: userId });
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados invalidos", errors: parsed.error.errors });
+      }
+      const center = await storage.createPersonalCostCenter(parsed.data);
+      res.status(201).json(center);
+    } catch (error) {
+      console.error("Error creating personal cost center:", error);
+      res.status(500).json({ message: "Falha ao criar centro de custo pessoal" });
+    }
+  });
+
+  app.post("/api/personal-cost-centers/seed", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuario nao autenticado" });
+      }
+      await storage.seedPersonalCostCenters(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error seeding personal cost centers:", error);
+      res.status(500).json({ message: "Falha ao criar estrutura de centros de custo pessoais" });
+    }
+  });
+
+  app.patch("/api/personal-cost-centers/:id", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuario nao autenticado" });
+      }
+      const parsed = insertPersonalCostCenterSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Dados invalidos", errors: parsed.error.errors });
+      }
+      const updated = await storage.updatePersonalCostCenter(parseInt(req.params.id), userId, parsed.data);
+      if (!updated) {
+        return res.status(404).json({ message: "Centro de custo pessoal nao encontrado" });
+      }
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating personal cost center:", error);
+      res.status(500).json({ message: "Falha ao atualizar centro de custo pessoal" });
+    }
+  });
+
+  app.delete("/api/personal-cost-centers/:id", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Usuario nao autenticado" });
+      }
+      await storage.deletePersonalCostCenter(parseInt(req.params.id), userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting personal cost center:", error);
+      res.status(500).json({ message: "Falha ao excluir centro de custo pessoal" });
     }
   });
 
