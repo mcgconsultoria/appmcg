@@ -46,7 +46,7 @@ async function createProducts() {
     });
     await stripe.prices.create({
       product: proProduct.id,
-      unit_amount: 29700, // R$ 297,00
+      unit_amount: 49900, // R$ 499,00
       currency: 'brl',
       recurring: { interval: 'month' },
     });
@@ -67,7 +67,7 @@ async function createProducts() {
     });
     await stripe.prices.create({
       product: corpProduct.id,
-      unit_amount: 59700, // R$ 597,00
+      unit_amount: 149900, // R$ 1.499,00
       currency: 'brl',
       recurring: { interval: 'month' },
     });
