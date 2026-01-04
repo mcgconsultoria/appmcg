@@ -10,6 +10,9 @@ import { WebhookHandlers } from './webhookHandlers';
 const app = express();
 const httpServer = createServer(app);
 
+// Trust proxy for production (Replit uses HTTPS behind a proxy)
+app.set('trust proxy', 1);
+
 app.use(cookieParser());
 
 declare module "http" {
