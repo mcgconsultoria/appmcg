@@ -484,7 +484,11 @@ export default function Pricing() {
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => window.location.href = "mailto:comercial@mcgconsultoria.com.br?subject=Consulta de Preço - " + encodeURIComponent(product.name)}
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        window.location.href = `/login?redirect=${encodeURIComponent('/planos')}`;
+                      }
+                    }}
                     data-testid={`button-product-${index}`}
                   >
                     Consultar Preço
@@ -507,7 +511,11 @@ export default function Pricing() {
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => window.location.href = "mailto:comercial@mcgconsultoria.com.br?subject=Consulta de Preço - " + encodeURIComponent(product.name)}
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        window.location.href = `/login?redirect=${encodeURIComponent('/planos')}`;
+                      }
+                    }}
                     data-testid={`button-product-${index + 2}`}
                   >
                     Consultar Preço
