@@ -128,7 +128,7 @@ export default function MeuPlano() {
         </div>
       </div>
 
-      {subscription?.daysUntilAccessLoss !== null && subscription.daysUntilAccessLoss <= 7 && (
+      {subscription && subscription.daysUntilAccessLoss !== null && subscription.daysUntilAccessLoss !== undefined && subscription.daysUntilAccessLoss <= 7 && (
         <Alert variant="destructive" data-testid="alert-access-warning">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Aviso de Acesso</AlertTitle>
