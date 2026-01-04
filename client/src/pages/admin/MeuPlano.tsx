@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Calendar, CreditCard, Users, Check, X, RefreshCw, ArrowLeft } from "lucide-react";
+import { AlertTriangle, Calendar, CreditCard, Users, Check, X, RefreshCw, ArrowLeft, ArrowUpCircle } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -138,6 +138,13 @@ export default function MeuPlano() {
             <p className="text-muted-foreground">Gerencie sua assinatura e plano</p>
           </div>
         </div>
+        <Button
+          onClick={() => navigate("/planos")}
+          data-testid="button-upgrade-plan"
+        >
+          <ArrowUpCircle className="h-4 w-4 mr-2" />
+          Fazer Upgrade
+        </Button>
       </div>
 
       {subscription && subscription.daysUntilAccessLoss !== null && subscription.daysUntilAccessLoss !== undefined && subscription.daysUntilAccessLoss <= 7 && (
