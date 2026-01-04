@@ -132,7 +132,7 @@ export async function registerRoutes(
   // Endpoint especial para setup inicial em produção
   app.post('/api/setup/reset-password', async (req, res) => {
     try {
-      const { email, newPassword, setupKey } = req.body;
+      const { email, newPassword, setupKey, createIfNotExists, role } = req.body;
       
       // Chave de segurança via variável de ambiente
       const validSetupKey = process.env.SETUP_KEY;
@@ -144,18 +144,47 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Email e nova senha são obrigatórios" });
       }
       
-      const user = await storage.getUserByEmail(email);
-      if (!user) {
-        return res.status(404).json({ message: "Usuário não encontrado" });
+      const bcrypt = await import('bcryptjs');
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      console.log(`Setup: Generating hash for ${email}, hash starts with: ${hashedPassword.substring(0, 20)}`);
+      
+      let user = await storage.getUserByEmail(email);
+      
+      if (!user && createIfNotExists) {
+        // Criar usuário se não existir
+        const newUser = await storage.createUser({
+          email,
+          password: hashedPassword,
+          firstName: email.split('@')[0],
+          lastName: '',
+          role: role || 'admin',
+          accountStatus: 'approved',
+          subscriptionStatus: 'free',
+          selectedPlan: 'free',
+        });
+        console.log(`Setup: Created new user ${email} with id ${newUser.id}`);
+        return res.json({ message: "Usuário criado com sucesso", email, userId: newUser.id, created: true });
       }
       
-      const { hashPassword } = await import('./customAuth');
-      const hashedPassword = await hashPassword(newPassword);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado. Use createIfNotExists: true para criar." });
+      }
+      
+      console.log(`Setup: User found ${email} with id ${user.id}, current hash: ${user.password?.substring(0, 20)}`);
       
       await storage.updateUserPassword(user.id, hashedPassword);
       
-      console.log(`Password reset via setup for: ${email}`);
-      res.json({ message: "Senha atualizada com sucesso", email });
+      // Verificar se a senha foi realmente atualizada
+      const updatedUser = await storage.getUserByEmail(email);
+      console.log(`Setup: After update, hash is: ${updatedUser?.password?.substring(0, 20)}`);
+      
+      if (updatedUser?.password === hashedPassword) {
+        console.log(`Setup: Password reset SUCCESSFUL for: ${email}`);
+        res.json({ message: "Senha atualizada com sucesso", email, verified: true });
+      } else {
+        console.log(`Setup: Password reset FAILED for: ${email} - hash mismatch`);
+        res.status(500).json({ message: "Erro: senha não foi persistida corretamente" });
+      }
     } catch (error) {
       console.error("Error in setup reset password:", error);
       res.status(500).json({ message: "Erro ao resetar senha" });
