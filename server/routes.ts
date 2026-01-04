@@ -191,6 +191,35 @@ export async function registerRoutes(
     }
   });
 
+  // Endpoint para aprovar usuário via setup
+  app.post('/api/setup/approve-user', async (req, res) => {
+    try {
+      const { email, setupKey } = req.body;
+      
+      const validSetupKey = process.env.SETUP_KEY;
+      if (!validSetupKey || setupKey !== validSetupKey) {
+        return res.status(403).json({ message: "Chave de setup inválida" });
+      }
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email é obrigatório" });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      await storage.approveUser(user.id, 'setup-api');
+      console.log(`Setup: User ${email} approved via setup API`);
+      
+      res.json({ message: "Usuário aprovado com sucesso", email, accountStatus: "approved" });
+    } catch (error) {
+      console.error("Error in setup approve user:", error);
+      res.status(500).json({ message: "Erro ao aprovar usuário" });
+    }
+  });
+
   app.post('/api/auth/register', async (req, res) => {
     try {
       const parsed = registerSchema.safeParse(req.body);
