@@ -152,7 +152,7 @@ export default function Landing() {
             <Link href="/calculadora-armazenagem" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Calculadora Armazenagem
             </Link>
-            <Link href="/planos" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/planos" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-planos-nav">
               Planos
             </Link>
             <a href="#contato" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
