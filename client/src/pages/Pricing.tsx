@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Check, Loader2, Briefcase, ArrowRight, Lock, Send, ArrowLeft, Save } from "lucide-react";
-import type { Client } from "@shared/schema";
+import type { Client, SubscriptionPlan } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -187,10 +187,26 @@ export default function Pricing() {
     queryKey: ["/api/stripe/products"],
   });
 
+  const { data: dbPlans } = useQuery<SubscriptionPlan[]>({
+    queryKey: ["/api/subscription-plans"],
+  });
+
   const { data: clients } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
     enabled: isAuthenticated,
   });
+
+  const activePlans = dbPlans && dbPlans.length > 0 ? dbPlans.map(plan => ({
+    name: plan.name,
+    description: plan.description || "",
+    price: plan.price / 100,
+    interval: plan.interval === "always" ? "sempre" : "mes",
+    baseUsers: plan.baseUsers || 1,
+    additionalUserPrice: (plan.additionalUserPrice || 0) / 100,
+    features: plan.features || [],
+    popular: plan.popular || false,
+    priceId: null,
+  })) : defaultPlans;
 
   const checkoutMutation = useMutation({
     mutationFn: async (priceId: string) => {
@@ -323,20 +339,7 @@ export default function Pricing() {
     consultingProposalMutation.mutate();
   };
 
-  const plans = productsData?.data?.length
-    ? productsData.data
-        .filter((product) => ["free", "professional", "enterprise"].includes(product.metadata?.plan_type || ""))
-        .sort((a, b) => parseInt(a.metadata?.order || "99") - parseInt(b.metadata?.order || "99"))
-        .map((product) => ({
-          name: product.name,
-          description: product.description || "",
-          price: product.prices[0]?.unit_amount ? product.prices[0].unit_amount / 100 : 0,
-          interval: product.prices[0]?.recurring?.interval === "month" ? "mês" : "ano",
-          features: product.metadata?.features?.split(",") || [],
-          popular: product.metadata?.popular === "true",
-          priceId: product.prices[0]?.id,
-        }))
-    : defaultPlans;
+  const plans = activePlans;
 
   const addons = productsData?.data?.length
     ? productsData.data

@@ -308,6 +308,11 @@ const adminMcgLojaItems = [
 
 const adminMcgSistemaItems = [
   {
+    title: "Planos e Valores",
+    url: "/admin/planos",
+    icon: CreditCard,
+  },
+  {
     title: "WhatsApp",
     url: "/admin/whatsapp",
     icon: MessageSquare,

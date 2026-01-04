@@ -200,6 +200,9 @@ import {
   consultingQuoteRequests,
   type ConsultingQuoteRequest,
   type InsertConsultingQuoteRequest,
+  subscriptionPlans,
+  type SubscriptionPlan,
+  type InsertSubscriptionPlan,
   type PersonalCategory,
   type InsertPersonalCategory,
   type PersonalAccount,
@@ -645,6 +648,12 @@ export interface IStorage {
   createConsultingQuoteRequest(data: InsertConsultingQuoteRequest): Promise<ConsultingQuoteRequest>;
   getConsultingQuoteRequests(): Promise<ConsultingQuoteRequest[]>;
   updateConsultingQuoteRequest(id: number, data: Partial<InsertConsultingQuoteRequest>): Promise<ConsultingQuoteRequest | undefined>;
+
+  // Subscription Plans operations
+  getSubscriptionPlans(): Promise<SubscriptionPlan[]>;
+  getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined>;
+  updateSubscriptionPlan(id: number, data: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined>;
+  seedSubscriptionPlans(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3046,6 +3055,99 @@ export class DatabaseStorage implements IStorage {
       .where(eq(consultingQuoteRequests.id, id))
       .returning();
     return updated;
+  }
+
+  // ==================== Subscription Plans Operations ====================
+
+  async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+    return db.select().from(subscriptionPlans).where(eq(subscriptionPlans.active, true)).orderBy(subscriptionPlans.sortOrder);
+  }
+
+  async getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined> {
+    const [plan] = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, id));
+    return plan;
+  }
+
+  async updateSubscriptionPlan(id: number, data: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined> {
+    const [updated] = await db.update(subscriptionPlans)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(subscriptionPlans.id, id))
+      .returning();
+    return updated;
+  }
+
+  async seedSubscriptionPlans(): Promise<void> {
+    const defaultPlans = [
+      {
+        code: "free",
+        name: "Gratuito",
+        description: "Acesso as calculadoras de frete e armazenagem",
+        price: 0,
+        interval: "always",
+        baseUsers: 1,
+        additionalUserPrice: 0,
+        features: [
+          "Calculadora de Frete com ICMS",
+          "Calculadora de Armazenagem",
+          "3 calculos gratuitos",
+          "1 usuario incluido",
+        ],
+        popular: false,
+        sortOrder: 1,
+      },
+      {
+        code: "professional",
+        name: "Profissional",
+        description: "Todas as ferramentas para gestão comercial completa",
+        price: 49900,
+        interval: "month",
+        baseUsers: 1,
+        additionalUserPrice: 6900,
+        features: [
+          "Tudo do plano Gratuito",
+          "Calculos ilimitados",
+          "CRM de Clientes",
+          "Pipeline de Vendas (Kanban)",
+          "Checklists de 18 Departamentos",
+          "Calendario Comercial",
+          "Ata Plano de Acao",
+          "Gestao Financeira",
+          "1 usuario incluido (+R$69/usuario adicional)",
+          "Suporte por email",
+        ],
+        popular: true,
+        sortOrder: 2,
+      },
+      {
+        code: "corporate",
+        name: "Corporativo",
+        description: "Para operações em grande escala com múltiplas filiais",
+        price: 149900,
+        interval: "month",
+        baseUsers: 1,
+        additionalUserPrice: 6900,
+        features: [
+          "Tudo do plano Profissional",
+          "Gestao de Tarefas e Projetos",
+          "Indicadores e Curva ABC",
+          "Modulo de Marketing",
+          "Integracoes com ERP (KMM/QualP)",
+          "Multi-empresas (Matriz/Filiais)",
+          "1 usuario incluido (+R$69/usuario adicional)",
+          "Suporte prioritario",
+          "Treinamento dedicado",
+        ],
+        popular: false,
+        sortOrder: 3,
+      },
+    ];
+
+    for (const plan of defaultPlans) {
+      const existing = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.code, plan.code));
+      if (existing.length === 0) {
+        await db.insert(subscriptionPlans).values(plan);
+      }
+    }
   }
 }
 

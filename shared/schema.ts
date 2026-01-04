@@ -2490,3 +2490,25 @@ export const commercialFlowcharts = pgTable("commercial_flowcharts", {
 export const insertCommercialFlowchartSchema = createInsertSchema(commercialFlowcharts).omit({ id: true, createdAt: true, updatedAt: true });
 export type CommercialFlowchart = typeof commercialFlowcharts.$inferSelect;
 export type InsertCommercialFlowchart = z.infer<typeof insertCommercialFlowchartSchema>;
+
+// Subscription Plans (Planos e Valores)
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: serial("id").primaryKey(),
+  code: varchar("code", { length: 50 }).notNull().unique(), // 'free', 'professional', 'corporate'
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  price: integer("price").notNull().default(0), // in cents (R$ 4,99 = 499)
+  interval: varchar("interval", { length: 20 }).default("month"), // 'month', 'year', 'always'
+  baseUsers: integer("base_users").default(1),
+  additionalUserPrice: integer("additional_user_price").default(0), // in cents
+  features: text("features").array().default([]),
+  popular: boolean("popular").default(false),
+  active: boolean("active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({ id: true, createdAt: true, updatedAt: true });
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;

@@ -45,6 +45,7 @@ import {
   insertBankIntegrationSchema,
   insertOperationBillingEntrySchema,
   insertOperationBillingGoalSchema,
+  insertSubscriptionPlanSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -824,6 +825,61 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error updating company:", error);
       res.status(500).json({ message: "Failed to update company" });
+    }
+  });
+
+  // Subscription Plans management routes (public read, admin write)
+  app.get("/api/subscription-plans", async (req, res) => {
+    try {
+      const plans = await storage.getSubscriptionPlans();
+      res.json(plans);
+    } catch (error) {
+      console.error("Error fetching subscription plans:", error);
+      res.status(500).json({ message: "Failed to fetch subscription plans" });
+    }
+  });
+
+  app.get("/api/subscription-plans/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const plan = await storage.getSubscriptionPlan(id);
+      if (!plan) {
+        return res.status(404).json({ message: "Plan not found" });
+      }
+      res.json(plan);
+    } catch (error) {
+      console.error("Error fetching subscription plan:", error);
+      res.status(500).json({ message: "Failed to fetch subscription plan" });
+    }
+  });
+
+  app.put("/api/subscription-plans/:id", isMcgAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const parseResult = insertSubscriptionPlanSchema.partial().safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ message: "Invalid data", errors: parseResult.error.errors });
+      }
+      const plan = await storage.updateSubscriptionPlan(id, parseResult.data);
+      if (!plan) {
+        return res.status(404).json({ message: "Plan not found" });
+      }
+      await logAudit(req, "update", "subscription_plan", id, `Plano ${plan.name} atualizado`);
+      res.json(plan);
+    } catch (error) {
+      console.error("Error updating subscription plan:", error);
+      res.status(500).json({ message: "Failed to update subscription plan" });
+    }
+  });
+
+  app.post("/api/subscription-plans/seed", isMcgAdmin, async (req, res) => {
+    try {
+      await storage.seedSubscriptionPlans();
+      const plans = await storage.getSubscriptionPlans();
+      res.json({ message: "Plans seeded successfully", plans });
+    } catch (error) {
+      console.error("Error seeding subscription plans:", error);
+      res.status(500).json({ message: "Failed to seed subscription plans" });
     }
   });
 

@@ -65,6 +65,7 @@ import PessoalDashboard from "@/pages/pessoal/PessoalDashboard";
 import GestaoFinanceira from "@/pages/pessoal/GestaoFinanceira";
 import PessoalIRPF from "@/pages/pessoal/IRPF";
 import AdminIRPJ from "@/pages/admin/IRPJ";
+import AdminPlanos from "@/pages/admin/AdminPlanos";
 import MeuPlano from "@/pages/admin/MeuPlano";
 import ContasBancariasPF from "@/pages/pessoal/ContasBancariasPF";
 import CentrosCustoPF from "@/pages/pessoal/CentrosCustoPF";
@@ -175,6 +176,9 @@ function Router() {
       </Route>
       <Route path="/admin/backup">
         {() => isAuthenticated && isMcgAdmin ? <AdminBackup /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/planos">
+        {() => isAuthenticated && isMcgAdmin ? <AdminPlanos /> : <AdminLogin />}
       </Route>
       <Route path="/admin/meu-plano">
         {() => isAuthenticated ? <MeuPlano /> : <Login />}
