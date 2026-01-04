@@ -479,23 +479,15 @@ export default function Pricing() {
                   </CardTitle>
                   <CardDescription>{product.description}</CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1">
-                  <div>
-                    <span className="text-3xl font-bold" data-testid={`text-product-price-${index}`}>
-                      R$ {product.price}
-                    </span>
-                    <span className="text-muted-foreground">/{product.interval}</span>
-                  </div>
-                </CardContent>
+                <CardContent className="flex-1" />
                 <CardFooter>
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => handleSubscribe(product.priceId)}
-                    disabled={checkoutMutation.isPending || !product.priceId}
+                    onClick={() => window.location.href = "mailto:comercial@mcgconsultoria.com.br?subject=Consulta de Preço - " + encodeURIComponent(product.name)}
                     data-testid={`button-product-${index}`}
                   >
-                    {!product.priceId ? "Em Breve" : "Adquirir"}
+                    Consultar Preço
                   </Button>
                 </CardFooter>
               </Card>
@@ -510,23 +502,15 @@ export default function Pricing() {
                   </CardTitle>
                   <CardDescription>{product.description}</CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1">
-                  <div>
-                    <span className="text-3xl font-bold" data-testid={`text-product-price-${index + 2}`}>
-                      R$ {product.price}
-                    </span>
-                    <span className="text-muted-foreground">/{product.interval}</span>
-                  </div>
-                </CardContent>
+                <CardContent className="flex-1" />
                 <CardFooter>
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => handleSubscribe(product.priceId)}
-                    disabled={checkoutMutation.isPending || !product.priceId}
+                    onClick={() => window.location.href = "mailto:comercial@mcgconsultoria.com.br?subject=Consulta de Preço - " + encodeURIComponent(product.name)}
                     data-testid={`button-product-${index + 2}`}
                   >
-                    {!product.priceId ? "Em Breve" : "Adquirir"}
+                    Consultar Preço
                   </Button>
                 </CardFooter>
               </Card>
