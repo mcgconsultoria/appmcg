@@ -648,14 +648,12 @@ export function AppSidebar() {
           location={location}
         />
 
-        {isAdmin && (
-          <CollapsibleSection
-            title="Admin Cliente"
-            icon={UserCog}
-            items={adminClienteItems}
-            location={location}
-          />
-        )}
+        <CollapsibleSection
+          title="Admin Cliente"
+          icon={UserCog}
+          items={adminClienteItems}
+          location={location}
+        />
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
           <AdminPJSection location={location} userRole={user?.role} />
