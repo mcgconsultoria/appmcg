@@ -1522,6 +1522,20 @@ export const costCenters = pgTable("cost_centers", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Personal Cost Centers (for ADMIN PF - individual finances)
+export const personalCostCenters = pgTable("personal_cost_centers", {
+  id: serial("id").primaryKey(),
+  ownerUserId: varchar("owner_user_id", { length: 100 }).notNull(),
+  parentId: integer("parent_id"), // Self-referencing for tree structure
+  code: varchar("code", { length: 20 }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  type: varchar("type", { length: 50 }), // bancos, saude, alimentacao, transporte, moradia, educacao, vestuario, lazer, investimentos
+  description: text("description"),
+  budget: decimal("budget", { precision: 15, scale: 2 }),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Bank Accounts
 export const bankAccounts = pgTable("bank_accounts", {
   id: serial("id").primaryKey(),
@@ -1711,6 +1725,11 @@ export const insertDreAccountSchema = createInsertSchema(dreAccounts).omit({
 });
 
 export const insertCostCenterSchema = createInsertSchema(costCenters).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPersonalCostCenterSchema = createInsertSchema(personalCostCenters).omit({
   id: true,
   createdAt: true,
 });
@@ -2166,6 +2185,8 @@ export type DreAccount = typeof dreAccounts.$inferSelect;
 export type InsertDreAccount = z.infer<typeof insertDreAccountSchema>;
 export type CostCenter = typeof costCenters.$inferSelect;
 export type InsertCostCenter = z.infer<typeof insertCostCenterSchema>;
+export type PersonalCostCenter = typeof personalCostCenters.$inferSelect;
+export type InsertPersonalCostCenter = z.infer<typeof insertPersonalCostCenterSchema>;
 export type BankAccount = typeof bankAccounts.$inferSelect;
 export type InsertBankAccount = z.infer<typeof insertBankAccountSchema>;
 export type NfseProvider = typeof nfseProviders.$inferSelect;
