@@ -129,6 +129,39 @@ export async function registerRoutes(
     }
   });
 
+  // Endpoint especial para setup inicial em produção
+  app.post('/api/setup/reset-password', async (req, res) => {
+    try {
+      const { email, newPassword, setupKey } = req.body;
+      
+      // Chave de segurança via variável de ambiente
+      const validSetupKey = process.env.SETUP_KEY;
+      if (!validSetupKey || setupKey !== validSetupKey) {
+        return res.status(403).json({ message: "Chave de setup inválida" });
+      }
+      
+      if (!email || !newPassword) {
+        return res.status(400).json({ message: "Email e nova senha são obrigatórios" });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      
+      const { hashPassword } = await import('./customAuth');
+      const hashedPassword = await hashPassword(newPassword);
+      
+      await storage.updateUserPassword(user.id, hashedPassword);
+      
+      console.log(`Password reset via setup for: ${email}`);
+      res.json({ message: "Senha atualizada com sucesso", email });
+    } catch (error) {
+      console.error("Error in setup reset password:", error);
+      res.status(500).json({ message: "Erro ao resetar senha" });
+    }
+  });
+
   app.post('/api/auth/register', async (req, res) => {
     try {
       const parsed = registerSchema.safeParse(req.body);
