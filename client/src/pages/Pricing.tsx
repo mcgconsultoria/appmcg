@@ -430,7 +430,7 @@ export default function Pricing() {
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => (window.location.href = "/calculadora-frete")}
+                    onClick={() => (window.location.href = "/calculadoras")}
                     data-testid={`button-plan-${index}`}
                   >
                     Começar Grátis
