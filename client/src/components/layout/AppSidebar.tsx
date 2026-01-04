@@ -62,6 +62,8 @@ import {
   Wallet,
   GitBranch,
   UserCheck,
+  MessageSquare,
+  Database,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -304,6 +306,19 @@ const adminMcgLojaItems = [
   },
 ];
 
+const adminMcgSistemaItems = [
+  {
+    title: "WhatsApp",
+    url: "/admin/whatsapp",
+    icon: MessageSquare,
+  },
+  {
+    title: "Backup GitHub",
+    url: "/admin/backup",
+    icon: Database,
+  },
+];
+
 const suporteItems = [
   {
     title: "Suporte",
@@ -436,6 +451,14 @@ function AdminPJSection({ location, userRole }: { location: string; userRole?: s
               items={adminMcgLojaItems}
               location={location}
             />
+            {userRole === 'admin_mcg' && (
+              <CollapsibleSection
+                title="Sistema"
+                icon={Settings}
+                items={adminMcgSistemaItems}
+                location={location}
+              />
+            )}
           </div>
         </CollapsibleContent>
       </SidebarGroup>

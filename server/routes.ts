@@ -3154,6 +3154,72 @@ export async function registerRoutes(
     }
   });
 
+  // GitHub Backup routes
+  app.get("/api/github/backup/config", isMcgAdmin, async (req: any, res) => {
+    try {
+      const { getBackupConfig, isGitHubIntegrationAvailable } = await import("./githubService");
+      const config = getBackupConfig();
+      res.json({ 
+        ...config, 
+        githubConfigured: isGitHubIntegrationAvailable() 
+      });
+    } catch (error: any) {
+      console.error("Error getting backup config:", error);
+      res.status(500).json({ message: "Erro ao obter configuracao de backup" });
+    }
+  });
+
+  app.post("/api/github/backup/config", isMcgAdmin, async (req: any, res) => {
+    try {
+      const { setBackupConfig, getBackupConfig, startBackupScheduler, stopBackupScheduler } = await import("./githubService");
+      const { enabled, repositoryOwner, repositoryName, scheduledHour } = req.body;
+      
+      setBackupConfig({
+        enabled: enabled ?? false,
+        repositoryOwner: repositoryOwner || '',
+        repositoryName: repositoryName || 'mcg-backup',
+        scheduledHour: scheduledHour ?? 3,
+      });
+
+      // Restart scheduler if enabled
+      if (enabled) {
+        startBackupScheduler();
+      } else {
+        stopBackupScheduler();
+      }
+
+      res.json({ message: "Configuracao de backup atualizada", config: getBackupConfig() });
+    } catch (error: any) {
+      console.error("Error updating backup config:", error);
+      res.status(500).json({ message: "Erro ao atualizar configuracao de backup" });
+    }
+  });
+
+  app.post("/api/github/backup/run", isMcgAdmin, async (req: any, res) => {
+    try {
+      const { runDatabaseBackup, isGitHubIntegrationAvailable, getBackupConfig } = await import("./githubService");
+      
+      if (!isGitHubIntegrationAvailable()) {
+        return res.status(400).json({ message: "GitHub nao configurado" });
+      }
+      
+      const config = getBackupConfig();
+      if (!config.repositoryOwner || !config.repositoryName) {
+        return res.status(400).json({ message: "Configure o repositorio de backup primeiro" });
+      }
+
+      const result = await runDatabaseBackup();
+      if (result.success) {
+        res.json({ message: "Backup realizado com sucesso", files: result.files });
+      } else {
+        res.status(500).json({ message: "Erro no backup", error: result.error });
+      }
+    } catch (error: any) {
+      console.error("Error running backup:", error);
+      res.status(500).json({ message: "Erro ao executar backup", error: error.message });
+    }
+  });
+
   // Projects routes
   app.get("/api/projects", isAuthenticated, async (req: any, res) => {
     try {

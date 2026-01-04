@@ -119,3 +119,189 @@ export async function getRepositoryInfo(owner: string, repo: string): Promise<an
     return null;
   }
 }
+
+// Backup configuration
+let backupConfig = {
+  enabled: false,
+  repositoryOwner: '',
+  repositoryName: 'mcg-backup',
+  lastBackupAt: null as Date | null,
+  lastBackupStatus: 'never' as 'success' | 'error' | 'never',
+  lastBackupError: null as string | null,
+  scheduledHour: 3, // 3 AM
+};
+
+export function getBackupConfig() {
+  return { ...backupConfig };
+}
+
+export function setBackupConfig(config: Partial<typeof backupConfig>) {
+  backupConfig = { ...backupConfig, ...config };
+}
+
+export async function createBackupFile(owner: string, repo: string, path: string, content: string, message: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const octokit = await getGitHubClient();
+    
+    // Check if file exists to get SHA
+    let sha: string | undefined;
+    try {
+      const { data: existingFile } = await octokit.repos.getContent({
+        owner,
+        repo,
+        path,
+      });
+      if ('sha' in existingFile) {
+        sha = existingFile.sha;
+      }
+    } catch (e) {
+      // File doesn't exist, that's fine
+    }
+
+    await octokit.repos.createOrUpdateFileContents({
+      owner,
+      repo,
+      path,
+      message,
+      content: Buffer.from(content).toString('base64'),
+      sha,
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Erro ao criar arquivo de backup:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function runDatabaseBackup(): Promise<{ success: boolean; error?: string; files?: string[] }> {
+  try {
+    if (!backupConfig.repositoryOwner || !backupConfig.repositoryName) {
+      backupConfig.lastBackupAt = new Date();
+      backupConfig.lastBackupStatus = 'error';
+      backupConfig.lastBackupError = 'Backup nao configurado';
+      return { success: false, error: 'Backup nao configurado' };
+    }
+
+    const { storage } = await import('./storage');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const dateFolder = new Date().toISOString().split('T')[0];
+    const files: string[] = [];
+
+    // Backup ALL users (without passwords) - using raw query to get all users
+    const { db } = await import('./db');
+    const { users: usersTable } = await import('@shared/schema');
+    const allUsersRaw = await db.select().from(usersTable);
+    const allUsers = allUsersRaw.map(u => {
+      const { password, activeSessionToken, ...safeUser } = u;
+      return safeUser;
+    });
+    
+    const usersResult = await createBackupFile(
+      backupConfig.repositoryOwner,
+      backupConfig.repositoryName,
+      `backups/${dateFolder}/users_${timestamp}.json`,
+      JSON.stringify(allUsers, null, 2),
+      `Backup usuarios - ${new Date().toLocaleString('pt-BR')}`
+    );
+    if (usersResult.success) files.push('users');
+
+    // Backup clients
+    const clients = await storage.getClients();
+    const clientsResult = await createBackupFile(
+      backupConfig.repositoryOwner,
+      backupConfig.repositoryName,
+      `backups/${dateFolder}/clients_${timestamp}.json`,
+      JSON.stringify(clients, null, 2),
+      `Backup clientes - ${new Date().toLocaleString('pt-BR')}`
+    );
+    if (clientsResult.success) files.push('clients');
+
+    // Backup tasks
+    const tasks = await storage.getTasks();
+    const tasksResult = await createBackupFile(
+      backupConfig.repositoryOwner,
+      backupConfig.repositoryName,
+      `backups/${dateFolder}/tasks_${timestamp}.json`,
+      JSON.stringify(tasks, null, 2),
+      `Backup tarefas - ${new Date().toLocaleString('pt-BR')}`
+    );
+    if (tasksResult.success) files.push('tasks');
+
+    // Backup financial records
+    const financial = await storage.getFinancialRecords();
+    const financialResult = await createBackupFile(
+      backupConfig.repositoryOwner,
+      backupConfig.repositoryName,
+      `backups/${dateFolder}/financial_${timestamp}.json`,
+      JSON.stringify(financial, null, 2),
+      `Backup financeiro - ${new Date().toLocaleString('pt-BR')}`
+    );
+    if (financialResult.success) files.push('financial');
+
+    // Backup meeting records
+    const meetings = await storage.getMeetingRecords();
+    const meetingsResult = await createBackupFile(
+      backupConfig.repositoryOwner,
+      backupConfig.repositoryName,
+      `backups/${dateFolder}/meetings_${timestamp}.json`,
+      JSON.stringify(meetings, null, 2),
+      `Backup reunioes - ${new Date().toLocaleString('pt-BR')}`
+    );
+    if (meetingsResult.success) files.push('meetings');
+
+    // Update backup status
+    backupConfig.lastBackupAt = new Date();
+    backupConfig.lastBackupStatus = 'success';
+    backupConfig.lastBackupError = null;
+
+    console.log(`Backup diario concluido: ${files.length} arquivos salvos em ${backupConfig.repositoryOwner}/${backupConfig.repositoryName}`);
+    
+    return { success: true, files };
+  } catch (error: any) {
+    console.error('Erro no backup diario:', error);
+    backupConfig.lastBackupAt = new Date();
+    backupConfig.lastBackupStatus = 'error';
+    backupConfig.lastBackupError = error.message;
+    return { success: false, error: error.message };
+  }
+}
+
+// Backup scheduler
+let backupInterval: NodeJS.Timeout | null = null;
+
+export function startBackupScheduler() {
+  if (backupInterval) {
+    clearInterval(backupInterval);
+  }
+
+  // Check every hour if it's time for backup
+  backupInterval = setInterval(async () => {
+    const now = new Date();
+    const currentHour = now.getHours();
+    
+    if (backupConfig.enabled && currentHour === backupConfig.scheduledHour) {
+      // Check if we already did backup today
+      if (backupConfig.lastBackupAt) {
+        const lastBackupDate = new Date(backupConfig.lastBackupAt).toDateString();
+        const todayDate = now.toDateString();
+        if (lastBackupDate === todayDate) {
+          return; // Already backed up today
+        }
+      }
+      
+      console.log('Iniciando backup diario automatico...');
+      await runDatabaseBackup();
+    }
+  }, 60 * 60 * 1000); // Check every hour
+
+  console.log('Scheduler de backup iniciado');
+}
+
+export function stopBackupScheduler() {
+  if (backupInterval) {
+    clearInterval(backupInterval);
+    backupInterval = null;
+    console.log('Scheduler de backup parado');
+  }
+}

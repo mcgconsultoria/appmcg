@@ -60,6 +60,7 @@ import AdminLançamentos from "@/pages/admin/AdminLancamentos";
 import AdminRelatorioDRE from "@/pages/admin/AdminRelatorioDRE";
 import AdminLoja from "@/pages/admin/AdminLoja";
 import AdminWhatsApp from "@/pages/admin/AdminWhatsApp";
+import AdminBackup from "@/pages/admin/AdminBackup";
 import PessoalDashboard from "@/pages/pessoal/PessoalDashboard";
 import GestaoFinanceira from "@/pages/pessoal/GestaoFinanceira";
 import PessoalIRPF from "@/pages/pessoal/IRPF";
@@ -171,6 +172,9 @@ function Router() {
       </Route>
       <Route path="/admin/whatsapp">
         {() => isAuthenticated && isAdmin ? <AdminWhatsApp /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/backup">
+        {() => isAuthenticated && isMcgAdmin ? <AdminBackup /> : <AdminLogin />}
       </Route>
       <Route path="/admin/meu-plano">
         {() => isAuthenticated && isAdmin ? <MeuPlano /> : <AdminLogin />}
