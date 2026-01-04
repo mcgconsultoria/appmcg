@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Check, Loader2, Briefcase, ArrowRight, Lock, Send, ArrowLeft } from "lucide-react";
+import { Check, Loader2, Briefcase, ArrowRight, Lock, Send, ArrowLeft, Save } from "lucide-react";
+import type { Client } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
