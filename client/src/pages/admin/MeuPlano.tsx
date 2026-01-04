@@ -3,7 +3,8 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Calendar, CreditCard, Users, Check, X, RefreshCw } from "lucide-react";
+import { AlertTriangle, Calendar, CreditCard, Users, Check, X, RefreshCw, ArrowLeft } from "lucide-react";
+import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import {
@@ -50,6 +51,7 @@ const planPrices: Record<string, number> = {
 };
 
 export default function MeuPlano() {
+  const [, navigate] = useLocation();
   const { toast } = useToast();
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showRenewalDialog, setShowRenewalDialog] = useState(false);
@@ -122,9 +124,19 @@ export default function MeuPlano() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold" data-testid="text-page-title">Meu Plano</h1>
-          <p className="text-muted-foreground">Gerencie sua assinatura e plano</p>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/")}
+            data-testid="button-back"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold" data-testid="text-page-title">Meu Plano</h1>
+            <p className="text-muted-foreground">Gerencie sua assinatura e plano</p>
+          </div>
         </div>
       </div>
 
