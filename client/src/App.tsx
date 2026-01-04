@@ -177,7 +177,7 @@ function Router() {
         {() => isAuthenticated && isMcgAdmin ? <AdminBackup /> : <AdminLogin />}
       </Route>
       <Route path="/admin/meu-plano">
-        {() => isAuthenticated && isAdmin ? <MeuPlano /> : <AdminLogin />}
+        {() => isAuthenticated ? <MeuPlano /> : <Login />}
       </Route>
       <Route path="/pessoal">
         {() => isAuthenticated && isAdmin ? <PessoalDashboard /> : <AdminLogin />}
