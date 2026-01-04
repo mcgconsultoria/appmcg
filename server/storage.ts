@@ -235,6 +235,7 @@ export interface IStorage {
   approveUser(userId: string, approvedBy: string): Promise<User | undefined>;
   rejectUser(userId: string, reason: string): Promise<User | undefined>;
   suspendUser(userId: string, reason: string): Promise<User | undefined>;
+  updateUserRole(userId: string, role: string): Promise<User | undefined>;
 
   // Company operations
   getCompany(id: number): Promise<Company | undefined>;
@@ -735,6 +736,18 @@ export class DatabaseStorage implements IStorage {
         accountStatus: "suspended", 
         accountStatusReason: reason,
         activeSessionToken: null,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateUserRole(userId: string, role: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        role,
         updatedAt: new Date() 
       })
       .where(eq(users.id, userId))

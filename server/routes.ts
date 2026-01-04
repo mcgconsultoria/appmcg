@@ -244,7 +244,7 @@ export async function registerRoutes(
         return res.status(404).json({ message: "Usuário não encontrado" });
       }
       
-      await storage.updateUser(user.id, { role });
+      await storage.updateUserRole(user.id, role);
       console.log(`Setup: User ${email} role updated to ${role}`);
       
       res.json({ message: "Role atualizado com sucesso", email, role });
