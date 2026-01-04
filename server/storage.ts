@@ -130,6 +130,7 @@ import {
   type InsertDiagnosticLead,
   dreAccounts,
   costCenters,
+  personalCostCenters,
   bankAccounts,
   digitalCertificates,
   accountingEntries,
@@ -139,6 +140,8 @@ import {
   type InsertDreAccount,
   type CostCenter,
   type InsertCostCenter,
+  type PersonalCostCenter,
+  type InsertPersonalCostCenter,
   type BankAccount,
   type InsertBankAccount,
   type DigitalCertificate,
@@ -538,6 +541,14 @@ export interface IStorage {
   updateCostCenter(id: number, center: Partial<InsertCostCenter>): Promise<CostCenter | undefined>;
   deleteCostCenter(id: number): Promise<boolean>;
   seedDefaultCostCenters(): Promise<void>;
+
+  // Personal Cost Centers (ADMIN PF)
+  getPersonalCostCenters(userId: string): Promise<PersonalCostCenter[]>;
+  getPersonalCostCenter(id: number, userId: string): Promise<PersonalCostCenter | undefined>;
+  createPersonalCostCenter(center: InsertPersonalCostCenter): Promise<PersonalCostCenter>;
+  updatePersonalCostCenter(id: number, userId: string, center: Partial<InsertPersonalCostCenter>): Promise<PersonalCostCenter | undefined>;
+  deletePersonalCostCenter(id: number, userId: string): Promise<boolean>;
+  seedPersonalCostCenters(userId: string): Promise<void>;
 
   // Financial Module - Bank Accounts
   getBankAccounts(): Promise<BankAccount[]>;
@@ -2208,6 +2219,91 @@ export class DatabaseStorage implements IStorage {
       
       const [inserted] = await db.insert(costCenters).values({
         ...center,
+        parentId,
+      }).returning();
+      
+      insertedCenters[center.code] = inserted.id;
+    }
+  }
+
+  // Personal Cost Centers (ADMIN PF)
+  async getPersonalCostCenters(userId: string): Promise<PersonalCostCenter[]> {
+    return db.select().from(personalCostCenters)
+      .where(eq(personalCostCenters.ownerUserId, userId))
+      .orderBy(personalCostCenters.code);
+  }
+
+  async getPersonalCostCenter(id: number, userId: string): Promise<PersonalCostCenter | undefined> {
+    const [center] = await db.select().from(personalCostCenters)
+      .where(and(eq(personalCostCenters.id, id), eq(personalCostCenters.ownerUserId, userId)));
+    return center;
+  }
+
+  async createPersonalCostCenter(center: InsertPersonalCostCenter): Promise<PersonalCostCenter> {
+    const [newCenter] = await db.insert(personalCostCenters).values(center).returning();
+    return newCenter;
+  }
+
+  async updatePersonalCostCenter(id: number, userId: string, center: Partial<InsertPersonalCostCenter>): Promise<PersonalCostCenter | undefined> {
+    const [updated] = await db
+      .update(personalCostCenters)
+      .set(center)
+      .where(and(eq(personalCostCenters.id, id), eq(personalCostCenters.ownerUserId, userId)))
+      .returning();
+    return updated;
+  }
+
+  async deletePersonalCostCenter(id: number, userId: string): Promise<boolean> {
+    await db.delete(personalCostCenters)
+      .where(and(eq(personalCostCenters.id, id), eq(personalCostCenters.ownerUserId, userId)));
+    return true;
+  }
+
+  async seedPersonalCostCenters(userId: string): Promise<void> {
+    const existing = await db.select().from(personalCostCenters)
+      .where(eq(personalCostCenters.ownerUserId, userId));
+    if (existing.length > 0) return;
+
+    const defaultCenters = [
+      { code: "BAN", name: "Bancos", type: "bancos" },
+      { code: "BAN.01", name: "Conta Corrente", type: "bancos" },
+      { code: "BAN.02", name: "Poupanca", type: "bancos" },
+      { code: "SAU", name: "Saude", type: "saude" },
+      { code: "SAU.01", name: "Plano de Saude", type: "saude" },
+      { code: "SAU.02", name: "Medicamentos", type: "saude" },
+      { code: "ALI", name: "Alimentacao", type: "alimentacao" },
+      { code: "ALI.01", name: "Supermercado", type: "alimentacao" },
+      { code: "ALI.02", name: "Restaurantes", type: "alimentacao" },
+      { code: "TRA", name: "Transporte", type: "transporte" },
+      { code: "TRA.01", name: "Combustivel", type: "transporte" },
+      { code: "TRA.02", name: "Manutencao Veiculo", type: "transporte" },
+      { code: "MOR", name: "Moradia", type: "moradia" },
+      { code: "MOR.01", name: "Aluguel/Financiamento", type: "moradia" },
+      { code: "MOR.02", name: "Condominio", type: "moradia" },
+      { code: "MOR.03", name: "Agua/Luz/Gas", type: "moradia" },
+      { code: "EDU", name: "Educacao", type: "educacao" },
+      { code: "EDU.01", name: "Cursos", type: "educacao" },
+      { code: "EDU.02", name: "Livros", type: "educacao" },
+      { code: "VES", name: "Vestuario", type: "vestuario" },
+      { code: "VES.01", name: "Roupas", type: "vestuario" },
+      { code: "VES.02", name: "Calcados", type: "vestuario" },
+      { code: "LAZ", name: "Lazer", type: "lazer" },
+      { code: "LAZ.01", name: "Viagens", type: "lazer" },
+      { code: "LAZ.02", name: "Entretenimento", type: "lazer" },
+      { code: "INV", name: "Investimentos", type: "investimentos" },
+      { code: "INV.01", name: "Renda Fixa", type: "investimentos" },
+      { code: "INV.02", name: "Renda Variavel", type: "investimentos" },
+    ];
+
+    const insertedCenters: Record<string, number> = {};
+    
+    for (const center of defaultCenters) {
+      const parentCode = center.code.includes(".") ? center.code.split(".")[0] : null;
+      const parentId = parentCode ? insertedCenters[parentCode] : null;
+      
+      const [inserted] = await db.insert(personalCostCenters).values({
+        ...center,
+        ownerUserId: userId,
         parentId,
       }).returning();
       
