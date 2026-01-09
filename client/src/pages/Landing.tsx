@@ -475,10 +475,9 @@ export default function Landing() {
             <div>
               <h4 className="font-semibold mb-4">Suporte</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>Central de Ajuda</li>
-                <li><a href="#contato" className="hover:text-foreground">Fale Conosco</a></li>
                 <li><Link href="/termos" className="hover:text-foreground">Termos de Uso</Link></li>
                 <li><Link href="/privacidade" className="hover:text-foreground">Privacidade</Link></li>
+                <li><a href="#contato" className="hover:text-foreground">Fale Conosco</a></li>
               </ul>
             </div>
           </div>
