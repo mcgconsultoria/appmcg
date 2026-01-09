@@ -23,6 +23,7 @@ const registerSchema = z.object({
   email: z.string().email("Email inválido"),
   password: z.string().min(8, "Senha deve ter no mínimo 8 caracteres"),
   confirmPassword: z.string(),
+  selectedPlan: z.string().min(1, "Selecione um plano ou serviço"),
   userCategories: z.array(z.string()).min(1, "Selecione pelo menos uma categoria"),
   cnpj: z.string().optional(),
   inscriçãoEstadual: z.string().optional(),
@@ -48,6 +49,14 @@ const registerSchema = z.object({
 });
 
 type RegisterData = z.infer<typeof registerSchema>;
+
+const planOptions = [
+  { key: "gratuito", label: "Gratuito", desc: "Calculadoras de frete e armazenagem" },
+  { key: "profissional", label: "Plano Profissional", desc: "CRM, Checklist, Financeiro" },
+  { key: "corporativo", label: "Plano Corporativo", desc: "Multi-empresas e recursos avançados" },
+  { key: "consultoria", label: "Consultoria", desc: "Acompanhamento especializado" },
+  { key: "produtos_avulsos", label: "Produtos Avulsos", desc: "E-books, manuais e brindes" },
+];
 
 const userCategoryOptions = [
   { key: "embarcador", label: "Embarcador", desc: "Busca prestadores de serviço" },
@@ -146,6 +155,7 @@ export default function Register() {
       email: "",
       password: "",
       confirmPassword: "",
+      selectedPlan: "",
       userCategories: [],
       cnpj: "",
       inscriçãoEstadual: "",
@@ -345,6 +355,69 @@ export default function Register() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                {/* Seleção de Plano */}
+                <FormField
+                  control={form.control}
+                  name="selectedPlan"
+                  render={({ field }) => {
+                    const selectedValue = field.value || "";
+                    const hasSelection = selectedValue !== "";
+                    
+                    const handleSelect = (planKey: string) => {
+                      if (selectedValue === planKey) {
+                        field.onChange("");
+                      } else {
+                        field.onChange(planKey);
+                      }
+                    };
+                    
+                    return (
+                      <FormItem>
+                        <FormLabel>Escolha seu plano ou serviço: *</FormLabel>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                          {planOptions.map((plan) => {
+                            const isChecked = selectedValue === plan.key;
+                            const isDisabled = hasSelection && !isChecked;
+                            return (
+                              <div
+                                key={plan.key}
+                                role="radio"
+                                aria-checked={isChecked}
+                                aria-disabled={isDisabled}
+                                tabIndex={isDisabled ? -1 : 0}
+                                className={`flex items-start gap-2 p-3 rounded-md border transition-colors select-none ${
+                                  isChecked
+                                    ? "border-primary bg-primary/5 cursor-pointer"
+                                    : isDisabled
+                                    ? "border-border opacity-50 cursor-not-allowed"
+                                    : "border-border hover:border-primary/50 cursor-pointer"
+                                }`}
+                                onClick={() => !isDisabled && handleSelect(plan.key)}
+                                onKeyDown={(e) => {
+                                  if (!isDisabled && (e.key === 'Enter' || e.key === ' ')) {
+                                    e.preventDefault();
+                                    handleSelect(plan.key);
+                                  }
+                                }}
+                                data-testid={`radio-plan-${plan.key}`}
+                              >
+                                <div className={`flex-shrink-0 h-4 w-4 rounded-full border ${isChecked ? 'bg-primary border-primary' : 'border-primary'} flex items-center justify-center mt-0.5`}>
+                                  {isChecked && <div className="h-2 w-2 rounded-full bg-primary-foreground" />}
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-medium">{plan.label}</span>
+                                  <span className="text-xs text-muted-foreground">{plan.desc}</span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+
                 {/* Categorias de Usuário */}
                 <FormField
                   control={form.control}
