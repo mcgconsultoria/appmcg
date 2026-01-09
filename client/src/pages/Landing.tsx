@@ -230,8 +230,9 @@ export default function Landing() {
               <span className="text-primary">Operações Logísticas</span>
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              Sistema completo para gestão de empresas do setor logístico. CRM, calculadoras, 
-              checklists e controle financeiro em uma única plataforma.
+              Sistema completo para gestão comercial de empresas do setor logístico.
+              <br />
+              CRM, calculadoras, checklists e controle financeiro em uma única plataforma.
             </p>
             <div className="flex flex-col items-center justify-center gap-4">
               <Link href="/diagnóstico">
