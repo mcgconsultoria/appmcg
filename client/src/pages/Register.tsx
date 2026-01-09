@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Loader2, Plus, Search, CheckCircle2, ArrowLeft, Check, Square } from "lucide-react";
+import { Eye, EyeOff, Loader2, Plus, Search, CheckCircle2, ArrowLeft } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { apiRequest, queryClient } from "@/lib/queryClient";
