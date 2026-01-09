@@ -350,12 +350,14 @@ export default function Register() {
                   name="userCategories"
                   render={({ field }) => {
                     const currentValues = Array.isArray(field.value) ? field.value : [];
+                    const hasSelection = currentValues.length > 0;
                     
                     const handleToggle = (categoryKey: string) => {
-                      const newValues = currentValues.includes(categoryKey)
-                        ? currentValues.filter((v) => v !== categoryKey)
-                        : [...currentValues, categoryKey];
-                      field.onChange(newValues);
+                      if (currentValues.includes(categoryKey)) {
+                        field.onChange([]);
+                      } else {
+                        field.onChange([categoryKey]);
+                      }
                     };
                     
                     return (
@@ -364,28 +366,32 @@ export default function Register() {
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
                           {userCategoryOptions.map((category) => {
                             const isChecked = currentValues.includes(category.key);
+                            const isDisabled = hasSelection && !isChecked;
                             return (
                               <div
                                 key={category.key}
-                                role="checkbox"
+                                role="radio"
                                 aria-checked={isChecked}
-                                tabIndex={0}
-                                className={`flex items-start gap-2 p-3 rounded-md border cursor-pointer transition-colors select-none ${
+                                aria-disabled={isDisabled}
+                                tabIndex={isDisabled ? -1 : 0}
+                                className={`flex items-start gap-2 p-3 rounded-md border transition-colors select-none ${
                                   isChecked
-                                    ? "border-primary bg-primary/5"
-                                    : "border-border hover:border-primary/50"
+                                    ? "border-primary bg-primary/5 cursor-pointer"
+                                    : isDisabled
+                                    ? "border-border opacity-50 cursor-not-allowed"
+                                    : "border-border hover:border-primary/50 cursor-pointer"
                                 }`}
-                                onClick={() => handleToggle(category.key)}
+                                onClick={() => !isDisabled && handleToggle(category.key)}
                                 onKeyDown={(e) => {
-                                  if (e.key === 'Enter' || e.key === ' ') {
+                                  if (!isDisabled && (e.key === 'Enter' || e.key === ' ')) {
                                     e.preventDefault();
                                     handleToggle(category.key);
                                   }
                                 }}
                                 data-testid={`checkbox-category-${category.key}`}
                               >
-                                <div className={`flex-shrink-0 h-4 w-4 rounded-sm border ${isChecked ? 'bg-primary border-primary' : 'border-primary'} flex items-center justify-center mt-0.5`}>
-                                  {isChecked && <Check className="h-3 w-3 text-primary-foreground" />}
+                                <div className={`flex-shrink-0 h-4 w-4 rounded-full border ${isChecked ? 'bg-primary border-primary' : 'border-primary'} flex items-center justify-center mt-0.5`}>
+                                  {isChecked && <div className="h-2 w-2 rounded-full bg-primary-foreground" />}
                                 </div>
                                 <div className="flex flex-col">
                                   <span className="text-sm font-medium">{category.label}</span>
