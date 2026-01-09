@@ -242,7 +242,7 @@ export default function Landing() {
             <div className="flex flex-col items-center justify-center gap-4">
               <Link href="/diagnóstico">
                 <Button size="lg" className="gap-2" data-testid="button-diagnostic">
-                  Faça Diagnóstico Grátis
+                  FAÇA DIAGNÓSTICO GRÁTIS
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
