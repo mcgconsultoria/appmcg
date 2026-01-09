@@ -146,10 +146,10 @@ export default function Landing() {
             <Link href="/diagnóstico" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Diagnóstico Grátis
             </Link>
-            <Link href="/calculadora-frete" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Calculadora Frete
             </Link>
-            <Link href="/calculadora-armazenagem" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Calculadora Armazenagem
             </Link>
             <Link href="/planos" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-planos-nav">
@@ -241,12 +241,12 @@ export default function Landing() {
                 </Button>
               </Link>
               <div className="flex flex-row items-center gap-4">
-                <Link href="/calculadora-frete">
+                <Link href="/login">
                   <Button size="lg" variant="outline" className="gap-2" data-testid="button-calc-frete">
                     Calculadora de Frete
                   </Button>
                 </Link>
-                <Link href="/calculadora-armazenagem">
+                <Link href="/login">
                   <Button size="lg" variant="outline" className="gap-2" data-testid="button-calc-armazenagem">
                     Calculadora de Armazenagem
                   </Button>
