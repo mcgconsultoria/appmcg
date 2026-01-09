@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Loader2, Plus, Search, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Loader2, Plus, Search, CheckCircle2, ArrowLeft, Check, Square } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -367,25 +367,25 @@ export default function Register() {
                             return (
                               <div
                                 key={category.key}
-                                className={`flex items-start gap-2 p-3 rounded-md border cursor-pointer transition-colors ${
+                                role="checkbox"
+                                aria-checked={isChecked}
+                                tabIndex={0}
+                                className={`flex items-start gap-2 p-3 rounded-md border cursor-pointer transition-colors select-none ${
                                   isChecked
                                     ? "border-primary bg-primary/5"
                                     : "border-border hover:border-primary/50"
                                 }`}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  handleToggle(category.key);
+                                onClick={() => handleToggle(category.key)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    handleToggle(category.key);
+                                  }
                                 }}
                                 data-testid={`checkbox-category-${category.key}`}
                               >
-                                <div className="pt-0.5">
-                                  <Checkbox
-                                    checked={isChecked}
-                                    tabIndex={-1}
-                                    className="pointer-events-none"
-                                    onCheckedChange={() => {}}
-                                  />
+                                <div className={`flex-shrink-0 h-4 w-4 rounded-sm border ${isChecked ? 'bg-primary border-primary' : 'border-primary'} flex items-center justify-center mt-0.5`}>
+                                  {isChecked && <Check className="h-3 w-3 text-primary-foreground" />}
                                 </div>
                                 <div className="flex flex-col">
                                   <span className="text-sm font-medium">{category.label}</span>
