@@ -163,7 +163,7 @@ const consultingPhases = [
     badge: "4ª Fase",
     duration: "Contínuo",
     description: "On Line + Comissão sobre negócios fechados",
-    requiresDiagnóstico: false,
+    requiresDiagnóstico: true,
     isExpansao: true,
   },
   {
