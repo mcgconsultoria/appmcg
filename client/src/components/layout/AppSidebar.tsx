@@ -64,6 +64,7 @@ import {
   UserCheck,
   MessageSquare,
   Database,
+  Lock,
 } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
@@ -350,15 +351,63 @@ const lojaMcgItems = [
   },
 ];
 
+const FREE_PLAN_ALLOWED_URLS = [
+  "/calculadora-frete",
+  "/calculadora-armazenagem",
+  "/suporte",
+  "/manual-app",
+  "/fluxograma",
+  "/configurações",
+  "/logout",
+];
+
+const PROFESSIONAL_PLAN_ALLOWED_URLS = [
+  ...FREE_PLAN_ALLOWED_URLS,
+  "/marketing",
+  "/indicadores-pre-vendas",
+  "/dashboard",
+  "/clientes",
+  "/pipeline",
+  "/calendário",
+  "/rotas",
+  "/atas",
+  "/checklist",
+  "/rfi",
+  "/tarefas",
+  "/projetos",
+  "/indicadores-vendas",
+  "/relatórios",
+  "/operações",
+  "/pesquisas",
+  "/indicadores-pos-vendas",
+  "/admin/meu-plano",
+  "/vendedores",
+  "/logs-auditoria",
+  "/biblioteca",
+  "/ebook",
+  "/brindes",
+];
+
+function isUrlAllowedForPlan(url: string, plan: string | undefined | null): boolean {
+  if (!plan || plan === "free" || plan === "gratuito") {
+    return FREE_PLAN_ALLOWED_URLS.some(allowed => url === allowed || url.startsWith(allowed + "/"));
+  }
+  if (plan === "profissional" || plan === "professional") {
+    return PROFESSIONAL_PLAN_ALLOWED_URLS.some(allowed => url === allowed || url.startsWith(allowed + "/"));
+  }
+  return true;
+}
+
 interface CollapsibleSectionProps {
   title: string;
   icon: React.ElementType;
   items: Array<{ title: string; url: string; icon: React.ElementType }>;
   location: string;
   defaultOpen?: boolean;
+  userPlan?: string | null;
 }
 
-function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = false }: CollapsibleSectionProps) {
+function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = false, userPlan }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   
   const isItemActive = (itemUrl: string) => {
@@ -388,6 +437,30 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
             <SidebarMenu>
               {items.map((item) => {
                 const isActive = isItemActive(item.url);
+                const isLocked = !isUrlAllowedForPlan(item.url, userPlan);
+                
+                if (isLocked) {
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className="flex items-center gap-2 px-3 py-2 text-muted-foreground/60 cursor-not-allowed"
+                            data-testid={`nav-${item.url.replace("/", "")}-locked`}
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span className="flex-1">{item.title}</span>
+                            <Lock className="h-3 w-3" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">
+                          <p>Disponível em planos superiores</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </SidebarMenuItem>
+                  );
+                }
+                
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={isActive}>
@@ -630,6 +703,7 @@ export function AppSidebar() {
           icon={Store}
           items={lojaMcgItems}
           location={location}
+          userPlan={user?.selectedPlan}
         />
 
         <CollapsibleSection
@@ -637,6 +711,7 @@ export function AppSidebar() {
           icon={Megaphone}
           items={preVendasItems}
           location={location}
+          userPlan={user?.selectedPlan}
         />
 
         <CollapsibleSection
@@ -644,6 +719,7 @@ export function AppSidebar() {
           icon={ShoppingCart}
           items={vendasItems}
           location={location}
+          userPlan={user?.selectedPlan}
         />
 
         <CollapsibleSection
@@ -651,6 +727,7 @@ export function AppSidebar() {
           icon={Handshake}
           items={posVendasItems}
           location={location}
+          userPlan={user?.selectedPlan}
         />
 
         <CollapsibleSection
@@ -658,6 +735,7 @@ export function AppSidebar() {
           icon={UserCog}
           items={adminClienteItems}
           location={location}
+          userPlan={user?.selectedPlan}
         />
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
