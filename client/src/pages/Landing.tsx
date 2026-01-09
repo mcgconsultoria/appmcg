@@ -100,6 +100,18 @@ const services = [
     icon: Zap,
     highlighted: false,
   },
+  {
+    title: "Outsourcing Comercial",
+    description: "Terceirização completa da área comercial da sua empresa de logística, com equipe especializada dedicada às suas vendas.",
+    features: [
+      "Equipe comercial dedicada",
+      "Prospecção ativa de clientes",
+      "Gestão de carteira de clientes",
+      "Relatórios de performance",
+    ],
+    icon: UserCheck,
+    highlighted: false,
+  },
 ];
 
 export default function Landing() {
