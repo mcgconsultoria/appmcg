@@ -314,6 +314,11 @@ const adminMcgSistemaItems = [
     icon: CreditCard,
   },
   {
+    title: "Cargos e Permissões",
+    url: "/admin/permissoes",
+    icon: Shield,
+  },
+  {
     title: "WhatsApp",
     url: "/admin/whatsapp",
     icon: MessageSquare,

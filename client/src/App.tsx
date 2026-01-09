@@ -66,6 +66,7 @@ import GestaoFinanceira from "@/pages/pessoal/GestaoFinanceira";
 import PessoalIRPF from "@/pages/pessoal/IRPF";
 import AdminIRPJ from "@/pages/admin/IRPJ";
 import AdminPlanos from "@/pages/admin/AdminPlanos";
+import AdminPermissoes from "@/pages/admin/AdminPermissoes";
 import MeuPlano from "@/pages/admin/MeuPlano";
 import ContasBancariasPF from "@/pages/pessoal/ContasBancariasPF";
 import CentrosCustoPF from "@/pages/pessoal/CentrosCustoPF";
@@ -179,6 +180,9 @@ function Router() {
       </Route>
       <Route path="/admin/planos">
         {() => isAuthenticated && isMcgAdmin ? <AdminPlanos /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/permissoes">
+        {() => isAuthenticated && isAdmin ? <AdminPermissoes /> : <AdminLogin />}
       </Route>
       <Route path="/admin/meu-plano">
         {() => isAuthenticated ? <MeuPlano /> : <Login />}
