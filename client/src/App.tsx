@@ -182,7 +182,7 @@ function Router() {
         {() => isAuthenticated && isMcgAdmin ? <AdminPlanos /> : <AdminLogin />}
       </Route>
       <Route path="/admin/permissoes">
-        {() => isAuthenticated && isAdmin ? <AdminPermissoes /> : <AdminLogin />}
+        {() => isAuthenticated && isMcgAdmin ? <AdminPermissoes /> : <AdminLogin />}
       </Route>
       <Route path="/admin/meu-plano">
         {() => isAuthenticated ? <MeuPlano /> : <Login />}
