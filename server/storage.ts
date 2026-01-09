@@ -203,6 +203,15 @@ import {
   subscriptionPlans,
   type SubscriptionPlan,
   type InsertSubscriptionPlan,
+  permissionDefinitions,
+  companyRoles,
+  userRoleAssignments,
+  type PermissionDefinition,
+  type InsertPermissionDefinition,
+  type CompanyRole,
+  type InsertCompanyRole,
+  type UserRoleAssignment,
+  type InsertUserRoleAssignment,
   type PersonalCategory,
   type InsertPersonalCategory,
   type PersonalAccount,
@@ -654,6 +663,28 @@ export interface IStorage {
   getSubscriptionPlan(id: number): Promise<SubscriptionPlan | undefined>;
   updateSubscriptionPlan(id: number, data: Partial<InsertSubscriptionPlan>): Promise<SubscriptionPlan | undefined>;
   seedSubscriptionPlans(): Promise<void>;
+
+  // Permission Definitions operations
+  getPermissionDefinitions(): Promise<PermissionDefinition[]>;
+  getPermissionDefinition(id: number): Promise<PermissionDefinition | undefined>;
+  createPermissionDefinition(data: InsertPermissionDefinition): Promise<PermissionDefinition>;
+  updatePermissionDefinition(id: number, data: Partial<InsertPermissionDefinition>): Promise<PermissionDefinition | undefined>;
+  deletePermissionDefinition(id: number): Promise<boolean>;
+  seedPermissionDefinitions(): Promise<void>;
+
+  // Company Roles operations
+  getCompanyRoles(companyId?: number): Promise<CompanyRole[]>;
+  getCompanyRole(id: number): Promise<CompanyRole | undefined>;
+  createCompanyRole(data: InsertCompanyRole): Promise<CompanyRole>;
+  updateCompanyRole(id: number, data: Partial<InsertCompanyRole>): Promise<CompanyRole | undefined>;
+  deleteCompanyRole(id: number): Promise<boolean>;
+  seedSystemRoles(): Promise<void>;
+
+  // User Role Assignments operations
+  getUserRoleAssignments(userId: string, companyId?: number): Promise<(UserRoleAssignment & { role: CompanyRole })[]>;
+  assignUserRole(data: InsertUserRoleAssignment): Promise<UserRoleAssignment>;
+  removeUserRole(id: number): Promise<boolean>;
+  getUserPermissions(userId: string, companyId?: number): Promise<string[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3148,6 +3179,322 @@ export class DatabaseStorage implements IStorage {
         await db.insert(subscriptionPlans).values(plan);
       }
     }
+  }
+
+  // ============================================
+  // PERMISSION DEFINITIONS
+  // ============================================
+
+  async getPermissionDefinitions(): Promise<PermissionDefinition[]> {
+    return await db.select().from(permissionDefinitions).orderBy(permissionDefinitions.module, permissionDefinitions.sortOrder);
+  }
+
+  async getPermissionDefinition(id: number): Promise<PermissionDefinition | undefined> {
+    const [perm] = await db.select().from(permissionDefinitions).where(eq(permissionDefinitions.id, id));
+    return perm;
+  }
+
+  async createPermissionDefinition(data: InsertPermissionDefinition): Promise<PermissionDefinition> {
+    const [perm] = await db.insert(permissionDefinitions).values(data).returning();
+    return perm;
+  }
+
+  async updatePermissionDefinition(id: number, data: Partial<InsertPermissionDefinition>): Promise<PermissionDefinition | undefined> {
+    const [updated] = await db.update(permissionDefinitions).set(data).where(eq(permissionDefinitions.id, id)).returning();
+    return updated;
+  }
+
+  async deletePermissionDefinition(id: number): Promise<boolean> {
+    const result = await db.delete(permissionDefinitions).where(eq(permissionDefinitions.id, id));
+    return true;
+  }
+
+  async seedPermissionDefinitions(): Promise<void> {
+    const defaultPermissions = [
+      // CRM Module
+      { code: 'crm.view', name: 'Visualizar CRM', description: 'Visualizar clientes e pipeline', module: 'crm', category: 'view', sortOrder: 1 },
+      { code: 'crm.create', name: 'Criar Clientes', description: 'Adicionar novos clientes', module: 'crm', category: 'create', sortOrder: 2 },
+      { code: 'crm.edit', name: 'Editar Clientes', description: 'Editar informações de clientes', module: 'crm', category: 'edit', sortOrder: 3 },
+      { code: 'crm.delete', name: 'Excluir Clientes', description: 'Remover clientes do sistema', module: 'crm', category: 'delete', sortOrder: 4 },
+      { code: 'crm.export', name: 'Exportar CRM', description: 'Exportar dados de clientes', module: 'crm', category: 'export', sortOrder: 5 },
+      
+      // Financial Module
+      { code: 'financial.view', name: 'Visualizar Financeiro', description: 'Visualizar contas e movimentações', module: 'financial', category: 'view', sortOrder: 1 },
+      { code: 'financial.create', name: 'Criar Lançamentos', description: 'Adicionar lançamentos financeiros', module: 'financial', category: 'create', sortOrder: 2 },
+      { code: 'financial.edit', name: 'Editar Lançamentos', description: 'Editar lançamentos existentes', module: 'financial', category: 'edit', sortOrder: 3 },
+      { code: 'financial.delete', name: 'Excluir Lançamentos', description: 'Remover lançamentos financeiros', module: 'financial', category: 'delete', sortOrder: 4 },
+      { code: 'financial.approve', name: 'Aprovar Pagamentos', description: 'Aprovar pagamentos e transferências', module: 'financial', category: 'approve', sortOrder: 5 },
+      { code: 'financial.export', name: 'Exportar Financeiro', description: 'Exportar relatórios financeiros', module: 'financial', category: 'export', sortOrder: 6 },
+      
+      // Checklist Module
+      { code: 'checklist.view', name: 'Visualizar Checklists', description: 'Visualizar diagnósticos', module: 'checklist', category: 'view', sortOrder: 1 },
+      { code: 'checklist.create', name: 'Criar Checklists', description: 'Iniciar novos diagnósticos', module: 'checklist', category: 'create', sortOrder: 2 },
+      { code: 'checklist.edit', name: 'Editar Checklists', description: 'Editar diagnósticos existentes', module: 'checklist', category: 'edit', sortOrder: 3 },
+      { code: 'checklist.delete', name: 'Excluir Checklists', description: 'Remover diagnósticos', module: 'checklist', category: 'delete', sortOrder: 4 },
+      
+      // RFI Module
+      { code: 'rfi.view', name: 'Visualizar RFI', description: 'Visualizar formulários RFI', module: 'rfi', category: 'view', sortOrder: 1 },
+      { code: 'rfi.create', name: 'Criar RFI', description: 'Criar novos formulários RFI', module: 'rfi', category: 'create', sortOrder: 2 },
+      { code: 'rfi.edit', name: 'Editar RFI', description: 'Editar formulários RFI', module: 'rfi', category: 'edit', sortOrder: 3 },
+      { code: 'rfi.delete', name: 'Excluir RFI', description: 'Remover formulários RFI', module: 'rfi', category: 'delete', sortOrder: 4 },
+      
+      // Calculator Module
+      { code: 'calculator.view', name: 'Usar Calculadoras', description: 'Acessar calculadoras de frete e armazenagem', module: 'calculator', category: 'view', sortOrder: 1 },
+      { code: 'calculator.export', name: 'Exportar Cálculos', description: 'Exportar resultados de cálculos', module: 'calculator', category: 'export', sortOrder: 2 },
+      
+      // Loja Module
+      { code: 'loja.view', name: 'Visualizar Loja', description: 'Acessar a loja MCG', module: 'loja', category: 'view', sortOrder: 1 },
+      { code: 'loja.purchase', name: 'Realizar Compras', description: 'Comprar produtos na loja', module: 'loja', category: 'create', sortOrder: 2 },
+      
+      // Calendar Module
+      { code: 'calendar.view', name: 'Visualizar Calendário', description: 'Ver eventos do calendário', module: 'calendar', category: 'view', sortOrder: 1 },
+      { code: 'calendar.create', name: 'Criar Eventos', description: 'Adicionar eventos ao calendário', module: 'calendar', category: 'create', sortOrder: 2 },
+      { code: 'calendar.edit', name: 'Editar Eventos', description: 'Editar eventos existentes', module: 'calendar', category: 'edit', sortOrder: 3 },
+      { code: 'calendar.delete', name: 'Excluir Eventos', description: 'Remover eventos do calendário', module: 'calendar', category: 'delete', sortOrder: 4 },
+      
+      // Tasks Module
+      { code: 'tasks.view', name: 'Visualizar Tarefas', description: 'Ver lista de tarefas', module: 'tasks', category: 'view', sortOrder: 1 },
+      { code: 'tasks.create', name: 'Criar Tarefas', description: 'Adicionar novas tarefas', module: 'tasks', category: 'create', sortOrder: 2 },
+      { code: 'tasks.edit', name: 'Editar Tarefas', description: 'Editar tarefas existentes', module: 'tasks', category: 'edit', sortOrder: 3 },
+      { code: 'tasks.delete', name: 'Excluir Tarefas', description: 'Remover tarefas', module: 'tasks', category: 'delete', sortOrder: 4 },
+      
+      // Projects Module
+      { code: 'projects.view', name: 'Visualizar Projetos', description: 'Ver projetos da empresa', module: 'projects', category: 'view', sortOrder: 1 },
+      { code: 'projects.create', name: 'Criar Projetos', description: 'Adicionar novos projetos', module: 'projects', category: 'create', sortOrder: 2 },
+      { code: 'projects.edit', name: 'Editar Projetos', description: 'Editar projetos existentes', module: 'projects', category: 'edit', sortOrder: 3 },
+      { code: 'projects.delete', name: 'Excluir Projetos', description: 'Remover projetos', module: 'projects', category: 'delete', sortOrder: 4 },
+      
+      // Atas Module
+      { code: 'atas.view', name: 'Visualizar Atas', description: 'Ver atas de reunião', module: 'atas', category: 'view', sortOrder: 1 },
+      { code: 'atas.create', name: 'Criar Atas', description: 'Registrar novas atas', module: 'atas', category: 'create', sortOrder: 2 },
+      { code: 'atas.edit', name: 'Editar Atas', description: 'Editar atas existentes', module: 'atas', category: 'edit', sortOrder: 3 },
+      { code: 'atas.delete', name: 'Excluir Atas', description: 'Remover atas de reunião', module: 'atas', category: 'delete', sortOrder: 4 },
+      
+      // Support Module
+      { code: 'support.view', name: 'Visualizar Suporte', description: 'Ver tickets de suporte', module: 'support', category: 'view', sortOrder: 1 },
+      { code: 'support.create', name: 'Criar Tickets', description: 'Abrir novos tickets', module: 'support', category: 'create', sortOrder: 2 },
+      
+      // Reports Module
+      { code: 'reports.view', name: 'Visualizar Relatórios', description: 'Acessar relatórios e dashboards', module: 'reports', category: 'view', sortOrder: 1 },
+      { code: 'reports.export', name: 'Exportar Relatórios', description: 'Exportar relatórios em PDF/Excel', module: 'reports', category: 'export', sortOrder: 2 },
+      
+      // Admin Module
+      { code: 'admin.users', name: 'Gerenciar Usuários', description: 'Adicionar e editar membros da equipe', module: 'admin', category: 'manage', sortOrder: 1 },
+      { code: 'admin.roles', name: 'Gerenciar Cargos', description: 'Criar e editar cargos e permissões', module: 'admin', category: 'manage', sortOrder: 2 },
+      { code: 'admin.settings', name: 'Configurações', description: 'Alterar configurações da empresa', module: 'admin', category: 'manage', sortOrder: 3 },
+      { code: 'admin.billing', name: 'Gerenciar Assinatura', description: 'Gerenciar plano e pagamentos', module: 'admin', category: 'manage', sortOrder: 4 },
+    ];
+
+    for (const perm of defaultPermissions) {
+      const existing = await db.select().from(permissionDefinitions).where(eq(permissionDefinitions.code, perm.code));
+      if (existing.length === 0) {
+        await db.insert(permissionDefinitions).values(perm);
+      }
+    }
+  }
+
+  // ============================================
+  // COMPANY ROLES
+  // ============================================
+
+  async getCompanyRoles(companyId?: number): Promise<CompanyRole[]> {
+    if (companyId) {
+      return await db.select().from(companyRoles)
+        .where(sql`${companyRoles.companyId} = ${companyId} OR ${companyRoles.companyId} IS NULL`)
+        .orderBy(companyRoles.sortOrder);
+    }
+    return await db.select().from(companyRoles).orderBy(companyRoles.sortOrder);
+  }
+
+  async getCompanyRole(id: number): Promise<CompanyRole | undefined> {
+    const [role] = await db.select().from(companyRoles).where(eq(companyRoles.id, id));
+    return role;
+  }
+
+  async createCompanyRole(data: InsertCompanyRole): Promise<CompanyRole> {
+    const [role] = await db.insert(companyRoles).values(data).returning();
+    return role;
+  }
+
+  async updateCompanyRole(id: number, data: Partial<InsertCompanyRole>): Promise<CompanyRole | undefined> {
+    const [updated] = await db.update(companyRoles)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(companyRoles.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCompanyRole(id: number): Promise<boolean> {
+    const role = await this.getCompanyRole(id);
+    if (role?.isSystem) {
+      throw new Error('Não é possível excluir cargos do sistema');
+    }
+    await db.delete(companyRoles).where(eq(companyRoles.id, id));
+    return true;
+  }
+
+  async seedSystemRoles(): Promise<void> {
+    const defaultRoles = [
+      {
+        code: 'owner',
+        name: 'Proprietário',
+        description: 'Acesso total a todas as funcionalidades',
+        color: '#8B5CF6',
+        permissions: [
+          'crm.view', 'crm.create', 'crm.edit', 'crm.delete', 'crm.export',
+          'financial.view', 'financial.create', 'financial.edit', 'financial.delete', 'financial.approve', 'financial.export',
+          'checklist.view', 'checklist.create', 'checklist.edit', 'checklist.delete',
+          'rfi.view', 'rfi.create', 'rfi.edit', 'rfi.delete',
+          'calculator.view', 'calculator.export',
+          'loja.view', 'loja.purchase',
+          'calendar.view', 'calendar.create', 'calendar.edit', 'calendar.delete',
+          'tasks.view', 'tasks.create', 'tasks.edit', 'tasks.delete',
+          'projects.view', 'projects.create', 'projects.edit', 'projects.delete',
+          'atas.view', 'atas.create', 'atas.edit', 'atas.delete',
+          'support.view', 'support.create',
+          'reports.view', 'reports.export',
+          'admin.users', 'admin.roles', 'admin.settings', 'admin.billing',
+        ],
+        isSystem: true,
+        sortOrder: 1,
+      },
+      {
+        code: 'manager',
+        name: 'Gerente',
+        description: 'Gerenciamento de equipe e operações',
+        color: '#3B82F6',
+        permissions: [
+          'crm.view', 'crm.create', 'crm.edit', 'crm.export',
+          'financial.view', 'financial.create', 'financial.edit', 'financial.export',
+          'checklist.view', 'checklist.create', 'checklist.edit',
+          'rfi.view', 'rfi.create', 'rfi.edit',
+          'calculator.view', 'calculator.export',
+          'loja.view', 'loja.purchase',
+          'calendar.view', 'calendar.create', 'calendar.edit', 'calendar.delete',
+          'tasks.view', 'tasks.create', 'tasks.edit', 'tasks.delete',
+          'projects.view', 'projects.create', 'projects.edit',
+          'atas.view', 'atas.create', 'atas.edit',
+          'support.view', 'support.create',
+          'reports.view', 'reports.export',
+          'admin.users',
+        ],
+        isSystem: true,
+        sortOrder: 2,
+      },
+      {
+        code: 'sales',
+        name: 'Vendedor',
+        description: 'Foco em vendas e relacionamento com clientes',
+        color: '#10B981',
+        permissions: [
+          'crm.view', 'crm.create', 'crm.edit',
+          'checklist.view', 'checklist.create', 'checklist.edit',
+          'rfi.view', 'rfi.create', 'rfi.edit',
+          'calculator.view',
+          'calendar.view', 'calendar.create', 'calendar.edit',
+          'tasks.view', 'tasks.create', 'tasks.edit',
+          'atas.view', 'atas.create', 'atas.edit',
+          'support.view', 'support.create',
+        ],
+        isSystem: true,
+        sortOrder: 3,
+      },
+      {
+        code: 'financial_analyst',
+        name: 'Analista Financeiro',
+        description: 'Gestão financeira e relatórios',
+        color: '#F59E0B',
+        permissions: [
+          'financial.view', 'financial.create', 'financial.edit', 'financial.export',
+          'reports.view', 'reports.export',
+          'support.view', 'support.create',
+        ],
+        isSystem: true,
+        sortOrder: 4,
+      },
+      {
+        code: 'viewer',
+        name: 'Visualizador',
+        description: 'Acesso somente leitura',
+        color: '#6B7280',
+        permissions: [
+          'crm.view',
+          'financial.view',
+          'checklist.view',
+          'rfi.view',
+          'calculator.view',
+          'calendar.view',
+          'tasks.view',
+          'projects.view',
+          'atas.view',
+          'reports.view',
+          'support.view',
+        ],
+        isSystem: true,
+        sortOrder: 5,
+      },
+    ];
+
+    for (const role of defaultRoles) {
+      const existing = await db.select().from(companyRoles).where(
+        and(eq(companyRoles.code, role.code), sql`${companyRoles.companyId} IS NULL`)
+      );
+      if (existing.length === 0) {
+        await db.insert(companyRoles).values({ ...role, companyId: null });
+      }
+    }
+  }
+
+  // ============================================
+  // USER ROLE ASSIGNMENTS
+  // ============================================
+
+  async getUserRoleAssignments(userId: string, companyId?: number): Promise<(UserRoleAssignment & { role: CompanyRole })[]> {
+    const query = companyId
+      ? and(eq(userRoleAssignments.userId, userId), eq(userRoleAssignments.companyId, companyId), eq(userRoleAssignments.isActive, true))
+      : and(eq(userRoleAssignments.userId, userId), eq(userRoleAssignments.isActive, true));
+
+    const assignments = await db.select().from(userRoleAssignments).where(query);
+    
+    const result: (UserRoleAssignment & { role: CompanyRole })[] = [];
+    for (const assignment of assignments) {
+      const role = await this.getCompanyRole(assignment.roleId);
+      if (role) {
+        result.push({ ...assignment, role });
+      }
+    }
+    return result;
+  }
+
+  async assignUserRole(data: InsertUserRoleAssignment): Promise<UserRoleAssignment> {
+    // Remove any existing assignment for the same user/company/role
+    await db.delete(userRoleAssignments).where(
+      and(
+        eq(userRoleAssignments.userId, data.userId),
+        eq(userRoleAssignments.companyId, data.companyId),
+        eq(userRoleAssignments.roleId, data.roleId)
+      )
+    );
+    const [assignment] = await db.insert(userRoleAssignments).values(data).returning();
+    return assignment;
+  }
+
+  async removeUserRole(id: number): Promise<boolean> {
+    await db.delete(userRoleAssignments).where(eq(userRoleAssignments.id, id));
+    return true;
+  }
+
+  async getUserPermissions(userId: string, companyId?: number): Promise<string[]> {
+    const assignments = await this.getUserRoleAssignments(userId, companyId);
+    const permissions = new Set<string>();
+    for (const assignment of assignments) {
+      if (assignment.role.permissions) {
+        for (const perm of assignment.role.permissions) {
+          permissions.add(perm);
+        }
+      }
+    }
+    return Array.from(permissions);
   }
 }
 

@@ -46,6 +46,8 @@ import {
   insertOperationBillingEntrySchema,
   insertOperationBillingGoalSchema,
   insertSubscriptionPlanSchema,
+  insertCompanyRoleSchema,
+  insertUserRoleAssignmentSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -6802,6 +6804,180 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error saving flowchart:", error);
       res.status(500).json({ message: "Falha ao salvar fluxograma" });
+    }
+  });
+
+  // ==================== ROLE-BASED PERMISSIONS SYSTEM ====================
+
+  // Seed permissions and roles on startup
+  (async () => {
+    try {
+      await storage.seedPermissionDefinitions();
+      await storage.seedSystemRoles();
+      console.log("Permissions and roles seeded successfully");
+    } catch (error) {
+      console.error("Error seeding permissions:", error);
+    }
+  })();
+
+  // Permission Definitions (admin_mcg only)
+  app.get("/api/permissions", isAuthenticated, async (req, res) => {
+    try {
+      const permissions = await storage.getPermissionDefinitions();
+      res.json(permissions);
+    } catch (error) {
+      console.error("Error fetching permissions:", error);
+      res.status(500).json({ message: "Falha ao buscar permissões" });
+    }
+  });
+
+  app.post("/api/permissions", isMcgAdmin, async (req, res) => {
+    try {
+      const permission = await storage.createPermissionDefinition(req.body);
+      res.json(permission);
+    } catch (error) {
+      console.error("Error creating permission:", error);
+      res.status(500).json({ message: "Falha ao criar permissão" });
+    }
+  });
+
+  app.patch("/api/permissions/:id", isMcgAdmin, async (req, res) => {
+    try {
+      const permission = await storage.updatePermissionDefinition(parseInt(req.params.id), req.body);
+      if (!permission) return res.status(404).json({ message: "Permissão não encontrada" });
+      res.json(permission);
+    } catch (error) {
+      console.error("Error updating permission:", error);
+      res.status(500).json({ message: "Falha ao atualizar permissão" });
+    }
+  });
+
+  app.delete("/api/permissions/:id", isMcgAdmin, async (req, res) => {
+    try {
+      await storage.deletePermissionDefinition(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting permission:", error);
+      res.status(500).json({ message: "Falha ao excluir permissão" });
+    }
+  });
+
+  // Company Roles
+  app.get("/api/roles", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user?.companyId || undefined;
+      const roles = await storage.getCompanyRoles(companyId);
+      res.json(roles);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+      res.status(500).json({ message: "Falha ao buscar cargos" });
+    }
+  });
+
+  app.get("/api/roles/:id", isAuthenticated, async (req, res) => {
+    try {
+      const role = await storage.getCompanyRole(parseInt(req.params.id));
+      if (!role) return res.status(404).json({ message: "Cargo não encontrado" });
+      res.json(role);
+    } catch (error) {
+      console.error("Error fetching role:", error);
+      res.status(500).json({ message: "Falha ao buscar cargo" });
+    }
+  });
+
+  app.post("/api/roles", isAdmin, async (req, res) => {
+    try {
+      const data = insertCompanyRoleSchema.parse({
+        ...req.body,
+        companyId: req.user?.companyId || null,
+        createdBy: req.user?.id,
+      });
+      const role = await storage.createCompanyRole(data);
+      res.json(role);
+    } catch (error) {
+      console.error("Error creating role:", error);
+      res.status(500).json({ message: "Falha ao criar cargo" });
+    }
+  });
+
+  app.patch("/api/roles/:id", isAdmin, async (req, res) => {
+    try {
+      const role = await storage.updateCompanyRole(parseInt(req.params.id), req.body);
+      if (!role) return res.status(404).json({ message: "Cargo não encontrado" });
+      res.json(role);
+    } catch (error) {
+      console.error("Error updating role:", error);
+      res.status(500).json({ message: "Falha ao atualizar cargo" });
+    }
+  });
+
+  app.delete("/api/roles/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteCompanyRole(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error deleting role:", error);
+      res.status(400).json({ message: error.message || "Falha ao excluir cargo" });
+    }
+  });
+
+  // User Role Assignments
+  app.get("/api/users/:userId/roles", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user?.companyId || undefined;
+      const assignments = await storage.getUserRoleAssignments(req.params.userId, companyId);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching user roles:", error);
+      res.status(500).json({ message: "Falha ao buscar cargos do usuário" });
+    }
+  });
+
+  app.get("/api/users/:userId/permissions", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user?.companyId || undefined;
+      const permissions = await storage.getUserPermissions(req.params.userId, companyId);
+      res.json(permissions);
+    } catch (error) {
+      console.error("Error fetching user permissions:", error);
+      res.status(500).json({ message: "Falha ao buscar permissões do usuário" });
+    }
+  });
+
+  app.get("/api/my-permissions", isAuthenticated, async (req, res) => {
+    try {
+      const companyId = req.user?.companyId || undefined;
+      const permissions = await storage.getUserPermissions(req.user!.id, companyId);
+      res.json(permissions);
+    } catch (error) {
+      console.error("Error fetching my permissions:", error);
+      res.status(500).json({ message: "Falha ao buscar minhas permissões" });
+    }
+  });
+
+  app.post("/api/users/:userId/roles", isAdmin, async (req, res) => {
+    try {
+      const data = insertUserRoleAssignmentSchema.parse({
+        userId: req.params.userId,
+        companyId: req.user?.companyId || req.body.companyId,
+        roleId: req.body.roleId,
+        assignedBy: req.user?.id,
+      });
+      const assignment = await storage.assignUserRole(data);
+      res.json(assignment);
+    } catch (error) {
+      console.error("Error assigning role:", error);
+      res.status(500).json({ message: "Falha ao atribuir cargo" });
+    }
+  });
+
+  app.delete("/api/user-roles/:id", isAdmin, async (req, res) => {
+    try {
+      await storage.removeUserRole(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing role:", error);
+      res.status(500).json({ message: "Falha ao remover cargo" });
     }
   });
 

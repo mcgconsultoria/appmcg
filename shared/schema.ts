@@ -2512,3 +2512,76 @@ export const subscriptionPlans = pgTable("subscription_plans", {
 export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).omit({ id: true, createdAt: true, updatedAt: true });
 export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
 export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
+
+// ============================================
+// ROLE-BASED PERMISSIONS SYSTEM
+// ============================================
+
+// Permission definitions - defines all available permissions in the system
+export const permissionDefinitions = pgTable("permission_definitions", {
+  id: serial("id").primaryKey(),
+  code: varchar("code", { length: 100 }).notNull().unique(), // e.g., 'crm.view', 'crm.edit', 'financial.approve'
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  module: varchar("module", { length: 50 }).notNull(), // crm, financial, checklist, rfi, calculator, loja, admin
+  category: varchar("category", { length: 50 }), // view, create, edit, delete, approve, export
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Custom roles - company-defined roles with permissions
+export const companyRoles = pgTable("company_roles", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id"), // null = system role (available to all)
+  code: varchar("code", { length: 50 }).notNull(), // e.g., 'vendedor', 'gerente', 'financeiro'
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  color: varchar("color", { length: 20 }), // For UI display
+  permissions: text("permissions").array().default([]), // Array of permission codes
+  isSystem: boolean("is_system").default(false), // System roles can't be deleted
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdBy: varchar("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User role assignments - assigns roles to team members
+export const userRoleAssignments = pgTable("user_role_assignments", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  companyId: integer("company_id").notNull(),
+  roleId: integer("role_id").notNull(),
+  assignedBy: varchar("assigned_by"),
+  assignedAt: timestamp("assigned_at").defaultNow(),
+  expiresAt: timestamp("expires_at"), // Optional role expiration
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Insert schemas
+export const insertPermissionDefinitionSchema = createInsertSchema(permissionDefinitions).omit({ id: true, createdAt: true });
+export const insertCompanyRoleSchema = createInsertSchema(companyRoles).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertUserRoleAssignmentSchema = createInsertSchema(userRoleAssignments).omit({ id: true, createdAt: true });
+
+// Types
+export type PermissionDefinition = typeof permissionDefinitions.$inferSelect;
+export type InsertPermissionDefinition = z.infer<typeof insertPermissionDefinitionSchema>;
+export type CompanyRole = typeof companyRoles.$inferSelect;
+export type InsertCompanyRole = z.infer<typeof insertCompanyRoleSchema>;
+export type UserRoleAssignment = typeof userRoleAssignments.$inferSelect;
+export type InsertUserRoleAssignment = z.infer<typeof insertUserRoleAssignmentSchema>;
+
+// Default permission modules and categories
+export const PERMISSION_MODULES = [
+  'crm', 'financial', 'checklist', 'rfi', 'calculator', 'loja', 'calendar',
+  'tasks', 'projects', 'atas', 'support', 'admin', 'reports'
+] as const;
+
+export const PERMISSION_CATEGORIES = [
+  'view', 'create', 'edit', 'delete', 'approve', 'export', 'manage'
+] as const;
+
+export type PermissionModule = typeof PERMISSION_MODULES[number];
+export type PermissionCategory = typeof PERMISSION_CATEGORIES[number];
