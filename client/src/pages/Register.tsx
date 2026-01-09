@@ -55,6 +55,7 @@ const planOptions = [
   { key: "profissional", label: "Plano Profissional", desc: "CRM, Checklist, Financeiro" },
   { key: "corporativo", label: "Plano Corporativo", desc: "Multi-empresas e recursos avançados" },
   { key: "consultoria", label: "Consultoria", desc: "Acompanhamento especializado" },
+  { key: "outsourcing", label: "Outsourcing Comercial", desc: "Terceirização da área comercial" },
   { key: "produtos_avulsos", label: "Produtos Avulsos", desc: "E-books, manuais e brindes" },
 ];
 
