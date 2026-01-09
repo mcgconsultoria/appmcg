@@ -460,7 +460,7 @@ export default function Register() {
                         <div className="flex items-center gap-2 mt-1">
                           <Checkbox
                             id="ie-isento"
-                            checked={form.watch("inscriçãoEstadualIsento")}
+                            checked={watchIEIsento}
                             onCheckedChange={(checked) => {
                               form.setValue("inscriçãoEstadualIsento", !!checked);
                               if (checked) form.setValue("inscriçãoEstadual", "");
