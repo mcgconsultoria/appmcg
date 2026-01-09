@@ -513,7 +513,7 @@ export default function Pricing() {
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => (window.location.href = "/calculadoras")}
+                    onClick={() => (window.location.href = "/login")}
                     data-testid={`button-plan-${index}`}
                   >
                     Começar Grátis
@@ -523,7 +523,13 @@ export default function Pricing() {
                     <Button
                       className="w-full"
                       variant={plan.popular ? "default" : "outline"}
-                      onClick={() => handleSubscribe(plan.priceId)}
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          window.location.href = `/login?redirect=${encodeURIComponent('/planos')}`;
+                        } else {
+                          handleSubscribe(plan.priceId);
+                        }
+                      }}
                       disabled={checkoutMutation.isPending}
                       data-testid={`button-plan-${index}`}
                     >
