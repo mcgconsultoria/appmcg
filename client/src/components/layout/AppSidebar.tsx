@@ -357,7 +357,7 @@ const FREE_PLAN_ALLOWED_URLS = [
   "/suporte",
   "/manual-app",
   "/fluxograma",
-  "/configurações",
+  "/configuracoes",
   "/logout",
 ];
 
@@ -368,7 +368,7 @@ const PROFESSIONAL_PLAN_ALLOWED_URLS = [
   "/dashboard",
   "/clientes",
   "/pipeline",
-  "/calendário",
+  "/calendario",
   "/rotas",
   "/atas",
   "/checklist",
@@ -376,8 +376,8 @@ const PROFESSIONAL_PLAN_ALLOWED_URLS = [
   "/tarefas",
   "/projetos",
   "/indicadores-vendas",
-  "/relatórios",
-  "/operações",
+  "/relatorios",
+  "/operacoes",
   "/pesquisas",
   "/indicadores-pos-vendas",
   "/admin/meu-plano",
@@ -388,12 +388,29 @@ const PROFESSIONAL_PLAN_ALLOWED_URLS = [
   "/brindes",
 ];
 
-function isUrlAllowedForPlan(url: string, plan: string | undefined | null): boolean {
+function normalizeUrl(url: string): string {
+  return url
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function isUrlAllowedForPlan(url: string, plan: string | undefined | null, planLoaded: boolean = true): boolean {
+  if (!planLoaded) {
+    return true;
+  }
+  
+  const normalizedUrl = normalizeUrl(url);
+  
   if (!plan || plan === "free" || plan === "gratuito") {
-    return FREE_PLAN_ALLOWED_URLS.some(allowed => url === allowed || url.startsWith(allowed + "/"));
+    return FREE_PLAN_ALLOWED_URLS.some(allowed => 
+      normalizedUrl === normalizeUrl(allowed) || normalizedUrl.startsWith(normalizeUrl(allowed) + "/")
+    );
   }
   if (plan === "profissional" || plan === "professional") {
-    return PROFESSIONAL_PLAN_ALLOWED_URLS.some(allowed => url === allowed || url.startsWith(allowed + "/"));
+    return PROFESSIONAL_PLAN_ALLOWED_URLS.some(allowed => 
+      normalizedUrl === normalizeUrl(allowed) || normalizedUrl.startsWith(normalizeUrl(allowed) + "/")
+    );
   }
   return true;
 }
@@ -405,9 +422,10 @@ interface CollapsibleSectionProps {
   location: string;
   defaultOpen?: boolean;
   userPlan?: string | null;
+  planLoaded?: boolean;
 }
 
-function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = false, userPlan }: CollapsibleSectionProps) {
+function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = false, userPlan, planLoaded = true }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   
   const isItemActive = (itemUrl: string) => {
@@ -437,7 +455,7 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
             <SidebarMenu>
               {items.map((item) => {
                 const isActive = isItemActive(item.url);
-                const isLocked = !isUrlAllowedForPlan(item.url, userPlan);
+                const isLocked = !isUrlAllowedForPlan(item.url, userPlan, planLoaded);
                 
                 if (isLocked) {
                   return (
@@ -480,7 +498,7 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
   );
 }
 
-function AdminPJSection({ location, userRole }: { location: string; userRole?: string }) {
+function AdminPJSection({ location, userRole, userPlan, planLoaded = true }: { location: string; userRole?: string; userPlan?: string | null; planLoaded?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   
   // Filter comercial items - only admin_mcg can see "Aguardando Aprovação"
@@ -510,24 +528,32 @@ function AdminPJSection({ location, userRole }: { location: string; userRole?: s
               icon={Briefcase}
               items={filteredComercialItems}
               location={location}
+              userPlan={userPlan}
+              planLoaded={planLoaded}
             />
             <CollapsibleSection
               title="Marketing"
               icon={Megaphone}
               items={adminMcgMarketingItems}
               location={location}
+              userPlan={userPlan}
+              planLoaded={planLoaded}
             />
             <CollapsibleSection
               title="Financeiro"
               icon={Landmark}
               items={adminMcgFinanceiroItems}
               location={location}
+              userPlan={userPlan}
+              planLoaded={planLoaded}
             />
             <CollapsibleSection
               title="Loja"
               icon={Store}
               items={adminMcgLojaItems}
               location={location}
+              userPlan={userPlan}
+              planLoaded={planLoaded}
             />
             {userRole === 'admin_mcg' && (
               <CollapsibleSection
@@ -535,6 +561,8 @@ function AdminPJSection({ location, userRole }: { location: string; userRole?: s
                 icon={Settings}
                 items={adminMcgSistemaItems}
                 location={location}
+                userPlan={userPlan}
+                planLoaded={planLoaded}
               />
             )}
           </div>
@@ -572,7 +600,7 @@ const adminPfItems = [
   },
 ];
 
-function AdminPFSection({ location }: { location: string }) {
+function AdminPFSection({ location, userPlan, planLoaded = true }: { location: string; userPlan?: string | null; planLoaded?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const isItemActive = (itemUrl: string) => {
@@ -602,6 +630,30 @@ function AdminPFSection({ location }: { location: string }) {
             <SidebarMenu>
               {adminPfItems.map((item) => {
                 const isActive = isItemActive(item.url);
+                const isLocked = !isUrlAllowedForPlan(item.url, userPlan, planLoaded);
+                
+                if (isLocked) {
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className="flex items-center gap-2 px-3 py-2 text-muted-foreground/60 cursor-not-allowed"
+                            data-testid={`nav-${item.url.replace("/", "")}-locked`}
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span className="flex-1">{item.title}</span>
+                            <Lock className="h-3 w-3" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">
+                          <p>Disponível em planos superiores</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </SidebarMenuItem>
+                  );
+                }
+                
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild isActive={isActive}>
@@ -623,7 +675,7 @@ function AdminPFSection({ location }: { location: string }) {
 
 export function AppSidebar() {
   const [location] = useLocation();
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
 
   const getInitials = (firstName?: string | null, lastName?: string | null) => {
     const first = firstName?.charAt(0) || "";
@@ -632,6 +684,9 @@ export function AppSidebar() {
   };
 
   const isAdmin = user?.role === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
+  
+  const planLoaded = !isLoading && user !== undefined;
+  const effectivePlan = planLoaded ? user?.selectedPlan : "corporativo";
 
   return (
     <Sidebar>
@@ -703,7 +758,8 @@ export function AppSidebar() {
           icon={Store}
           items={lojaMcgItems}
           location={location}
-          userPlan={user?.selectedPlan}
+          userPlan={effectivePlan}
+          planLoaded={planLoaded}
         />
 
         <CollapsibleSection
@@ -711,7 +767,8 @@ export function AppSidebar() {
           icon={Megaphone}
           items={preVendasItems}
           location={location}
-          userPlan={user?.selectedPlan}
+          userPlan={effectivePlan}
+          planLoaded={planLoaded}
         />
 
         <CollapsibleSection
@@ -719,7 +776,8 @@ export function AppSidebar() {
           icon={ShoppingCart}
           items={vendasItems}
           location={location}
-          userPlan={user?.selectedPlan}
+          userPlan={effectivePlan}
+          planLoaded={planLoaded}
         />
 
         <CollapsibleSection
@@ -727,7 +785,8 @@ export function AppSidebar() {
           icon={Handshake}
           items={posVendasItems}
           location={location}
-          userPlan={user?.selectedPlan}
+          userPlan={effectivePlan}
+          planLoaded={planLoaded}
         />
 
         <CollapsibleSection
@@ -735,15 +794,16 @@ export function AppSidebar() {
           icon={UserCog}
           items={adminClienteItems}
           location={location}
-          userPlan={user?.selectedPlan}
+          userPlan={effectivePlan}
+          planLoaded={planLoaded}
         />
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
-          <AdminPJSection location={location} userRole={user?.role} />
+          <AdminPJSection location={location} userRole={user?.role} userPlan={effectivePlan} planLoaded={planLoaded} />
         )}
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
-          <AdminPFSection location={location} />
+          <AdminPFSection location={location} userPlan={effectivePlan} planLoaded={planLoaded} />
         )}
       </SidebarContent>
 
