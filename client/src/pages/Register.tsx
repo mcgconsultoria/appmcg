@@ -53,8 +53,9 @@ const userCategoryOptions = [
   { key: "embarcador", label: "Embarcador", desc: "Busca prestadores de serviço" },
   { key: "servicos", label: "Transportadora", desc: "Busca clientes" },
   { key: "operador", label: "Operador Logístico", desc: "Busca clientes e prestadores de serviço" },
-  { key: "parceiro", label: "Parceiros", desc: "Serviços Autônomos" },
+  { key: "carga_descarga", label: "Carga/Descarga", desc: "Serviços de carga e descarga" },
   { key: "motorista", label: "Motoristas", desc: "Terceiros, Agregados, Autônomos" },
+  { key: "parceiro", label: "Parceiros", desc: "Serviços Autônomos" },
 ];
 
 const defaultBusinessTypes = [
