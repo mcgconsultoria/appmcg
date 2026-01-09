@@ -51,7 +51,7 @@ type RegisterData = z.infer<typeof registerSchema>;
 
 const userCategoryOptions = [
   { key: "embarcador", label: "Embarcador", desc: "Busca prestadores de serviço" },
-  { key: "servicos", label: "Serviços", desc: "Busca clientes" },
+  { key: "servicos", label: "Transportadora", desc: "Busca clientes" },
   { key: "operador", label: "Operador Logístico", desc: "Busca clientes e prestadores de serviço" },
   { key: "parceiro", label: "Parceiros", desc: "Serviços Autônomos" },
   { key: "motorista", label: "Motoristas", desc: "Terceiros, Agregados, Autônomos" },
