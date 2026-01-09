@@ -225,7 +225,7 @@ export default function Landing() {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 max-w-4xl mx-auto">
               Gestão Comercial Inteligente
               <br />
-              <span className="text-muted-foreground">para</span>
+              para
               <br />
               <span className="text-primary">Operações Logísticas</span>
             </h1>
