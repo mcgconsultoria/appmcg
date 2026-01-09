@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Check, Loader2, Briefcase, ArrowRight, Lock, Send, ArrowLeft, Save } from "lucide-react";
+import { Check, Loader2, Briefcase, ArrowRight, Lock, Send, ArrowLeft, Save, ShoppingBag } from "lucide-react";
 import type { Client, SubscriptionPlan } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -182,9 +182,17 @@ export default function Pricing() {
   const { toast } = useToast();
   
   const [consultingDialogOpen, setConsultingDialogOpen] = useState(false);
+  const [productsDialogOpen, setProductsDialogOpen] = useState(false);
   const [selectedPhases, setSelectedPhases] = useState<string[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [consultingForm, setConsultingForm] = useState({
+    contactName: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+  const [productsForm, setProductsForm] = useState({
     contactName: "",
     email: "",
     phone: "",
@@ -284,6 +292,15 @@ export default function Pricing() {
     return { phases, hasExpansao };
   };
 
+  const toggleProduct = (productName: string) => {
+    setSelectedProducts(prev => {
+      if (prev.includes(productName)) {
+        return prev.filter(name => name !== productName);
+      }
+      return [...prev, productName];
+    });
+  };
+
   const consultingProposalMutation = useMutation({
     mutationFn: async () => {
       const { hasExpansao } = getSelectedPhasesInfo();
@@ -346,6 +363,60 @@ export default function Pricing() {
     }
 
     consultingProposalMutation.mutate();
+  };
+
+  const productsProposalMutation = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        proposalType: "products_quote",
+        contactName: productsForm.contactName,
+        email: productsForm.email,
+        phone: productsForm.phone,
+        message: productsForm.message,
+        products: selectedProducts,
+      };
+      return apiRequest("POST", "/api/consulting-quote-request", payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/consulting-quote-requests"] });
+      toast({
+        title: "Solicitação enviada com sucesso!",
+        description: "Nossa equipe entrará em contato em breve com um orçamento personalizado.",
+      });
+      setProductsDialogOpen(false);
+      setSelectedProducts([]);
+      setProductsForm({
+        contactName: "",
+        email: "",
+        phone: "",
+        message: "",
+      });
+    },
+    onError: () => {
+      toast({ title: "Erro ao enviar solicitação", variant: "destructive" });
+    },
+  });
+
+  const handleSubmitProductsProposal = () => {
+    if (selectedProducts.length === 0) {
+      toast({
+        title: "Selecione ao menos um produto",
+        description: "Escolha os produtos desejados.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!productsForm.contactName || !productsForm.email) {
+      toast({
+        title: "Preencha os campos obrigatórios",
+        description: "Nome e email são obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    productsProposalMutation.mutate();
   };
 
   const plans = activePlans;
@@ -482,60 +553,65 @@ export default function Pricing() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-6">
-            {addons.slice(0, 2).map((product, index) => (
-              <Card key={index} className="flex flex-col" data-testid={`card-product-${index}`}>
-                <CardHeader>
-                  <CardTitle className="text-xl" data-testid={`text-product-name-${index}`}>
-                    {product.name}
-                  </CardTitle>
-                  <CardDescription>{product.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1" />
-                <CardFooter>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      if (!isAuthenticated) {
-                        window.location.href = `/login?redirect=${encodeURIComponent('/planos')}`;
-                      }
-                    }}
-                    data-testid={`button-product-${index}`}
-                  >
-                    Consultar Preço
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {addons.slice(2).map((product, index) => (
-              <Card key={index + 2} className="flex flex-col" data-testid={`card-product-${index + 2}`}>
-                <CardHeader>
-                  <CardTitle className="text-xl" data-testid={`text-product-name-${index + 2}`}>
-                    {product.name}
-                  </CardTitle>
-                  <CardDescription>{product.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1" />
-                <CardFooter>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      if (!isAuthenticated) {
-                        window.location.href = `/login?redirect=${encodeURIComponent('/planos')}`;
-                      }
-                    }}
-                    data-testid={`button-product-${index + 2}`}
-                  >
-                    Consultar Preço
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+          <Card className="max-w-4xl mx-auto" data-testid="card-products-service">
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <ShoppingBag className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Ferramentas Individuais</CardTitle>
+              <CardDescription>
+                Selecione os produtos que deseja e solicite uma proposta
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-5 gap-4">
+                {addons.map((product, index) => {
+                  const isSelected = selectedProducts.includes(product.name);
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => toggleProduct(product.name)}
+                      className={`
+                        relative p-4 rounded-md border-2 cursor-pointer transition-all text-center
+                        ${isSelected 
+                          ? "border-primary bg-primary/5" 
+                          : "border-border hover:border-primary/50"
+                        }
+                      `}
+                      data-testid={`card-product-${index}`}
+                    >
+                      <div className="absolute top-2 left-2">
+                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${isSelected ? 'bg-primary border-primary' : 'border-muted-foreground'}`}>
+                          {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
+                        </div>
+                      </div>
+                      <h4 className="font-semibold mb-2 mt-4 text-sm">{product.name}</h4>
+                      <p className="text-xs text-muted-foreground">
+                        {product.description}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col gap-4">
+              <Button 
+                className="w-full md:w-auto" 
+                size="lg" 
+                data-testid="button-products-contact"
+                onClick={() => setProductsDialogOpen(true)}
+                disabled={selectedProducts.length === 0}
+              >
+                Solicitar Proposta
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+              <p className="text-sm text-muted-foreground text-center">
+                {selectedProducts.length > 0 
+                  ? `${selectedProducts.length} produto(s) selecionado(s)` 
+                  : "Selecione os produtos desejados e receba uma proposta personalizada"}
+              </p>
+            </CardFooter>
+          </Card>
         </div>
 
         <div className="mt-20">
@@ -778,6 +854,96 @@ export default function Pricing() {
               >
                 <Save className="h-4 w-4 mr-2" />
                 {consultingProposalMutation.isPending ? "Criando..." : "Criar Proposta"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={productsDialogOpen} onOpenChange={setProductsDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Solicitar Proposta de Produtos</DialogTitle>
+              <DialogDescription>
+                Preencha seus dados para receber uma proposta personalizada
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-6 py-4">
+              <div>
+                <Label className="text-base font-semibold mb-4 block">Produtos Selecionados</Label>
+                <div className="flex flex-wrap gap-2">
+                  {selectedProducts.map((product) => (
+                    <Badge key={product} variant="secondary" className="px-3 py-1">
+                      {product}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t pt-6">
+                <Label className="text-base font-semibold mb-4 block">Dados para Contato</Label>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="products-contactName">Nome Completo *</Label>
+                    <Input
+                      id="products-contactName"
+                      value={productsForm.contactName}
+                      onChange={(e) => setProductsForm(prev => ({ ...prev, contactName: e.target.value }))}
+                      placeholder="João Silva"
+                      data-testid="input-products-contact-name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="products-email">Email *</Label>
+                    <Input
+                      id="products-email"
+                      type="email"
+                      value={productsForm.email}
+                      onChange={(e) => setProductsForm(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="contato@empresa.com.br"
+                      data-testid="input-products-email"
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="products-phone">Telefone / WhatsApp</Label>
+                    <Input
+                      id="products-phone"
+                      value={productsForm.phone}
+                      onChange={(e) => setProductsForm(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="(11) 99999-9999"
+                      data-testid="input-products-phone"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2 mt-4">
+                  <Label htmlFor="products-message">Mensagem Adicional</Label>
+                  <Textarea
+                    id="products-message"
+                    value={productsForm.message}
+                    onChange={(e) => setProductsForm(prev => ({ ...prev, message: e.target.value }))}
+                    placeholder="Conte-nos sobre sua empresa e suas necessidades..."
+                    rows={3}
+                    data-testid="input-products-message"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setProductsDialogOpen(false)}
+                data-testid="button-cancel-products-proposal"
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleSubmitProductsProposal}
+                disabled={productsProposalMutation.isPending}
+                data-testid="button-submit-products-proposal"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {productsProposalMutation.isPending ? "Enviando..." : "Enviar Proposta"}
               </Button>
             </DialogFooter>
           </DialogContent>
