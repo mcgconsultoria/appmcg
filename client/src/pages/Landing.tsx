@@ -229,11 +229,10 @@ export default function Landing() {
               <br />
               <span className="text-primary">Operações Logísticas</span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              Sistema completo para gestão comercial de empresas do setor logístico.
-              <br />
-              <span className="whitespace-nowrap">CRM, calculadoras, checklists e controle financeiro em uma única plataforma.</span>
-            </p>
+            <div className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 text-center">
+              <p>Sistema completo para gestão comercial de empresas do setor logístico.</p>
+              <p className="whitespace-nowrap">CRM, calculadoras, checklists e controle financeiro em uma única plataforma.</p>
+            </div>
             <div className="flex flex-col items-center justify-center gap-4">
               <Link href="/diagnóstico">
                 <Button size="lg" className="gap-2" data-testid="button-diagnostic">
