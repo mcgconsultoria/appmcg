@@ -290,7 +290,7 @@ export default function Landing() {
                 excelência comercial
               </p>
             </div>
-            <div className="grid lg:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {services.map((service) => (
                 <Card 
                   key={service.title} 
