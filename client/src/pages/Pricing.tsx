@@ -49,7 +49,7 @@ const defaultPlans = [
   {
     name: "Profissional",
     description: "Todas as ferramentas para gestão comercial completa",
-    price: 499,
+    price: 399,
     interval: "mes",
     baseUsers: 1,
     additionalUserPrice: 69,
@@ -71,7 +71,7 @@ const defaultPlans = [
   {
     name: "Corporativo",
     description: "Para operações em grande escala com múltiplas filiais",
-    price: 1499,
+    price: 1299,
     interval: "mes",
     baseUsers: 1,
     additionalUserPrice: 69,
