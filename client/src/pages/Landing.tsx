@@ -232,7 +232,7 @@ export default function Landing() {
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
               Sistema completo para gestão comercial de empresas do setor logístico.
               <br />
-              CRM, calculadoras, checklists e controle financeiro em uma única plataforma.
+              <span className="whitespace-nowrap">CRM, calculadoras, checklists e controle financeiro em uma única plataforma.</span>
             </p>
             <div className="flex flex-col items-center justify-center gap-4">
               <Link href="/diagnóstico">
