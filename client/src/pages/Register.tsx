@@ -372,7 +372,11 @@ export default function Register() {
                                     ? "border-primary bg-primary/5"
                                     : "border-border hover:border-primary/50"
                                 }`}
-                                onClick={() => handleToggle(category.key)}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleToggle(category.key);
+                                }}
                                 data-testid={`checkbox-category-${category.key}`}
                               >
                                 <div className="pt-0.5">
@@ -380,6 +384,7 @@ export default function Register() {
                                     checked={isChecked}
                                     tabIndex={-1}
                                     className="pointer-events-none"
+                                    onCheckedChange={() => {}}
                                   />
                                 </div>
                                 <div className="flex flex-col">
