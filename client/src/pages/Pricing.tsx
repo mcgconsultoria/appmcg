@@ -166,6 +166,15 @@ const consultingPhases = [
     requiresDiagnóstico: false,
     isExpansao: true,
   },
+  {
+    id: "outsourcing",
+    name: "Outsourcing Comercial",
+    badge: "5ª Fase",
+    duration: "Contínuo",
+    description: "On Line, Terceirização da área comercial",
+    requiresDiagnóstico: false,
+    isExpansao: false,
+  },
 ];
 
 export default function Pricing() {
@@ -546,11 +555,11 @@ export default function Pricing() {
               </div>
               <CardTitle className="text-2xl">Consultoria Comercial Logística</CardTitle>
               <CardDescription>
-                Metodologia exclusiva em 4 fases para transformar sua área comercial
+                Metodologia exclusiva em 5 fases para transformar sua área comercial
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid md:grid-cols-4 gap-4">
+              <div className="grid md:grid-cols-5 gap-4">
                 <div className="text-center p-4 rounded-md bg-muted/50">
                   <Badge variant="outline" className="mb-3">1ª Fase</Badge>
                   <h4 className="font-semibold mb-2">Diagnóstico</h4>
@@ -590,6 +599,15 @@ export default function Pricing() {
                   </ul>
                   <p className="text-xs text-primary mt-3 font-medium">Contínuo</p>
                 </div>
+                
+                <div className="text-center p-4 rounded-md bg-muted/50">
+                  <Badge variant="outline" className="mb-3">5ª Fase</Badge>
+                  <h4 className="font-semibold mb-2">Outsourcing Comercial</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>On Line</li>
+                  </ul>
+                  <p className="text-xs text-primary mt-3 font-medium">Contínuo</p>
+                </div>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
@@ -621,7 +639,7 @@ export default function Pricing() {
             <div className="space-y-6 py-4">
               <div>
                 <Label className="text-base font-semibold mb-4 block">Selecione as Fases</Label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   {consultingPhases.map((phase) => {
                     const isSelected = selectedPhases.includes(phase.id);
                     const isLocked = phase.requiresDiagnóstico && !selectedPhases.includes("diagnóstico");
@@ -692,6 +710,7 @@ export default function Pricing() {
                   <p><strong className="text-foreground">Implementação:</strong> [Aguardando descrição]</p>
                   <p><strong className="text-foreground">Execução:</strong> [Aguardando descrição]</p>
                   <p><strong className="text-foreground">Expansão:</strong> [Aguardando descrição] + comissão sobre negócios fechados</p>
+                  <p><strong className="text-foreground">Outsourcing Comercial:</strong> Terceirização completa da área comercial</p>
                 </div>
               </div>
 
