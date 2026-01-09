@@ -461,7 +461,7 @@ export default function Pricing() {
         </div>
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4" data-testid="text-pricing-title">
-            Escolha seu Plano
+            Escolha o Plano do APP MCG
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Comece gratuitamente com nossas calculadoras e faça upgrade quando precisar de mais recursos
