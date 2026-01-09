@@ -457,10 +457,10 @@ export default function Landing() {
             <div>
               <h4 className="font-semibold mb-4">Serviços</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>Diagnóstico Comercial</li>
-                <li>Estruturação de Vendas</li>
-                <li>Treinamentos</li>
                 <li>Consultoria</li>
+                <li>Diagnóstico</li>
+                <li>Estruturação</li>
+                <li>Outsourcing</li>
               </ul>
             </div>
             <div>
