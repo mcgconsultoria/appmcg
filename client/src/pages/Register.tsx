@@ -117,7 +117,9 @@ const departamentos = [
 
 const perfisConta = [
   { value: "administrador", label: "Administrador" },
-  { value: "colaborador", label: "Colaborador" },
+  { value: "supervisor", label: "Supervisor" },
+  { value: "analista", label: "Analista" },
+  { value: "auxiliar", label: "Auxiliar" },
 ];
 
 export default function Register() {
