@@ -364,6 +364,9 @@ const FREE_PLAN_ALLOWED_URLS = [
   "/fluxograma",
   "/configuracoes",
   "/logout",
+  "/admin/meu-plano",
+  "/vendedores",
+  "/logs-auditoria",
 ];
 
 const PROFESSIONAL_PLAN_ALLOWED_URLS = [
