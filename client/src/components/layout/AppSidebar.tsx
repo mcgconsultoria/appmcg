@@ -403,7 +403,12 @@ function normalizeUrl(url: string): string {
     .toLowerCase();
 }
 
-function isUrlAllowedForPlan(url: string, plan: string | undefined | null, planLoaded: boolean = true): boolean {
+function isUrlAllowedForPlan(url: string, plan: string | undefined | null, planLoaded: boolean = true, userRole?: string | null): boolean {
+  // Admin MCG (CEO) always has full access - no restrictions
+  if (userRole === "admin_mcg") {
+    return true;
+  }
+  
   if (!planLoaded) {
     return true;
   }
@@ -431,9 +436,10 @@ interface CollapsibleSectionProps {
   defaultOpen?: boolean;
   userPlan?: string | null;
   planLoaded?: boolean;
+  userRole?: string | null;
 }
 
-function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = false, userPlan, planLoaded = true }: CollapsibleSectionProps) {
+function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = false, userPlan, planLoaded = true, userRole }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   
   const isItemActive = (itemUrl: string) => {
@@ -463,7 +469,7 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
             <SidebarMenu>
               {items.map((item) => {
                 const isActive = isItemActive(item.url);
-                const isLocked = !isUrlAllowedForPlan(item.url, userPlan, planLoaded);
+                const isLocked = !isUrlAllowedForPlan(item.url, userPlan, planLoaded, userRole);
                 
                 if (isLocked) {
                   return (
@@ -538,6 +544,7 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true }: { l
               location={location}
               userPlan={userPlan}
               planLoaded={planLoaded}
+              userRole={userRole}
             />
             <CollapsibleSection
               title="Marketing"
@@ -546,6 +553,7 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true }: { l
               location={location}
               userPlan={userPlan}
               planLoaded={planLoaded}
+              userRole={userRole}
             />
             <CollapsibleSection
               title="Financeiro"
@@ -554,6 +562,7 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true }: { l
               location={location}
               userPlan={userPlan}
               planLoaded={planLoaded}
+              userRole={userRole}
             />
             <CollapsibleSection
               title="Loja"
@@ -562,6 +571,7 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true }: { l
               location={location}
               userPlan={userPlan}
               planLoaded={planLoaded}
+              userRole={userRole}
             />
             {userRole === 'admin_mcg' && (
               <CollapsibleSection
@@ -571,6 +581,7 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true }: { l
                 location={location}
                 userPlan={userPlan}
                 planLoaded={planLoaded}
+                userRole={userRole}
               />
             )}
           </div>
@@ -608,7 +619,7 @@ const adminPfItems = [
   },
 ];
 
-function AdminPFSection({ location, userPlan, planLoaded = true }: { location: string; userPlan?: string | null; planLoaded?: boolean }) {
+function AdminPFSection({ location, userPlan, planLoaded = true, userRole }: { location: string; userPlan?: string | null; planLoaded?: boolean; userRole?: string }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const isItemActive = (itemUrl: string) => {
@@ -638,7 +649,7 @@ function AdminPFSection({ location, userPlan, planLoaded = true }: { location: s
             <SidebarMenu>
               {adminPfItems.map((item) => {
                 const isActive = isItemActive(item.url);
-                const isLocked = !isUrlAllowedForPlan(item.url, userPlan, planLoaded);
+                const isLocked = !isUrlAllowedForPlan(item.url, userPlan, planLoaded, userRole);
                 
                 if (isLocked) {
                   return (
@@ -768,6 +779,7 @@ export function AppSidebar() {
           location={location}
           userPlan={effectivePlan}
           planLoaded={planLoaded}
+          userRole={user?.role}
         />
 
         <CollapsibleSection
@@ -777,6 +789,7 @@ export function AppSidebar() {
           location={location}
           userPlan={effectivePlan}
           planLoaded={planLoaded}
+          userRole={user?.role}
         />
 
         <CollapsibleSection
@@ -786,6 +799,7 @@ export function AppSidebar() {
           location={location}
           userPlan={effectivePlan}
           planLoaded={planLoaded}
+          userRole={user?.role}
         />
 
         <CollapsibleSection
@@ -795,6 +809,7 @@ export function AppSidebar() {
           location={location}
           userPlan={effectivePlan}
           planLoaded={planLoaded}
+          userRole={user?.role}
         />
 
         <CollapsibleSection
@@ -804,6 +819,7 @@ export function AppSidebar() {
           location={location}
           userPlan={effectivePlan}
           planLoaded={planLoaded}
+          userRole={user?.role}
         />
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
@@ -811,7 +827,7 @@ export function AppSidebar() {
         )}
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
-          <AdminPFSection location={location} userPlan={effectivePlan} planLoaded={planLoaded} />
+          <AdminPFSection location={location} userPlan={effectivePlan} planLoaded={planLoaded} userRole={user?.role} />
         )}
       </SidebarContent>
 
