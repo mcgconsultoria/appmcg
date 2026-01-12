@@ -14,9 +14,38 @@ import { useTheme } from "@/components/ThemeProvider";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { User, Bell, Shield, Palette, Building2, Upload, Loader2, Search, CheckCircle2 } from "lucide-react";
+import { User, Bell, Shield, Palette, Building2, Upload, Loader2, Search, CheckCircle2, UserCog, Lock, Store, Megaphone, ShoppingCart, Handshake, Calculator, LayoutDashboard, Users, ClipboardCheck, FileText, Calendar, Wallet, MessageSquare, BookOpen, GitBranch, BarChart3, Package } from "lucide-react";
 import type { Company } from "@shared/schema";
 import { TaxIdField } from "@/components/TaxIdField";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const perfisConta = [
+  { value: "administrador", label: "Administrador" },
+  { value: "supervisor", label: "Supervisor" },
+  { value: "analista", label: "Analista" },
+  { value: "auxiliar", label: "Auxiliar" },
+];
+
+const modulosPermissoes = [
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "clientes", label: "CRM - Clientes", icon: Users },
+  { key: "pipeline", label: "Pipeline de Vendas", icon: BarChart3 },
+  { key: "checklist", label: "Checklist Diagnóstico", icon: ClipboardCheck },
+  { key: "atas", label: "Atas / Plano de Ação", icon: FileText },
+  { key: "rfi", label: "RFI - Ficha Técnica", icon: FileText },
+  { key: "calendario", label: "Calendário Comercial", icon: Calendar },
+  { key: "tarefas", label: "Tarefas", icon: ClipboardCheck },
+  { key: "projetos", label: "Projetos", icon: Package },
+  { key: "calculadoras", label: "Calculadoras", icon: Calculator },
+  { key: "loja", label: "Loja MCG", icon: Store },
+  { key: "mkt", label: "MKT (Pré Vendas)", icon: Megaphone },
+  { key: "com", label: "COM (Vendas)", icon: ShoppingCart },
+  { key: "cac", label: "CAC (Pós Vendas)", icon: Handshake },
+  { key: "financeiro", label: "Gestão Financeira", icon: Wallet },
+  { key: "whatsapp", label: "WhatsApp", icon: MessageSquare },
+  { key: "manual", label: "Manual APP", icon: BookOpen },
+  { key: "fluxograma", label: "Fluxograma", icon: GitBranch },
+];
 
 export default function Settings() {
   const { user } = useAuth();
@@ -26,6 +55,10 @@ export default function Settings() {
   const profileImageInputRef = useRef<HTMLInputElement>(null);
   const [cnpjLoading, setCnpjLoading] = useState(false);
   const [cnpjFound, setCnpjFound] = useState(false);
+  const [perfilConta, setPerfilConta] = useState(user?.perfilConta || "auxiliar");
+  const [permissoes, setPermissoes] = useState<string[]>([]);
+
+  const isAdmin = user?.perfilConta === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
   
   const [companyForm, setCompanyForm] = useState({
     name: "",
@@ -47,9 +80,9 @@ export default function Settings() {
         name: company.name || "",
         nomeFantasia: company.nomeFantasia || "",
         cnpj: company.cnpj || "",
-        inscriçãoEstadual: company.inscriçãoEstadual || "",
-        inscriçãoEstadualIsento: company.inscriçãoEstadualIsento || false,
-        inscriçãoMunicipal: company.inscriçãoMunicipal || "",
+        inscriçãoEstadual: company.inscricaoEstadual || "",
+        inscriçãoEstadualIsento: company.inscricaoEstadualIsento || false,
+        inscriçãoMunicipal: company.inscricaoMunicipal || "",
         logo: company.logo || "",
       });
     }
@@ -164,6 +197,34 @@ export default function Settings() {
             <CardDescription>Informações da sua conta</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Perfil da Conta */}
+            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+              <UserCog className="h-5 w-5 text-primary" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">Perfil da Conta</p>
+                <p className="text-xs text-muted-foreground">
+                  {perfisConta.find(p => p.value === (user?.perfilConta || "auxiliar"))?.label || "Auxiliar"}
+                </p>
+              </div>
+              {isAdmin && (
+                <Select
+                  value={perfilConta}
+                  onValueChange={setPerfilConta}
+                >
+                  <SelectTrigger className="w-40" data-testid="select-perfil-conta">
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {perfisConta.map((perfil) => (
+                      <SelectItem key={perfil.value} value={perfil.value}>
+                        {perfil.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
             <div className="flex items-center gap-6">
               <div className="relative">
                 <Avatar className="h-20 w-20">
@@ -235,6 +296,77 @@ export default function Settings() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Seção de Permissões - apenas para Administradores */}
+        {isAdmin && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Lock className="h-5 w-5" />
+                Permissões
+              </CardTitle>
+              <CardDescription>Defina quais módulos os membros da equipe podem acessar</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {modulosPermissoes.map((modulo) => {
+                  const IconComponent = modulo.icon;
+                  const isChecked = permissoes.includes(modulo.key);
+                  return (
+                    <div
+                      key={modulo.key}
+                      className={`flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${
+                        isChecked ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                      }`}
+                      onClick={() => {
+                        if (isChecked) {
+                          setPermissoes(permissoes.filter(p => p !== modulo.key));
+                        } else {
+                          setPermissoes([...permissoes, modulo.key]);
+                        }
+                      }}
+                      data-testid={`checkbox-permissao-${modulo.key}`}
+                    >
+                      <Checkbox
+                        checked={isChecked}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setPermissoes([...permissoes, modulo.key]);
+                          } else {
+                            setPermissoes(permissoes.filter(p => p !== modulo.key));
+                          }
+                        }}
+                      />
+                      <IconComponent className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{modulo.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-4 flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPermissoes(modulosPermissoes.map(m => m.key))}
+                  data-testid="button-select-all-permissions"
+                >
+                  Selecionar Todos
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPermissoes([])}
+                  data-testid="button-clear-permissions"
+                >
+                  Limpar Seleção
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-4">
+                As permissões serão aplicadas aos membros da equipe com perfis abaixo de Administrador.
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>
