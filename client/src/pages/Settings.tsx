@@ -64,9 +64,9 @@ export default function Settings() {
     name: "",
     nomeFantasia: "",
     cnpj: "",
-    inscriçãoEstadual: "",
-    inscriçãoEstadualIsento: false,
-    inscriçãoMunicipal: "",
+    inscricaoEstadual: "",
+    inscricaoEstadualIsento: false,
+    inscricaoMunicipal: "",
     logo: "",
   });
 
@@ -80,9 +80,9 @@ export default function Settings() {
         name: company.name || "",
         nomeFantasia: company.nomeFantasia || "",
         cnpj: company.cnpj || "",
-        inscriçãoEstadual: company.inscricaoEstadual || "",
-        inscriçãoEstadualIsento: company.inscricaoEstadualIsento || false,
-        inscriçãoMunicipal: company.inscricaoMunicipal || "",
+        inscricaoEstadual: company.inscricaoEstadual || "",
+        inscricaoEstadualIsento: company.inscricaoEstadualIsento || false,
+        inscricaoMunicipal: company.inscricaoMunicipal || "",
         logo: company.logo || "",
       });
     }
@@ -444,21 +444,21 @@ export default function Settings() {
                     <Label htmlFor="ie">Inscrição Estadual (I.E.)</Label>
                     <Input
                       id="ie"
-                      placeholder={companyForm.inscriçãoEstadualIsento ? "ISENTO" : "Inscrição Estadual"}
-                      disabled={companyForm.inscriçãoEstadualIsento}
-                      value={companyForm.inscriçãoEstadualIsento ? "" : companyForm.inscriçãoEstadual}
-                      onChange={(e) => setCompanyForm(prev => ({ ...prev, inscriçãoEstadual: e.target.value }))}
+                      placeholder={companyForm.inscricaoEstadualIsento ? "ISENTO" : "Inscrição Estadual"}
+                      disabled={companyForm.inscricaoEstadualIsento}
+                      value={companyForm.inscricaoEstadualIsento ? "" : companyForm.inscricaoEstadual}
+                      onChange={(e) => setCompanyForm(prev => ({ ...prev, inscricaoEstadual: e.target.value }))}
                       data-testid="input-company-ie"
                     />
                     <div className="flex items-center gap-2 mt-1">
                       <Checkbox
                         id="company-ie-isento"
-                        checked={companyForm.inscriçãoEstadualIsento}
+                        checked={companyForm.inscricaoEstadualIsento}
                         onCheckedChange={(checked) => {
                           setCompanyForm(prev => ({
                             ...prev,
-                            inscriçãoEstadualIsento: !!checked,
-                            inscriçãoEstadual: checked ? "" : prev.inscriçãoEstadual
+                            inscricaoEstadualIsento: !!checked,
+                            inscricaoEstadual: checked ? "" : prev.inscricaoEstadual
                           }));
                         }}
                         data-testid="checkbox-company-ie-isento"
@@ -473,8 +473,8 @@ export default function Settings() {
                     <Input
                       id="im"
                       placeholder="Inscrição Municipal"
-                      value={companyForm.inscriçãoMunicipal}
-                      onChange={(e) => setCompanyForm(prev => ({ ...prev, inscriçãoMunicipal: e.target.value }))}
+                      value={companyForm.inscricaoMunicipal}
+                      onChange={(e) => setCompanyForm(prev => ({ ...prev, inscricaoMunicipal: e.target.value }))}
                       data-testid="input-company-im"
                     />
                   </div>
