@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Users, Plus, Edit2, Trash2, Lock, Eye, FileEdit, FilePlus, FileX, Download, CheckCircle, Settings } from "lucide-react";
 import type { CompanyRole, PermissionDefinition } from "@/hooks/use-permissions";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 const MODULE_LABELS: Record<string, string> = {
   crm: "CRM",
@@ -182,24 +183,23 @@ export default function AdminPermissoes() {
 
   if (rolesLoading || permissionsLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <AppLayout title="Cargos e Permissões" subtitle="Gerencie os cargos e permissões de acesso da sua equipe">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold" data-testid="page-title">Cargos e Permissões</h1>
-          <p className="text-muted-foreground">Gerencie os cargos e permissões de acesso da sua equipe</p>
+    <AppLayout title="Cargos e Permissões" subtitle="Gerencie os cargos e permissões de acesso da sua equipe">
+      <div className="space-y-6">
+        <div className="flex items-center justify-end">
+          <Button onClick={openCreateDialog} data-testid="btn-create-role">
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Cargo
+          </Button>
         </div>
-        <Button onClick={openCreateDialog} data-testid="btn-create-role">
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Cargo
-        </Button>
-      </div>
 
       <Tabs defaultValue="roles" className="space-y-4">
         <TabsList>
@@ -493,6 +493,7 @@ export default function AdminPermissoes() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

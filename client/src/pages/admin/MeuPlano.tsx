@@ -7,6 +7,7 @@ import { AlertTriangle, Calendar, CreditCard, Users, Check, X, RefreshCw, ArrowL
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { AppLayout } from "@/components/layout/AppLayout";
 import {
   Dialog,
   DialogContent,
@@ -110,9 +111,11 @@ export default function MeuPlano() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <AppLayout title="Meu Plano" subtitle="Gerencie sua assinatura e plano">
+        <div className="flex items-center justify-center h-64">
+          <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </AppLayout>
     );
   }
 
@@ -122,30 +125,17 @@ export default function MeuPlano() {
   const hasActiveCancellation = !!subscription?.cancellationRequestedAt;
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-4">
+    <AppLayout title="Meu Plano" subtitle="Gerencie sua assinatura e plano">
+      <div className="space-y-6">
+        <div className="flex items-center justify-end gap-4 flex-wrap">
           <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/")}
-            data-testid="button-back"
+            onClick={() => navigate("/planos")}
+            data-testid="button-upgrade-plan"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowUpCircle className="h-4 w-4 mr-2" />
+            Fazer Upgrade
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold" data-testid="text-page-title">Meu Plano</h1>
-            <p className="text-muted-foreground">Gerencie sua assinatura e plano</p>
-          </div>
         </div>
-        <Button
-          onClick={() => navigate("/planos")}
-          data-testid="button-upgrade-plan"
-        >
-          <ArrowUpCircle className="h-4 w-4 mr-2" />
-          Fazer Upgrade
-        </Button>
-      </div>
 
       {subscription && subscription.daysUntilAccessLoss !== null && subscription.daysUntilAccessLoss !== undefined && subscription.daysUntilAccessLoss <= 7 && (
         <Alert variant="destructive" data-testid="alert-access-warning">
@@ -416,6 +406,7 @@ export default function MeuPlano() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

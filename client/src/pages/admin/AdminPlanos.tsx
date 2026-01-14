@@ -11,6 +11,7 @@ import { Loader2, Save, Check, X, Plus, Trash2, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { SubscriptionPlan } from "@shared/schema";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 export default function AdminPlanos() {
   const { toast } = useToast();
@@ -112,19 +113,18 @@ export default function AdminPlanos() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <AppLayout title="Planos e Valores" subtitle="Gerencie os planos de assinatura">
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold" data-testid="text-page-title">Planos e Valores</h1>
-          <p className="text-muted-foreground">Gerencie os planos de assinatura exibidos para os clientes</p>
-        </div>
+    <AppLayout title="Planos e Valores" subtitle="Gerencie os planos de assinatura exibidos para os clientes">
+      <div className="space-y-6">
+        <div className="flex items-center justify-end gap-4 flex-wrap">
         {(!plans || plans.length === 0) && (
           <Button
             onClick={() => seedPlansMutation.mutate()}
@@ -311,6 +311,7 @@ export default function AdminPlanos() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </AppLayout>
   );
 }

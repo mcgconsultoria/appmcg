@@ -12,6 +12,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Github, Database, Clock, Play, Settings, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 interface BackupConfig {
   enabled: boolean;
@@ -140,23 +141,17 @@ export default function AdminBackup() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <AppLayout title="Backup GitHub" subtitle="Configure backups automáticos para o GitHub">
+        <div className="flex items-center justify-center h-full">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="p-6 space-y-6" data-testid="admin-backup-page">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Github className="h-6 w-6" />
-            Backup GitHub
-          </h1>
-          <p className="text-muted-foreground">Configure backups automaticos para o GitHub</p>
-        </div>
-      </div>
+    <AppLayout title="Backup GitHub" subtitle="Configure backups automáticos para o GitHub">
+      <div className="space-y-6" data-testid="admin-backup-page">
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
@@ -344,6 +339,7 @@ export default function AdminBackup() {
           </p>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

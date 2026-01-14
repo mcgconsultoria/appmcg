@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { AppLayout } from "@/components/layout/AppLayout";
 import {
   Dialog,
   DialogContent,
@@ -98,41 +99,30 @@ export default function PendingApprovals() {
 
   if (isLoading) {
     return (
-      <div className="p-6 space-y-4">
-        <h1 className="text-2xl font-bold">Aguardando Aprovação</h1>
-        <div className="grid gap-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <Skeleton className="h-24 w-full" />
-              </CardContent>
-            </Card>
-          ))}
+      <AppLayout title="Aguardando Aprovação" subtitle="Solicitações de cadastro que precisam de aprovação">
+        <div className="space-y-4">
+          <div className="grid gap-4">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardContent className="p-6">
+                  <Skeleton className="h-24 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Link href="/admin">
-            <Button variant="ghost" size="icon" data-testid="button-back">
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold" data-testid="text-page-title">Aguardando Aprovação</h1>
-            <p className="text-muted-foreground">
-              Solicitações de cadastro que precisam de aprovação
-            </p>
-          </div>
+    <AppLayout title="Aguardando Aprovação" subtitle="Solicitações de cadastro que precisam de aprovação">
+      <div className="space-y-6">
+        <div className="flex items-center justify-end gap-4">
+          <Badge variant="secondary" className="text-lg px-4 py-2">
+            {pendingUsers?.length || 0} pendentes
+          </Badge>
         </div>
-        <Badge variant="secondary" className="text-lg px-4 py-2">
-          {pendingUsers?.length || 0} pendentes
-        </Badge>
-      </div>
 
       {!pendingUsers?.length ? (
         <Card>
@@ -269,6 +259,7 @@ export default function PendingApprovals() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </AppLayout>
   );
 }

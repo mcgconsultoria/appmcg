@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { WhatsappJourneyStep, WhatsappConfig, WhatsappAgent, WhatsappConversation } from "@shared/schema";
+import { AppLayout } from "@/components/layout/AppLayout";
 import {
   MessageSquare,
   Settings,
