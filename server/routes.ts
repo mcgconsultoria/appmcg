@@ -529,7 +529,7 @@ export async function registerRoutes(
   // User profile update (including profile image)
   app.patch('/api/user/profile', isAuthenticated, async (req: any, res) => {
     try {
-      const { profileImageUrl, firstName, lastName } = req.body;
+      const { profileImageUrl, firstName, lastName, perfilConta } = req.body;
       
       // Validate profile image if provided
       if (profileImageUrl) {
@@ -543,10 +543,24 @@ export async function registerRoutes(
         }
       }
       
+      // Validate perfilConta if provided - only admin/admin_mcg can change this
+      const validPerfis = ["administrador", "gestor", "colaborador", "auxiliar"];
+      if (perfilConta !== undefined) {
+        if (!validPerfis.includes(perfilConta)) {
+          return res.status(400).json({ message: "Perfil de conta invalido" });
+        }
+        // Check if user has permission to change perfilConta
+        const isAdmin = req.user?.role === "admin" || req.user?.role === "admin_mcg" || req.user?.perfilConta === "administrador";
+        if (!isAdmin) {
+          return res.status(403).json({ message: "Sem permissao para alterar perfil de conta" });
+        }
+      }
+      
       const updateData: any = {};
       if (profileImageUrl !== undefined) updateData.profileImageUrl = profileImageUrl;
       if (firstName !== undefined) updateData.firstName = firstName;
       if (lastName !== undefined) updateData.lastName = lastName;
+      if (perfilConta !== undefined) updateData.perfilConta = perfilConta;
       
       const updatedUser = await storage.updateUserProfile(req.user.id, updateData);
       if (!updatedUser) {

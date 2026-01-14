@@ -118,14 +118,19 @@ export default function Settings() {
   const updateCompanyMutation = useMutation({
     mutationFn: async (data: Partial<Company>) => {
       const res = await apiRequest("PATCH", "/api/company", data);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: "Erro desconhecido" }));
+        throw new Error(errorData.message || `Erro ${res.status}`);
+      }
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/company"] });
       toast({ title: "Empresa atualizada com sucesso" });
     },
-    onError: () => {
-      toast({ title: "Erro ao atualizar empresa", variant: "destructive" });
+    onError: (error: Error) => {
+      console.error("Erro ao atualizar empresa:", error);
+      toast({ title: error.message || "Erro ao atualizar empresa", variant: "destructive" });
     },
   });
 
@@ -150,16 +155,21 @@ export default function Settings() {
   };
 
   const updateProfileMutation = useMutation({
-    mutationFn: async (data: { profileImageUrl?: string }) => {
+    mutationFn: async (data: { profileImageUrl?: string; perfilConta?: string }) => {
       const res = await apiRequest("PATCH", "/api/user/profile", data);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: "Erro desconhecido" }));
+        throw new Error(errorData.message || `Erro ${res.status}`);
+      }
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      toast({ title: "Foto atualizada com sucesso" });
+      toast({ title: "Perfil atualizado com sucesso" });
     },
-    onError: () => {
-      toast({ title: "Erro ao atualizar foto", variant: "destructive" });
+    onError: (error: Error) => {
+      console.error("Erro ao atualizar perfil:", error);
+      toast({ title: error.message || "Erro ao atualizar perfil", variant: "destructive" });
     },
   });
 
@@ -207,21 +217,37 @@ export default function Settings() {
                 </p>
               </div>
               {isAdmin && (
-                <Select
-                  value={perfilConta}
-                  onValueChange={setPerfilConta}
-                >
-                  <SelectTrigger className="w-40" data-testid="select-perfil-conta">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {perfisConta.map((perfil) => (
-                      <SelectItem key={perfil.value} value={perfil.value}>
-                        {perfil.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={perfilConta}
+                    onValueChange={setPerfilConta}
+                  >
+                    <SelectTrigger className="w-40" data-testid="select-perfil-conta">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {perfisConta.map((perfil) => (
+                        <SelectItem key={perfil.value} value={perfil.value}>
+                          {perfil.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {perfilConta !== (user?.perfilConta || "auxiliar") && (
+                    <Button
+                      size="sm"
+                      onClick={() => updateProfileMutation.mutate({ perfilConta })}
+                      disabled={updateProfileMutation.isPending}
+                      data-testid="button-save-perfil-conta"
+                    >
+                      {updateProfileMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Salvar"
+                      )}
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
 
