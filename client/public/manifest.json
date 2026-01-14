@@ -1,0 +1,28 @@
+{
+  "name": "MCG Consultoria",
+  "short_name": "MCG",
+  "description": "Sistema completo de gestao comercial para empresas de logistica",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e40af",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "pt-BR",
+  "scope": "/",
+  "prefer_related_applications": false
+}
