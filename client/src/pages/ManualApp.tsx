@@ -257,7 +257,7 @@ export default function ManualApp() {
       }
       
       // Limpar os parâmetros da URL após processar
-      setLocation("/manual", { replace: true });
+      setLocation("/manual-app", { replace: true });
     }
   }, [searchString, setLocation]);
 

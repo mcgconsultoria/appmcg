@@ -533,7 +533,7 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Link 
-                              href={`/manual?sub=${manualInfo.subCategory}&item=${manualInfo.itemId}`}
+                              href={`/manual-app?sub=${manualInfo.subCategory}&item=${manualInfo.itemId}`}
                               className="p-1 text-muted-foreground hover:text-primary transition-colors"
                               data-testid={`help-${item.url.replace("/", "")}`}
                             >
