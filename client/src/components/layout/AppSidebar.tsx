@@ -65,7 +65,32 @@ import {
   MessageSquare,
   Database,
   Lock,
+  HelpCircle,
 } from "lucide-react";
+
+// Mapeamento de URLs para IDs do manual (subcategoria e item)
+const manualMapping: Record<string, { subCategory: string; itemId: string }> = {
+  "/marketing": { subCategory: "mkt", itemId: "mkt-marketing" },
+  "/indicadores-pre-vendas": { subCategory: "mkt", itemId: "mkt-indicadores" },
+  "/calculadora-frete": { subCategory: "com", itemId: "com-calcule-frete" },
+  "/calculadora-armazenagem": { subCategory: "com", itemId: "com-calcule-armazenagem" },
+  "/dashboard": { subCategory: "com", itemId: "com-dashboard" },
+  "/clientes": { subCategory: "com", itemId: "com-clientes" },
+  "/pipeline": { subCategory: "com", itemId: "com-pipeline" },
+  "/calendario": { subCategory: "com", itemId: "com-calendario" },
+  "/calendário": { subCategory: "com", itemId: "com-calendario" },
+  "/rotas": { subCategory: "com", itemId: "com-rotas" },
+  "/atas": { subCategory: "com", itemId: "com-ata" },
+  "/checklist": { subCategory: "com", itemId: "com-checklist" },
+  "/rfi": { subCategory: "com", itemId: "com-rfi" },
+  "/tarefas": { subCategory: "com", itemId: "com-tarefas" },
+  "/projetos": { subCategory: "com", itemId: "com-projetos" },
+  "/indicadores-vendas": { subCategory: "com", itemId: "com-indicadores" },
+  "/relatórios": { subCategory: "com", itemId: "com-relatorios" },
+  "/operações": { subCategory: "com", itemId: "com-metas" },
+  "/pesquisas": { subCategory: "cac", itemId: "cac-pesquisas" },
+  "/indicadores-pos-vendas": { subCategory: "cac", itemId: "cac-indicadores" },
+};
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -493,14 +518,34 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
                   );
                 }
                 
+                const manualInfo = manualMapping[item.url];
+                
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                    <div className="flex items-center w-full">
+                      <SidebarMenuButton asChild isActive={isActive} className="flex-1">
+                        <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                      {manualInfo && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Link 
+                              href={`/manual?sub=${manualInfo.subCategory}&item=${manualInfo.itemId}`}
+                              className="p-1 text-muted-foreground hover:text-primary transition-colors"
+                              data-testid={`help-${item.url.replace("/", "")}`}
+                            >
+                              <HelpCircle className="h-3.5 w-3.5" />
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent side="right">
+                            <p>Ver instruções no manual</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
                   </SidebarMenuItem>
                 );
               })}

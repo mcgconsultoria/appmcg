@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearch, useLocation } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -230,6 +231,35 @@ export default function ManualApp() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<ManualCategory | null>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<ManualSubCategory | null>(null);
+  const searchString = useSearch();
+  const [, setLocation] = useLocation();
+
+  // Processar parâmetros da URL para navegação direta
+  useEffect(() => {
+    const params = new URLSearchParams(searchString);
+    const subParam = params.get("sub");
+    const itemParam = params.get("item");
+    
+    if (subParam) {
+      // Encontrar a categoria principal (Roteiro Comercial)
+      const category = manualCategories.find(cat => 
+        cat.subCategories.some(sub => sub.id === subParam)
+      );
+      
+      if (category) {
+        setSelectedCategory(category);
+        
+        // Encontrar a subcategoria
+        const subCategory = category.subCategories.find(sub => sub.id === subParam);
+        if (subCategory) {
+          setSelectedSubCategory(subCategory);
+        }
+      }
+      
+      // Limpar os parâmetros da URL após processar
+      setLocation("/manual", { replace: true });
+    }
+  }, [searchString, setLocation]);
 
   const filteredItems = selectedSubCategory?.items.filter((item) =>
     item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
