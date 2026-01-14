@@ -16,7 +16,8 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { Check, X, Building2, Mail, Phone, Calendar, User } from "lucide-react";
+import { Check, X, Building2, Mail, Phone, Calendar, User, ArrowLeft } from "lucide-react";
+import { Link } from "wouter";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { User as UserType } from "@shared/schema";
@@ -115,11 +116,18 @@ export default function PendingApprovals() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold" data-testid="text-page-title">Aguardando Aprovação</h1>
-          <p className="text-muted-foreground">
-            Solicitações de cadastro que precisam de aprovação
-          </p>
+        <div className="flex items-center gap-4">
+          <Link href="/admin">
+            <Button variant="ghost" size="icon" data-testid="button-back">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-2xl font-bold" data-testid="text-page-title">Aguardando Aprovação</h1>
+            <p className="text-muted-foreground">
+              Solicitações de cadastro que precisam de aprovação
+            </p>
+          </div>
         </div>
         <Badge variant="secondary" className="text-lg px-4 py-2">
           {pendingUsers?.length || 0} pendentes
