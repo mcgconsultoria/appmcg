@@ -14,24 +14,8 @@ import {
   Route,
   ChevronRight,
   ArrowLeft,
-  Megaphone,
-  TrendingUp,
-  Calculator,
-  Warehouse,
-  LayoutDashboard,
-  Users,
-  Kanban,
-  Calendar,
-  FileEdit,
-  ClipboardCheck,
-  ClipboardList,
-  ListTodo,
-  FolderKanban,
-  BarChart3,
-  Settings2,
-  MessageSquareHeart,
-  Handshake,
 } from "lucide-react";
+import { getManualCategories } from "@/lib/featureRegistry";
 
 interface ManualItem {
   id: string;
@@ -59,178 +43,13 @@ interface ManualCategory {
   subCategories: ManualSubCategory[];
 }
 
-const manualCategories: ManualCategory[] = [
-  {
-    id: "roteiro-comercial",
-    title: "Roteiro Comercial",
-    description: "Guia completo do processo comercial da plataforma MCG",
-    icon: Route,
-    subCategories: [
-      {
-        id: "mkt",
-        title: "MKT - Pré-Vendas",
-        description: "Marketing e prospecção de clientes",
-        icon: Megaphone,
-        items: [
-          {
-            id: "mkt-marketing",
-            title: "Marketing",
-            description: "Estratégias de marketing e divulgação",
-            icon: Megaphone,
-            type: "pdf",
-          },
-          {
-            id: "mkt-indicadores",
-            title: "Indicadores de Pré-Vendas",
-            description: "KPIs e métricas de marketing",
-            icon: TrendingUp,
-            type: "pdf",
-          },
-        ],
-      },
-      {
-        id: "com",
-        title: "COM - Vendas",
-        description: "Processo comercial e gestão de vendas",
-        icon: Handshake,
-        items: [
-          {
-            id: "com-calcule-frete",
-            title: "Calcule Frete",
-            description: "Tutorial completo da calculadora de frete ANTT",
-            icon: Calculator,
-            type: "pdf",
-          },
-          {
-            id: "com-calcule-armazenagem",
-            title: "Calcule Armazenagem",
-            description: "Como calcular custos de armazenagem",
-            icon: Warehouse,
-            type: "pdf",
-          },
-          {
-            id: "com-dashboard",
-            title: "Dashboard",
-            description: "Visão geral e indicadores do painel",
-            icon: LayoutDashboard,
-            type: "pdf",
-          },
-          {
-            id: "com-clientes",
-            title: "Clientes (CRM)",
-            description: "Como cadastrar e gerenciar clientes no sistema",
-            icon: Users,
-            type: "pdf",
-          },
-          {
-            id: "com-pipeline",
-            title: "Pipeline",
-            description: "Gestão do funil de vendas",
-            icon: Kanban,
-            type: "pdf",
-          },
-          {
-            id: "com-calendario",
-            title: "Calendário",
-            description: "Agenda comercial e eventos",
-            icon: Calendar,
-            type: "pdf",
-          },
-          {
-            id: "com-rotas",
-            title: "Rotas",
-            description: "Planejamento de rotas comerciais",
-            icon: Route,
-            type: "pdf",
-          },
-          {
-            id: "com-ata",
-            title: "Ata Plano de Ação",
-            description: "Criação e envio de atas de reunião com plano de ação",
-            icon: FileEdit,
-            type: "pdf",
-          },
-          {
-            id: "com-checklist",
-            title: "Checklist",
-            description: "Como utilizar os checklists para diagnóstico de clientes",
-            icon: ClipboardCheck,
-            type: "pdf",
-          },
-          {
-            id: "com-rfi",
-            title: "RFI",
-            description: "Request for Information - documentação técnica",
-            icon: ClipboardList,
-            type: "pdf",
-          },
-          {
-            id: "com-tarefas",
-            title: "Tarefas",
-            description: "Gestão de tarefas e atividades",
-            icon: ListTodo,
-            type: "pdf",
-          },
-          {
-            id: "com-projetos",
-            title: "Projetos",
-            description: "Gerenciamento de projetos comerciais",
-            icon: FolderKanban,
-            type: "pdf",
-          },
-          {
-            id: "com-indicadores",
-            title: "Indicadores de Vendas",
-            description: "KPIs e métricas de vendas",
-            icon: TrendingUp,
-            type: "pdf",
-          },
-          {
-            id: "com-relatorios",
-            title: "Relatórios",
-            description: "Como gerar e analisar relatórios",
-            icon: BarChart3,
-            type: "pdf",
-          },
-          {
-            id: "com-metas",
-            title: "Metas",
-            description: "Definição e acompanhamento de metas",
-            icon: Settings2,
-            type: "pdf",
-          },
-        ],
-      },
-      {
-        id: "cac",
-        title: "CAC - Pós-Vendas",
-        description: "Relacionamento e satisfação do cliente",
-        icon: MessageSquareHeart,
-        items: [
-          {
-            id: "cac-pesquisas",
-            title: "Pesquisas de Satisfação",
-            description: "Como criar e analisar pesquisas NPS",
-            icon: MessageSquareHeart,
-            type: "pdf",
-          },
-          {
-            id: "cac-indicadores",
-            title: "Indicadores de Pós-Vendas",
-            description: "KPIs de satisfação e retenção",
-            icon: TrendingUp,
-            type: "pdf",
-          },
-        ],
-      },
-    ],
-  },
-];
+const manualCategories = getManualCategories() as ManualCategory[];
 
 export default function ManualApp() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<ManualCategory | null>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<ManualSubCategory | null>(null);
+  const [selectedItem, setSelectedItem] = useState<ManualItem | null>(null);
   const searchString = useSearch();
   const [, setLocation] = useLocation();
 
@@ -253,6 +72,14 @@ export default function ManualApp() {
         const subCategory = category.subCategories.find(sub => sub.id === subParam);
         if (subCategory) {
           setSelectedSubCategory(subCategory);
+          
+          // Se tiver itemParam, encontrar e selecionar o item diretamente
+          if (itemParam) {
+            const item = subCategory.items.find(i => i.id === itemParam);
+            if (item) {
+              setSelectedItem(item);
+            }
+          }
         }
       }
       
@@ -283,6 +110,87 @@ export default function ManualApp() {
       sub.items.some(item => item.title.toLowerCase().includes(searchTerm.toLowerCase()))
     )
   );
+
+  // Nível 4: Item específico selecionado
+  if (selectedItem && selectedSubCategory) {
+    const Icon = selectedItem.icon;
+    return (
+      <AppLayout title="Manual do APP" subtitle="Documentação e tutoriais da plataforma MCG">
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setSelectedItem(null)}
+              data-testid="button-back-item"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h2 className="text-xl font-semibold">{selectedItem.title}</h2>
+              <p className="text-sm text-muted-foreground">{selectedSubCategory.title}</p>
+            </div>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-lg bg-primary/10">
+                  <Icon className="h-8 w-8 text-primary" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">{selectedItem.title}</CardTitle>
+                  <p className="text-muted-foreground mt-1">{selectedItem.description}</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    Tipo: {selectedItem.type === "pdf" ? "Documento PDF" : selectedItem.type === "video" ? "Vídeo Tutorial" : "Artigo"}
+                  </p>
+                </div>
+                
+                <div className="flex gap-3">
+                  {selectedItem.downloadUrl ? (
+                    <Button asChild>
+                      <a href={selectedItem.downloadUrl} download>
+                        <Download className="h-4 w-4 mr-2" />
+                        Baixar Material
+                      </a>
+                    </Button>
+                  ) : (
+                    <Button disabled>
+                      <Download className="h-4 w-4 mr-2" />
+                      Material em Produção
+                    </Button>
+                  )}
+                  {selectedItem.externalUrl && (
+                    <Button variant="outline" asChild>
+                      <a href={selectedItem.externalUrl} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Acessar Link
+                      </a>
+                    </Button>
+                  )}
+                </div>
+
+                <div className="mt-6 p-4 border rounded-lg">
+                  <h3 className="font-medium mb-2">Conteúdo do Manual</h3>
+                  <p className="text-sm text-muted-foreground">
+                    O conteúdo detalhado deste manual estará disponível em breve. 
+                    Estamos preparando materiais completos com instruções passo-a-passo, 
+                    exemplos práticos e dicas de uso.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
+    );
+  }
 
   // Nível 3: Itens da subcategoria
   if (selectedSubCategory) {

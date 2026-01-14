@@ -68,29 +68,9 @@ import {
   HelpCircle,
 } from "lucide-react";
 
-// Mapeamento de URLs para IDs do manual (subcategoria e item)
-const manualMapping: Record<string, { subCategory: string; itemId: string }> = {
-  "/marketing": { subCategory: "mkt", itemId: "mkt-marketing" },
-  "/indicadores-pre-vendas": { subCategory: "mkt", itemId: "mkt-indicadores" },
-  "/calculadora-frete": { subCategory: "com", itemId: "com-calcule-frete" },
-  "/calculadora-armazenagem": { subCategory: "com", itemId: "com-calcule-armazenagem" },
-  "/dashboard": { subCategory: "com", itemId: "com-dashboard" },
-  "/clientes": { subCategory: "com", itemId: "com-clientes" },
-  "/pipeline": { subCategory: "com", itemId: "com-pipeline" },
-  "/calendario": { subCategory: "com", itemId: "com-calendario" },
-  "/calendário": { subCategory: "com", itemId: "com-calendario" },
-  "/rotas": { subCategory: "com", itemId: "com-rotas" },
-  "/atas": { subCategory: "com", itemId: "com-ata" },
-  "/checklist": { subCategory: "com", itemId: "com-checklist" },
-  "/rfi": { subCategory: "com", itemId: "com-rfi" },
-  "/tarefas": { subCategory: "com", itemId: "com-tarefas" },
-  "/projetos": { subCategory: "com", itemId: "com-projetos" },
-  "/indicadores-vendas": { subCategory: "com", itemId: "com-indicadores" },
-  "/relatórios": { subCategory: "com", itemId: "com-relatorios" },
-  "/operações": { subCategory: "com", itemId: "com-metas" },
-  "/pesquisas": { subCategory: "cac", itemId: "cac-pesquisas" },
-  "/indicadores-pos-vendas": { subCategory: "cac", itemId: "cac-indicadores" },
-};
+import { getSidebarItems, getManualMapping } from "@/lib/featureRegistry";
+
+const manualMapping = getManualMapping();
 import logoMcg from "@assets/logo_mcg_principal.png";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -98,109 +78,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 
-const preVendasItems = [
-  {
-    title: "Marketing",
-    url: "/marketing",
-    icon: Megaphone,
-  },
-  {
-    title: "Indicadores",
-    url: "/indicadores-pre-vendas",
-    icon: TrendingUp,
-  },
-];
-
-const vendasItems = [
-  {
-    title: "Calcule Frete",
-    url: "/calculadora-frete",
-    icon: Calculator,
-  },
-  {
-    title: "Calcule Armazenagem",
-    url: "/calculadora-armazenagem",
-    icon: Warehouse,
-  },
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Clientes",
-    url: "/clientes",
-    icon: Users,
-  },
-  {
-    title: "Pipeline",
-    url: "/pipeline",
-    icon: Kanban,
-  },
-  {
-    title: "Calendário",
-    url: "/calendário",
-    icon: Calendar,
-  },
-  {
-    title: "Rotas",
-    url: "/rotas",
-    icon: Route,
-  },
-  {
-    title: "Ata Plano de Ação",
-    url: "/atas",
-    icon: FileEdit,
-  },
-  {
-    title: "Checklist",
-    url: "/checklist",
-    icon: ClipboardCheck,
-  },
-  {
-    title: "RFI",
-    url: "/rfi",
-    icon: ClipboardList,
-  },
-  {
-    title: "Tarefas",
-    url: "/tarefas",
-    icon: ListTodo,
-  },
-  {
-    title: "Projetos",
-    url: "/projetos",
-    icon: FolderKanban,
-  },
-  {
-    title: "Indicadores",
-    url: "/indicadores-vendas",
-    icon: TrendingUp,
-  },
-  {
-    title: "Relatórios",
-    url: "/relatórios",
-    icon: BarChart3,
-  },
-  {
-    title: "Metas",
-    url: "/operações",
-    icon: Settings2,
-  },
-];
-
-const posVendasItems = [
-  {
-    title: "Pesquisas de Satisfação",
-    url: "/pesquisas",
-    icon: MessageSquareHeart,
-  },
-  {
-    title: "Indicadores",
-    url: "/indicadores-pos-vendas",
-    icon: TrendingUp,
-  },
-];
+const preVendasItems = getSidebarItems("mkt");
+const vendasItems = getSidebarItems("com");
+const posVendasItems = getSidebarItems("cac");
 
 const adminClienteItems = [
   {
