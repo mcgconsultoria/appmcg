@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { UserRound, Plus, Search, Mail, Phone, Target } from "lucide-react";
+import { UserRound, Plus, Search, Mail, Phone, Target, UserCog, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -20,9 +20,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuth } from "@/hooks/useAuth";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+
+const perfisConta = [
+  { value: "administrador", label: "Administrador" },
+  { value: "supervisor", label: "Supervisor" },
+  { value: "analista", label: "Analista" },
+  { value: "auxiliar", label: "Auxiliar" },
+];
 
 export default function Vendedores() {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [perfilConta, setPerfilConta] = useState(user?.perfilConta || "auxiliar");
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
@@ -30,6 +44,32 @@ export default function Vendedores() {
     cargo: "",
     metaMensal: "",
     status: "ativo",
+  });
+
+  const isAdmin = user?.perfilConta === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
+
+  useEffect(() => {
+    if (user?.perfilConta) {
+      setPerfilConta(user.perfilConta);
+    }
+  }, [user?.perfilConta]);
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: { perfilConta: string }) => {
+      const res = await apiRequest("PATCH", "/api/user/profile", data);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: "Erro desconhecido" }));
+        throw new Error(errorData.message || `Erro ${res.status}`);
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      toast({ title: "Perfil atualizado com sucesso" });
+    },
+    onError: (error: Error) => {
+      toast({ title: error.message || "Erro ao atualizar perfil", variant: "destructive" });
+    },
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -51,6 +91,61 @@ export default function Vendedores() {
   return (
     <AppLayout title="Vendedores">
       <div className="p-6 space-y-6">
+        {/* Secao Perfil */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <UserCog className="h-5 w-5" />
+              Perfil da Conta
+            </CardTitle>
+            <CardDescription>Defina seu nivel de acesso no sistema</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+              <UserCog className="h-5 w-5 text-primary" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">Perfil Atual</p>
+                <p className="text-xs text-muted-foreground">
+                  {perfisConta.find(p => p.value === (user?.perfilConta || "auxiliar"))?.label || "Auxiliar"}
+                </p>
+              </div>
+              {isAdmin && (
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={perfilConta}
+                    onValueChange={setPerfilConta}
+                  >
+                    <SelectTrigger className="w-40" data-testid="select-perfil-conta">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {perfisConta.map((perfil) => (
+                        <SelectItem key={perfil.value} value={perfil.value}>
+                          {perfil.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {perfilConta !== (user?.perfilConta || "auxiliar") && (
+                    <Button
+                      size="sm"
+                      onClick={() => updateProfileMutation.mutate({ perfilConta })}
+                      disabled={updateProfileMutation.isPending}
+                      data-testid="button-save-perfil-conta"
+                    >
+                      {updateProfileMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Salvar"
+                      )}
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">

@@ -191,9 +191,11 @@ export default function Settings() {
       }
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      const savedPermissions = Array.isArray(data.permissions) ? data.permissions : permissoes;
+      setPermissoes(savedPermissions);
+      setOriginalPermissoes(savedPermissions);
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      setOriginalPermissoes(permissoes);
       toast({ title: "Permissoes atualizadas com sucesso" });
     },
     onError: (error: Error) => {
@@ -353,90 +355,6 @@ export default function Settings() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Seção de Permissões - apenas para Administradores */}
-        {isAdmin && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Lock className="h-5 w-5" />
-                Permissões
-              </CardTitle>
-              <CardDescription>Defina quais módulos os membros da equipe podem acessar</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {modulosPermissoes.map((modulo) => {
-                  const IconComponent = modulo.icon;
-                  const isChecked = permissoes.includes(modulo.key);
-                  return (
-                    <div
-                      key={modulo.key}
-                      className={`flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${
-                        isChecked ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
-                      }`}
-                      onClick={() => {
-                        if (isChecked) {
-                          setPermissoes(permissoes.filter(p => p !== modulo.key));
-                        } else {
-                          setPermissoes([...permissoes, modulo.key]);
-                        }
-                      }}
-                      data-testid={`checkbox-permissao-${modulo.key}`}
-                    >
-                      <Checkbox
-                        checked={isChecked}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setPermissoes([...permissoes, modulo.key]);
-                          } else {
-                            setPermissoes(permissoes.filter(p => p !== modulo.key));
-                          }
-                        }}
-                      />
-                      <IconComponent className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">{modulo.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPermissoes(modulosPermissoes.map(m => m.key))}
-                  data-testid="button-select-all-permissions"
-                >
-                  Selecionar Todos
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPermissoes([])}
-                  data-testid="button-clear-permissions"
-                >
-                  Limpar Seleção
-                </Button>
-                {permissoesChanged && (
-                  <Button
-                    size="sm"
-                    onClick={() => updatePermissoesMutation.mutate(permissoes)}
-                    disabled={updatePermissoesMutation.isPending}
-                    data-testid="button-save-permissions"
-                  >
-                    {updatePermissoesMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : null}
-                    Salvar Permissoes
-                  </Button>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground mt-4">
-                As permissoes serao aplicadas aos membros da equipe com perfis abaixo de Administrador.
-              </p>
-            </CardContent>
-          </Card>
-        )}
 
         <Card>
           <CardHeader>

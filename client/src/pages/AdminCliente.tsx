@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -70,6 +70,21 @@ import {
   Eye,
   Download,
   PenTool,
+  Lock,
+  LayoutDashboard,
+  BarChart3,
+  ClipboardCheck,
+  Calendar,
+  Package,
+  Calculator,
+  Store,
+  Megaphone,
+  ShoppingCart,
+  Handshake,
+  Wallet,
+  BookOpen,
+  GitBranch,
+  Loader2,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
 import { format } from "date-fns";
@@ -118,6 +133,27 @@ const permissionLabels: Record<string, string> = {
   tasks: "Tarefas",
   projects: "Projetos",
 };
+
+const modulosPermissoes = [
+  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "clientes", label: "CRM - Clientes", icon: Users },
+  { key: "pipeline", label: "Pipeline de Vendas", icon: BarChart3 },
+  { key: "checklist", label: "Checklist Diagnostico", icon: ClipboardCheck },
+  { key: "atas", label: "Atas / Plano de Acao", icon: FileText },
+  { key: "rfi", label: "RFI - Ficha Tecnica", icon: FileText },
+  { key: "calendario", label: "Calendario Comercial", icon: Calendar },
+  { key: "tarefas", label: "Tarefas", icon: ClipboardCheck },
+  { key: "projetos", label: "Projetos", icon: Package },
+  { key: "calculadoras", label: "Calculadoras", icon: Calculator },
+  { key: "loja", label: "Loja MCG", icon: Store },
+  { key: "mkt", label: "MKT (Pre Vendas)", icon: Megaphone },
+  { key: "com", label: "COM (Vendas)", icon: ShoppingCart },
+  { key: "cac", label: "CAC (Pos Vendas)", icon: Handshake },
+  { key: "financeiro", label: "Gestao Financeira", icon: Wallet },
+  { key: "whatsapp", label: "WhatsApp", icon: MessageSquare },
+  { key: "manual", label: "Manual APP", icon: BookOpen },
+  { key: "fluxograma", label: "Fluxograma", icon: GitBranch },
+];
 
 const categoryLabels: Record<string, string> = {
   suporte: "Suporte Tecnico",
@@ -1380,6 +1416,129 @@ function ContractsTab() {
   );
 }
 
+function PermissoesTab() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [permissoes, setPermissoes] = useState<string[]>([]);
+  const [originalPermissoes, setOriginalPermissoes] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (user?.permissions) {
+      const perms = Array.isArray(user.permissions) ? user.permissions : [];
+      setPermissoes(perms);
+      setOriginalPermissoes(perms);
+    }
+  }, [user?.permissions]);
+
+  const updatePermissoesMutation = useMutation({
+    mutationFn: async (permissions: string[]) => {
+      const res = await apiRequest("PATCH", "/api/user/permissions", { permissions });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: "Erro desconhecido" }));
+        throw new Error(errorData.message || `Erro ${res.status}`);
+      }
+      return res.json();
+    },
+    onSuccess: (data) => {
+      const savedPermissions = Array.isArray(data.permissions) ? data.permissions : permissoes;
+      setPermissoes(savedPermissions);
+      setOriginalPermissoes(savedPermissions);
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      toast({ title: "Permissoes atualizadas com sucesso" });
+    },
+    onError: (error: Error) => {
+      toast({ title: error.message || "Erro ao atualizar permissoes", variant: "destructive" });
+    },
+  });
+
+  const permissoesChanged = JSON.stringify(permissoes.sort()) !== JSON.stringify(originalPermissoes.sort());
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Lock className="h-5 w-5" />
+          Permissoes de Modulos
+        </CardTitle>
+        <CardDescription>
+          Defina quais modulos os membros da equipe podem acessar
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {modulosPermissoes.map((modulo) => {
+            const IconComponent = modulo.icon;
+            const isChecked = permissoes.includes(modulo.key);
+            return (
+              <div
+                key={modulo.key}
+                className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                  isChecked ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                }`}
+                onClick={() => {
+                  if (isChecked) {
+                    setPermissoes(permissoes.filter(p => p !== modulo.key));
+                  } else {
+                    setPermissoes([...permissoes, modulo.key]);
+                  }
+                }}
+                data-testid={`checkbox-permissao-${modulo.key}`}
+              >
+                <Checkbox
+                  checked={isChecked}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setPermissoes([...permissoes, modulo.key]);
+                    } else {
+                      setPermissoes(permissoes.filter(p => p !== modulo.key));
+                    }
+                  }}
+                />
+                <IconComponent className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">{modulo.label}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPermissoes(modulosPermissoes.map(m => m.key))}
+            data-testid="button-select-all-permissions"
+          >
+            Selecionar Todos
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPermissoes([])}
+            data-testid="button-clear-permissions"
+          >
+            Limpar Selecao
+          </Button>
+          {permissoesChanged && (
+            <Button
+              size="sm"
+              onClick={() => updatePermissoesMutation.mutate(permissoes)}
+              disabled={updatePermissoesMutation.isPending}
+              data-testid="button-save-permissions"
+            >
+              {updatePermissoesMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : null}
+              Salvar Permissoes
+            </Button>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground mt-4">
+          As permissoes serao aplicadas aos membros da equipe com perfis abaixo de Administrador.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminCliente() {
   return (
     <AppLayout title="Admin Cliente">
@@ -1400,6 +1559,10 @@ export default function AdminCliente() {
               <Users className="h-4 w-4 mr-2" />
               Equipe
             </TabsTrigger>
+            <TabsTrigger value="permissoes" data-testid="tab-permissoes">
+              <Lock className="h-4 w-4 mr-2" />
+              Permissoes
+            </TabsTrigger>
             <TabsTrigger value="contratos" data-testid="tab-contratos">
               <FileText className="h-4 w-4 mr-2" />
               Contratos
@@ -1408,6 +1571,10 @@ export default function AdminCliente() {
           
           <TabsContent value="equipe">
             <TeamTab />
+          </TabsContent>
+
+          <TabsContent value="permissoes">
+            <PermissoesTab />
           </TabsContent>
           
           <TabsContent value="contratos">
