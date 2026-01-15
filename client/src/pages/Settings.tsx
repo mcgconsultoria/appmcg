@@ -57,8 +57,17 @@ export default function Settings() {
   const [cnpjFound, setCnpjFound] = useState(false);
   const [perfilConta, setPerfilConta] = useState(user?.perfilConta || "auxiliar");
   const [permissoes, setPermissoes] = useState<string[]>([]);
+  const [originalPermissoes, setOriginalPermissoes] = useState<string[]>([]);
 
   const isAdmin = user?.perfilConta === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
+  
+  useEffect(() => {
+    if (user?.permissions) {
+      const perms = Array.isArray(user.permissions) ? user.permissions : [];
+      setPermissoes(perms);
+      setOriginalPermissoes(perms);
+    }
+  }, [user?.permissions]);
   
   const [companyForm, setCompanyForm] = useState({
     name: "",
@@ -172,6 +181,28 @@ export default function Settings() {
       toast({ title: error.message || "Erro ao atualizar perfil", variant: "destructive" });
     },
   });
+
+  const updatePermissoesMutation = useMutation({
+    mutationFn: async (permissions: string[]) => {
+      const res = await apiRequest("PATCH", "/api/user/permissions", { permissions });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ message: "Erro desconhecido" }));
+        throw new Error(errorData.message || `Erro ${res.status}`);
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      setOriginalPermissoes(permissoes);
+      toast({ title: "Permissoes atualizadas com sucesso" });
+    },
+    onError: (error: Error) => {
+      console.error("Erro ao atualizar permissoes:", error);
+      toast({ title: error.message || "Erro ao atualizar permissoes", variant: "destructive" });
+    },
+  });
+  
+  const permissoesChanged = JSON.stringify(permissoes.sort()) !== JSON.stringify(originalPermissoes.sort());
 
   const handleProfileImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -369,7 +400,7 @@ export default function Settings() {
                   );
                 })}
               </div>
-              <div className="mt-4 flex gap-2">
+              <div className="mt-4 flex flex-wrap gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -386,9 +417,22 @@ export default function Settings() {
                 >
                   Limpar Seleção
                 </Button>
+                {permissoesChanged && (
+                  <Button
+                    size="sm"
+                    onClick={() => updatePermissoesMutation.mutate(permissoes)}
+                    disabled={updatePermissoesMutation.isPending}
+                    data-testid="button-save-permissions"
+                  >
+                    {updatePermissoesMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : null}
+                    Salvar Permissoes
+                  </Button>
+                )}
               </div>
               <p className="text-xs text-muted-foreground mt-4">
-                As permissões serão aplicadas aos membros da equipe com perfis abaixo de Administrador.
+                As permissoes serao aplicadas aos membros da equipe com perfis abaixo de Administrador.
               </p>
             </CardContent>
           </Card>

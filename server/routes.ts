@@ -575,6 +575,46 @@ export async function registerRoutes(
     }
   });
 
+  // Update user permissions
+  app.patch('/api/user/permissions', isAuthenticated, async (req: any, res) => {
+    try {
+      const { permissions } = req.body;
+      
+      // Validate permissions array
+      if (!Array.isArray(permissions)) {
+        return res.status(400).json({ message: "Permissoes devem ser um array" });
+      }
+      
+      // Only admin/admin_mcg can change permissions
+      const isAdmin = req.user?.role === "admin" || req.user?.role === "admin_mcg" || req.user?.perfilConta === "administrador";
+      if (!isAdmin) {
+        return res.status(403).json({ message: "Sem permissao para alterar permissoes" });
+      }
+      
+      // Validate permission keys
+      const validPermissions = [
+        "dashboard", "clientes", "pipeline", "checklist", "atas", "rfi", 
+        "calendario", "tarefas", "projetos", "calculadoras", "loja", 
+        "mkt", "com", "cac", "financeiro", "whatsapp", "manual", "fluxograma"
+      ];
+      const invalidPerms = permissions.filter((p: string) => !validPermissions.includes(p));
+      if (invalidPerms.length > 0) {
+        return res.status(400).json({ message: `Permissoes invalidas: ${invalidPerms.join(", ")}` });
+      }
+      
+      const updatedUser = await storage.updateUserProfile(req.user.id, { permissions });
+      if (!updatedUser) {
+        return res.status(404).json({ message: "Usuario nao encontrado" });
+      }
+      
+      const { password, ...userWithoutPassword } = updatedUser;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error updating user permissions:", error);
+      res.status(500).json({ message: "Erro ao atualizar permissoes" });
+    }
+  });
+
   // CNPJ lookup (public - needed for registration)
   app.get('/api/cnpj/:cnpj', async (req, res) => {
     try {

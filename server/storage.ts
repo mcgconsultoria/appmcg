@@ -245,7 +245,7 @@ export interface IStorage {
   getUserBySessionToken(token: string): Promise<User | undefined>;
   createUserWithPassword(userData: Partial<UpsertUser>): Promise<User>;
   updateUserSessionToken(userId: string, token: string | null): Promise<void>;
-  updateUserProfile(userId: string, data: { profileImageUrl?: string; firstName?: string; lastName?: string }): Promise<User | undefined>;
+  updateUserProfile(userId: string, data: { profileImageUrl?: string; firstName?: string; lastName?: string; perfilConta?: string; permissions?: string[] }): Promise<User | undefined>;
   getPendingApprovalUsers(): Promise<User[]>;
   approveUser(userId: string, approvedBy: string): Promise<User | undefined>;
   rejectUser(userId: string, reason: string): Promise<User | undefined>;
@@ -740,7 +740,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId));
   }
 
-  async updateUserProfile(userId: string, data: { profileImageUrl?: string; firstName?: string; lastName?: string }): Promise<User | undefined> {
+  async updateUserProfile(userId: string, data: { profileImageUrl?: string; firstName?: string; lastName?: string; perfilConta?: string; permissions?: string[] }): Promise<User | undefined> {
     const [user] = await db
       .update(users)
       .set({ ...data, updatedAt: new Date() })
