@@ -4069,6 +4069,44 @@ export async function registerRoutes(
     }
   });
 
+  // All approved users - for Admin MCG user management
+  app.get("/api/admin/users", isMcgAdmin, async (req: any, res) => {
+    try {
+      const allUsers = await storage.getAllApprovedUsers();
+      const safeUsers = allUsers.map(u => {
+        const { password, activeSessionToken, ...user } = u;
+        return user;
+      });
+      res.json(safeUsers);
+    } catch (error) {
+      console.error("Error fetching all users:", error);
+      res.status(500).json({ message: "Erro ao buscar usuarios" });
+    }
+  });
+
+  // Toggle full access for a user
+  app.post("/api/admin/users/:userId/full-access", isMcgAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { granted } = req.body;
+      const grantedBy = req.user?.email || 'admin';
+      
+      const user = await storage.updateUserFullAccess(userId, !!granted, grantedBy);
+      if (!user) {
+        return res.status(404).json({ message: "Usuario nao encontrado" });
+      }
+
+      const { password, activeSessionToken, ...safeUser } = user;
+      res.json({ 
+        message: granted ? "Acesso completo liberado" : "Acesso completo removido", 
+        user: safeUser 
+      });
+    } catch (error) {
+      console.error("Error updating user full access:", error);
+      res.status(500).json({ message: "Erro ao atualizar acesso do usuario" });
+    }
+  });
+
   // Admin Dashboard
   app.get("/api/admin/dashboard", isAdmin, async (req: any, res) => {
     try {

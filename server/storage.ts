@@ -247,10 +247,12 @@ export interface IStorage {
   updateUserSessionToken(userId: string, token: string | null): Promise<void>;
   updateUserProfile(userId: string, data: { profileImageUrl?: string; firstName?: string; lastName?: string; perfilConta?: string; permissions?: string[] }): Promise<User | undefined>;
   getPendingApprovalUsers(): Promise<User[]>;
+  getAllApprovedUsers(): Promise<User[]>;
   approveUser(userId: string, approvedBy: string): Promise<User | undefined>;
   rejectUser(userId: string, reason: string): Promise<User | undefined>;
   suspendUser(userId: string, reason: string): Promise<User | undefined>;
   updateUserRole(userId: string, role: string): Promise<User | undefined>;
+  updateUserFullAccess(userId: string, granted: boolean, grantedBy: string): Promise<User | undefined>;
 
   // Company operations
   getCompany(id: number): Promise<Company | undefined>;
@@ -799,6 +801,28 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({ 
         role,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async getAllApprovedUsers(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.accountStatus, "approved"))
+      .orderBy(desc(users.createdAt));
+  }
+
+  async updateUserFullAccess(userId: string, granted: boolean, grantedBy: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        fullAccessGranted: granted,
+        fullAccessGrantedAt: granted ? new Date() : null,
+        fullAccessGrantedBy: granted ? grantedBy : null,
         updatedAt: new Date() 
       })
       .where(eq(users.id, userId))
