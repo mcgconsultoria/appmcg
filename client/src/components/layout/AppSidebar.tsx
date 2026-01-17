@@ -540,12 +540,12 @@ const adminPfItems = [
   },
   {
     title: "Gestão Financeira",
-    url: "/pessoal/gestao-financeira",
+    url: "/pessoal/financeiro",
     icon: Wallet,
   },
   {
     title: "Contas Bancárias",
-    url: "/pessoal/contas",
+    url: "/pessoal/bancos",
     icon: Landmark,
   },
   {
