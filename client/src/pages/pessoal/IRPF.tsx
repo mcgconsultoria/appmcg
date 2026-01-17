@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { AdminPessoalLayout } from "@/components/AdminPessoalLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -219,7 +219,7 @@ export default function IRPF() {
 
   if (!selectedDeclaration) {
     return (
-      <AdminPessoalLayout>
+      <AppLayout title="IRPF" subtitle="Imposto de Renda Pessoa Física">
         <div className="space-y-6">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
@@ -298,12 +298,12 @@ export default function IRPF() {
             </div>
           )}
         </div>
-      </AdminPessoalLayout>
+      </AppLayout>
     );
   }
 
   return (
-    <AdminPessoalLayout>
+    <AppLayout title="IRPF" subtitle="Imposto de Renda Pessoa Física">
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
@@ -698,6 +698,6 @@ export default function IRPF() {
           </TabsContent>
         </Tabs>
       </div>
-    </AdminPessoalLayout>
+    </AppLayout>
   );
 }

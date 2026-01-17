@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { AdminPessoalLayout } from "@/components/AdminPessoalLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -149,7 +149,7 @@ export default function FinanceiroPessoal() {
   const saldo = totalReceitas - totalDespesas;
 
   return (
-    <AdminPessoalLayout>
+    <AppLayout title="Gestão Financeira" subtitle="Gerencie suas finanças pessoais">
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
@@ -443,6 +443,6 @@ export default function FinanceiroPessoal() {
           </TabsContent>
         </Tabs>
       </div>
-    </AdminPessoalLayout>
+    </AppLayout>
   );
 }

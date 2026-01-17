@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { AdminPessoalLayout } from "@/components/AdminPessoalLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -187,7 +187,7 @@ export default function PlanoContasPF() {
   const transferenciaCategories = categories.filter((c) => c.type === "transferencia");
 
   return (
-    <AdminPessoalLayout>
+    <AppLayout title="Plano de Contas" subtitle="Estruture suas categorias financeiras">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold" data-testid="text-page-title">
@@ -476,6 +476,6 @@ export default function PlanoContasPF() {
           </DialogContent>
         </Dialog>
       </div>
-    </AdminPessoalLayout>
+    </AppLayout>
   );
 }

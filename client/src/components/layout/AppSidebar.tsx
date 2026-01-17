@@ -534,7 +534,7 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true, fullA
 
 const adminPfItems = [
   {
-    title: "Dashboard PF",
+    title: "Visão Geral",
     url: "/pessoal",
     icon: LayoutDashboard,
   },
@@ -544,14 +544,19 @@ const adminPfItems = [
     icon: Wallet,
   },
   {
-    title: "Contas Bancárias",
-    url: "/pessoal/bancos",
-    icon: Landmark,
+    title: "Plano de Contas",
+    url: "/pessoal/plano-contas",
+    icon: PieChart,
   },
   {
     title: "Centros de Custo",
     url: "/pessoal/centros-custo",
     icon: Building2,
+  },
+  {
+    title: "Contas Bancárias",
+    url: "/pessoal/bancos",
+    icon: Landmark,
   },
   {
     title: "IRPF",

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { AdminPessoalLayout } from "@/components/AdminPessoalLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +50,7 @@ export default function PessoalDashboard() {
   };
 
   return (
-    <AdminPessoalLayout>
+    <AppLayout title="Visão Geral" subtitle="Resumo das suas finanças pessoais">
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold" data-testid="text-page-title">Visao Geral</h1>
@@ -202,6 +202,6 @@ export default function PessoalDashboard() {
           </CardContent>
         </Card>
       </div>
-    </AdminPessoalLayout>
+    </AppLayout>
   );
 }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { AdminPessoalLayout } from "@/components/AdminPessoalLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -160,7 +160,7 @@ export default function ContasBancariasPF() {
   };
 
   return (
-    <AdminPessoalLayout>
+    <AppLayout title="Contas Bancárias" subtitle="Gerencie suas contas bancárias pessoais">
       <div className="space-y-6">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
@@ -424,6 +424,6 @@ export default function ContasBancariasPF() {
           </DialogContent>
         </Dialog>
       </div>
-    </AdminPessoalLayout>
+    </AppLayout>
   );
 }
