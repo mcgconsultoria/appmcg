@@ -63,6 +63,7 @@ export function usePermissions() {
   const hasPermission = (permissionCode: string): boolean => {
     if (!user) return false;
     if (user.role === "admin_mcg") return true;
+    if (user.fullAccessGranted) return true;
     if (user.role === "admin") {
       const adminPerms = ["admin.users", "admin.roles", "admin.settings", "admin.billing"];
       if (adminPerms.includes(permissionCode)) return true;
@@ -81,6 +82,7 @@ export function usePermissions() {
   const hasModuleAccess = (module: string): boolean => {
     if (!user) return false;
     if (user.role === "admin_mcg") return true;
+    if (user.fullAccessGranted) return true;
     return permissions.some(p => p.startsWith(`${module}.`));
   };
 

@@ -4645,17 +4645,6 @@ export async function registerRoutes(
     }
   });
 
-  // Admin Users (list all users for subscription management)
-  app.get("/api/admin/users", isAdmin, async (req: any, res) => {
-    try {
-      const allUsers = await storage.getClients();
-      res.json(allUsers);
-    } catch (error) {
-      console.error("Error fetching users for admin:", error);
-      res.status(500).json({ message: "Failed to fetch users" });
-    }
-  });
-
   // ============================================
   // CLIENT ADMIN - Company Team Management APIs
   // ============================================
