@@ -80,6 +80,9 @@ export const users = pgTable("users", {
   approvedBy: varchar("approved_by"),
   selectedPlan: varchar("selected_plan", { length: 50 }).default("free"),
   additionalUsers: integer("additional_users").default(0),
+  fullAccessGranted: boolean("full_access_granted").default(false),
+  fullAccessGrantedAt: timestamp("full_access_granted_at"),
+  fullAccessGrantedBy: varchar("full_access_granted_by"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
