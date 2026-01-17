@@ -356,17 +356,34 @@ interface CollapsibleSectionProps {
 }
 
 function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = false, userPlan, planLoaded = true, userRole, fullAccessGranted }: CollapsibleSectionProps) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-  
   const isItemActive = (itemUrl: string) => {
     if (itemUrl === "/admin") {
       return location === "/admin";
     }
     return location === itemUrl || location.startsWith(itemUrl + "/");
   };
+  
+  // Check if any item in this section is currently active
+  const hasActiveItem = items.some(item => isItemActive(item.url));
+  
+  // Initialize open state: open if has active item or defaultOpen
+  const [isOpen, setIsOpen] = useState(defaultOpen || hasActiveItem);
+  
+  // Keep menu open if navigating within its items
+  const [wasManuallyToggled, setWasManuallyToggled] = useState(false);
+  
+  // Auto-open when navigating to an item in this section
+  if (hasActiveItem && !isOpen && !wasManuallyToggled) {
+    setIsOpen(true);
+  }
+  
+  const handleToggle = (open: boolean) => {
+    setWasManuallyToggled(true);
+    setIsOpen(open);
+  };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <Collapsible open={isOpen} onOpenChange={handleToggle}>
       <SidebarGroup>
         <CollapsibleTrigger asChild>
           <button
@@ -449,15 +466,39 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
 }
 
 function AdminPJSection({ location, userRole, userPlan, planLoaded = true, fullAccessGranted }: { location: string; userRole?: string; userPlan?: string | null; planLoaded?: boolean; fullAccessGranted?: boolean | null }) {
-  const [isOpen, setIsOpen] = useState(false);
-  
   // Filter comercial items - only admin_mcg can see "Aguardando Aprovação" and "Usuarios"
   const filteredComercialItems = userRole === 'admin_mcg' 
     ? adminMcgComercialItems 
     : adminMcgComercialItems.filter(item => item.url !== '/admin/aguardando-aprovacao' && item.url !== '/admin/usuarios');
 
+  // Check if any item in Admin PJ sections is currently active
+  const allAdminPJItems = [
+    ...filteredComercialItems,
+    ...adminMcgMarketingItems,
+    ...adminMcgFinanceiroItems,
+    ...adminMcgLojaItems,
+    ...adminMcgSistemaItems
+  ];
+  
+  const hasActiveItem = allAdminPJItems.some(item => 
+    location === item.url || location.startsWith(item.url + "/")
+  );
+  
+  const [isOpen, setIsOpen] = useState(hasActiveItem);
+  const [wasManuallyToggled, setWasManuallyToggled] = useState(false);
+  
+  // Auto-open when navigating to an item in this section
+  if (hasActiveItem && !isOpen && !wasManuallyToggled) {
+    setIsOpen(true);
+  }
+  
+  const handleToggle = (open: boolean) => {
+    setWasManuallyToggled(true);
+    setIsOpen(open);
+  };
+
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <Collapsible open={isOpen} onOpenChange={handleToggle}>
       <SidebarGroup>
         <CollapsibleTrigger asChild>
           <button
@@ -566,17 +607,31 @@ const adminPfItems = [
 ];
 
 function AdminPFSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted }: { location: string; userPlan?: string | null; planLoaded?: boolean; userRole?: string; fullAccessGranted?: boolean | null }) {
-  const [isOpen, setIsOpen] = useState(false);
-
   const isItemActive = (itemUrl: string) => {
     if (itemUrl === "/pessoal") {
       return location === "/pessoal";
     }
     return location === itemUrl || location.startsWith(itemUrl + "/");
   };
+  
+  // Check if any item in Admin PF section is currently active
+  const hasActiveItem = adminPfItems.some(item => isItemActive(item.url));
+  
+  const [isOpen, setIsOpen] = useState(hasActiveItem);
+  const [wasManuallyToggled, setWasManuallyToggled] = useState(false);
+  
+  // Auto-open when navigating to an item in this section
+  if (hasActiveItem && !isOpen && !wasManuallyToggled) {
+    setIsOpen(true);
+  }
+  
+  const handleToggle = (open: boolean) => {
+    setWasManuallyToggled(true);
+    setIsOpen(open);
+  };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <Collapsible open={isOpen} onOpenChange={handleToggle}>
       <SidebarGroup>
         <CollapsibleTrigger asChild>
           <button
