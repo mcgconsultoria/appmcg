@@ -34,7 +34,7 @@ interface ChatOption {
 }
 
 const FAQ_RESPONSES: Record<string, string> = {
-  planos: "Oferecemos 3 planos: Free (R$0), Professional (R$499/mês) e Enterprise (R$1.499/mês). Todos incluem 1 usuário base. Usuários adicionais custam R$69/mês cada. Quer saber mais sobre algum plano específico?",
+  planos: "Oferecemos 3 planos: Free (R$0), Profissional (R$399/mês) e Corporativo (R$1.299/mês). Todos incluem 1 usuário base. Usuários adicionais custam R$49/mês cada. Quer saber mais sobre algum plano específico?",
   calculadoras: "Temos duas calculadoras: Frete (com ICMS de todos os estados) e Armazenagem. No plano Free você tem 3 cálculos gratuitos. Nos planos pagos, cálculos ilimitados!",
   pagamento: "Aceitamos cartão de crédito via Stripe. Após aprovação da MCG, você receberá o link de pagamento por email. Precisa de ajuda com pagamento?",
   suporte: "Nosso suporte funciona em horário comercial. Você pode abrir um ticket aqui no chat ou enviar email para comercial@mcgconsultoria.com.br",
