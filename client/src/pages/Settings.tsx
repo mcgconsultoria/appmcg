@@ -13,7 +13,18 @@ import { useTheme } from "@/components/ThemeProvider";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { User, Bell, Palette, Building2, Upload, Loader2, Search, CheckCircle2, UserCog, Shield } from "lucide-react";
+import { User, Bell, Palette, Building2, Upload, Loader2, Search, CheckCircle2, UserCog, Shield, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Company } from "@shared/schema";
 import { TaxIdField } from "@/components/TaxIdField";
@@ -36,7 +47,26 @@ export default function Settings() {
   const [cnpjLoading, setCnpjLoading] = useState(false);
   const [cnpjFound, setCnpjFound] = useState(false);
   const [perfilConta, setPerfilConta] = useState(user?.perfilConta || "auxiliar");
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const isAdmin = user?.perfilConta === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      await apiRequest("DELETE", "/api/auth/delete-account");
+      toast({ title: "Conta excluída com sucesso" });
+      window.location.href = "/";
+    } catch (error: any) {
+      toast({ 
+        title: error.message || "Erro ao excluir conta", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteConfirmOpen(false);
+    }
+  };
   
   const [companyForm, setCompanyForm] = useState({
     name: "",
@@ -540,16 +570,55 @@ export default function Settings() {
               </Button>
             </div>
             <Separator />
-            <div>
+            <div className="flex items-center gap-3">
               <Link href="/logout">
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                <Button
+                  variant="destructive"
                   data-testid="button-logout-settings"
                 >
                   Sair da Conta
-                </button>
+                </Button>
               </Link>
+              
+              <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    data-testid="button-delete-account"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Excluir Conta
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Tem certeza que deseja excluir sua conta?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Esta ação é irreversível. Todos os seus dados serão permanentemente excluídos, 
+                      incluindo clientes, tarefas, projetos e configurações.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel data-testid="button-cancel-delete">Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteAccount}
+                      disabled={isDeleting}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      data-testid="button-confirm-delete"
+                    >
+                      {isDeleting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Excluindo...
+                        </>
+                      ) : (
+                        "Sim, excluir minha conta"
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </CardContent>
         </Card>

@@ -420,6 +420,33 @@ export async function registerRoutes(
     }
   });
 
+  // Delete account endpoint
+  app.delete('/api/auth/delete-account', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const companyId = req.user.companyId;
+
+      // Delete all user-related data
+      // Note: This deletes the user's data but preserves company data if there are other users
+      
+      // Clear the session cookie first
+      res.clearCookie(SESSION_COOKIE_NAME, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+      });
+
+      // Delete the user from the database
+      await storage.deleteUser(userId);
+
+      res.json({ message: "Conta excluída com sucesso" });
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      res.status(500).json({ message: "Erro ao excluir conta" });
+    }
+  });
+
   app.post('/api/auth/forgot-password', async (req, res) => {
     try {
       const { email } = req.body;

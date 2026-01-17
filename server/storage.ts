@@ -845,6 +845,10 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async deleteUser(userId: string): Promise<void> {
+    await db.delete(users).where(eq(users.id, userId));
+  }
+
   async setPasswordResetToken(userId: string, token: string, expiry: Date): Promise<void> {
     await db
       .update(users)
