@@ -60,8 +60,8 @@ const planOptions = [
 ];
 
 const userCategoryOptions = [
-  { key: "embarcador", label: "Embarcador", desc: "Busca prestadores de serviço" },
   { key: "servicos", label: "Transportadora", desc: "Busca clientes" },
+  { key: "embarcador", label: "Embarcador", desc: "Busca prestadores de serviço" },
   { key: "operador", label: "Operador Logístico", desc: "Busca clientes e prestadores de serviço" },
   { key: "carga_descarga", label: "Carga/Descarga", desc: "Serviços de carga e descarga" },
   { key: "motorista", label: "Motoristas", desc: "Terceiros, Agregados, Autônomos" },
