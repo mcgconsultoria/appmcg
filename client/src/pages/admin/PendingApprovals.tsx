@@ -37,7 +37,7 @@ export default function PendingApprovals() {
 
   const approveMutation = useMutation({
     mutationFn: async (userId: string) => {
-      return apiRequest(`/api/admin/approve-user/${userId}`, { method: "POST" });
+      return apiRequest("POST", `/api/admin/approve-user/${userId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-approvals"] });
@@ -57,11 +57,7 @@ export default function PendingApprovals() {
 
   const rejectMutation = useMutation({
     mutationFn: async ({ userId, reason }: { userId: string; reason: string }) => {
-      return apiRequest(`/api/admin/reject-user/${userId}`, {
-        method: "POST",
-        body: JSON.stringify({ reason }),
-        headers: { "Content-Type": "application/json" },
-      });
+      return apiRequest("POST", `/api/admin/reject-user/${userId}`, { reason });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-approvals"] });
