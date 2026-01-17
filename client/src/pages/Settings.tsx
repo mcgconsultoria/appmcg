@@ -8,13 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/components/ThemeProvider";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { User, Bell, Shield, Palette, Building2, Upload, Loader2, Search, CheckCircle2, UserCog, Lock, Store, Megaphone, ShoppingCart, Handshake, Calculator, LayoutDashboard, Users, ClipboardCheck, FileText, Calendar, Wallet, MessageSquare, BookOpen, GitBranch, BarChart3, Package } from "lucide-react";
+import { User, Bell, Palette, Building2, Upload, Loader2, Search, CheckCircle2, UserCog, Shield } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { Company } from "@shared/schema";
 import { TaxIdField } from "@/components/TaxIdField";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,26 +26,6 @@ const perfisConta = [
   { value: "auxiliar", label: "Auxiliar" },
 ];
 
-const modulosPermissoes = [
-  { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { key: "clientes", label: "CRM - Clientes", icon: Users },
-  { key: "pipeline", label: "Pipeline de Vendas", icon: BarChart3 },
-  { key: "checklist", label: "Checklist Diagnóstico", icon: ClipboardCheck },
-  { key: "atas", label: "Atas / Plano de Ação", icon: FileText },
-  { key: "rfi", label: "RFI - Ficha Técnica", icon: FileText },
-  { key: "calendario", label: "Calendário Comercial", icon: Calendar },
-  { key: "tarefas", label: "Tarefas", icon: ClipboardCheck },
-  { key: "projetos", label: "Projetos", icon: Package },
-  { key: "calculadoras", label: "Calculadoras", icon: Calculator },
-  { key: "loja", label: "Loja MCG", icon: Store },
-  { key: "mkt", label: "MKT (Pré Vendas)", icon: Megaphone },
-  { key: "com", label: "COM (Vendas)", icon: ShoppingCart },
-  { key: "cac", label: "CAC (Pós Vendas)", icon: Handshake },
-  { key: "financeiro", label: "Gestão Financeira", icon: Wallet },
-  { key: "whatsapp", label: "WhatsApp", icon: MessageSquare },
-  { key: "manual", label: "Manual APP", icon: BookOpen },
-  { key: "fluxograma", label: "Fluxograma", icon: GitBranch },
-];
 
 export default function Settings() {
   const { user } = useAuth();
@@ -56,18 +36,7 @@ export default function Settings() {
   const [cnpjLoading, setCnpjLoading] = useState(false);
   const [cnpjFound, setCnpjFound] = useState(false);
   const [perfilConta, setPerfilConta] = useState(user?.perfilConta || "auxiliar");
-  const [permissoes, setPermissoes] = useState<string[]>([]);
-  const [originalPermissoes, setOriginalPermissoes] = useState<string[]>([]);
-
   const isAdmin = user?.perfilConta === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
-  
-  useEffect(() => {
-    if (user?.permissions) {
-      const perms = Array.isArray(user.permissions) ? user.permissions : [];
-      setPermissoes(perms);
-      setOriginalPermissoes(perms);
-    }
-  }, [user?.permissions]);
   
   const [companyForm, setCompanyForm] = useState({
     name: "",
@@ -181,30 +150,6 @@ export default function Settings() {
       toast({ title: error.message || "Erro ao atualizar perfil", variant: "destructive" });
     },
   });
-
-  const updatePermissoesMutation = useMutation({
-    mutationFn: async (permissions: string[]) => {
-      const res = await apiRequest("PATCH", "/api/user/permissions", { permissions });
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ message: "Erro desconhecido" }));
-        throw new Error(errorData.message || `Erro ${res.status}`);
-      }
-      return res.json();
-    },
-    onSuccess: (data) => {
-      const savedPermissions = Array.isArray(data.permissions) ? data.permissions : permissoes;
-      setPermissoes(savedPermissions);
-      setOriginalPermissoes(savedPermissions);
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      toast({ title: "Permissoes atualizadas com sucesso" });
-    },
-    onError: (error: Error) => {
-      console.error("Erro ao atualizar permissoes:", error);
-      toast({ title: error.message || "Erro ao atualizar permissoes", variant: "destructive" });
-    },
-  });
-  
-  const permissoesChanged = JSON.stringify(permissoes.sort()) !== JSON.stringify(originalPermissoes.sort());
 
   const handleProfileImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
