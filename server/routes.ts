@@ -4107,6 +4107,29 @@ export async function registerRoutes(
     }
   });
 
+  // Toggle active status for a user
+  app.post("/api/admin/users/:userId/active", isMcgAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { active } = req.body;
+      const changedBy = req.user?.email || 'admin';
+      
+      const user = await storage.updateUserActiveStatus(userId, !!active, changedBy);
+      if (!user) {
+        return res.status(404).json({ message: "Usuario nao encontrado" });
+      }
+
+      const { password, activeSessionToken, ...safeUser } = user;
+      res.json({ 
+        message: active ? "Usuario ativado" : "Usuario desativado", 
+        user: safeUser 
+      });
+    } catch (error) {
+      console.error("Error updating user active status:", error);
+      res.status(500).json({ message: "Erro ao atualizar status do usuario" });
+    }
+  });
+
   // Admin Dashboard
   app.get("/api/admin/dashboard", isAdmin, async (req: any, res) => {
     try {

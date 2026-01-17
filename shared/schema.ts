@@ -83,6 +83,9 @@ export const users = pgTable("users", {
   fullAccessGranted: boolean("full_access_granted").default(false),
   fullAccessGrantedAt: timestamp("full_access_granted_at"),
   fullAccessGrantedBy: varchar("full_access_granted_by"),
+  isActive: boolean("is_active").default(true),
+  deactivatedAt: timestamp("deactivated_at"),
+  deactivatedBy: varchar("deactivated_by"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

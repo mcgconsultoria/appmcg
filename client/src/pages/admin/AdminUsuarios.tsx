@@ -46,6 +46,28 @@ export default function AdminUsuarios() {
     },
   });
 
+  const toggleActiveStatusMutation = useMutation({
+    mutationFn: async ({ userId, active }: { userId: string; active: boolean }) => {
+      return apiRequest("POST", `/api/admin/users/${userId}/active`, { active });
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: variables.active ? "Usuario ativado" : "Usuario desativado",
+        description: variables.active 
+          ? "O usuario pode acessar o sistema normalmente." 
+          : "O usuario foi bloqueado e nao pode mais acessar o sistema.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Nao foi possivel atualizar o status do usuario.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const filteredUsers = users?.filter((user) => {
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
@@ -109,7 +131,7 @@ export default function AdminUsuarios() {
         ) : (
           <div className="grid gap-4">
             {filteredUsers?.map((user) => (
-              <Card key={user.id} className={user.fullAccessGranted ? "border-primary/50 bg-primary/5" : ""}>
+              <Card key={user.id} className={user.isActive === false ? "border-destructive/50 bg-destructive/5 opacity-70" : user.fullAccessGranted ? "border-primary/50 bg-primary/5" : ""}>
                 <CardContent className="p-6">
                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div className="flex items-start gap-4 flex-1">
@@ -125,7 +147,13 @@ export default function AdminUsuarios() {
                           <h3 className="font-semibold text-lg" data-testid={`text-user-name-${user.id}`}>
                             {user.firstName} {user.lastName}
                           </h3>
-                          {user.fullAccessGranted && (
+                          {user.isActive === false && (
+                            <Badge variant="destructive">
+                              <X className="h-3 w-3 mr-1" />
+                              Inativo
+                            </Badge>
+                          )}
+                          {user.fullAccessGranted && user.isActive !== false && (
                             <Badge className="bg-primary text-primary-foreground">
                               <Crown className="h-3 w-3 mr-1" />
                               Acesso Completo
@@ -188,22 +216,37 @@ export default function AdminUsuarios() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Acesso Completo</span>
-                        <Switch
-                          checked={!!user.fullAccessGranted}
-                          onCheckedChange={(checked) => {
-                            toggleFullAccessMutation.mutate({ userId: user.id, granted: checked });
-                          }}
-                          disabled={toggleFullAccessMutation.isPending}
-                          data-testid={`switch-full-access-${user.id}`}
-                        />
+                    <div className="flex flex-col items-end gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">Ativo</span>
+                          <Switch
+                            checked={user.isActive !== false}
+                            onCheckedChange={(checked) => {
+                              toggleActiveStatusMutation.mutate({ userId: user.id, active: checked });
+                            }}
+                            disabled={toggleActiveStatusMutation.isPending}
+                            data-testid={`switch-active-${user.id}`}
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">Acesso Completo</span>
+                          <Switch
+                            checked={!!user.fullAccessGranted}
+                            onCheckedChange={(checked) => {
+                              toggleFullAccessMutation.mutate({ userId: user.id, granted: checked });
+                            }}
+                            disabled={toggleFullAccessMutation.isPending}
+                            data-testid={`switch-full-access-${user.id}`}
+                          />
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground max-w-[200px] text-right">
-                        {user.fullAccessGranted 
-                          ? "Este usuario tem acesso a todos os modulos" 
-                          : "Libere acesso completo independente do plano"}
+                      <p className="text-xs text-muted-foreground max-w-[280px] text-right">
+                        {user.isActive === false 
+                          ? "Usuario bloqueado - nao pode acessar o sistema" 
+                          : user.fullAccessGranted 
+                            ? "Usuario ativo com acesso a todos os modulos" 
+                            : "Usuario ativo seguindo restricoes do plano"}
                       </p>
                     </div>
                   </div>

@@ -253,6 +253,7 @@ export interface IStorage {
   suspendUser(userId: string, reason: string): Promise<User | undefined>;
   updateUserRole(userId: string, role: string): Promise<User | undefined>;
   updateUserFullAccess(userId: string, granted: boolean, grantedBy: string): Promise<User | undefined>;
+  updateUserActiveStatus(userId: string, active: boolean, changedBy: string): Promise<User | undefined>;
 
   // Company operations
   getCompany(id: number): Promise<Company | undefined>;
@@ -823,6 +824,20 @@ export class DatabaseStorage implements IStorage {
         fullAccessGranted: granted,
         fullAccessGrantedAt: granted ? new Date() : null,
         fullAccessGrantedBy: granted ? grantedBy : null,
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateUserActiveStatus(userId: string, active: boolean, changedBy: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        isActive: active,
+        deactivatedAt: active ? null : new Date(),
+        deactivatedBy: active ? null : changedBy,
         updatedAt: new Date() 
       })
       .where(eq(users.id, userId))

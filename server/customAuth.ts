@@ -239,6 +239,11 @@ export async function loginUser(data: LoginData): Promise<{ user: User; sessionT
   if (user.accountStatus === "suspended") {
     return { error: "Sua conta foi suspensa. Entre em contato com comercial@mcgconsultoria.com.br" };
   }
+  
+  // Verificar se o usuario está ativo
+  if (user.isActive === false) {
+    return { error: "Sua conta foi desativada. Entre em contato com comercial@mcgconsultoria.com.br" };
+  }
 
   const sessionToken = generateSessionToken();
   
