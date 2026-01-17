@@ -237,7 +237,7 @@ export default function MeuPlano() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Usuário Adicional</span>
-              <span className="text-sm">R$ 69,00/mês</span>
+              <span className="text-sm">R$ 49,00/mês</span>
             </div>
           </CardContent>
         </Card>
