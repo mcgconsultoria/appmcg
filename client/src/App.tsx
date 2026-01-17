@@ -67,6 +67,7 @@ import PessoalIRPF from "@/pages/pessoal/IRPF";
 import AdminIRPJ from "@/pages/admin/IRPJ";
 import AdminPlanos from "@/pages/admin/AdminPlanos";
 import AdminPermissoes from "@/pages/admin/AdminPermissoes";
+import AdminUsuarios from "@/pages/admin/AdminUsuarios";
 import MeuPlano from "@/pages/admin/MeuPlano";
 import ContasBancariasPF from "@/pages/pessoal/ContasBancariasPF";
 import CentrosCustoPF from "@/pages/pessoal/CentrosCustoPF";
@@ -120,6 +121,9 @@ function Router() {
       </Route>
       <Route path="/admin/aguardando-aprovacao">
         {() => isAuthenticated && isMcgAdmin ? <PendingApprovals /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/usuarios">
+        {() => isAuthenticated && isMcgAdmin ? <AdminUsuarios /> : <AdminLogin />}
       </Route>
       <Route path="/admin/comercial">
         {() => isAuthenticated && isAdmin ? <AdminComercial /> : <AdminLogin />}

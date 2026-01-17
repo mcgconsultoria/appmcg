@@ -107,6 +107,11 @@ const adminMcgComercialItems = [
     icon: UserCheck,
   },
   {
+    title: "Usuarios",
+    url: "/admin/usuarios",
+    icon: Users,
+  },
+  {
     title: "Comercial",
     url: "/admin/comercial",
     icon: Briefcase,
