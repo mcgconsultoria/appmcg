@@ -865,7 +865,8 @@ export async function registerRoutes(
   // Company routes
   app.get("/api/company", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const company = await storage.getCompany(userCompanyId);
       if (!company) {
         return res.status(404).json({ message: "Company not found" });
@@ -882,8 +883,9 @@ export async function registerRoutes(
       console.log("PATCH /api/company - user:", req.user?.id, "companyId:", req.user?.companyId);
       console.log("PATCH /api/company - body fields:", Object.keys(req.body));
       
-      // Use user's companyId or default to 1 for single-tenant MVP
-      const userCompanyId = req.user?.companyId || 1;
+      // Use user's companyId with secure validation
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       
       // Validate and sanitize allowed fields
       const allowedFields = ["name", "nomeFantasia", "cnpj", "inscricaoEstadual", "inscricaoEstadualIsento", "inscricaoMunicipal", "email", "phone", "address", "city", "state", "logo"];
@@ -1174,8 +1176,8 @@ export async function registerRoutes(
 
   app.post("/api/checklists", isAuthenticated, async (req, res) => {
     try {
-      const user = req.user as any;
-      const userCompanyId = user?.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       
       const parsed = insertChecklistSchema.safeParse({
         ...req.body,
@@ -1295,7 +1297,8 @@ export async function registerRoutes(
   app.post("/api/checklists/:checklistId/attachments", isAuthenticated, async (req, res) => {
     try {
       const checklistId = parseInt(req.params.checklistId);
-      const companyId = req.user?.companyId || 1;
+      const companyId = getRequiredCompanyId(req, res);
+      if (companyId === null) return;
       const parsed = insertChecklistAttachmentSchema.safeParse({ 
         ...req.body, 
         checklistId,
@@ -2148,7 +2151,9 @@ export async function registerRoutes(
   // Commercial proposals routes
   app.get("/api/commercial-proposals", isAuthenticated, async (req: any, res) => {
     try {
-      const proposals = await storage.getCommercialProposals(req.user.companyId || 1);
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
+      const proposals = await storage.getCommercialProposals(userCompanyId);
       res.json(proposals);
     } catch (error) {
       console.error("Error fetching proposals:", error);
@@ -2159,7 +2164,8 @@ export async function registerRoutes(
   app.get("/api/commercial-proposals/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const proposal = await storage.getCommercialProposal(id);
       if (!proposal) {
         return res.status(404).json({ message: "Proposal not found" });
@@ -2183,8 +2189,11 @@ export async function registerRoutes(
       const validUntil = new Date();
       validUntil.setDate(validUntil.getDate() + (proposalData.validityDays || 15));
       
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
+      
       const proposal = await storage.createCommercialProposal({
-        companyId: req.user.companyId || 1,
+        companyId: userCompanyId,
         clientId: proposalData.clientId || null,
         proposalNumber,
         proposalType: proposalData.proposalType || "freight",
@@ -2243,7 +2252,8 @@ export async function registerRoutes(
   app.patch("/api/commercial-proposals/:id/status", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const { status } = req.body;
       
       const existingProposal = await storage.getCommercialProposal(id);
@@ -2311,7 +2321,8 @@ export async function registerRoutes(
     try {
       const PDFDocument = (await import("pdfkit")).default;
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const proposal = await storage.getCommercialProposal(id);
       
       if (!proposal) {
@@ -2501,7 +2512,8 @@ export async function registerRoutes(
   // Meeting objectives routes (catalog)
   app.get("/api/meeting-objectives", isAuthenticated, async (req: any, res) => {
     try {
-      const companyId = req.user.companyId || 1;
+      const companyId = getRequiredCompanyId(req, res);
+      if (companyId === null) return;
       const objectives = await storage.getMeetingObjectives(companyId);
       res.json(objectives);
     } catch (error) {
@@ -2512,7 +2524,8 @@ export async function registerRoutes(
 
   app.post("/api/meeting-objectives", isAuthenticated, async (req: any, res) => {
     try {
-      const companyId = req.user.companyId || 1;
+      const companyId = getRequiredCompanyId(req, res);
+      if (companyId === null) return;
       const parsed = insertMeetingObjectiveSchema.safeParse({
         ...req.body,
         companyId,
@@ -2543,7 +2556,8 @@ export async function registerRoutes(
   // Meeting records routes (Ata Plano de Acao)
   app.get("/api/meeting-records", isAuthenticated, async (req: any, res) => {
     try {
-      const companyId = req.user.companyId || 1;
+      const companyId = getRequiredCompanyId(req, res);
+      if (companyId === null) return;
       const records = await storage.getMeetingRecords(companyId);
       res.json(records);
     } catch (error) {
@@ -2555,7 +2569,8 @@ export async function registerRoutes(
   app.get("/api/meeting-records/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const record = await storage.getMeetingRecord(id);
       if (!record) {
         return res.status(404).json({ message: "Meeting record not found" });
@@ -2573,7 +2588,8 @@ export async function registerRoutes(
 
   app.post("/api/meeting-records", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const body = {
         ...req.body,
         companyId: userCompanyId,
@@ -2632,7 +2648,8 @@ export async function registerRoutes(
   app.patch("/api/meeting-records/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const existingRecord = await storage.getMeetingRecord(id);
       if (!existingRecord) {
         return res.status(404).json({ message: "Meeting record not found" });
@@ -2656,7 +2673,8 @@ export async function registerRoutes(
   app.delete("/api/meeting-records/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const existingRecord = await storage.getMeetingRecord(id);
       if (!existingRecord) {
         return res.status(404).json({ message: "Meeting record not found" });
@@ -2677,7 +2695,8 @@ export async function registerRoutes(
     try {
       const PDFDocument = (await import("pdfkit")).default;
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const record = await storage.getMeetingRecord(id);
       
       if (!record) {
@@ -2811,7 +2830,8 @@ export async function registerRoutes(
       const PDFDocument = (await import("pdfkit")).default;
       
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const record = await storage.getMeetingRecord(id);
       
       if (!record) {
@@ -2966,7 +2986,8 @@ export async function registerRoutes(
   app.get("/api/meeting-records/:id/action-items", isAuthenticated, async (req: any, res) => {
     try {
       const meetingRecordId = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const record = await storage.getMeetingRecord(meetingRecordId);
       if (!record) {
         return res.status(404).json({ message: "Meeting record not found" });
@@ -2985,7 +3006,8 @@ export async function registerRoutes(
   app.post("/api/meeting-records/:id/action-items", isAuthenticated, async (req: any, res) => {
     try {
       const meetingRecordId = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const record = await storage.getMeetingRecord(meetingRecordId);
       if (!record) {
         return res.status(404).json({ message: "Meeting record not found" });
@@ -3070,7 +3092,8 @@ export async function registerRoutes(
   // Commercial events routes
   app.get("/api/commercial-events", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const events = await storage.getCommercialEvents(userCompanyId);
       res.json(events);
     } catch (error) {
@@ -3082,7 +3105,8 @@ export async function registerRoutes(
   app.get("/api/commercial-events/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const event = await storage.getCommercialEvent(id);
       if (!event) {
         return res.status(404).json({ message: "Commercial event not found" });
@@ -3099,7 +3123,8 @@ export async function registerRoutes(
 
   app.post("/api/commercial-events", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const parsed = insertCommercialEventSchema.safeParse({
         ...req.body,
         companyId: userCompanyId,
@@ -3119,7 +3144,8 @@ export async function registerRoutes(
   app.patch("/api/commercial-events/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const existingEvent = await storage.getCommercialEvent(id);
       if (!existingEvent) {
         return res.status(404).json({ message: "Commercial event not found" });
@@ -3138,7 +3164,8 @@ export async function registerRoutes(
   app.delete("/api/commercial-events/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const existingEvent = await storage.getCommercialEvent(id);
       if (!existingEvent) {
         return res.status(404).json({ message: "Commercial event not found" });
@@ -3167,7 +3194,8 @@ export async function registerRoutes(
       if (isNaN(id)) {
         return res.status(400).json({ message: "ID de evento invalido" });
       }
-      const userCompanyId = req.user?.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const event = await storage.getCommercialEvent(id);
       
       if (!event) {
@@ -3214,7 +3242,8 @@ export async function registerRoutes(
       if (!type || !["clients", "tasks", "events"].includes(type)) {
         return res.status(400).json({ message: "Tipo de exportacao invalido. Use: clients, tasks, events" });
       }
-      const userCompanyId = req.user?.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       let data: any[][] = [];
       let sheetName = "";
 
@@ -3430,7 +3459,8 @@ export async function registerRoutes(
   // Projects routes
   app.get("/api/projects", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const projects = await storage.getProjects(userCompanyId);
       res.json(projects);
     } catch (error) {
@@ -3442,7 +3472,8 @@ export async function registerRoutes(
   app.get("/api/projects/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const project = await storage.getProject(id);
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
@@ -3459,7 +3490,8 @@ export async function registerRoutes(
 
   app.post("/api/projects", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const parsed = insertProjectSchema.safeParse({
         ...req.body,
         companyId: userCompanyId,
@@ -3478,7 +3510,8 @@ export async function registerRoutes(
   app.patch("/api/projects/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const existingProject = await storage.getProject(id);
       if (!existingProject) {
         return res.status(404).json({ message: "Project not found" });
@@ -3497,7 +3530,8 @@ export async function registerRoutes(
   app.delete("/api/projects/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const existingProject = await storage.getProject(id);
       if (!existingProject) {
         return res.status(404).json({ message: "Project not found" });
@@ -3516,7 +3550,8 @@ export async function registerRoutes(
   // Tasks routes
   app.get("/api/tasks", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const tasks = await storage.getTasks(userCompanyId);
       res.json(tasks);
     } catch (error) {
@@ -3528,7 +3563,8 @@ export async function registerRoutes(
   app.get("/api/projects/:id/tasks", isAuthenticated, async (req: any, res) => {
     try {
       const projectId = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const project = await storage.getProject(projectId);
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
@@ -3547,7 +3583,8 @@ export async function registerRoutes(
   app.get("/api/tasks/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const task = await storage.getTask(id);
       if (!task) {
         return res.status(404).json({ message: "Task not found" });
@@ -3564,7 +3601,8 @@ export async function registerRoutes(
 
   app.post("/api/tasks", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const parsed = insertTaskSchema.safeParse({
         ...req.body,
         companyId: userCompanyId,
@@ -3583,7 +3621,8 @@ export async function registerRoutes(
   app.patch("/api/tasks/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const existingTask = await storage.getTask(id);
       if (!existingTask) {
         return res.status(404).json({ message: "Task not found" });
@@ -3602,7 +3641,8 @@ export async function registerRoutes(
   app.delete("/api/tasks/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const existingTask = await storage.getTask(id);
       if (!existingTask) {
         return res.status(404).json({ message: "Task not found" });
@@ -3621,7 +3661,8 @@ export async function registerRoutes(
   // RFI routes
   app.get("/api/rfis", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const rfis = await storage.getRfis(userCompanyId);
       res.json(rfis);
     } catch (error) {
@@ -3633,7 +3674,8 @@ export async function registerRoutes(
   app.get("/api/rfis/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const rfi = await storage.getRfi(id);
       if (!rfi) {
         return res.status(404).json({ message: "RFI not found" });
@@ -3650,7 +3692,8 @@ export async function registerRoutes(
 
   app.post("/api/rfis", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const parsed = insertRfiSchema.safeParse({
         ...req.body,
         companyId: userCompanyId,
@@ -3669,7 +3712,8 @@ export async function registerRoutes(
   app.patch("/api/rfis/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const existingRfi = await storage.getRfi(id);
       if (!existingRfi) {
         return res.status(404).json({ message: "RFI not found" });
@@ -3688,7 +3732,8 @@ export async function registerRoutes(
   app.delete("/api/rfis/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const existingRfi = await storage.getRfi(id);
       if (!existingRfi) {
         return res.status(404).json({ message: "RFI not found" });
@@ -3711,7 +3756,8 @@ export async function registerRoutes(
   // Get billing pace data for dashboard
   app.get("/api/dashboard/billing-pace", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const monthParam = req.query.month as string; // YYYY-MM format
       
       // Parse the month or default to current month
@@ -3843,7 +3889,8 @@ export async function registerRoutes(
   // Billing Entries CRUD
   app.get("/api/billing-entries", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const { startDate, endDate } = req.query;
       
       const start = startDate ? new Date(startDate as string) : new Date(new Date().getFullYear(), 0, 1);
@@ -3859,7 +3906,8 @@ export async function registerRoutes(
 
   app.post("/api/billing-entries", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const parsed = insertOperationBillingEntrySchema.safeParse({
         ...req.body,
         companyId: userCompanyId,
@@ -3880,7 +3928,8 @@ export async function registerRoutes(
   app.patch("/api/billing-entries/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       
       // Verify ownership by fetching entries for this company and checking if the ID exists
       const allEntries = await storage.getOperationBillingEntries(userCompanyId, new Date(2000, 0, 1), new Date(2100, 0, 1));
@@ -3900,7 +3949,8 @@ export async function registerRoutes(
   app.delete("/api/billing-entries/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       
       // Verify ownership
       const allEntries = await storage.getOperationBillingEntries(userCompanyId, new Date(2000, 0, 1), new Date(2100, 0, 1));
@@ -3920,7 +3970,8 @@ export async function registerRoutes(
   // Billing Goals CRUD
   app.get("/api/billing-goals", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const goalMonth = req.query.month as string | undefined;
       
       const goals = await storage.getOperationBillingGoals(userCompanyId, goalMonth);
@@ -3933,7 +3984,8 @@ export async function registerRoutes(
 
   app.post("/api/billing-goals", isAuthenticated, async (req: any, res) => {
     try {
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const parsed = insertOperationBillingGoalSchema.safeParse({
         ...req.body,
         companyId: userCompanyId,
@@ -3954,7 +4006,8 @@ export async function registerRoutes(
   app.patch("/api/billing-goals/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       
       // Verify ownership
       const allGoals = await storage.getOperationBillingGoals(userCompanyId);
@@ -3974,7 +4027,8 @@ export async function registerRoutes(
   app.delete("/api/billing-goals/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const userCompanyId = req.user.companyId || 1;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       
       // Verify ownership
       const allGoals = await storage.getOperationBillingGoals(userCompanyId);
