@@ -105,6 +105,16 @@ function isMcgAdmin(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+// Helper function to get companyId safely - returns null if not found
+function getRequiredCompanyId(req: Request, res: Response): number | null {
+  const companyId = req.user?.companyId;
+  if (!companyId) {
+    res.status(403).json({ message: "Usuário não vinculado a uma empresa. Entre em contato com o suporte." });
+    return null;
+  }
+  return companyId;
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
