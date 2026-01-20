@@ -758,11 +758,17 @@ export async function registerRoutes(
     try {
       const id = parseInt(req.params.id);
       const user = req.user;
-      const isAdministrador = user?.role === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
+      const isAdminMCG = user?.role === "admin_mcg";
+      const isAdministrador = user?.role === "administrador" || user?.role === "admin" || isAdminMCG;
       
       const client = await storage.getClient(id);
       if (!client) {
         return res.status(404).json({ message: "Client not found" });
+      }
+      
+      // Verificar companyId para prevenir acesso entre tenants (admin_mcg pode ver todos)
+      if (!isAdminMCG && client.companyId && user?.companyId && client.companyId !== user.companyId) {
+        return res.status(403).json({ message: "Acesso negado" });
       }
       
       // Verificar acesso se nao for administrador
@@ -803,12 +809,18 @@ export async function registerRoutes(
     try {
       const id = parseInt(req.params.id);
       const user = req.user;
-      const isAdministrador = user?.role === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
+      const isAdminMCG = user?.role === "admin_mcg";
+      const isAdministrador = user?.role === "administrador" || user?.role === "admin" || isAdminMCG;
       
       // Verificar acesso antes de atualizar
       const existingClient = await storage.getClient(id);
       if (!existingClient) {
         return res.status(404).json({ message: "Client not found" });
+      }
+      
+      // Verificar companyId para prevenir acesso entre tenants (admin_mcg pode ver todos)
+      if (!isAdminMCG && existingClient.companyId && user?.companyId && existingClient.companyId !== user.companyId) {
+        return res.status(403).json({ message: "Acesso negado" });
       }
       
       if (!isAdministrador && user?.email) {
@@ -835,12 +847,18 @@ export async function registerRoutes(
     try {
       const id = parseInt(req.params.id);
       const user = req.user;
-      const isAdministrador = user?.role === "administrador" || user?.role === "admin" || user?.role === "admin_mcg";
+      const isAdminMCG = user?.role === "admin_mcg";
+      const isAdministrador = user?.role === "administrador" || user?.role === "admin" || isAdminMCG;
       
       // Verificar acesso antes de deletar
       const existingClient = await storage.getClient(id);
       if (!existingClient) {
         return res.status(404).json({ message: "Client not found" });
+      }
+      
+      // Verificar companyId para prevenir acesso entre tenants (admin_mcg pode ver todos)
+      if (!isAdminMCG && existingClient.companyId && user?.companyId && existingClient.companyId !== user.companyId) {
+        return res.status(403).json({ message: "Acesso negado" });
       }
       
       if (!isAdministrador && user?.email) {
@@ -1194,13 +1212,19 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/checklists/:id", isAuthenticated, async (req, res) => {
+  app.patch("/api/checklists/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const checklist = await storage.updateChecklist(id, req.body);
-      if (!checklist) {
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
+      const existingChecklist = await storage.getChecklist(id);
+      if (!existingChecklist) {
         return res.status(404).json({ message: "Checklist not found" });
       }
+      if (existingChecklist.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      const checklist = await storage.updateChecklist(id, req.body);
       res.json(checklist);
     } catch (error) {
       console.error("Error updating checklist:", error);
@@ -1208,9 +1232,18 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/checklists/:id", isAuthenticated, async (req, res) => {
+  app.delete("/api/checklists/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
+      const existingChecklist = await storage.getChecklist(id);
+      if (!existingChecklist) {
+        return res.status(404).json({ message: "Checklist not found" });
+      }
+      if (existingChecklist.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
       await storage.deleteChecklist(id);
       res.status(204).send();
     } catch (error) {
@@ -1220,9 +1253,18 @@ export async function registerRoutes(
   });
 
   // Checklist items routes
-  app.get("/api/checklists/:checklistId/items", isAuthenticated, async (req, res) => {
+  app.get("/api/checklists/:checklistId/items", isAuthenticated, async (req: any, res) => {
     try {
       const checklistId = parseInt(req.params.checklistId);
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
+      const checklist = await storage.getChecklist(checklistId);
+      if (!checklist) {
+        return res.status(404).json({ message: "Checklist not found" });
+      }
+      if (checklist.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
       const items = await storage.getChecklistItems(checklistId);
       res.json(items);
     } catch (error) {
@@ -1261,9 +1303,18 @@ export async function registerRoutes(
   });
 
   // Checklist attachments routes
-  app.get("/api/checklists/:checklistId/attachments", isAuthenticated, async (req, res) => {
+  app.get("/api/checklists/:checklistId/attachments", isAuthenticated, async (req: any, res) => {
     try {
       const checklistId = parseInt(req.params.checklistId);
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
+      const checklist = await storage.getChecklist(checklistId);
+      if (!checklist) {
+        return res.status(404).json({ message: "Checklist not found" });
+      }
+      if (checklist.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
       const attachments = await storage.getChecklistAttachments(checklistId);
       res.json(attachments);
     } catch (error) {
@@ -1315,13 +1366,19 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/attachments/:id", isAuthenticated, async (req, res) => {
+  app.patch("/api/attachments/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const attachment = await storage.updateChecklistAttachment(id, req.body);
-      if (!attachment) {
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
+      const existingAttachment = await storage.getChecklistAttachment(id);
+      if (!existingAttachment) {
         return res.status(404).json({ message: "Attachment not found" });
       }
+      if (existingAttachment.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      const attachment = await storage.updateChecklistAttachment(id, req.body);
       res.json(attachment);
     } catch (error) {
       console.error("Error updating attachment:", error);
@@ -1329,9 +1386,18 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/attachments/:id", isAuthenticated, async (req, res) => {
+  app.delete("/api/attachments/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
+      const existingAttachment = await storage.getChecklistAttachment(id);
+      if (!existingAttachment) {
+        return res.status(404).json({ message: "Attachment not found" });
+      }
+      if (existingAttachment.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
       await storage.deleteChecklistAttachment(id);
       res.status(204).send();
     } catch (error) {
@@ -1748,12 +1814,17 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/saved-routes/:id", isAuthenticated, async (req, res) => {
+  app.get("/api/saved-routes/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
       const route = await storage.getSavedRoute(id);
       if (!route) {
         return res.status(404).json({ message: "Rota não encontrada" });
+      }
+      if (route.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Acesso negado" });
       }
       res.json(route);
     } catch (error) {
@@ -1801,18 +1872,26 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/saved-routes/:id", isAuthenticated, async (req, res) => {
+  app.patch("/api/saved-routes/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const user = req.user as User;
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
+      const existingRoute = await storage.getSavedRoute(id);
+      if (!existingRoute) {
+        return res.status(404).json({ message: "Rota não encontrada" });
+      }
+      if (existingRoute.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
       const body = { ...req.body };
       if (body.routeDate && typeof body.routeDate === "string") {
         body.routeDate = new Date(body.routeDate);
       }
       
       // Check for duplicate route on update (excluding current route)
-      if (user.companyId && body.originCity && body.destinationCity) {
-        const existingRoutes = await storage.getSavedRoutes(user.companyId);
+      if (body.originCity && body.destinationCity) {
+        const existingRoutes = await storage.getSavedRoutes(userCompanyId);
         const isDuplicate = existingRoutes.some(r => 
           r.id !== id &&
           r.originCity === body.originCity &&
@@ -1830,9 +1909,6 @@ export async function registerRoutes(
       }
       
       const route = await storage.updateSavedRoute(id, body);
-      if (!route) {
-        return res.status(404).json({ message: "Rota não encontrada" });
-      }
       res.json(route);
     } catch (error) {
       console.error("Error updating saved route:", error);
@@ -1840,9 +1916,18 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/saved-routes/:id", isAuthenticated, async (req, res) => {
+  app.delete("/api/saved-routes/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
+      const existingRoute = await storage.getSavedRoute(id);
+      if (!existingRoute) {
+        return res.status(404).json({ message: "Rota não encontrada" });
+      }
+      if (existingRoute.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
       await storage.deleteSavedRoute(id);
       res.status(204).send();
     } catch (error) {
@@ -1876,13 +1961,19 @@ export async function registerRoutes(
     }
   });
 
-  app.patch("/api/financial/:id", isAuthenticated, async (req, res) => {
+  app.patch("/api/financial/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
-      const account = await storage.updateFinancialAccount(id, req.body);
-      if (!account) {
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
+      const existingAccount = await storage.getFinancialAccount(id);
+      if (!existingAccount) {
         return res.status(404).json({ message: "Account not found" });
       }
+      if (existingAccount.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      const account = await storage.updateFinancialAccount(id, req.body);
       res.json(account);
     } catch (error) {
       console.error("Error updating financial account:", error);
@@ -1890,9 +1981,18 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/financial/:id", isAuthenticated, async (req, res) => {
+  app.delete("/api/financial/:id", isAuthenticated, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
+      const userCompanyId = getRequiredCompanyId(req, res);
+      if (userCompanyId === null) return;
+      const existingAccount = await storage.getFinancialAccount(id);
+      if (!existingAccount) {
+        return res.status(404).json({ message: "Account not found" });
+      }
+      if (existingAccount.companyId !== userCompanyId) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
       await storage.deleteFinancialAccount(id);
       res.status(204).send();
     } catch (error) {

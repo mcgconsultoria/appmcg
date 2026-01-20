@@ -282,6 +282,7 @@ export interface IStorage {
 
   // Checklist attachment operations
   getChecklistAttachments(checklistId: number): Promise<ChecklistAttachment[]>;
+  getChecklistAttachment(id: number): Promise<ChecklistAttachment | undefined>;
   getChecklistAttachmentsByCompany(companyId: number): Promise<ChecklistAttachment[]>;
   getExpiringAttachments(daysAhead: number): Promise<ChecklistAttachment[]>;
   createChecklistAttachment(attachment: InsertChecklistAttachment): Promise<ChecklistAttachment>;
@@ -991,6 +992,11 @@ export class DatabaseStorage implements IStorage {
   // Checklist attachment operations
   async getChecklistAttachments(checklistId: number): Promise<ChecklistAttachment[]> {
     return db.select().from(checklistAttachments).where(eq(checklistAttachments.checklistId, checklistId));
+  }
+
+  async getChecklistAttachment(id: number): Promise<ChecklistAttachment | undefined> {
+    const [attachment] = await db.select().from(checklistAttachments).where(eq(checklistAttachments.id, id));
+    return attachment;
   }
 
   async getChecklistAttachmentsByCompany(companyId: number): Promise<ChecklistAttachment[]> {
