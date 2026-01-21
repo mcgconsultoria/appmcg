@@ -2131,8 +2131,8 @@ export class DatabaseStorage implements IStorage {
     
     const defaultTemplates = [
       {
-        name: "Checklist Operador Logístico - Transporte Rodoviário",
-        description: "Template completo para diagnóstico de operações de transporte rodoviário. Inclui análise comercial, operacional, qualidade, financeiro e gestão de riscos.",
+        name: "Checklist Operador Logístico - Armazenagem e Distribuição",
+        description: "Template completo para diagnóstico de operações de operador logístico. Inclui análise comercial, armazenagem, WMS, qualidade, financeiro e gestão de riscos.",
         segment: "Operador Logístico",
         priceInCents: 14900,
         isActive: true,
@@ -2148,12 +2148,13 @@ export class DatabaseStorage implements IStorage {
               ]
             },
             {
-              id: "operacional",
-              title: "Operacional - Transporte",
+              id: "armazenagem",
+              title: "Operacional - Armazenagem",
               items: [
-                { id: "op1", text: "Frota própria ou terceirizada documentada?", checked: false },
-                { id: "op2", text: "Controle de manutenção preventiva?", checked: false },
-                { id: "op3", text: "Sistema de rastreamento ativo?", checked: false }
+                { id: "arm1", text: "WMS implementado e funcionando?", checked: false },
+                { id: "arm2", text: "Endereçamento lógico definido?", checked: false },
+                { id: "arm3", text: "Inventário cíclico realizado regularmente?", checked: false },
+                { id: "arm4", text: "Acuracidade de estoque acima de 98%?", checked: false }
               ]
             },
             {
@@ -2177,7 +2178,7 @@ export class DatabaseStorage implements IStorage {
               title: "GRISCO",
               items: [
                 { id: "g1", text: "Gerenciamento de riscos implementado?", checked: false },
-                { id: "g2", text: "Seguro de carga ativo?", checked: false }
+                { id: "g2", text: "Seguro de mercadoria ativo?", checked: false }
               ]
             }
           ]
@@ -2268,8 +2269,8 @@ export class DatabaseStorage implements IStorage {
   async forceSeedChecklistTemplates(): Promise<void> {
     const defaultTemplates = [
       {
-        name: "Checklist Operador Logístico - Transporte Rodoviário",
-        description: "Template completo para diagnóstico de operações de transporte rodoviário. Inclui análise comercial, operacional, qualidade, financeiro e gestão de riscos.",
+        name: "Checklist Operador Logístico - Armazenagem e Distribuição",
+        description: "Template completo para diagnóstico de operações de operador logístico. Inclui análise comercial, armazenagem, WMS, qualidade, financeiro e gestão de riscos.",
         segment: "Operador Logístico",
         priceInCents: 14900,
         isActive: true,
@@ -2280,10 +2281,11 @@ export class DatabaseStorage implements IStorage {
               { id: "com2", text: "Tem tabela de preços atualizada?", checked: false },
               { id: "com3", text: "Realiza follow-up com clientes regularmente?", checked: false }
             ]},
-            { id: "operacional", title: "Operacional - Transporte", items: [
-              { id: "op1", text: "Frota própria ou terceirizada documentada?", checked: false },
-              { id: "op2", text: "Controle de manutenção preventiva?", checked: false },
-              { id: "op3", text: "Sistema de rastreamento ativo?", checked: false }
+            { id: "armazenagem", title: "Operacional - Armazenagem", items: [
+              { id: "arm1", text: "WMS implementado e funcionando?", checked: false },
+              { id: "arm2", text: "Endereçamento lógico definido?", checked: false },
+              { id: "arm3", text: "Inventário cíclico realizado regularmente?", checked: false },
+              { id: "arm4", text: "Acuracidade de estoque acima de 98%?", checked: false }
             ]},
             { id: "qualidade", title: "Qualidade", items: [
               { id: "q1", text: "Possui certificação ISO ou equivalente?", checked: false },
@@ -2295,7 +2297,7 @@ export class DatabaseStorage implements IStorage {
             ]},
             { id: "grisco", title: "GRISCO", items: [
               { id: "g1", text: "Gerenciamento de riscos implementado?", checked: false },
-              { id: "g2", text: "Seguro de carga ativo?", checked: false }
+              { id: "g2", text: "Seguro de mercadoria ativo?", checked: false }
             ]}
           ]
         }
