@@ -2131,185 +2131,51 @@ export class DatabaseStorage implements IStorage {
     
     const defaultTemplates = [
       {
-        name: "Checklist Operador Logístico - Armazenagem e Distribuição",
-        description: "Template completo para diagnóstico de operações de operador logístico. Inclui análise comercial, armazenagem, WMS, qualidade, financeiro e gestão de riscos.",
-        segment: "Operador Logístico",
-        priceInCents: 14900,
-        isActive: true,
-        templateData: {
-          sections: [
-            {
-              id: "comercial",
-              title: "Comercial",
-              items: [
-                { id: "com1", text: "Possui contrato formal de prestação de serviços?", checked: false },
-                { id: "com2", text: "Tem tabela de preços atualizada?", checked: false },
-                { id: "com3", text: "Realiza follow-up com clientes regularmente?", checked: false }
-              ]
-            },
-            {
-              id: "armazenagem",
-              title: "Operacional - Armazenagem",
-              items: [
-                { id: "arm1", text: "WMS implementado e funcionando?", checked: false },
-                { id: "arm2", text: "Endereçamento lógico definido?", checked: false },
-                { id: "arm3", text: "Inventário cíclico realizado regularmente?", checked: false },
-                { id: "arm4", text: "Acuracidade de estoque acima de 98%?", checked: false }
-              ]
-            },
-            {
-              id: "qualidade",
-              title: "Qualidade",
-              items: [
-                { id: "q1", text: "Possui certificação ISO ou equivalente?", checked: false },
-                { id: "q2", text: "Indicadores de performance definidos?", checked: false }
-              ]
-            },
-            {
-              id: "financeiro",
-              title: "Financeiro",
-              items: [
-                { id: "f1", text: "Controle de custos por operação?", checked: false },
-                { id: "f2", text: "Margem de contribuição calculada?", checked: false }
-              ]
-            },
-            {
-              id: "grisco",
-              title: "GRISCO",
-              items: [
-                { id: "g1", text: "Gerenciamento de riscos implementado?", checked: false },
-                { id: "g2", text: "Seguro de mercadoria ativo?", checked: false }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        name: "Checklist Indústria - Expedição e Distribuição",
-        description: "Template para avaliação de processos de expedição industrial. Foco em picking, packing, carregamento e indicadores de produtividade.",
-        segment: "Indústria",
-        priceInCents: 9900,
-        isActive: true,
-        templateData: {
-          sections: [
-            {
-              id: "expedicao",
-              title: "Expedição",
-              items: [
-                { id: "e1", text: "Área de expedição organizada e sinalizada?", checked: false },
-                { id: "e2", text: "Processo de picking padronizado?", checked: false },
-                { id: "e3", text: "Conferência de carga documentada?", checked: false }
-              ]
-            },
-            {
-              id: "distribuicao",
-              title: "Distribuição",
-              items: [
-                { id: "d1", text: "Roteirização de entregas otimizada?", checked: false },
-                { id: "d2", text: "Controle de entregas realizadas?", checked: false }
-              ]
-            },
-            {
-              id: "indicadores",
-              title: "Indicadores",
-              items: [
-                { id: "i1", text: "OTIF (On Time In Full) monitorado?", checked: false },
-                { id: "i2", text: "Custo por entrega calculado?", checked: false }
-              ]
-            }
-          ]
-        }
-      },
-      {
-        name: "Checklist Armazenagem - WMS e Controle de Estoque",
-        description: "Diagnóstico completo de operações de armazenagem. Inclui avaliação de WMS, layout, endereçamento e acuracidade de inventário.",
-        segment: "Armazenagem",
-        priceInCents: 12900,
-        isActive: true,
-        templateData: {
-          sections: [
-            {
-              id: "wms",
-              title: "Sistema WMS",
-              items: [
-                { id: "w1", text: "WMS implementado e funcionando?", checked: false },
-                { id: "w2", text: "Integração com ERP ativa?", checked: false },
-                { id: "w3", text: "Usuários treinados no sistema?", checked: false }
-              ]
-            },
-            {
-              id: "estoque",
-              title: "Controle de Estoque",
-              items: [
-                { id: "es1", text: "Inventário cíclico realizado?", checked: false },
-                { id: "es2", text: "Acuracidade acima de 98%?", checked: false },
-                { id: "es3", text: "FIFO/FEFO implementado?", checked: false }
-              ]
-            },
-            {
-              id: "layout",
-              title: "Layout e Endereçamento",
-              items: [
-                { id: "l1", text: "Endereçamento lógico definido?", checked: false },
-                { id: "l2", text: "Área de avarias segregada?", checked: false }
-              ]
-            }
-          ]
-        }
-      }
-    ];
-
-    for (const template of defaultTemplates) {
-      await db.insert(checklistTemplates).values(template as any);
-    }
-    
-    console.log("Checklist templates seeded successfully");
-  }
-
-  async forceSeedChecklistTemplates(): Promise<void> {
-    const defaultTemplates = [
-      {
-        name: "Checklist Operador Logístico - Armazenagem e Distribuição",
-        description: "Template completo para diagnóstico de operações de operador logístico. Inclui análise comercial, armazenagem, WMS, qualidade, financeiro e gestão de riscos.",
-        segment: "Operador Logístico",
-        priceInCents: 14900,
+        name: "Checklist Transporte - Diagnóstico Completo",
+        description: "Template completo para diagnóstico de operações de transporte rodoviário. Inclui análise comercial, operacional, frota, qualidade, financeiro e gestão de riscos.",
+        segment: "Transporte",
+        priceInCents: 16990,
         isActive: true,
         templateData: {
           sections: [
             { id: "comercial", title: "Comercial", items: [
               { id: "com1", text: "Possui contrato formal de prestação de serviços?", checked: false },
-              { id: "com2", text: "Tem tabela de preços atualizada?", checked: false },
+              { id: "com2", text: "Tem tabela de frete atualizada?", checked: false },
               { id: "com3", text: "Realiza follow-up com clientes regularmente?", checked: false }
             ]},
-            { id: "armazenagem", title: "Operacional - Armazenagem", items: [
-              { id: "arm1", text: "WMS implementado e funcionando?", checked: false },
-              { id: "arm2", text: "Endereçamento lógico definido?", checked: false },
-              { id: "arm3", text: "Inventário cíclico realizado regularmente?", checked: false },
-              { id: "arm4", text: "Acuracidade de estoque acima de 98%?", checked: false }
+            { id: "operacional", title: "Operacional - Transporte", items: [
+              { id: "op1", text: "Frota própria ou terceirizada documentada?", checked: false },
+              { id: "op2", text: "Controle de manutenção preventiva?", checked: false },
+              { id: "op3", text: "Sistema de rastreamento ativo?", checked: false },
+              { id: "op4", text: "Roteirização de entregas otimizada?", checked: false }
             ]},
             { id: "qualidade", title: "Qualidade", items: [
               { id: "q1", text: "Possui certificação ISO ou equivalente?", checked: false },
-              { id: "q2", text: "Indicadores de performance definidos?", checked: false }
+              { id: "q2", text: "Indicadores de performance definidos (OTIF, custo/km)?", checked: false }
             ]},
             { id: "financeiro", title: "Financeiro", items: [
-              { id: "f1", text: "Controle de custos por operação?", checked: false },
-              { id: "f2", text: "Margem de contribuição calculada?", checked: false }
+              { id: "f1", text: "Controle de custos por viagem/rota?", checked: false },
+              { id: "f2", text: "Margem de contribuição por cliente calculada?", checked: false }
             ]},
             { id: "grisco", title: "GRISCO", items: [
               { id: "g1", text: "Gerenciamento de riscos implementado?", checked: false },
-              { id: "g2", text: "Seguro de mercadoria ativo?", checked: false }
+              { id: "g2", text: "Seguro de carga ativo e atualizado?", checked: false }
             ]}
           ]
         }
       },
       {
         name: "Checklist Indústria - Expedição e Distribuição",
-        description: "Template para avaliação de processos de expedição industrial. Foco em picking, packing, carregamento e indicadores de produtividade.",
+        description: "Template para avaliação de processos de expedição industrial. Foco em picking, packing, carregamento, distribuição e indicadores de produtividade.",
         segment: "Indústria",
-        priceInCents: 9900,
+        priceInCents: 14990,
         isActive: true,
         templateData: {
           sections: [
+            { id: "comercial", title: "Comercial", items: [
+              { id: "com1", text: "Possui política comercial definida?", checked: false },
+              { id: "com2", text: "Controle de pedidos integrado?", checked: false }
+            ]},
             { id: "expedicao", title: "Expedição", items: [
               { id: "e1", text: "Área de expedição organizada e sinalizada?", checked: false },
               { id: "e2", text: "Processo de picking padronizado?", checked: false },
@@ -2327,16 +2193,21 @@ export class DatabaseStorage implements IStorage {
         }
       },
       {
-        name: "Checklist Armazenagem - WMS e Controle de Estoque",
-        description: "Diagnóstico completo de operações de armazenagem. Inclui avaliação de WMS, layout, endereçamento e acuracidade de inventário.",
-        segment: "Armazenagem",
-        priceInCents: 12900,
+        name: "Checklist Operador Logístico - Armazenagem",
+        description: "Diagnóstico completo de operações de operador logístico e armazenagem. Inclui avaliação de WMS, layout, endereçamento, acuracidade e gestão de estoque.",
+        segment: "Operador Logístico",
+        priceInCents: 12990,
         isActive: true,
         templateData: {
           sections: [
+            { id: "comercial", title: "Comercial", items: [
+              { id: "com1", text: "Possui contrato formal de prestação de serviços?", checked: false },
+              { id: "com2", text: "Tem tabela de preços de armazenagem atualizada?", checked: false },
+              { id: "com3", text: "Realiza follow-up com clientes regularmente?", checked: false }
+            ]},
             { id: "wms", title: "Sistema WMS", items: [
               { id: "w1", text: "WMS implementado e funcionando?", checked: false },
-              { id: "w2", text: "Integração com ERP ativa?", checked: false },
+              { id: "w2", text: "Integração com ERP do cliente ativa?", checked: false },
               { id: "w3", text: "Usuários treinados no sistema?", checked: false }
             ]},
             { id: "estoque", title: "Controle de Estoque", items: [
@@ -2347,6 +2218,117 @@ export class DatabaseStorage implements IStorage {
             { id: "layout", title: "Layout e Endereçamento", items: [
               { id: "l1", text: "Layout otimizado para fluxo?", checked: false },
               { id: "l2", text: "Endereçamento padronizado?", checked: false }
+            ]},
+            { id: "qualidade", title: "Qualidade", items: [
+              { id: "q1", text: "Possui certificação ISO ou equivalente?", checked: false },
+              { id: "q2", text: "Indicadores de performance definidos?", checked: false }
+            ]}
+          ]
+        }
+      }
+    ];
+
+    for (const template of defaultTemplates) {
+      await db.insert(checklistTemplates).values(template as any);
+    }
+    
+    console.log("Checklist templates seeded successfully");
+  }
+
+  async forceSeedChecklistTemplates(): Promise<void> {
+    const defaultTemplates = [
+      {
+        name: "Checklist Transporte - Diagnóstico Completo",
+        description: "Template completo para diagnóstico de operações de transporte rodoviário. Inclui análise comercial, operacional, frota, qualidade, financeiro e gestão de riscos.",
+        segment: "Transporte",
+        priceInCents: 16990,
+        isActive: true,
+        templateData: {
+          sections: [
+            { id: "comercial", title: "Comercial", items: [
+              { id: "com1", text: "Possui contrato formal de prestação de serviços?", checked: false },
+              { id: "com2", text: "Tem tabela de frete atualizada?", checked: false },
+              { id: "com3", text: "Realiza follow-up com clientes regularmente?", checked: false }
+            ]},
+            { id: "operacional", title: "Operacional - Transporte", items: [
+              { id: "op1", text: "Frota própria ou terceirizada documentada?", checked: false },
+              { id: "op2", text: "Controle de manutenção preventiva?", checked: false },
+              { id: "op3", text: "Sistema de rastreamento ativo?", checked: false },
+              { id: "op4", text: "Roteirização de entregas otimizada?", checked: false }
+            ]},
+            { id: "qualidade", title: "Qualidade", items: [
+              { id: "q1", text: "Possui certificação ISO ou equivalente?", checked: false },
+              { id: "q2", text: "Indicadores de performance definidos (OTIF, custo/km)?", checked: false }
+            ]},
+            { id: "financeiro", title: "Financeiro", items: [
+              { id: "f1", text: "Controle de custos por viagem/rota?", checked: false },
+              { id: "f2", text: "Margem de contribuição por cliente calculada?", checked: false }
+            ]},
+            { id: "grisco", title: "GRISCO", items: [
+              { id: "g1", text: "Gerenciamento de riscos implementado?", checked: false },
+              { id: "g2", text: "Seguro de carga ativo e atualizado?", checked: false }
+            ]}
+          ]
+        }
+      },
+      {
+        name: "Checklist Indústria - Expedição e Distribuição",
+        description: "Template para avaliação de processos de expedição industrial. Foco em picking, packing, carregamento, distribuição e indicadores de produtividade.",
+        segment: "Indústria",
+        priceInCents: 14990,
+        isActive: true,
+        templateData: {
+          sections: [
+            { id: "comercial", title: "Comercial", items: [
+              { id: "com1", text: "Possui política comercial definida?", checked: false },
+              { id: "com2", text: "Controle de pedidos integrado?", checked: false }
+            ]},
+            { id: "expedicao", title: "Expedição", items: [
+              { id: "e1", text: "Área de expedição organizada e sinalizada?", checked: false },
+              { id: "e2", text: "Processo de picking padronizado?", checked: false },
+              { id: "e3", text: "Conferência de carga documentada?", checked: false }
+            ]},
+            { id: "distribuicao", title: "Distribuição", items: [
+              { id: "d1", text: "Roteirização de entregas otimizada?", checked: false },
+              { id: "d2", text: "Controle de entregas realizadas?", checked: false }
+            ]},
+            { id: "indicadores", title: "Indicadores", items: [
+              { id: "i1", text: "OTIF (On Time In Full) monitorado?", checked: false },
+              { id: "i2", text: "Custo por entrega calculado?", checked: false }
+            ]}
+          ]
+        }
+      },
+      {
+        name: "Checklist Operador Logístico - Armazenagem",
+        description: "Diagnóstico completo de operações de operador logístico e armazenagem. Inclui avaliação de WMS, layout, endereçamento, acuracidade e gestão de estoque.",
+        segment: "Operador Logístico",
+        priceInCents: 12990,
+        isActive: true,
+        templateData: {
+          sections: [
+            { id: "comercial", title: "Comercial", items: [
+              { id: "com1", text: "Possui contrato formal de prestação de serviços?", checked: false },
+              { id: "com2", text: "Tem tabela de preços de armazenagem atualizada?", checked: false },
+              { id: "com3", text: "Realiza follow-up com clientes regularmente?", checked: false }
+            ]},
+            { id: "wms", title: "Sistema WMS", items: [
+              { id: "w1", text: "WMS implementado e funcionando?", checked: false },
+              { id: "w2", text: "Integração com ERP do cliente ativa?", checked: false },
+              { id: "w3", text: "Usuários treinados no sistema?", checked: false }
+            ]},
+            { id: "estoque", title: "Controle de Estoque", items: [
+              { id: "es1", text: "Inventário cíclico realizado?", checked: false },
+              { id: "es2", text: "Acuracidade acima de 98%?", checked: false },
+              { id: "es3", text: "FIFO/FEFO implementado?", checked: false }
+            ]},
+            { id: "layout", title: "Layout e Endereçamento", items: [
+              { id: "l1", text: "Layout otimizado para fluxo?", checked: false },
+              { id: "l2", text: "Endereçamento padronizado?", checked: false }
+            ]},
+            { id: "qualidade", title: "Qualidade", items: [
+              { id: "q1", text: "Possui certificação ISO ou equivalente?", checked: false },
+              { id: "q2", text: "Indicadores de performance definidos?", checked: false }
             ]}
           ]
         }
