@@ -1442,6 +1442,22 @@ export async function registerRoutes(
     }
   });
 
+  // Admin route to force seed checklist templates (for production sync)
+  app.post("/api/checklist-templates/seed", isAuthenticated, async (req, res) => {
+    try {
+      const isAdmin = req.user?.role === "admin" || req.user?.role === "admin_mcg";
+      if (!isAdmin) {
+        return res.status(403).json({ message: "Apenas admin_mcg pode executar seed" });
+      }
+      await storage.forceSeedChecklistTemplates();
+      const templates = await storage.getChecklistTemplates();
+      res.json({ message: "Templates criados com sucesso", count: templates.length, templates });
+    } catch (error) {
+      console.error("Error seeding checklist templates:", error);
+      res.status(500).json({ message: "Erro ao criar templates" });
+    }
+  });
+
   app.post("/api/checklist-templates", isAuthenticated, async (req, res) => {
     try {
       const isAdmin = req.user?.role === "admin" || req.user?.role === "admin_mcg";

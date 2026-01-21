@@ -531,6 +531,7 @@ export interface IStorage {
   updateChecklistTemplate(id: number, template: Partial<InsertChecklistTemplate>): Promise<ChecklistTemplate | undefined>;
   deleteChecklistTemplate(id: number): Promise<boolean>;
   seedChecklistTemplates(): Promise<void>;
+  forceSeedChecklistTemplates(): Promise<void>;
 
   // Checklist Template Purchase operations
   getChecklistTemplatePurchases(userId: string): Promise<ChecklistTemplatePurchase[]>;
@@ -2262,6 +2263,108 @@ export class DatabaseStorage implements IStorage {
     }
     
     console.log("Checklist templates seeded successfully");
+  }
+
+  async forceSeedChecklistTemplates(): Promise<void> {
+    const defaultTemplates = [
+      {
+        name: "Checklist Operador Logístico - Transporte Rodoviário",
+        description: "Template completo para diagnóstico de operações de transporte rodoviário. Inclui análise comercial, operacional, qualidade, financeiro e gestão de riscos.",
+        segment: "Operador Logístico",
+        priceInCents: 14900,
+        isActive: true,
+        templateData: {
+          sections: [
+            { id: "comercial", title: "Comercial", items: [
+              { id: "com1", text: "Possui contrato formal de prestação de serviços?", checked: false },
+              { id: "com2", text: "Tem tabela de preços atualizada?", checked: false },
+              { id: "com3", text: "Realiza follow-up com clientes regularmente?", checked: false }
+            ]},
+            { id: "operacional", title: "Operacional - Transporte", items: [
+              { id: "op1", text: "Frota própria ou terceirizada documentada?", checked: false },
+              { id: "op2", text: "Controle de manutenção preventiva?", checked: false },
+              { id: "op3", text: "Sistema de rastreamento ativo?", checked: false }
+            ]},
+            { id: "qualidade", title: "Qualidade", items: [
+              { id: "q1", text: "Possui certificação ISO ou equivalente?", checked: false },
+              { id: "q2", text: "Indicadores de performance definidos?", checked: false }
+            ]},
+            { id: "financeiro", title: "Financeiro", items: [
+              { id: "f1", text: "Controle de custos por operação?", checked: false },
+              { id: "f2", text: "Margem de contribuição calculada?", checked: false }
+            ]},
+            { id: "grisco", title: "GRISCO", items: [
+              { id: "g1", text: "Gerenciamento de riscos implementado?", checked: false },
+              { id: "g2", text: "Seguro de carga ativo?", checked: false }
+            ]}
+          ]
+        }
+      },
+      {
+        name: "Checklist Indústria - Expedição e Distribuição",
+        description: "Template para avaliação de processos de expedição industrial. Foco em picking, packing, carregamento e indicadores de produtividade.",
+        segment: "Indústria",
+        priceInCents: 9900,
+        isActive: true,
+        templateData: {
+          sections: [
+            { id: "expedicao", title: "Expedição", items: [
+              { id: "e1", text: "Área de expedição organizada e sinalizada?", checked: false },
+              { id: "e2", text: "Processo de picking padronizado?", checked: false },
+              { id: "e3", text: "Conferência de carga documentada?", checked: false }
+            ]},
+            { id: "distribuicao", title: "Distribuição", items: [
+              { id: "d1", text: "Roteirização de entregas otimizada?", checked: false },
+              { id: "d2", text: "Controle de entregas realizadas?", checked: false }
+            ]},
+            { id: "indicadores", title: "Indicadores", items: [
+              { id: "i1", text: "OTIF (On Time In Full) monitorado?", checked: false },
+              { id: "i2", text: "Custo por entrega calculado?", checked: false }
+            ]}
+          ]
+        }
+      },
+      {
+        name: "Checklist Armazenagem - WMS e Controle de Estoque",
+        description: "Diagnóstico completo de operações de armazenagem. Inclui avaliação de WMS, layout, endereçamento e acuracidade de inventário.",
+        segment: "Armazenagem",
+        priceInCents: 12900,
+        isActive: true,
+        templateData: {
+          sections: [
+            { id: "wms", title: "Sistema WMS", items: [
+              { id: "w1", text: "WMS implementado e funcionando?", checked: false },
+              { id: "w2", text: "Integração com ERP ativa?", checked: false },
+              { id: "w3", text: "Usuários treinados no sistema?", checked: false }
+            ]},
+            { id: "estoque", title: "Controle de Estoque", items: [
+              { id: "es1", text: "Inventário cíclico realizado?", checked: false },
+              { id: "es2", text: "Acuracidade acima de 98%?", checked: false },
+              { id: "es3", text: "FIFO/FEFO implementado?", checked: false }
+            ]},
+            { id: "layout", title: "Layout e Endereçamento", items: [
+              { id: "l1", text: "Layout otimizado para fluxo?", checked: false },
+              { id: "l2", text: "Endereçamento padronizado?", checked: false }
+            ]}
+          ]
+        }
+      }
+    ];
+
+    for (const template of defaultTemplates) {
+      // Check if template with this name already exists
+      const [existing] = await db.select().from(checklistTemplates)
+        .where(eq(checklistTemplates.name, template.name));
+      
+      if (!existing) {
+        await db.insert(checklistTemplates).values(template as any);
+        console.log(`Template created: ${template.name}`);
+      } else {
+        console.log(`Template already exists: ${template.name}`);
+      }
+    }
+    
+    console.log("Force seed checklist templates completed");
   }
 
   // Checklist Template Purchase operations
