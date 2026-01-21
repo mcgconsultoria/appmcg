@@ -211,7 +211,7 @@ const adminMcgFinanceiroItems = [
 
 const adminMcgLojaItems = [
   {
-    title: "Loja MCG",
+    title: "Produtos",
     url: "/admin/loja",
     icon: Store,
   },
@@ -540,7 +540,7 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true, fullA
               fullAccessGranted={fullAccessGranted}
             />
             <CollapsibleSection
-              title="Loja"
+              title="Loja MCG"
               icon={Store}
               items={adminMcgLojaItems}
               location={location}
