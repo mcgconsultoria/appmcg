@@ -31,11 +31,13 @@ import {
   Eye,
   Loader2,
   UserPlus,
+  RefreshCw,
 } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import type { ChecklistTemplate, Client } from "@shared/schema";
 
 const SEGMENT_LABELS: Record<string, string> = {
@@ -59,6 +61,7 @@ const SEGMENT_LABELS: Record<string, string> = {
 
 export default function BibliotecaChecklists() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSegment, setSelectedSegment] = useState<string>("all");
@@ -71,8 +74,32 @@ export default function BibliotecaChecklists() {
   const [purchasingTemplate, setPurchasingTemplate] = useState<ChecklistTemplate | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<string>("brl");
 
+  const isAdminMcg = user?.role === "admin_mcg";
+
   const { data: templates, isLoading } = useQuery<ChecklistTemplate[]>({
     queryKey: ["/api/checklist-templates", selectedSegment !== "all" ? selectedSegment : undefined],
+  });
+
+  const seedMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/checklist-templates/seed", {});
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Templates Criados",
+        description: `${data.count} templates carregados com sucesso!`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/checklist-templates"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/checklist-templates/segments/list"] });
+    },
+    onError: () => {
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os templates.",
+        variant: "destructive",
+      });
+    },
   });
 
   const { data: segments } = useQuery<string[]>({
@@ -233,6 +260,20 @@ export default function BibliotecaChecklists() {
               Checklists prontos por segmento industrial para acelerar sua análise de clientes
             </p>
           </div>
+          {isAdminMcg && (!templates || templates.length === 0) && (
+            <Button
+              onClick={() => seedMutation.mutate()}
+              disabled={seedMutation.isPending}
+              data-testid="button-seed-templates"
+            >
+              {seedMutation.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Carregar Templates
+            </Button>
+          )}
         </div>
 
         <Card>
