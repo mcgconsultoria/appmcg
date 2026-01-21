@@ -260,10 +260,11 @@ export default function BibliotecaChecklists() {
               Checklists prontos por segmento industrial para acelerar sua análise de clientes
             </p>
           </div>
-          {isAdminMcg && (!templates || templates.length === 0) && (
+          {isAdminMcg && (
             <Button
               onClick={() => seedMutation.mutate()}
               disabled={seedMutation.isPending}
+              variant="outline"
               data-testid="button-seed-templates"
             >
               {seedMutation.isPending ? (
@@ -271,7 +272,7 @@ export default function BibliotecaChecklists() {
               ) : (
                 <RefreshCw className="h-4 w-4 mr-2" />
               )}
-              Carregar Templates
+              {(!templates || templates.length === 0) ? "Carregar Templates" : "Sincronizar Templates"}
             </Button>
           )}
         </div>
