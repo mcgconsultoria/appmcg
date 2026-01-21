@@ -141,6 +141,11 @@ const adminMcgComercialItems = [
     url: "/admin/leads-diagnóstico",
     icon: Search,
   },
+  {
+    title: "Templates",
+    url: "/admin/templates",
+    icon: Library,
+  },
 ];
 
 const adminMcgMarketingItems = [
@@ -153,11 +158,6 @@ const adminMcgMarketingItems = [
     title: "Kit Marca",
     url: "/admin/kit-marca",
     icon: Palette,
-  },
-  {
-    title: "Templates",
-    url: "/admin/templates",
-    icon: Library,
   },
 ];
 
