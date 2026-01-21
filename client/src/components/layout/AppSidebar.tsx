@@ -250,11 +250,6 @@ const suporteItems = [
 
 const lojaMcgItems = [
   {
-    title: "Biblioteca",
-    url: "/biblioteca",
-    icon: Library,
-  },
-  {
     title: "E-book",
     url: "/ebook",
     icon: BookOpen,

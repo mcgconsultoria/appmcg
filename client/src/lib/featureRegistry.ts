@@ -18,6 +18,7 @@ import {
   MessageSquareHeart,
   Handshake,
   FileText,
+  Library,
 } from "lucide-react";
 
 export interface FeatureItem {
@@ -168,6 +169,18 @@ export const featureRegistry: FeatureItem[] = [
     manual: {
       title: "Checklist Comercial",
       description: "Diagnóstico operacional do cliente",
+      type: "pdf",
+    },
+  },
+  {
+    id: "com-biblioteca",
+    title: "Biblioteca",
+    url: "/biblioteca",
+    icon: Library,
+    subCategory: "com",
+    manual: {
+      title: "Biblioteca de Checklists",
+      description: "Templates prontos de checklists por segmento",
       type: "pdf",
     },
   },
