@@ -157,6 +157,7 @@ import {
   storeOrders,
   storeOrderItems,
   ebookVolumes,
+  productMedia,
   auditLogs,
   type StoreProductCategory,
   type InsertStoreProductCategory,
@@ -168,6 +169,8 @@ import {
   type InsertStoreOrderItem,
   type EbookVolume,
   type InsertEbookVolume,
+  type ProductMedia,
+  type InsertProductMedia,
   type AuditLog,
   type InsertAuditLog,
   whatsappJourneySteps,
@@ -611,6 +614,11 @@ export interface IStorage {
   createStoreProduct(product: InsertStoreProduct): Promise<StoreProduct>;
   updateStoreProduct(id: number, product: Partial<InsertStoreProduct>): Promise<StoreProduct | undefined>;
   deleteStoreProduct(id: number): Promise<boolean>;
+
+  getProductMedia(productId: number): Promise<ProductMedia[]>;
+  createProductMedia(media: InsertProductMedia): Promise<ProductMedia>;
+  updateProductMedia(id: number, media: Partial<InsertProductMedia>): Promise<ProductMedia | undefined>;
+  deleteProductMedia(id: number): Promise<boolean>;
 
   getEbookVolumes(productId?: number): Promise<EbookVolume[]>;
   getEbookVolume(id: number): Promise<EbookVolume | undefined>;
@@ -2858,6 +2866,30 @@ export class DatabaseStorage implements IStorage {
 
   async deleteStoreProduct(id: number): Promise<boolean> {
     await db.delete(storeProducts).where(eq(storeProducts.id, id));
+    return true;
+  }
+
+  // Product Media (images and videos)
+  async getProductMedia(productId: number): Promise<ProductMedia[]> {
+    return db.select().from(productMedia).where(eq(productMedia.productId, productId)).orderBy(productMedia.position);
+  }
+
+  async createProductMedia(media: InsertProductMedia): Promise<ProductMedia> {
+    const [newMedia] = await db.insert(productMedia).values(media).returning();
+    return newMedia;
+  }
+
+  async updateProductMedia(id: number, media: Partial<InsertProductMedia>): Promise<ProductMedia | undefined> {
+    const [updated] = await db
+      .update(productMedia)
+      .set(media)
+      .where(eq(productMedia.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteProductMedia(id: number): Promise<boolean> {
+    await db.delete(productMedia).where(eq(productMedia.id, id));
     return true;
   }
 

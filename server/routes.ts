@@ -6424,6 +6424,61 @@ export async function registerRoutes(
     }
   });
 
+  // Product Media (Admin) - Imagens e Vídeos
+  app.get("/api/admin/store/products/:productId/media", isAdmin, async (req, res) => {
+    try {
+      const media = await storage.getProductMedia(parseInt(req.params.productId));
+      res.json(media);
+    } catch (error) {
+      console.error("Error fetching product media:", error);
+      res.status(500).json({ message: "Falha ao buscar mídias" });
+    }
+  });
+
+  app.post("/api/admin/store/products/:productId/media", isAdmin, async (req, res) => {
+    try {
+      const { mediaType, url, position, altText, fileSize, mimeType } = req.body;
+      const productId = parseInt(req.params.productId);
+      
+      const media = await storage.createProductMedia({
+        productId,
+        mediaType,
+        url,
+        position: position || 1,
+        altText,
+        fileSize,
+        mimeType,
+      });
+      res.json(media);
+    } catch (error) {
+      console.error("Error creating product media:", error);
+      res.status(500).json({ message: "Falha ao adicionar mídia" });
+    }
+  });
+
+  app.patch("/api/admin/store/products/:productId/media/:mediaId", isAdmin, async (req, res) => {
+    try {
+      const media = await storage.updateProductMedia(parseInt(req.params.mediaId), req.body);
+      if (!media) {
+        return res.status(404).json({ message: "Mídia não encontrada" });
+      }
+      res.json(media);
+    } catch (error) {
+      console.error("Error updating product media:", error);
+      res.status(500).json({ message: "Falha ao atualizar mídia" });
+    }
+  });
+
+  app.delete("/api/admin/store/products/:productId/media/:mediaId", isAdmin, async (req, res) => {
+    try {
+      await storage.deleteProductMedia(parseInt(req.params.mediaId));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting product media:", error);
+      res.status(500).json({ message: "Falha ao excluir mídia" });
+    }
+  });
+
   // E-book Volumes (Admin)
   app.get("/api/admin/store/ebook-volumes", isAdmin, async (req, res) => {
     try {
