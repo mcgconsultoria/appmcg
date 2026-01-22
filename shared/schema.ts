@@ -1882,6 +1882,19 @@ export const storeOrders = pgTable("store_orders", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Product Media (images and videos with positions)
+export const productMedia = pgTable("product_media", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull(),
+  mediaType: varchar("media_type", { length: 20 }).notNull(), // image, video
+  url: text("url").notNull(),
+  position: integer("position").notNull().default(1), // 1-10 for images, 1-3 for videos
+  altText: varchar("alt_text", { length: 255 }),
+  fileSize: integer("file_size"), // in bytes
+  mimeType: varchar("mime_type", { length: 100 }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Store Order Items
 export const storeOrderItems = pgTable("store_order_items", {
   id: serial("id").primaryKey(),
@@ -1924,6 +1937,11 @@ export const insertStoreOrderSchema = createInsertSchema(storeOrders).omit({
 });
 
 export const insertStoreOrderItemSchema = createInsertSchema(storeOrderItems).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertProductMediaSchema = createInsertSchema(productMedia).omit({
   id: true,
   createdAt: true,
 });
@@ -2219,6 +2237,8 @@ export type StoreOrder = typeof storeOrders.$inferSelect;
 export type InsertStoreOrder = z.infer<typeof insertStoreOrderSchema>;
 export type StoreOrderItem = typeof storeOrderItems.$inferSelect;
 export type InsertStoreOrderItem = z.infer<typeof insertStoreOrderItemSchema>;
+export type ProductMedia = typeof productMedia.$inferSelect;
+export type InsertProductMedia = z.infer<typeof insertProductMediaSchema>;
 
 // WhatsApp Support Types
 export type WhatsappJourneyStep = typeof whatsappJourneySteps.$inferSelect;
