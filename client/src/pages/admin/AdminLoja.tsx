@@ -55,6 +55,10 @@ import {
   EyeOff,
   Upload,
   ImageIcon,
+  Palette,
+  PlusCircle,
+  X,
+  Ruler,
 } from "lucide-react";
 import { useUpload } from "@/hooks/use-upload";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -76,6 +80,7 @@ const productFormSchema = z.object({
   fulfillmentType: z.enum(["physical", "digital", "hybrid"]),
   categoryId: z.number().optional(),
   sizes: z.array(z.string()).optional(),
+  colors: z.array(z.string()).optional(),
   sku: z.string().optional(),
   priceAmount: z.string().optional(),
   priceCurrency: z.string().default("BRL"),
@@ -108,6 +113,10 @@ export default function AdminLoja() {
   const [editingCategory, setEditingCategory] = useState<StoreProductCategory | null>(null);
   const [deleteConfirmProduct, setDeleteConfirmProduct] = useState<StoreProduct | null>(null);
   const [deleteConfirmCategory, setDeleteConfirmCategory] = useState<StoreProductCategory | null>(null);
+  const [availableColors, setAvailableColors] = useState<string[]>([
+    "Preto", "Branco", "Azul", "Vermelho", "Verde", "Amarelo", "Cinza", "Marrom", "Rosa", "Laranja"
+  ]);
+  const [newColorInput, setNewColorInput] = useState("");
 
   const { data: products, isLoading: productsLoading } = useQuery<StoreProduct[]>({
     queryKey: ["/api/admin/store/products"],
@@ -159,6 +168,7 @@ export default function AdminLoja() {
       productType: "",
       fulfillmentType: "",
       sizes: [],
+      colors: [],
       priceAmount: "",
       priceCurrency: "BRL",
       compareAtPrice: "",
@@ -315,6 +325,7 @@ export default function AdminLoja() {
         fulfillmentType: product.fulfillmentType as "physical" | "digital" | "hybrid",
         categoryId: product.categoryId || undefined,
         sizes: (product as any).sizes || [],
+        colors: (product as any).colors || [],
         sku: product.sku || "",
         priceAmount: product.priceAmount || "",
         priceCurrency: product.priceCurrency || "BRL",
@@ -839,47 +850,159 @@ export default function AdminLoja() {
                 />
               </div>
 
-              {/* Size selection for clothing products */}
-              {watchedProductType === "vestuario" && (
+              {/* Size and Color selection - always visible but disabled for non-clothing */}
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Sizes */}
                 <FormField
                   control={productForm.control}
                   name="sizes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tamanhos Disponiveis</FormLabel>
-                      <FormDescription>Selecione os tamanhos disponiveis para este produto</FormDescription>
-                      <FormControl>
-                        <div className="flex flex-wrap gap-2">
-                          {brazilianSizes.map((size) => {
-                            const isSelected = field.value?.includes(size);
-                            return (
-                              <Button
-                                key={size}
-                                type="button"
-                                variant={isSelected ? "default" : "outline"}
-                                size="sm"
-                                className="min-w-[48px] h-10 font-semibold"
-                                data-testid={`size-${size.toLowerCase()}`}
-                                onClick={() => {
-                                  const currentSizes = field.value || [];
-                                  if (isSelected) {
-                                    field.onChange(currentSizes.filter(s => s !== size));
-                                  } else {
-                                    field.onChange([...currentSizes, size]);
-                                  }
-                                }}
-                              >
-                                {size}
-                              </Button>
-                            );
-                          })}
+                  render={({ field }) => {
+                    const isVestuario = watchedProductType === "vestuario";
+                    return (
+                      <FormItem>
+                        <div className="flex items-center gap-2">
+                          <Ruler className="h-4 w-4 text-muted-foreground" />
+                          <FormLabel className={!isVestuario ? "text-muted-foreground" : ""}>
+                            Tamanhos Disponiveis
+                          </FormLabel>
                         </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                        <FormDescription className={!isVestuario ? "text-muted-foreground/60" : ""}>
+                          {isVestuario 
+                            ? "Selecione os tamanhos disponiveis" 
+                            : "Disponivel apenas para Vestuario"}
+                        </FormDescription>
+                        <FormControl>
+                          <div className="flex flex-wrap gap-2">
+                            {brazilianSizes.map((size) => {
+                              const isSelected = field.value?.includes(size);
+                              return (
+                                <Button
+                                  key={size}
+                                  type="button"
+                                  variant={isSelected ? "default" : "outline"}
+                                  size="sm"
+                                  className={`min-w-[48px] h-10 font-semibold ${!isVestuario ? "opacity-50 cursor-not-allowed" : ""}`}
+                                  data-testid={`size-${size.toLowerCase()}`}
+                                  disabled={!isVestuario}
+                                  onClick={() => {
+                                    if (!isVestuario) return;
+                                    const currentSizes = field.value || [];
+                                    if (isSelected) {
+                                      field.onChange(currentSizes.filter(s => s !== size));
+                                    } else {
+                                      field.onChange([...currentSizes, size]);
+                                    }
+                                  }}
+                                >
+                                  {size}
+                                </Button>
+                              );
+                            })}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
-              )}
+
+                {/* Colors */}
+                <FormField
+                  control={productForm.control}
+                  name="colors"
+                  render={({ field }) => {
+                    const isVestuario = watchedProductType === "vestuario";
+                    return (
+                      <FormItem>
+                        <div className="flex items-center gap-2">
+                          <Palette className="h-4 w-4 text-muted-foreground" />
+                          <FormLabel className={!isVestuario ? "text-muted-foreground" : ""}>
+                            Cores Disponiveis
+                          </FormLabel>
+                        </div>
+                        <FormDescription className={!isVestuario ? "text-muted-foreground/60" : ""}>
+                          {isVestuario 
+                            ? "Selecione ou crie novas cores" 
+                            : "Disponivel apenas para Vestuario"}
+                        </FormDescription>
+                        <FormControl>
+                          <div className="space-y-3">
+                            {/* Color buttons */}
+                            <div className="flex flex-wrap gap-2">
+                              {availableColors.map((color) => {
+                                const isSelected = field.value?.includes(color);
+                                return (
+                                  <Button
+                                    key={color}
+                                    type="button"
+                                    variant={isSelected ? "default" : "outline"}
+                                    size="sm"
+                                    className={`h-10 font-semibold ${!isVestuario ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    data-testid={`color-${color.toLowerCase()}`}
+                                    disabled={!isVestuario}
+                                    onClick={() => {
+                                      if (!isVestuario) return;
+                                      const currentColors = field.value || [];
+                                      if (isSelected) {
+                                        field.onChange(currentColors.filter(c => c !== color));
+                                      } else {
+                                        field.onChange([...currentColors, color]);
+                                      }
+                                    }}
+                                  >
+                                    {color}
+                                  </Button>
+                                );
+                              })}
+                            </div>
+                            {/* Add new color input */}
+                            {isVestuario && (
+                              <div className="flex gap-2">
+                                <Input
+                                  placeholder="Nova cor..."
+                                  value={newColorInput}
+                                  onChange={(e) => setNewColorInput(e.target.value)}
+                                  className="max-w-[150px]"
+                                  data-testid="input-new-color"
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      e.preventDefault();
+                                      if (newColorInput.trim() && !availableColors.includes(newColorInput.trim())) {
+                                        const newColor = newColorInput.trim();
+                                        setAvailableColors(prev => [...prev, newColor]);
+                                        field.onChange([...(field.value || []), newColor]);
+                                        setNewColorInput("");
+                                      }
+                                    }
+                                  }}
+                                />
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-10"
+                                  data-testid="button-add-color"
+                                  onClick={() => {
+                                    if (newColorInput.trim() && !availableColors.includes(newColorInput.trim())) {
+                                      const newColor = newColorInput.trim();
+                                      setAvailableColors(prev => [...prev, newColor]);
+                                      field.onChange([...(field.value || []), newColor]);
+                                      setNewColorInput("");
+                                    }
+                                  }}
+                                >
+                                  <PlusCircle className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+              </div>
 
               <div className="grid gap-4 md:grid-cols-4">
                 <FormField
