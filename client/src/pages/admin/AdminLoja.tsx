@@ -79,6 +79,7 @@ const productFormSchema = z.object({
   productType: z.enum(["merch", "ebook", "escritorio", "vestuario"]),
   fulfillmentType: z.enum(["physical", "digital", "hybrid"]),
   categoryId: z.number().optional(),
+  modelo: z.string().optional(),
   sizes: z.array(z.string()).optional(),
   colors: z.array(z.string()).optional(),
   sku: z.string().optional(),
@@ -90,6 +91,17 @@ const productFormSchema = z.object({
   isActive: z.boolean().default(false),
   isFeatured: z.boolean().default(false),
 });
+
+const modeloOptions = [
+  "Camiseta",
+  "Camisa", 
+  "Camisetao",
+  "Vestido",
+  "Saia",
+  "Calca",
+  "Shorts",
+  "Casaco",
+];
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
@@ -167,6 +179,8 @@ export default function AdminLoja() {
       longDescription: "",
       productType: "",
       fulfillmentType: "",
+      categoryId: undefined,
+      modelo: "",
       sizes: [],
       colors: [],
       priceAmount: "",
@@ -326,6 +340,7 @@ export default function AdminLoja() {
         categoryId: product.categoryId || undefined,
         sizes: (product as any).sizes || [],
         colors: (product as any).colors || [],
+        modelo: (product as any).modelo || "",
         sku: product.sku || "",
         priceAmount: product.priceAmount || "",
         priceCurrency: product.priceCurrency || "BRL",
@@ -696,7 +711,7 @@ export default function AdminLoja() {
           </DialogHeader>
           <Form {...productForm}>
             <form onSubmit={productForm.handleSubmit(onProductSubmit)} className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 md:grid-cols-3">
                 <FormField
                   control={productForm.control}
                   name="name"
@@ -741,6 +756,33 @@ export default function AdminLoja() {
                           className="bg-muted text-muted-foreground"
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={productForm.control}
+                  name="categoryId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Categoria</FormLabel>
+                      <Select
+                        onValueChange={(val) => handleCategoryChange(val ? parseInt(val) : undefined)}
+                        value={field.value?.toString() || ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger data-testid="select-category">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {categories?.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id.toString()}>
+                              {cat.name} {cat.code && `(${cat.code})`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -823,23 +865,20 @@ export default function AdminLoja() {
                 />
                 <FormField
                   control={productForm.control}
-                  name="categoryId"
+                  name="modelo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Categoria</FormLabel>
-                      <Select
-                        onValueChange={(val) => handleCategoryChange(val ? parseInt(val) : undefined)}
-                        value={field.value?.toString() || ""}
-                      >
+                      <FormLabel>Modelo</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
-                          <SelectTrigger data-testid="select-category">
+                          <SelectTrigger data-testid="select-modelo">
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {categories?.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.id.toString()}>
-                              {cat.name} {cat.code && `(${cat.code})`}
+                          {modeloOptions.map((modelo) => (
+                            <SelectItem key={modelo} value={modelo}>
+                              {modelo}
                             </SelectItem>
                           ))}
                         </SelectContent>
