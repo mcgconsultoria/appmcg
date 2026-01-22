@@ -66,6 +66,7 @@ import {
   Database,
   Lock,
   HelpCircle,
+  Shirt,
 } from "lucide-react";
 
 import { getSidebarItems, getManualMapping } from "@/lib/featureRegistry";
@@ -263,6 +264,11 @@ const lojaMcgItems = [
     title: "Escritório",
     url: "/escritorio",
     icon: Briefcase,
+  },
+  {
+    title: "Vestuário",
+    url: "/vestuario",
+    icon: Shirt,
   },
 ];
 

@@ -67,7 +67,7 @@ const productFormSchema = z.object({
   slug: z.string().min(1, "Slug obrigatorio"),
   shortDescription: z.string().optional(),
   longDescription: z.string().optional(),
-  productType: z.enum(["merch", "ebook", "escritorio"]),
+  productType: z.enum(["merch", "ebook", "escritorio", "vestuario"]),
   fulfillmentType: z.enum(["physical", "digital", "hybrid"]),
   categoryId: z.number().optional(),
   sku: z.string().optional(),
@@ -317,6 +317,8 @@ export default function AdminLoja() {
         return <Badge>E-book</Badge>;
       case "escritorio":
         return <Badge variant="outline">Escritório</Badge>;
+      case "vestuario":
+        return <Badge variant="secondary">Vestuário</Badge>;
       default:
         return <Badge variant="outline">{type}</Badge>;
     }
@@ -690,6 +692,7 @@ export default function AdminLoja() {
                           <SelectItem value="merch">Brindes</SelectItem>
                           <SelectItem value="ebook">E-book</SelectItem>
                           <SelectItem value="escritorio">Escritório</SelectItem>
+                          <SelectItem value="vestuario">Vestuário</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
