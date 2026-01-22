@@ -154,8 +154,8 @@ export default function AdminLoja() {
       slug: "",
       shortDescription: "",
       longDescription: "",
-      productType: "merch",
-      fulfillmentType: "physical",
+      productType: "",
+      fulfillmentType: "",
       priceAmount: "",
       priceCurrency: "BRL",
       compareAtPrice: "",
@@ -687,7 +687,23 @@ export default function AdminLoja() {
                     <FormItem>
                       <FormLabel>Nome</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Nome do produto" data-testid="input-product-name" />
+                        <Input 
+                          {...field} 
+                          placeholder="Nome do produto" 
+                          data-testid="input-product-name"
+                          onChange={(e) => {
+                            field.onChange(e);
+                            if (!editingProduct) {
+                              const slug = e.target.value
+                                .toLowerCase()
+                                .normalize("NFD")
+                                .replace(/[\u0300-\u036f]/g, "")
+                                .replace(/[^a-z0-9]+/g, "-")
+                                .replace(/^-+|-+$/g, "");
+                              productForm.setValue("slug", slug);
+                            }
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -698,9 +714,15 @@ export default function AdminLoja() {
                   name="slug"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Slug</FormLabel>
+                      <FormLabel className="text-muted-foreground">Slug (automatico)</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="nome-do-produto" data-testid="input-product-slug" />
+                        <Input 
+                          {...field} 
+                          placeholder="nome-do-produto" 
+                          data-testid="input-product-slug"
+                          readOnly
+                          className="bg-muted text-muted-foreground"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -743,17 +765,17 @@ export default function AdminLoja() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Tipo de Produto</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
                           <SelectTrigger data-testid="select-product-type">
-                            <SelectValue />
+                            <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="merch">Brindes</SelectItem>
                           <SelectItem value="ebook">E-book</SelectItem>
-                          <SelectItem value="escritorio">Escritório</SelectItem>
-                          <SelectItem value="vestuario">Vestuário</SelectItem>
+                          <SelectItem value="escritorio">Escritorio</SelectItem>
+                          <SelectItem value="vestuario">Vestuario</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -766,10 +788,10 @@ export default function AdminLoja() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Entrega</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
                         <FormControl>
                           <SelectTrigger data-testid="select-fulfillment">
-                            <SelectValue />
+                            <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -843,9 +865,15 @@ export default function AdminLoja() {
                   name="sku"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>SKU</FormLabel>
+                      <FormLabel className="text-muted-foreground">SKU (automatico)</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="MCG-001" data-testid="input-sku" />
+                        <Input 
+                          {...field} 
+                          placeholder="Selecione categoria" 
+                          data-testid="input-sku"
+                          readOnly
+                          className="bg-muted text-muted-foreground"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
