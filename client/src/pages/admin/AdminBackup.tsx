@@ -56,10 +56,8 @@ export default function AdminBackup() {
 
   const saveConfigMutation = useMutation({
     mutationFn: async (data: { enabled: boolean; repositoryOwner: string; repositoryName: string; scheduledHour: number }) => {
-      return apiRequest("/api/github/backup/config", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      const response = await apiRequest("POST", "/api/github/backup/config", data);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/github/backup/config"] });
@@ -79,9 +77,8 @@ export default function AdminBackup() {
 
   const runBackupMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("/api/github/backup/run", {
-        method: "POST",
-      });
+      const response = await apiRequest("POST", "/api/github/backup/run");
+      return response.json();
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/github/backup/config"] });
@@ -280,9 +277,11 @@ export default function AdminBackup() {
 
           {repositories && repositories.length > 0 && (
             <div className="space-y-2">
-              <Label>Repositorios Disponiveis</Label>
+              <Label>Repositorio Configurado</Label>
               <div className="flex flex-wrap gap-2">
-                {repositories.slice(0, 10).map((repo) => (
+                {repositories
+                  .filter((repo) => repo.fullName === "mcgconsultoria/appmcg")
+                  .map((repo) => (
                   <Badge
                     key={repo.fullName}
                     variant="outline"
