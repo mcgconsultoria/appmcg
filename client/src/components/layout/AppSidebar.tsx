@@ -259,6 +259,11 @@ const lojaMcgItems = [
     url: "/brindes",
     icon: Gift,
   },
+  {
+    title: "Escritório",
+    url: "/escritorio",
+    icon: Briefcase,
+  },
 ];
 
 const FREE_PLAN_ALLOWED_URLS = [

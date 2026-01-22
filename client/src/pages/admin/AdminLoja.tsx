@@ -67,7 +67,7 @@ const productFormSchema = z.object({
   slug: z.string().min(1, "Slug obrigatorio"),
   shortDescription: z.string().optional(),
   longDescription: z.string().optional(),
-  productType: z.enum(["merch", "ebook", "manual"]),
+  productType: z.enum(["merch", "ebook", "escritorio"]),
   fulfillmentType: z.enum(["physical", "digital", "hybrid"]),
   categoryId: z.number().optional(),
   sku: z.string().optional(),
@@ -248,7 +248,7 @@ export default function AdminLoja() {
         slug: product.slug,
         shortDescription: product.shortDescription || "",
         longDescription: product.longDescription || "",
-        productType: product.productType as "merch" | "ebook" | "manual",
+        productType: (product.productType === "manual" ? "escritorio" : product.productType) as "merch" | "ebook" | "escritorio",
         fulfillmentType: product.fulfillmentType as "physical" | "digital" | "hybrid",
         categoryId: product.categoryId || undefined,
         sku: product.sku || "",
@@ -315,8 +315,8 @@ export default function AdminLoja() {
         return <Badge variant="secondary">Brindes</Badge>;
       case "ebook":
         return <Badge>E-book</Badge>;
-      case "manual":
-        return <Badge variant="outline">Manual</Badge>;
+      case "escritorio":
+        return <Badge variant="outline">Escritório</Badge>;
       default:
         return <Badge variant="outline">{type}</Badge>;
     }
@@ -689,7 +689,7 @@ export default function AdminLoja() {
                         <SelectContent>
                           <SelectItem value="merch">Brindes</SelectItem>
                           <SelectItem value="ebook">E-book</SelectItem>
-                          <SelectItem value="manual">Manual</SelectItem>
+                          <SelectItem value="escritorio">Escritório</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

@@ -80,6 +80,7 @@ import ManualApp from "@/pages/ManualApp";
 import Calculadoras from "@/pages/Calculadoras";
 import FluxogramaComercial from "@/pages/FluxogramaComercial";
 import Brindes from "@/pages/Brindes";
+import Escritorio from "@/pages/Escritorio";
 import DiagnósticoComercial from "@/pages/DiagnosticoComercial";
 import CampanhaPiloto from "@/pages/CampanhaPiloto";
 import Logout from "@/pages/Logout";
@@ -231,6 +232,7 @@ function Router() {
           <Route path="/manual-app" component={ManualApp} />
           <Route path="/fluxograma" component={FluxogramaComercial} />
           <Route path="/brindes" component={Brindes} />
+          <Route path="/escritorio" component={Escritorio} />
           <Route path="/rfi" component={RFI} />
           <Route path="/tarefas" component={TasksPage} />
           <Route path="/projetos" component={ProjectsPage} />
