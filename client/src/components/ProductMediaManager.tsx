@@ -27,6 +27,7 @@ import {
   Plus,
   Loader2,
   GripVertical,
+  Download,
 } from "lucide-react";
 import { useUpload } from "@/hooks/use-upload";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -269,17 +270,39 @@ export function ProductMediaManager({
                 >
                   {item.position}
                 </Badge>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="destructive"
-                  className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => deleteMediaMutation.mutate(item.id)}
-                  disabled={deleteMediaMutation.isPending}
-                  data-testid={`button-delete-media-${item.id}`}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
+                <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {item.mediaType === "video" && (
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="secondary"
+                      className="h-6 w-6"
+                      onClick={() => {
+                        const link = document.createElement("a");
+                        link.href = item.url;
+                        link.download = `video-${item.position}.mp4`;
+                        link.target = "_blank";
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                      data-testid={`button-download-media-${item.id}`}
+                    >
+                      <Download className="h-3 w-3" />
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="destructive"
+                    className="h-6 w-6"
+                    onClick={() => deleteMediaMutation.mutate(item.id)}
+                    disabled={deleteMediaMutation.isPending}
+                    data-testid={`button-delete-media-${item.id}`}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
