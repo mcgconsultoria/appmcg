@@ -476,22 +476,20 @@ interface LojaMcgDynamicSectionProps {
   fullAccessGranted?: boolean | null;
 }
 
-function LojaMcgDynamicSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted }: LojaMcgDynamicSectionProps) {
-  const { data: categories } = useQuery<StoreProductCategory[]>({
-    queryKey: ["/api/store/categories"],
-  });
+// Categorias fixas da loja - sempre visíveis no menu
+const DEFAULT_STORE_CATEGORIES = [
+  { title: "E-books", url: "/loja/e-books", icon: BookOpen },
+  { title: "Brindes", url: "/loja/brindes", icon: Gift },
+  { title: "Escritório", url: "/loja/escritorio", icon: Briefcase },
+  { title: "Vestuário", url: "/loja/vestuario", icon: Shirt },
+];
 
+function LojaMcgDynamicSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted }: LojaMcgDynamicSectionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [wasManuallyToggled, setWasManuallyToggled] = useState(false);
 
-  const items = (categories || [])
-    .filter(cat => cat.isActive)
-    .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
-    .map(cat => ({
-      title: cat.name,
-      url: `/loja/${cat.slug}`,
-      icon: getCategoryIcon(cat.slug),
-    }));
+  // Usar categorias fixas para sempre mostrar a loja
+  const items = DEFAULT_STORE_CATEGORIES;
 
   const isItemActive = (itemUrl: string) => {
     return location === itemUrl || location.startsWith(itemUrl + "/");
@@ -509,10 +507,6 @@ function LojaMcgDynamicSection({ location, userPlan, planLoaded = true, userRole
     setWasManuallyToggled(true);
     setIsOpen(open);
   };
-
-  if (items.length === 0) {
-    return null;
-  }
 
   return (
     <Collapsible open={isOpen} onOpenChange={handleToggle}>
