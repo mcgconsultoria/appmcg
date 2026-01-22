@@ -53,7 +53,10 @@ import {
   XCircle,
   Eye,
   EyeOff,
+  Upload,
+  ImageIcon,
 } from "lucide-react";
+import { useUpload } from "@/hooks/use-upload";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -813,15 +816,79 @@ export default function AdminLoja() {
               <FormField
                 control={productForm.control}
                 name="primaryImageUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>URL da Imagem</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="https://..." data-testid="input-image-url" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const { uploadFile, isUploading, progress } = useUpload({
+                    onSuccess: (response) => {
+                      field.onChange(response.objectPath);
+                      toast({
+                        title: "Imagem enviada",
+                        description: "A imagem foi carregada com sucesso.",
+                      });
+                    },
+                    onError: (error) => {
+                      toast({
+                        title: "Erro no upload",
+                        description: error.message,
+                        variant: "destructive",
+                      });
+                    },
+                  });
+
+                  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      await uploadFile(file);
+                    }
+                  };
+
+                  return (
+                    <FormItem>
+                      <FormLabel>Imagem do Produto</FormLabel>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFileChange}
+                              disabled={isUploading}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              data-testid="input-image-upload"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              disabled={isUploading}
+                              className="pointer-events-none"
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              {isUploading ? `Enviando... ${progress}%` : "Fazer Upload"}
+                            </Button>
+                          </div>
+                          {field.value && (
+                            <div className="h-12 w-12 bg-muted rounded flex items-center justify-center overflow-hidden">
+                              <img
+                                src={field.value}
+                                alt="Preview"
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">ou cole uma URL:</span>
+                          <Input
+                            {...field}
+                            placeholder="https://..."
+                            className="flex-1"
+                            data-testid="input-image-url"
+                          />
+                        </div>
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               <div className="flex gap-6">

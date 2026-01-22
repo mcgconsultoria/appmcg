@@ -5,6 +5,7 @@ import { setupAuth } from "./replitAuth";
 import { registerUser, loginUser, validateSession, logoutUser } from "./customAuth";
 import { consultarCNPJ } from "./cnpjService";
 import { logAudit } from "./auditHelper";
+import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import {
   insertClientSchema,
   insertChecklistSchema,
@@ -122,6 +123,8 @@ export async function registerRoutes(
   app.use(customAuthMiddleware);
   
   await setupAuth(app);
+  
+  registerObjectStorageRoutes(app);
 
   app.get('/api/brand-kit/manual', isAuthenticated, async (req, res) => {
     try {
