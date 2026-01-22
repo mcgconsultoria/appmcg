@@ -6353,8 +6353,18 @@ export async function registerRoutes(
     try {
       const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
       const productType = req.query.productType as string | undefined;
+      const categorySlug = req.query.categorySlug as string | undefined;
+      
+      let effectiveCategoryId = categoryId;
+      if (categorySlug && !categoryId) {
+        const category = await storage.getStoreProductCategoryBySlug(categorySlug);
+        if (category) {
+          effectiveCategoryId = category.id;
+        }
+      }
+      
       const products = await storage.getStoreProducts({ 
-        categoryId, 
+        categoryId: effectiveCategoryId, 
         isActive: true,
         productType 
       });

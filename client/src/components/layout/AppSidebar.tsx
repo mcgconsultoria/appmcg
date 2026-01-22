@@ -78,6 +78,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
+import type { StoreProductCategory } from "@shared/schema";
 
 const preVendasItems = getSidebarItems("mkt");
 const vendasItems = getSidebarItems("com");
@@ -249,28 +251,6 @@ const suporteItems = [
   },
 ];
 
-const lojaMcgItems = [
-  {
-    title: "E-book",
-    url: "/ebook",
-    icon: BookOpen,
-  },
-  {
-    title: "Brindes",
-    url: "/brindes",
-    icon: Gift,
-  },
-  {
-    title: "Escritório",
-    url: "/escritorio",
-    icon: Briefcase,
-  },
-  {
-    title: "Vestuário",
-    url: "/vestuario",
-    icon: Shirt,
-  },
-];
 
 const FREE_PLAN_ALLOWED_URLS = [
   "/calculadora-frete",
@@ -460,6 +440,128 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
                         </Tooltip>
                       )}
                     </div>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </CollapsibleContent>
+      </SidebarGroup>
+    </Collapsible>
+  );
+}
+
+function getCategoryIcon(slug: string): React.ElementType {
+  switch (slug) {
+    case 'brindes':
+      return Gift;
+    case 'ebooks':
+    case 'ebook':
+      return BookOpen;
+    case 'escritorio':
+      return Briefcase;
+    case 'vestuario':
+      return Shirt;
+    default:
+      return Store;
+  }
+}
+
+interface LojaMcgDynamicSectionProps {
+  location: string;
+  userPlan?: string | null;
+  planLoaded?: boolean;
+  userRole?: string | null;
+  fullAccessGranted?: boolean | null;
+}
+
+function LojaMcgDynamicSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted }: LojaMcgDynamicSectionProps) {
+  const { data: categories } = useQuery<StoreProductCategory[]>({
+    queryKey: ["/api/store/categories"],
+  });
+
+  const items = (categories || [])
+    .filter(cat => cat.isActive)
+    .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+    .map(cat => ({
+      title: cat.name,
+      url: `/loja/${cat.slug}`,
+      icon: getCategoryIcon(cat.slug),
+    }));
+
+  const isItemActive = (itemUrl: string) => {
+    return location === itemUrl || location.startsWith(itemUrl + "/");
+  };
+  
+  const hasActiveItem = items.some(item => isItemActive(item.url));
+  const [isOpen, setIsOpen] = useState(hasActiveItem);
+  const [wasManuallyToggled, setWasManuallyToggled] = useState(false);
+  
+  if (hasActiveItem && !isOpen && !wasManuallyToggled) {
+    setIsOpen(true);
+  }
+  
+  const handleToggle = (open: boolean) => {
+    setWasManuallyToggled(true);
+    setIsOpen(open);
+  };
+
+  if (items.length === 0) {
+    return null;
+  }
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={handleToggle}>
+      <SidebarGroup>
+        <CollapsibleTrigger asChild>
+          <button
+            className="flex items-center justify-between w-full px-3 py-2 text-base font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
+            data-testid="section-loja-mcg"
+          >
+            <div className="flex items-center gap-2">
+              <Store className="h-5 w-5" />
+              <span>Loja MCG</span>
+            </div>
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarGroupContent className="mt-1">
+            <SidebarMenu>
+              {items.map((item) => {
+                const isActive = isItemActive(item.url);
+                const isLocked = !isUrlAllowedForPlan(item.url, userPlan, planLoaded, userRole, fullAccessGranted);
+                
+                if (isLocked) {
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className="flex items-center gap-2 px-3 py-2 text-muted-foreground/60 cursor-not-allowed"
+                            data-testid={`nav-${item.url.replace("/", "")}-locked`}
+                          >
+                            <item.icon className="h-4 w-4" />
+                            <span className="flex-1">{item.title}</span>
+                            <Lock className="h-3 w-3" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">
+                          <p>Disponivel em planos superiores</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </SidebarMenuItem>
+                  );
+                }
+                
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <Link href={item.url} data-testid={`nav-loja-${item.url.split('/').pop()}`}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
               })}
@@ -779,10 +881,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <CollapsibleSection
-          title="Loja MCG"
-          icon={Store}
-          items={lojaMcgItems}
+        <LojaMcgDynamicSection
           location={location}
           userPlan={effectivePlan}
           planLoaded={planLoaded}

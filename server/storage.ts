@@ -604,6 +604,7 @@ export interface IStorage {
   // Store operations
   getStoreProductCategories(): Promise<StoreProductCategory[]>;
   getStoreProductCategory(id: number): Promise<StoreProductCategory | undefined>;
+  getStoreProductCategoryBySlug(slug: string): Promise<StoreProductCategory | undefined>;
   createStoreProductCategory(category: InsertStoreProductCategory): Promise<StoreProductCategory>;
   updateStoreProductCategory(id: number, category: Partial<InsertStoreProductCategory>): Promise<StoreProductCategory | undefined>;
   deleteStoreProductCategory(id: number): Promise<boolean>;
@@ -2797,6 +2798,11 @@ export class DatabaseStorage implements IStorage {
 
   async getStoreProductCategory(id: number): Promise<StoreProductCategory | undefined> {
     const [category] = await db.select().from(storeProductCategories).where(eq(storeProductCategories.id, id));
+    return category;
+  }
+
+  async getStoreProductCategoryBySlug(slug: string): Promise<StoreProductCategory | undefined> {
+    const [category] = await db.select().from(storeProductCategories).where(eq(storeProductCategories.slug, slug));
     return category;
   }
 
