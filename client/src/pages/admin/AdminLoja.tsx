@@ -711,7 +711,7 @@ export default function AdminLoja() {
           </DialogHeader>
           <Form {...productForm}>
             <form onSubmit={productForm.handleSubmit(onProductSubmit)} className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-4">
                 <FormField
                   control={productForm.control}
                   name="name"
@@ -787,6 +787,25 @@ export default function AdminLoja() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={productForm.control}
+                  name="sku"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-muted-foreground">SKU (automatico)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          placeholder="Selecione categoria" 
+                          data-testid="input-sku"
+                          readOnly
+                          className="bg-muted text-muted-foreground"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <FormField
@@ -817,7 +836,7 @@ export default function AdminLoja() {
                 )}
               />
 
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-2">
                 <FormField
                   control={productForm.control}
                   name="productType"
@@ -835,28 +854,6 @@ export default function AdminLoja() {
                           <SelectItem value="ebook">E-book</SelectItem>
                           <SelectItem value="escritorio">Escritorio</SelectItem>
                           <SelectItem value="vestuario">Vestuario</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={productForm.control}
-                  name="fulfillmentType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Entrega</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""}>
-                        <FormControl>
-                          <SelectTrigger data-testid="select-fulfillment">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="physical">Fisico</SelectItem>
-                          <SelectItem value="digital">Digital</SelectItem>
-                          <SelectItem value="hybrid">Hibrido</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -1082,19 +1079,22 @@ export default function AdminLoja() {
                 />
                 <FormField
                   control={productForm.control}
-                  name="sku"
+                  name="fulfillmentType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-muted-foreground">SKU (automatico)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          {...field} 
-                          placeholder="Selecione categoria" 
-                          data-testid="input-sku"
-                          readOnly
-                          className="bg-muted text-muted-foreground"
-                        />
-                      </FormControl>
+                      <FormLabel>Entrega</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-fulfillment">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="physical">Fisico</SelectItem>
+                          <SelectItem value="digital">Digital</SelectItem>
+                          <SelectItem value="hybrid">Hibrido</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
