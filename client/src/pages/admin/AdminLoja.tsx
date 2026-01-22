@@ -64,6 +64,7 @@ import { z } from "zod";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { StoreProduct, StoreProductCategory, StoreOrder } from "@shared/schema";
+import { brazilianSizes } from "@shared/schema";
 import { ProductMediaManager } from "@/components/ProductMediaManager";
 
 const productFormSchema = z.object({
@@ -74,6 +75,7 @@ const productFormSchema = z.object({
   productType: z.enum(["merch", "ebook", "escritorio", "vestuario"]),
   fulfillmentType: z.enum(["physical", "digital", "hybrid"]),
   categoryId: z.number().optional(),
+  sizes: z.array(z.string()).optional(),
   sku: z.string().optional(),
   priceAmount: z.string().optional(),
   priceCurrency: z.string().default("BRL"),
@@ -156,6 +158,7 @@ export default function AdminLoja() {
       longDescription: "",
       productType: "",
       fulfillmentType: "",
+      sizes: [],
       priceAmount: "",
       priceCurrency: "BRL",
       compareAtPrice: "",
@@ -166,6 +169,8 @@ export default function AdminLoja() {
       isFeatured: false,
     },
   });
+  
+  const watchedProductType = productForm.watch("productType");
 
   const categoryForm = useForm<CategoryFormValues>({
     resolver: zodResolver(categoryFormSchema),
@@ -306,9 +311,10 @@ export default function AdminLoja() {
         slug: product.slug,
         shortDescription: product.shortDescription || "",
         longDescription: product.longDescription || "",
-        productType: (product.productType === "manual" ? "escritorio" : product.productType) as "merch" | "ebook" | "escritorio",
+        productType: (product.productType === "manual" ? "escritorio" : product.productType) as "merch" | "ebook" | "escritorio" | "vestuario",
         fulfillmentType: product.fulfillmentType as "physical" | "digital" | "hybrid",
         categoryId: product.categoryId || undefined,
+        sizes: (product as any).sizes || [],
         sku: product.sku || "",
         priceAmount: product.priceAmount || "",
         priceCurrency: product.priceCurrency || "BRL",
@@ -832,6 +838,48 @@ export default function AdminLoja() {
                   )}
                 />
               </div>
+
+              {/* Size selection for clothing products */}
+              {watchedProductType === "vestuario" && (
+                <FormField
+                  control={productForm.control}
+                  name="sizes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tamanhos Disponiveis</FormLabel>
+                      <FormDescription>Selecione os tamanhos disponiveis para este produto</FormDescription>
+                      <FormControl>
+                        <div className="flex flex-wrap gap-2">
+                          {brazilianSizes.map((size) => {
+                            const isSelected = field.value?.includes(size);
+                            return (
+                              <Button
+                                key={size}
+                                type="button"
+                                variant={isSelected ? "default" : "outline"}
+                                size="sm"
+                                className="min-w-[48px] h-10 font-semibold"
+                                data-testid={`size-${size.toLowerCase()}`}
+                                onClick={() => {
+                                  const currentSizes = field.value || [];
+                                  if (isSelected) {
+                                    field.onChange(currentSizes.filter(s => s !== size));
+                                  } else {
+                                    field.onChange([...currentSizes, size]);
+                                  }
+                                }}
+                              >
+                                {size}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <div className="grid gap-4 md:grid-cols-4">
                 <FormField

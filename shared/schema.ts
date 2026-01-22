@@ -1797,6 +1797,10 @@ export const storeProductCategories = pgTable("store_product_categories", {
 });
 
 // Store Products
+// Brazilian clothing sizes
+export const brazilianSizes = ["PP", "P", "M", "G", "GG", "XGG", "EXG"] as const;
+export type BrazilianSize = typeof brazilianSizes[number];
+
 export const storeProducts = pgTable("store_products", {
   id: serial("id").primaryKey(),
   categoryId: integer("category_id").notNull(),
@@ -1806,6 +1810,7 @@ export const storeProducts = pgTable("store_products", {
   longDescription: text("long_description"),
   productType: varchar("product_type", { length: 50 }).notNull(), // merch, ebook, manual
   fulfillmentType: varchar("fulfillment_type", { length: 50 }).default("physical"), // physical, digital, hybrid
+  sizes: text("sizes").array(), // Available sizes for clothing (PP, P, M, G, GG, XGG, EXG)
   priceAmount: decimal("price_amount", { precision: 10, scale: 2 }).notNull(),
   compareAtPrice: decimal("compare_at_price", { precision: 10, scale: 2 }),
   priceCurrency: varchar("price_currency", { length: 3 }).default("BRL"),
