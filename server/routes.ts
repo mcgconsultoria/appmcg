@@ -6439,12 +6439,23 @@ export async function registerRoutes(
     try {
       const { mediaType, url, position, altText, fileSize, mimeType } = req.body;
       const productId = parseInt(req.params.productId);
+      const targetPosition = position || 1;
+      
+      const existingMedia = await storage.getProductMedia(productId);
+      const positionInUse = existingMedia.some(m => m.position === targetPosition);
+      if (positionInUse) {
+        return res.status(409).json({ message: `Posição ${targetPosition} já está em uso` });
+      }
+      
+      if (existingMedia.length >= 10) {
+        return res.status(400).json({ message: "Limite de 10 mídias por produto atingido" });
+      }
       
       const media = await storage.createProductMedia({
         productId,
         mediaType,
         url,
-        position: position || 1,
+        position: targetPosition,
         altText,
         fileSize,
         mimeType,

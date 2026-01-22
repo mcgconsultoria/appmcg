@@ -64,6 +64,7 @@ import { z } from "zod";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { StoreProduct, StoreProductCategory, StoreOrder } from "@shared/schema";
+import { ProductMediaManager } from "@/components/ProductMediaManager";
 
 const productFormSchema = z.object({
   name: z.string().min(1, "Nome obrigatorio"),
@@ -116,6 +117,34 @@ export default function AdminLoja() {
   const { data: orders, isLoading: ordersLoading } = useQuery<StoreOrder[]>({
     queryKey: ["/api/admin/store/orders"],
   });
+
+  const {
+    uploadFile: uploadPrimaryImage,
+    isUploading: isPrimaryImageUploading,
+    progress: primaryImageProgress,
+  } = useUpload({
+    onSuccess: (response) => {
+      productForm.setValue("primaryImageUrl", response.objectPath);
+      toast({
+        title: "Imagem enviada",
+        description: "A imagem foi carregada com sucesso.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Erro no upload",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handlePrimaryImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await uploadPrimaryImage(file);
+    }
+  };
 
   const productForm = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
@@ -816,53 +845,28 @@ export default function AdminLoja() {
               <FormField
                 control={productForm.control}
                 name="primaryImageUrl"
-                render={({ field }) => {
-                  const { uploadFile, isUploading, progress } = useUpload({
-                    onSuccess: (response) => {
-                      field.onChange(response.objectPath);
-                      toast({
-                        title: "Imagem enviada",
-                        description: "A imagem foi carregada com sucesso.",
-                      });
-                    },
-                    onError: (error) => {
-                      toast({
-                        title: "Erro no upload",
-                        description: error.message,
-                        variant: "destructive",
-                      });
-                    },
-                  });
-
-                  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      await uploadFile(file);
-                    }
-                  };
-
-                  return (
+                render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Imagem do Produto</FormLabel>
+                      <FormLabel>Imagem do Produto (Principal)</FormLabel>
                       <div className="space-y-3">
                         <div className="flex items-center gap-3">
                           <div className="relative">
                             <input
                               type="file"
                               accept="image/*"
-                              onChange={handleFileChange}
-                              disabled={isUploading}
+                              onChange={handlePrimaryImageChange}
+                              disabled={isPrimaryImageUploading}
                               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                               data-testid="input-image-upload"
                             />
                             <Button
                               type="button"
                               variant="outline"
-                              disabled={isUploading}
+                              disabled={isPrimaryImageUploading}
                               className="pointer-events-none"
                             >
                               <Upload className="h-4 w-4 mr-2" />
-                              {isUploading ? `Enviando... ${progress}%` : "Fazer Upload"}
+                              {isPrimaryImageUploading ? `Enviando... ${primaryImageProgress}%` : "Fazer Upload"}
                             </Button>
                           </div>
                           {field.value && (
@@ -887,9 +891,17 @@ export default function AdminLoja() {
                       </div>
                       <FormMessage />
                     </FormItem>
-                  );
-                }}
+                )}
               />
+
+              {editingProduct && (
+                <div className="pt-2 border-t">
+                  <ProductMediaManager
+                    productId={editingProduct.id}
+                    onPrimaryImageChange={(url) => productForm.setValue("primaryImageUrl", url)}
+                  />
+                </div>
+              )}
 
               <div className="flex gap-6">
                 <FormField
