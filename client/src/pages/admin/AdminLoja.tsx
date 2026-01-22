@@ -866,26 +866,36 @@ export default function AdminLoja() {
                 <FormField
                   control={productForm.control}
                   name="modelo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Modelo</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value || ""}>
-                        <FormControl>
-                          <SelectTrigger data-testid="select-modelo">
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {modeloOptions.map((modelo) => (
-                            <SelectItem key={modelo} value={modelo}>
-                              {modelo}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const isVestuario = watchedProductType === "vestuario";
+                    return (
+                      <FormItem>
+                        <FormLabel className={!isVestuario ? "text-muted-foreground" : ""}>Modelo</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          value={field.value || ""}
+                          disabled={!isVestuario}
+                        >
+                          <FormControl>
+                            <SelectTrigger 
+                              data-testid="select-modelo"
+                              className={!isVestuario ? "opacity-50 cursor-not-allowed" : ""}
+                            >
+                              <SelectValue placeholder={isVestuario ? "Selecione" : "Disponivel apenas para Vestuario"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {modeloOptions.map((modelo) => (
+                              <SelectItem key={modelo} value={modelo}>
+                                {modelo}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
               </div>
 
