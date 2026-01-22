@@ -89,10 +89,7 @@ export function ProductMediaManager({
       fileSize?: number;
       mimeType?: string;
     }) =>
-      apiRequest(`/api/admin/store/products/${productId}/media`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
+      apiRequest("POST", `/api/admin/store/products/${productId}/media`, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["/api/admin/store/products", productId, "media"],
@@ -113,9 +110,7 @@ export function ProductMediaManager({
 
   const deleteMediaMutation = useMutation({
     mutationFn: (mediaId: number) =>
-      apiRequest(`/api/admin/store/products/${productId}/media/${mediaId}`, {
-        method: "DELETE",
-      }),
+      apiRequest("DELETE", `/api/admin/store/products/${productId}/media/${mediaId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["/api/admin/store/products", productId, "media"],

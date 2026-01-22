@@ -178,7 +178,7 @@ export default function AdminLoja() {
 
   const createProductMutation = useMutation({
     mutationFn: (data: ProductFormValues) =>
-      apiRequest("/api/admin/store/products", { method: "POST", body: JSON.stringify(data) }),
+      apiRequest("POST", "/api/admin/store/products", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/store/products"] });
       setShowProductDialog(false);
@@ -192,7 +192,7 @@ export default function AdminLoja() {
 
   const updateProductMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<ProductFormValues> }) =>
-      apiRequest(`/api/admin/store/products/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+      apiRequest("PATCH", `/api/admin/store/products/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/store/products"] });
       setShowProductDialog(false);
@@ -207,7 +207,7 @@ export default function AdminLoja() {
 
   const deleteProductMutation = useMutation({
     mutationFn: (id: number) =>
-      apiRequest(`/api/admin/store/products/${id}`, { method: "DELETE" }),
+      apiRequest("DELETE", `/api/admin/store/products/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/store/products"] });
       setDeleteConfirmProduct(null);
@@ -220,7 +220,7 @@ export default function AdminLoja() {
 
   const createCategoryMutation = useMutation({
     mutationFn: (data: CategoryFormValues) =>
-      apiRequest("/api/admin/store/categories", { method: "POST", body: JSON.stringify(data) }),
+      apiRequest("POST", "/api/admin/store/categories", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/store/categories"] });
       setShowCategoryDialog(false);
@@ -234,7 +234,7 @@ export default function AdminLoja() {
 
   const updateCategoryMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Partial<CategoryFormValues> }) =>
-      apiRequest(`/api/admin/store/categories/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+      apiRequest("PATCH", `/api/admin/store/categories/${id}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/store/categories"] });
       setShowCategoryDialog(false);
@@ -249,7 +249,7 @@ export default function AdminLoja() {
 
   const deleteCategoryMutation = useMutation({
     mutationFn: (id: number) =>
-      apiRequest(`/api/admin/store/categories/${id}`, { method: "DELETE" }),
+      apiRequest("DELETE", `/api/admin/store/categories/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/store/categories"] });
       setDeleteConfirmCategory(null);
@@ -262,7 +262,7 @@ export default function AdminLoja() {
 
   const toggleProductActive = useMutation({
     mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
-      apiRequest(`/api/admin/store/products/${id}`, { method: "PATCH", body: JSON.stringify({ isActive }) }),
+      apiRequest("PATCH", `/api/admin/store/products/${id}`, { isActive }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/store/products"] });
       toast({ title: "Status do produto atualizado" });
