@@ -123,8 +123,8 @@ export async function getRepositoryInfo(owner: string, repo: string): Promise<an
 // Backup configuration
 let backupConfig = {
   enabled: false,
-  repositoryOwner: '',
-  repositoryName: 'mcg-backup',
+  repositoryOwner: 'mcgconsultoria',
+  repositoryName: 'appmcg',
   lastBackupAt: null as Date | null,
   lastBackupStatus: 'never' as 'success' | 'error' | 'never',
   lastBackupError: null as string | null,

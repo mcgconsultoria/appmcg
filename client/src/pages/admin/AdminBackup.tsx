@@ -27,8 +27,8 @@ interface BackupConfig {
 
 export default function AdminBackup() {
   const { toast } = useToast();
-  const [repositoryOwner, setRepositoryOwner] = useState("");
-  const [repositoryName, setRepositoryName] = useState("mcg-backup");
+  const [repositoryOwner, setRepositoryOwner] = useState("mcgconsultoria");
+  const [repositoryName, setRepositoryName] = useState("appmcg");
   const [scheduledHour, setScheduledHour] = useState("3");
   const [enabled, setEnabled] = useState(false);
 
