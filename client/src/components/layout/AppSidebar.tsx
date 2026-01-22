@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import {
   Sidebar,
@@ -480,6 +480,9 @@ function LojaMcgDynamicSection({ location, userPlan, planLoaded = true, userRole
     queryKey: ["/api/store/categories"],
   });
 
+  const [isOpen, setIsOpen] = useState(false);
+  const [wasManuallyToggled, setWasManuallyToggled] = useState(false);
+
   const items = (categories || [])
     .filter(cat => cat.isActive)
     .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
@@ -494,12 +497,12 @@ function LojaMcgDynamicSection({ location, userPlan, planLoaded = true, userRole
   };
   
   const hasActiveItem = items.some(item => isItemActive(item.url));
-  const [isOpen, setIsOpen] = useState(hasActiveItem);
-  const [wasManuallyToggled, setWasManuallyToggled] = useState(false);
   
-  if (hasActiveItem && !isOpen && !wasManuallyToggled) {
-    setIsOpen(true);
-  }
+  useEffect(() => {
+    if (!wasManuallyToggled) {
+      setIsOpen(hasActiveItem);
+    }
+  }, [hasActiveItem, wasManuallyToggled]);
   
   const handleToggle = (open: boolean) => {
     setWasManuallyToggled(true);

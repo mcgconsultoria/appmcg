@@ -49,12 +49,7 @@ export default function LojaCategoria() {
   const category = categories?.find(c => c.slug === categorySlug);
 
   const { data: products, isLoading: productsLoading } = useQuery<StoreProduct[]>({
-    queryKey: ["/api/store/products", categorySlug],
-    queryFn: async () => {
-      const res = await fetch(`/api/store/products?categorySlug=${categorySlug}`);
-      if (!res.ok) throw new Error("Failed to fetch products");
-      return res.json();
-    },
+    queryKey: [`/api/store/products?categorySlug=${categorySlug}`],
     enabled: !!categorySlug,
   });
 

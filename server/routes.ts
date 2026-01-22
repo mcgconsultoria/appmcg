@@ -6360,6 +6360,8 @@ export async function registerRoutes(
         const category = await storage.getStoreProductCategoryBySlug(categorySlug);
         if (category) {
           effectiveCategoryId = category.id;
+        } else {
+          return res.json([]);
         }
       }
       
