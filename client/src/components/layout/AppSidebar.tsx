@@ -263,6 +263,7 @@ const FREE_PLAN_ALLOWED_URLS = [
   "/admin/meu-plano",
   "/vendedores",
   "/logs-auditoria",
+  "/loja",
 ];
 
 const PROFESSIONAL_PLAN_ALLOWED_URLS = [
