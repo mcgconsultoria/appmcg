@@ -6348,6 +6348,42 @@ export async function registerRoutes(
     }
   });
 
+  // Generate next SKU for category
+  app.get("/api/admin/store/next-sku/:categoryId", isAdmin, async (req, res) => {
+    try {
+      const categoryId = parseInt(req.params.categoryId);
+      const category = await storage.getStoreProductCategory(categoryId);
+      if (!category) {
+        return res.status(404).json({ message: "Categoria não encontrada" });
+      }
+      
+      const categoryCode = category.code || category.slug.substring(0, 4).toUpperCase();
+      const products = await storage.getStoreProducts({ categoryId });
+      
+      // Find highest SKU number for this category
+      let maxNumber = 0;
+      const skuPattern = new RegExp(`^MCG_${categoryCode}_(\\d+)$`);
+      
+      for (const product of products) {
+        if (product.sku) {
+          const match = product.sku.match(skuPattern);
+          if (match) {
+            const num = parseInt(match[1], 10);
+            if (num > maxNumber) maxNumber = num;
+          }
+        }
+      }
+      
+      const nextNumber = (maxNumber + 1).toString().padStart(4, '0');
+      const nextSku = `MCG_${categoryCode}_${nextNumber}`;
+      
+      res.json({ sku: nextSku, categoryCode });
+    } catch (error) {
+      console.error("Error generating next SKU:", error);
+      res.status(500).json({ message: "Falha ao gerar SKU" });
+    }
+  });
+
   // Store Products (Public - only active products)
   app.get("/api/store/products", async (req, res) => {
     try {

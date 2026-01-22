@@ -89,6 +89,7 @@ type ProductFormValues = z.infer<typeof productFormSchema>;
 const categoryFormSchema = z.object({
   name: z.string().min(1, "Nome obrigatorio"),
   slug: z.string().min(1, "Slug obrigatorio"),
+  code: z.string().max(10, "Maximo 10 caracteres").optional(),
   description: z.string().optional(),
   parentId: z.number().optional().nullable(),
   displayOrder: z.number().default(0),
@@ -272,6 +273,31 @@ export default function AdminLoja() {
     },
   });
 
+  const fetchNextSku = async (categoryId: number) => {
+    try {
+      const response = await fetch(`/api/admin/store/next-sku/${categoryId}`, {
+        credentials: "include",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        return data.sku;
+      }
+    } catch (error) {
+      console.error("Error fetching next SKU:", error);
+    }
+    return null;
+  };
+
+  const handleCategoryChange = async (categoryId: number | undefined) => {
+    productForm.setValue("categoryId", categoryId);
+    if (categoryId && !editingProduct) {
+      const nextSku = await fetchNextSku(categoryId);
+      if (nextSku) {
+        productForm.setValue("sku", nextSku);
+      }
+    }
+  };
+
   const openProductDialog = (product?: StoreProduct) => {
     if (product) {
       setEditingProduct(product);
@@ -305,6 +331,7 @@ export default function AdminLoja() {
       categoryForm.reset({
         name: category.name,
         slug: category.slug,
+        code: category.code || "",
         description: category.description || "",
         parentId: category.parentId,
         displayOrder: category.displayOrder || 0,
@@ -527,6 +554,7 @@ export default function AdminLoja() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Nome</TableHead>
+                      <TableHead>Sigla</TableHead>
                       <TableHead>Slug</TableHead>
                       <TableHead>Ordem</TableHead>
                       <TableHead className="text-right">Acoes</TableHead>
@@ -536,6 +564,7 @@ export default function AdminLoja() {
                     {categories.map((category) => (
                       <TableRow key={category.id} data-testid={`row-category-${category.id}`}>
                         <TableCell className="font-medium">{category.name}</TableCell>
+                        <TableCell><Badge variant="outline">{category.code || "-"}</Badge></TableCell>
                         <TableCell className="text-muted-foreground">{category.slug}</TableCell>
                         <TableCell>{category.displayOrder}</TableCell>
                         <TableCell className="text-right">
@@ -760,7 +789,7 @@ export default function AdminLoja() {
                     <FormItem>
                       <FormLabel>Categoria</FormLabel>
                       <Select
-                        onValueChange={(val) => field.onChange(val ? parseInt(val) : undefined)}
+                        onValueChange={(val) => handleCategoryChange(val ? parseInt(val) : undefined)}
                         value={field.value?.toString() || ""}
                       >
                         <FormControl>
@@ -771,7 +800,7 @@ export default function AdminLoja() {
                         <SelectContent>
                           {categories?.map((cat) => (
                             <SelectItem key={cat.id} value={cat.id.toString()}>
-                              {cat.name}
+                              {cat.name} {cat.code && `(${cat.code})`}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -992,6 +1021,27 @@ export default function AdminLoja() {
                     <FormControl>
                       <Input {...field} placeholder="nome-da-categoria" data-testid="input-category-slug" />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={categoryForm.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sigla para SKU</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        placeholder="EBK" 
+                        maxLength={10}
+                        className="uppercase"
+                        onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        data-testid="input-category-code" 
+                      />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">Ex: EBK, BRDS, VEST (max 10 caracteres)</p>
                     <FormMessage />
                   </FormItem>
                 )}

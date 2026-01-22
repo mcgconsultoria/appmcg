@@ -1789,6 +1789,7 @@ export const storeProductCategories = pgTable("store_product_categories", {
   id: serial("id").primaryKey(),
   slug: varchar("slug", { length: 100 }).unique().notNull(),
   name: varchar("name", { length: 255 }).notNull(),
+  code: varchar("code", { length: 10 }), // Sigla para SKU (ex: EBK, BRDS, VEST)
   description: text("description"),
   displayOrder: integer("display_order").default(0),
   isActive: boolean("is_active").default(true),
