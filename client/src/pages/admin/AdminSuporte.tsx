@@ -160,10 +160,10 @@ export default function AdminSuporte() {
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: async ({ ticketId, content }: { ticketId: number; content: string }) => {
+    mutationFn: async ({ ticketId, message }: { ticketId: number; message: string }) => {
       const response = await apiRequest("POST", `/api/support-tickets/${ticketId}/messages`, {
-        content,
-        isStaff: true,
+        message,
+        isInternal: false,
       });
       return response.json();
     },
@@ -470,18 +470,20 @@ export default function AdminSuporte() {
                     </p>
                   ) : (
                     <div className="space-y-3">
-                      {messages.map((msg) => (
+                      {messages.map((msg) => {
+                        const isFromStaff = msg.userId !== selectedTicket?.userId;
+                        return (
                         <div
                           key={msg.id}
                           className={`p-3 rounded-lg ${
-                            msg.isStaff
+                            isFromStaff
                               ? "bg-primary/10 ml-8"
                               : "bg-muted mr-8"
                           }`}
                         >
                           <div className="flex justify-between items-center mb-1">
                             <span className="text-xs font-medium">
-                              {msg.isStaff ? "Suporte MCG" : "Cliente"}
+                              {isFromStaff ? "Suporte MCG" : "Cliente"}
                             </span>
                             <span className="text-xs text-muted-foreground">
                               {msg.createdAt
@@ -489,9 +491,10 @@ export default function AdminSuporte() {
                                 : ""}
                             </span>
                           </div>
-                          <p className="text-sm">{msg.content}</p>
+                          <p className="text-sm">{msg.message}</p>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </ScrollArea>
@@ -517,7 +520,7 @@ export default function AdminSuporte() {
                   if (selectedTicket && replyMessage.trim()) {
                     sendMessageMutation.mutate({
                       ticketId: selectedTicket.id,
-                      content: replyMessage,
+                      message: replyMessage,
                     });
                   }
                 }}
