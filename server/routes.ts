@@ -6,6 +6,7 @@ import { registerUser, loginUser, validateSession, logoutUser } from "./customAu
 import { consultarCNPJ } from "./cnpjService";
 import { logAudit } from "./auditHelper";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
+import { performFullBackup, startAutomaticBackup } from "./backupService";
 import {
   insertClientSchema,
   insertChecklistSchema,
@@ -7475,6 +7476,22 @@ export async function registerRoutes(
       res.status(500).json({ message: "Falha ao remover cargo" });
     }
   });
+
+  // ==================== BACKUP TO GOOGLE DRIVE ====================
+  
+  // Manual backup trigger (admin only)
+  app.post("/api/backup/manual", isMcgAdmin, async (req, res) => {
+    try {
+      const result = await performFullBackup();
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error performing backup:", error);
+      res.status(500).json({ success: false, message: `Erro no backup: ${error.message}` });
+    }
+  });
+
+  // Start automatic backup on server startup (every 24 hours)
+  startAutomaticBackup(24);
 
   return httpServer;
 }
