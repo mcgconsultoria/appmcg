@@ -115,6 +115,7 @@ export default function LojaCategoria() {
   const isLoading = categoriesLoading || productsLoading;
 
   const content = (
+    <>
       <div className="space-y-6">
         {categorySlug === 'brindes' && (
           <Card className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30">
