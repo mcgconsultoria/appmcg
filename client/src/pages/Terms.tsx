@@ -110,7 +110,7 @@ export default function Terms() {
             <h2>11. Lei Aplicável</h2>
             <p>
               Estes termos são regidos pelas leis da República Federativa do Brasil.
-              Qualquer disputa será resolvida no foro da Comarca de São Paulo/SP.
+              Qualquer disputa será resolvida no foro da Comarca de Curitiba/PR.
             </p>
 
             <h2>12. Contato</h2>
