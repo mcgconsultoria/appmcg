@@ -1562,7 +1562,7 @@ export async function registerRoutes(
       }
 
       const session = await stripeClient.checkout.sessions.create({
-        payment_method_types: ["card"],
+        payment_method_types: selectedCurrency === "brl" ? ["card", "pix", "boleto"] : ["card"],
         line_items: [
           {
             price_data: {
