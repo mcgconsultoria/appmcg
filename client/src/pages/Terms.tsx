@@ -29,8 +29,8 @@ export default function Terms() {
             <h2>1. Aceitação dos Termos</h2>
             <p>
               Ao acessar e utilizar a plataforma MCG Consultoria, você concorda com estes
-              Termos de Uso. Se não concordar com qualquer parte destes termos, não utilize
-              nossos serviços.
+              Termos de Uso. Se não concordar com qualquer parte destes termos, fique muito
+              à vontade em escolher não utilizar nossos serviços.
             </p>
 
             <h2>2. Descrição dos Serviços</h2>
