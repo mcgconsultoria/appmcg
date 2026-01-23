@@ -45,6 +45,7 @@ import {
   Filter,
   User,
   Building2,
+  Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -174,6 +175,20 @@ export default function AdminSuporte() {
     },
     onError: () => {
       toast({ title: "Erro ao enviar resposta", variant: "destructive" });
+    },
+  });
+
+  const deleteTicketMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/support-tickets/${id}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/support-tickets"] });
+      toast({ title: "Chamado excluido com sucesso" });
+    },
+    onError: () => {
+      toast({ title: "Erro ao excluir chamado", variant: "destructive" });
     },
   });
 
@@ -356,15 +371,30 @@ export default function AdminSuporte() {
                             : "-"}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setSelectedTicket(ticket)}
-                            data-testid={`button-view-ticket-${ticket.id}`}
-                          >
-                            <MessageSquare className="h-4 w-4 mr-1" />
-                            Ver
-                          </Button>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setSelectedTicket(ticket)}
+                              data-testid={`button-view-ticket-${ticket.id}`}
+                            >
+                              <MessageSquare className="h-4 w-4 mr-1" />
+                              Ver
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                              onClick={() => {
+                                if (confirm(`Excluir chamado ${ticket.ticketNumber}?`)) {
+                                  deleteTicketMutation.mutate(ticket.id);
+                                }
+                              }}
+                              data-testid={`button-delete-ticket-${ticket.id}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}

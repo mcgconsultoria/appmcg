@@ -5081,6 +5081,25 @@ export async function registerRoutes(
     }
   });
 
+  // Admin Support Tickets - delete
+  app.delete("/api/admin/support-tickets/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const isMcgAdmin = req.user?.role === 'admin_mcg';
+      if (!isMcgAdmin) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      
+      const ticket = await storage.getSupportTicket(parseInt(req.params.id));
+      if (!ticket) return res.status(404).json({ message: "Ticket not found" });
+      
+      await storage.deleteSupportTicket(parseInt(req.params.id), ticket.companyId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting support ticket:", error);
+      res.status(500).json({ message: "Failed to delete support ticket" });
+    }
+  });
+
   // Admin Support Tickets - with user/company info
   app.get("/api/admin/support-tickets", isAuthenticated, async (req: any, res) => {
     try {
