@@ -84,6 +84,7 @@ import Brindes from "@/pages/Brindes";
 import Escritorio from "@/pages/Escritorio";
 import Vestuario from "@/pages/Vestuario";
 import LojaCategoria from "@/pages/LojaCategoria";
+import Loja from "@/pages/Loja";
 import DiagnósticoComercial from "@/pages/DiagnosticoComercial";
 import CampanhaPiloto from "@/pages/CampanhaPiloto";
 import Logout from "@/pages/Logout";
@@ -114,6 +115,8 @@ function Router() {
       <Route path="/planos" component={Pricing} />
       <Route path="/privacidade" component={Privacy} />
       <Route path="/termos" component={Terms} />
+      <Route path="/loja" component={Loja} />
+      <Route path="/loja/:slug" component={LojaCategoria} />
       <Route path="/login" component={Login} />
       <Route path="/registro" component={Register} />
       <Route path="/esqueci-senha" component={ForgotPassword} />
@@ -240,7 +243,6 @@ function Router() {
           <Route path="/brindes" component={Brindes} />
           <Route path="/escritorio" component={Escritorio} />
           <Route path="/vestuario" component={Vestuario} />
-          <Route path="/loja/:slug" component={LojaCategoria} />
           <Route path="/rfi" component={RFI} />
           <Route path="/tarefas" component={TasksPage} />
           <Route path="/projetos" component={ProjectsPage} />

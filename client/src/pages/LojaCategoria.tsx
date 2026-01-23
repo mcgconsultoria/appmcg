@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,10 +31,14 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { StoreProduct, StoreProductCategory } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import logoMcg from "@assets/logo_mcg_principal.png";
 
 export default function LojaCategoria() {
   const params = useParams();
   const categorySlug = params.slug as string;
+  const { isAuthenticated } = useAuth();
   
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<StoreProduct | null>(null);
@@ -110,11 +114,7 @@ export default function LojaCategoria() {
   const CategoryIcon = getCategoryIcon();
   const isLoading = categoriesLoading || productsLoading;
 
-  return (
-    <AppLayout
-      title={category?.name || "Loja MCG"}
-      subtitle={category?.description || "Produtos MCG Consultoria"}
-    >
+  const content = (
       <div className="space-y-6">
         {categorySlug === 'brindes' && (
           <Card className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30">
@@ -351,6 +351,62 @@ export default function LojaCategoria() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </AppLayout>
+    </>
+  );
+
+  if (isAuthenticated) {
+    return (
+      <AppLayout
+        title={category?.name || "Loja MCG"}
+        subtitle={category?.description || "Produtos MCG Consultoria"}
+      >
+        {content}
+      </AppLayout>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Link href="/landing" className="flex items-center gap-3">
+            <img 
+              src={logoMcg} 
+              alt="MCG Consultoria" 
+              className="h-10 w-10 object-contain"
+            />
+            <div className="flex flex-col">
+              <span className="font-bold text-lg leading-tight">MCG</span>
+              <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
+            </div>
+          </Link>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <Link href="/login">
+              <Button variant="outline" size="sm" data-testid="btn-login">
+                Entrar
+              </Button>
+            </Link>
+            <Link href="/registro">
+              <Button size="sm" data-testid="btn-registro">
+                Novo Acesso
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <Link href="/loja" className="text-sm text-muted-foreground hover:text-foreground">
+            ← Voltar para a Loja
+          </Link>
+        </div>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">{category?.name || "Loja MCG"}</h1>
+          <p className="text-muted-foreground">{category?.description || "Produtos MCG Consultoria"}</p>
+        </div>
+        {content}
+      </div>
+    </div>
   );
 }
