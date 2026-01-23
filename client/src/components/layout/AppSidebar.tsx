@@ -237,6 +237,11 @@ const adminMcgSistemaItems = [
     icon: MessageSquare,
   },
   {
+    title: "Suporte",
+    url: "/admin/suporte",
+    icon: HeadphonesIcon,
+  },
+  {
     title: "Backup GitHub",
     url: "/admin/backup",
     icon: Database,

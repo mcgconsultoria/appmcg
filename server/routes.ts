@@ -5081,6 +5081,52 @@ export async function registerRoutes(
     }
   });
 
+  // Admin Support Tickets - with user/company info
+  app.get("/api/admin/support-tickets", isAuthenticated, async (req: any, res) => {
+    try {
+      const isMcgAdmin = req.user?.role === 'admin_mcg';
+      if (!isMcgAdmin) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      
+      const tickets = await storage.getSupportTickets();
+      
+      // Enrich tickets with user and company info
+      const enrichedTickets = await Promise.all(tickets.map(async (ticket) => {
+        let userName = "Usuario";
+        let userEmail = "";
+        let companyName = "";
+        
+        if (ticket.userId) {
+          const user = await storage.getUser(ticket.userId);
+          if (user) {
+            userName = user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email;
+            userEmail = user.email;
+          }
+        }
+        
+        if (ticket.companyId) {
+          const company = await storage.getCompany(ticket.companyId);
+          if (company) {
+            companyName = company.name;
+          }
+        }
+        
+        return {
+          ...ticket,
+          userName,
+          userEmail,
+          companyName,
+        };
+      }));
+      
+      res.json(enrichedTickets);
+    } catch (error) {
+      console.error("Error fetching admin support tickets:", error);
+      res.status(500).json({ message: "Failed to fetch support tickets" });
+    }
+  });
+
   // Support Tickets
   app.get("/api/support-tickets", isAuthenticated, async (req: any, res) => {
     try {
