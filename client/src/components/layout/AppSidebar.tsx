@@ -909,8 +909,8 @@ export function AppSidebar() {
           fullAccessGranted={user?.fullAccessGranted}
         />
 
-        {/* ADMIN section - only visible to company administrators created by MCG */}
-        {user?.role === "admin" && (
+        {/* ADMIN section - only visible to MCG admin and company administrators created by MCG */}
+        {(user?.role === "admin" || user?.role === "admin_mcg") && (
           <CollapsibleSection
             title="ADMIN"
             icon={UserCog}
