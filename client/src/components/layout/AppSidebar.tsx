@@ -841,6 +841,14 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        {(user?.role === "admin" || user?.role === "admin_mcg") && (
+          <AdminPJSection location={location} userRole={user?.role} userPlan={effectivePlan} planLoaded={planLoaded} fullAccessGranted={user?.fullAccessGranted} />
+        )}
+
+        {(user?.role === "admin" || user?.role === "admin_mcg") && (
+          <AdminPFSection location={location} userPlan={effectivePlan} planLoaded={planLoaded} userRole={user?.role} fullAccessGranted={user?.fullAccessGranted} />
+        )}
+
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -923,14 +931,6 @@ export function AppSidebar() {
           userRole={user?.role}
           fullAccessGranted={user?.fullAccessGranted}
         />
-
-        {(user?.role === "admin" || user?.role === "admin_mcg") && (
-          <AdminPJSection location={location} userRole={user?.role} userPlan={effectivePlan} planLoaded={planLoaded} fullAccessGranted={user?.fullAccessGranted} />
-        )}
-
-        {(user?.role === "admin" || user?.role === "admin_mcg") && (
-          <AdminPFSection location={location} userPlan={effectivePlan} planLoaded={planLoaded} userRole={user?.role} fullAccessGranted={user?.fullAccessGranted} />
-        )}
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-sidebar-border">
