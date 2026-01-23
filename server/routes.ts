@@ -7302,12 +7302,13 @@ export async function registerRoutes(
 
   // ==================== ROLE-BASED PERMISSIONS SYSTEM ====================
 
-  // Seed permissions, roles, and checklist templates on startup
+  // Seed permissions, roles, checklist templates and store categories on startup
   (async () => {
     try {
       await storage.seedPermissionDefinitions();
       await storage.seedSystemRoles();
       await storage.seedChecklistTemplates();
+      await storage.seedStoreCategories();
       console.log("Permissions, roles, and checklists seeded successfully");
     } catch (error) {
       console.error("Error seeding permissions:", error);

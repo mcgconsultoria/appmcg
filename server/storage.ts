@@ -694,6 +694,7 @@ export interface IStorage {
   updateCompanyRole(id: number, data: Partial<InsertCompanyRole>): Promise<CompanyRole | undefined>;
   deleteCompanyRole(id: number): Promise<boolean>;
   seedSystemRoles(): Promise<void>;
+  seedStoreCategories(): Promise<void>;
 
   // User Role Assignments operations
   getUserRoleAssignments(userId: string, companyId?: number): Promise<(UserRoleAssignment & { role: CompanyRole })[]>;
@@ -3812,6 +3813,25 @@ export class DatabaseStorage implements IStorage {
       }
     }
     return Array.from(permissions);
+  }
+
+  async seedStoreCategories(): Promise<void> {
+    const existingCategories = await db.select().from(storeProductCategories);
+    if (existingCategories.length > 0) {
+      return;
+    }
+
+    const defaultCategories = [
+      { name: 'E-books', slug: 'ebooks', description: 'Livros digitais e Materiais educativos', icon: 'book', displayOrder: 1, isActive: true },
+      { name: 'Brindes', slug: 'brindes', description: 'Brindes e itens promocionais', icon: 'gift', displayOrder: 2, isActive: true },
+      { name: 'Escritorio', slug: 'escritorio', description: 'Materiais para escritorio', icon: 'briefcase', displayOrder: 3, isActive: true },
+      { name: 'Vestuario', slug: 'vestuario', description: 'Uniformes e roupas corporativas', icon: 'shirt', displayOrder: 4, isActive: true },
+    ];
+
+    for (const category of defaultCategories) {
+      await db.insert(storeProductCategories).values(category);
+    }
+    console.log("Store categories seeded successfully");
   }
 }
 
