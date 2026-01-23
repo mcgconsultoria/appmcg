@@ -47,8 +47,8 @@ const planNames: Record<string, string> = {
 
 const planPrices: Record<string, number> = {
   free: 0,
-  professional: 499,
-  enterprise: 1499
+  professional: 399,
+  enterprise: 1299
 };
 
 export default function MeuPlano() {
