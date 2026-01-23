@@ -213,6 +213,30 @@ export default function Pricing() {
     enabled: isAuthenticated,
   });
 
+  // Map Stripe products to get priceIds by matching plan names
+  const getStripePriceId = (planName: string): string | null => {
+    if (!productsData?.data) return null;
+    
+    // Map plan names to Stripe product names (case-insensitive match)
+    const normalizedName = planName.toLowerCase();
+    
+    for (const product of productsData.data) {
+      const productName = product.name.toLowerCase();
+      if (productName.includes(normalizedName) || normalizedName.includes(productName)) {
+        if (product.prices && product.prices.length > 0) {
+          return product.prices[0].id;
+        }
+      }
+      // Also check metadata for plan_type
+      if (product.metadata?.plan_type?.toLowerCase() === normalizedName) {
+        if (product.prices && product.prices.length > 0) {
+          return product.prices[0].id;
+        }
+      }
+    }
+    return null;
+  };
+
   const activePlans = dbPlans && dbPlans.length > 0 ? dbPlans.map(plan => ({
     name: plan.name,
     description: plan.description || "",
@@ -222,8 +246,11 @@ export default function Pricing() {
     additionalUserPrice: (plan.additionalUserPrice || 0) / 100,
     features: plan.features || [],
     popular: plan.popular || false,
-    priceId: null,
-  })) : defaultPlans;
+    priceId: plan.stripePriceId || getStripePriceId(plan.name),
+  })) : defaultPlans.map(plan => ({
+    ...plan,
+    priceId: getStripePriceId(plan.name),
+  }));
 
   const checkoutMutation = useMutation({
     mutationFn: async (priceId: string) => {
@@ -433,8 +460,13 @@ export default function Pricing() {
         }))
     : individualProducts;
 
-  const handleSubscribe = (priceId: string | null) => {
+  const handleSubscribe = (priceId: string | null, planName?: string) => {
     if (!priceId) {
+      toast({
+        title: "Plano não configurado",
+        description: `O plano ${planName || ''} ainda não está disponível para assinatura online. Entre em contato conosco.`,
+        variant: "destructive",
+      });
       return;
     }
     if (!isAuthenticated) {
@@ -527,7 +559,7 @@ export default function Pricing() {
                         if (!isAuthenticated) {
                           window.location.href = `/login?redirect=${encodeURIComponent('/planos')}`;
                         } else {
-                          handleSubscribe(plan.priceId);
+                          handleSubscribe(plan.priceId, plan.name);
                         }
                       }}
                       disabled={checkoutMutation.isPending}

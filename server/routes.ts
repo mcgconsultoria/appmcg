@@ -2035,31 +2035,79 @@ export async function registerRoutes(
   // Stripe routes
   app.get("/api/stripe/products", async (req, res) => {
     try {
-      const rows = await storage.listStripeProductsWithPrices();
-      const productsMap = new Map();
-      for (const row of rows) {
-        if (!productsMap.has(row.product_id)) {
-          productsMap.set(row.product_id, {
-            id: row.product_id,
-            name: row.product_name,
-            description: row.product_description,
-            active: row.product_active,
-            metadata: row.product_metadata,
-            prices: []
-          });
+      // Try to get from local sync first
+      let products: any[] = [];
+      try {
+        const rows = await storage.listStripeProductsWithPrices();
+        const productsMap = new Map();
+        for (const row of rows) {
+          if (!productsMap.has(row.product_id)) {
+            productsMap.set(row.product_id, {
+              id: row.product_id,
+              name: row.product_name,
+              description: row.product_description,
+              active: row.product_active,
+              metadata: row.product_metadata,
+              prices: []
+            });
+          }
+          if (row.price_id) {
+            productsMap.get(row.product_id).prices.push({
+              id: row.price_id,
+              unit_amount: row.unit_amount,
+              currency: row.currency,
+              recurring: row.recurring,
+              active: row.price_active,
+              metadata: row.price_metadata,
+            });
+          }
         }
-        if (row.price_id) {
-          productsMap.get(row.product_id).prices.push({
-            id: row.price_id,
-            unit_amount: row.unit_amount,
-            currency: row.currency,
-            recurring: row.recurring,
-            active: row.price_active,
-            metadata: row.price_metadata,
-          });
+        products = Array.from(productsMap.values());
+      } catch (dbError) {
+        console.log("Local stripe sync not available, fetching from Stripe API...");
+      }
+
+      // If no products from local sync, fetch directly from Stripe API
+      if (products.length === 0) {
+        try {
+          const { getUncachableStripeClient } = await import("./stripeClient");
+          const stripe = await getUncachableStripeClient();
+          
+          const stripeProducts = await stripe.products.list({ active: true, limit: 20 });
+          const stripePrices = await stripe.prices.list({ active: true, limit: 100 });
+          
+          const pricesMap = new Map<string, any[]>();
+          for (const price of stripePrices.data) {
+            const productId = typeof price.product === 'string' ? price.product : price.product?.id;
+            if (productId) {
+              if (!pricesMap.has(productId)) {
+                pricesMap.set(productId, []);
+              }
+              pricesMap.get(productId)?.push({
+                id: price.id,
+                unit_amount: price.unit_amount,
+                currency: price.currency,
+                recurring: price.recurring,
+                active: price.active,
+                metadata: price.metadata,
+              });
+            }
+          }
+          
+          products = stripeProducts.data.map(product => ({
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            active: product.active,
+            metadata: product.metadata,
+            prices: pricesMap.get(product.id) || [],
+          }));
+        } catch (stripeError) {
+          console.error("Error fetching from Stripe API:", stripeError);
         }
       }
-      res.json({ data: Array.from(productsMap.values()) });
+
+      res.json({ data: products });
     } catch (error) {
       console.error("Error fetching products:", error);
       res.json({ data: [] });
