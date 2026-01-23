@@ -355,22 +355,10 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
     return location === itemUrl || location.startsWith(itemUrl + "/");
   };
   
-  // Check if any item in this section is currently active
-  const hasActiveItem = items.some(item => isItemActive(item.url));
-  
-  // Initialize open state: open if has active item or defaultOpen
-  const [isOpen, setIsOpen] = useState(defaultOpen || hasActiveItem);
-  
-  // Keep menu open if navigating within its items
-  const [wasManuallyToggled, setWasManuallyToggled] = useState(false);
-  
-  // Auto-open when navigating to an item in this section
-  if (hasActiveItem && !isOpen && !wasManuallyToggled) {
-    setIsOpen(true);
-  }
+  // Initialize open state: always closed by default unless explicitly set
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   
   const handleToggle = (open: boolean) => {
-    setWasManuallyToggled(true);
     setIsOpen(open);
   };
 
