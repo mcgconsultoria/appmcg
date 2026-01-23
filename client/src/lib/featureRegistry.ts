@@ -19,6 +19,7 @@ import {
   Handshake,
   FileText,
   Library,
+  GitBranch,
 } from "lucide-react";
 
 export interface FeatureItem {
@@ -253,6 +254,18 @@ export const featureRegistry: FeatureItem[] = [
     manual: {
       title: "Gestão de Metas",
       description: "Definição e acompanhamento de metas",
+      type: "pdf",
+    },
+  },
+  {
+    id: "com-fluxograma",
+    title: "Fluxograma Comercial",
+    url: "/fluxograma",
+    icon: GitBranch,
+    subCategory: "com",
+    manual: {
+      title: "Fluxograma Comercial",
+      description: "Fluxo visual do processo comercial",
       type: "pdf",
     },
   },

@@ -868,18 +868,6 @@ export function AppSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={location === "/fluxograma"}>
-                  <Link 
-                    href="/fluxograma" 
-                    data-testid="nav-fluxograma"
-                    className="flex items-center gap-2 px-3 py-2 text-base font-semibold"
-                  >
-                    <GitBranch className="h-5 w-5" />
-                    <span>Fluxograma Comercial</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
