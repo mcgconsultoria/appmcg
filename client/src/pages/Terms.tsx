@@ -36,9 +36,9 @@ export default function Terms() {
             <h2>2. Descrição dos Serviços</h2>
             <p>A MCG Consultoria oferece:</p>
             <ul>
-              <li><strong>Calculadoras gratuitas:</strong> Frete e armazenagem (acesso livre)</li>
-              <li><strong>Plano Profissional:</strong> CRM, Pipeline, Checklists, Financeiro, Marketing</li>
-              <li><strong>Plano Empresarial:</strong> Recursos avançados e multi-usuários</li>
+              <li><strong>Calculadoras gratuitas:</strong> Frete e armazenagem (acesso limitado)</li>
+              <li><strong>Plano Profissional:</strong> Recursos Comerciais do CRM</li>
+              <li><strong>Plano Empresarial:</strong> Recursos Avançados Marketing, Comerciais e Pós Vendas com Multi-Usuários</li>
             </ul>
 
             <h2>3. Cadastro e Conta</h2>
