@@ -85,6 +85,7 @@ export default function Terms() {
               <li>Interrupções temporárias do serviço</li>
               <li>Perda de dados por uso inadequado</li>
               <li>Danos indiretos ou consequenciais</li>
+              <li>Comandos feitos de forma errônea em recursos pagos para uso da IA integrada aos serviços</li>
             </ul>
 
             <h2>8. Disponibilidade do Serviço</h2>
