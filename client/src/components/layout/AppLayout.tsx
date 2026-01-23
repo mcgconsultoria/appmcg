@@ -1,7 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Bell, ArrowLeft, AlertTriangle, RefreshCw, X } from "lucide-react";
+import { Bell, ArrowLeft, AlertTriangle, RefreshCw, X, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLocation, Link } from "wouter";
@@ -30,6 +30,7 @@ export function AppLayout({ children, title, subtitle, showBackButton = true }: 
   const [location, setLocation] = useLocation();
   const [dismissedAccessWarning, setDismissedAccessWarning] = useState(false);
   const [dismissedRenewalAlert, setDismissedRenewalAlert] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const { user, isAuthenticated } = useAuth();
   
   const { data: subscription } = useQuery<SubscriptionStatus>({
@@ -109,6 +110,20 @@ export function AppLayout({ children, title, subtitle, showBackButton = true }: 
               <ThemeToggle />
               <Tooltip>
                 <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => setIsChatOpen(!isChatOpen)}
+                    data-testid="button-support-chat"
+                    className="relative"
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Chat de Suporte</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
                   <Button variant="outline" size="sm" asChild data-testid="button-new-access" className="hidden md:flex">
                     <a href="/login">
                       Novo Acesso
@@ -173,6 +188,8 @@ export function AppLayout({ children, title, subtitle, showBackButton = true }: 
         companyId={user?.companyId}
         userEmail={user?.email}
         userName={user?.firstName || user?.email}
+        isOpenExternal={isChatOpen}
+        onOpenChange={setIsChatOpen}
       />
     </SidebarProvider>
   );

@@ -86,6 +86,8 @@ interface ChatWidgetProps {
   companyId?: number;
   userEmail?: string;
   userName?: string;
+  isOpenExternal?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export default function ChatWidget({ 
@@ -93,9 +95,20 @@ export default function ChatWidget({
   userId,
   companyId,
   userEmail,
-  userName
+  userName,
+  isOpenExternal,
+  onOpenChange
 }: ChatWidgetProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenInternal, setIsOpenInternal] = useState(false);
+  
+  const isOpen = isOpenExternal !== undefined ? isOpenExternal : isOpenInternal;
+  const setIsOpen = (open: boolean) => {
+    if (onOpenChange) {
+      onOpenChange(open);
+    } else {
+      setIsOpenInternal(open);
+    }
+  };
   const [messages, setMessages] = useState<ChatMessage[]>([GREETING_MESSAGE]);
   const [inputValue, setInputValue] = useState("");
   const [isCreatingTicket, setIsCreatingTicket] = useState(false);
@@ -245,7 +258,7 @@ export default function ChatWidget({
 
   return (
     <>
-      {!isOpen && (
+      {!isOpen && isOpenExternal === undefined && (
         <Button
           onClick={() => setIsOpen(true)}
           className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50"
