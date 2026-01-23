@@ -92,7 +92,7 @@ const adminClienteItems = [
     icon: CreditCard,
   },
   {
-    title: "Vendedores",
+    title: "Colaboradores",
     url: "/vendedores",
     icon: UserRound,
   },
