@@ -909,16 +909,19 @@ export function AppSidebar() {
           fullAccessGranted={user?.fullAccessGranted}
         />
 
-        <CollapsibleSection
-          title="Admin Cliente"
-          icon={UserCog}
-          items={adminClienteItems}
-          location={location}
-          userPlan={effectivePlan}
-          planLoaded={planLoaded}
-          userRole={user?.role}
-          fullAccessGranted={user?.fullAccessGranted}
-        />
+        {/* ADMIN section - only visible to company administrators created by MCG */}
+        {user?.role === "admin" && (
+          <CollapsibleSection
+            title="ADMIN"
+            icon={UserCog}
+            items={adminClienteItems}
+            location={location}
+            userPlan={effectivePlan}
+            planLoaded={planLoaded}
+            userRole={user?.role}
+            fullAccessGranted={user?.fullAccessGranted}
+          />
+        )}
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-sidebar-border">

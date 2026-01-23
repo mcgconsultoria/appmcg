@@ -1541,12 +1541,12 @@ function PermissoesTab() {
 
 export default function AdminCliente() {
   return (
-    <AppLayout title="Admin Cliente">
+    <AppLayout title="ADMIN">
       <div className="p-6">
         <div className="mb-6">
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <UserCog className="h-6 w-6" />
-            Admin Cliente
+            ADMIN
           </h1>
           <p className="text-muted-foreground">
             Gerencie sua equipe e contratos
