@@ -85,6 +85,7 @@ import Escritorio from "@/pages/Escritorio";
 import Vestuario from "@/pages/Vestuario";
 import LojaCategoria from "@/pages/LojaCategoria";
 import Loja from "@/pages/Loja";
+import LojaSucesso from "@/pages/LojaSucesso";
 import DiagnósticoComercial from "@/pages/DiagnosticoComercial";
 import CampanhaPiloto from "@/pages/CampanhaPiloto";
 import Logout from "@/pages/Logout";
@@ -116,6 +117,7 @@ function Router() {
       <Route path="/privacidade" component={Privacy} />
       <Route path="/termos" component={Terms} />
       <Route path="/loja" component={Loja} />
+      <Route path="/loja/sucesso" component={LojaSucesso} />
       <Route path="/loja/:slug" component={LojaCategoria} />
       <Route path="/login" component={Login} />
       <Route path="/registro" component={Register} />

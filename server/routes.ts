@@ -6586,6 +6586,256 @@ export async function registerRoutes(
     }
   });
 
+  // Store Checkout - Create Stripe checkout session for store products
+  app.post("/api/store/checkout", async (req, res) => {
+    try {
+      const { items, customerEmail, customerName, customerPhone, shippingAddress, isGift, giftRecipientName, giftNote } = req.body;
+
+      if (!items || !Array.isArray(items) || items.length === 0) {
+        return res.status(400).json({ message: "Carrinho vazio" });
+      }
+
+      // Get Stripe client
+      const { getUncachableStripeClient } = await import("./stripeClient");
+      const stripeClient = await getUncachableStripeClient();
+
+      // Validate and fetch products
+      const lineItems: any[] = [];
+      let subtotal = 0;
+      const orderItems: any[] = [];
+
+      for (const item of items) {
+        const product = await storage.getStoreProduct(item.productId);
+        if (!product || !product.isActive) {
+          return res.status(400).json({ message: `Produto ${item.productId} não encontrado ou indisponível` });
+        }
+
+        // Server-side quantity validation
+        const quantity = Math.max(1, Math.min(100, parseInt(item.quantity) || 1));
+        
+        // Server-side size validation for clothing products
+        if (product.sizes && product.sizes.length > 0) {
+          if (!item.selectedSize || !product.sizes.includes(item.selectedSize)) {
+            return res.status(400).json({ message: `Tamanho inválido para o produto ${product.name}` });
+          }
+        }
+
+        // Check inventory if applicable
+        if (product.inventoryQty !== null && product.inventoryQty < quantity && !product.allowBackorder) {
+          return res.status(400).json({ message: `Estoque insuficiente para ${product.name}. Disponível: ${product.inventoryQty}` });
+        }
+
+        const priceInCents = Math.round(parseFloat(product.priceAmount) * 100);
+        subtotal += priceInCents * quantity;
+
+        // Build line item for Stripe
+        lineItems.push({
+          price_data: {
+            currency: product.priceCurrency?.toLowerCase() || "brl",
+            product_data: {
+              name: product.name,
+              description: product.shortDescription || undefined,
+              images: product.primaryImageUrl ? [product.primaryImageUrl] : undefined,
+            },
+            unit_amount: priceInCents,
+          },
+          quantity: quantity,
+        });
+
+        // Build order item for local storage
+        orderItems.push({
+          productId: product.id,
+          productSnapshot: {
+            name: product.name,
+            sku: product.sku,
+            primaryImageUrl: product.primaryImageUrl,
+            productType: product.productType,
+          },
+          quantity: quantity,
+          unitPrice: product.priceAmount,
+          totalPrice: (parseFloat(product.priceAmount) * quantity).toFixed(2),
+          selectedSize: item.selectedSize,
+          selectedColor: item.selectedColor,
+        });
+      }
+
+      // Check if any product requires shipping
+      const hasPhysicalProducts = orderItems.some(item => {
+        const product = items.find((i: any) => i.productId === item.productId);
+        return product?.fulfillmentType === "physical" || product?.fulfillmentType === "hybrid";
+      });
+
+      // Generate unique order number
+      const orderNumber = `MCG-${Date.now()}-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+
+      // Create order in database (pending status)
+      const order = await storage.createStoreOrder({
+        orderNumber,
+        companyId: req.user?.companyId || undefined,
+        userId: req.user?.id || undefined,
+        status: "pending",
+        subtotal: (subtotal / 100).toFixed(2),
+        taxAmount: "0",
+        shippingAmount: "0",
+        totalAmount: (subtotal / 100).toFixed(2),
+        currency: "BRL",
+        customerEmail: customerEmail || req.user?.email,
+        customerName: customerName || req.user?.name,
+        customerPhone,
+        shippingAddress: hasPhysicalProducts ? shippingAddress : undefined,
+        isGift: isGift || false,
+        giftRecipientName,
+        giftNote,
+      });
+
+      // Create order items
+      for (const item of orderItems) {
+        await storage.createStoreOrderItem({
+          orderId: order.id,
+          ...item,
+        });
+      }
+
+      // Build success/cancel URLs
+      const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+        ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+        : process.env.REPLIT_DOMAINS?.split(",")[0] 
+          ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}`
+          : "http://localhost:5000";
+
+      // Create Stripe checkout session
+      const session = await stripeClient.checkout.sessions.create({
+        payment_method_types: ["card", "boleto"],
+        line_items: lineItems,
+        mode: "payment",
+        success_url: `${baseUrl}/loja/sucesso?order=${orderNumber}`,
+        cancel_url: `${baseUrl}/loja?canceled=true`,
+        locale: "pt-BR",
+        customer_email: customerEmail || req.user?.email,
+        metadata: {
+          orderId: order.id.toString(),
+          orderNumber: orderNumber,
+          type: "store_purchase",
+        },
+        shipping_address_collection: hasPhysicalProducts ? {
+          allowed_countries: ["BR"],
+        } : undefined,
+      });
+
+      // Update order with Stripe session ID
+      await storage.updateStoreOrder(order.id, {
+        stripeCheckoutSessionId: session.id,
+      });
+
+      res.json({ 
+        checkoutUrl: session.url,
+        orderId: order.id,
+        orderNumber: orderNumber,
+      });
+    } catch (error) {
+      console.error("Error creating store checkout:", error);
+      res.status(500).json({ message: "Falha ao criar checkout" });
+    }
+  });
+
+  // Store checkout success - Update order status (verify via Stripe session)
+  app.post("/api/store/checkout/confirm", async (req, res) => {
+    try {
+      const { orderNumber } = req.body;
+
+      if (!orderNumber) {
+        return res.status(400).json({ message: "Número do pedido é obrigatório" });
+      }
+
+      const order = await storage.getStoreOrderByNumber(orderNumber);
+      if (!order) {
+        return res.status(404).json({ message: "Pedido não encontrado" });
+      }
+
+      // Only allow status update if order is still pending
+      if (order.status !== "pending") {
+        return res.json({ 
+          success: true, 
+          order,
+          message: order.status === "paid" ? "Pagamento já confirmado!" : "Pedido em processamento." 
+        });
+      }
+
+      // Verify payment status via Stripe session
+      if (order.stripeCheckoutSessionId) {
+        try {
+          const { getUncachableStripeClient } = await import("./stripeClient");
+          const stripeClient = await getUncachableStripeClient();
+          const session = await stripeClient.checkout.sessions.retrieve(order.stripeCheckoutSessionId);
+
+          // Verify session metadata matches order
+          if (session.metadata?.orderNumber !== orderNumber) {
+            console.error("Session orderNumber mismatch:", session.metadata?.orderNumber, orderNumber);
+            return res.status(403).json({ message: "Sessão inválida para este pedido" });
+          }
+
+          if (session.payment_status === "paid") {
+            await storage.updateStoreOrder(order.id, {
+              status: "paid",
+              stripePaymentIntentId: session.payment_intent as string,
+            });
+            
+            return res.json({ 
+              success: true, 
+              order: { ...order, status: "paid" },
+              message: "Pagamento confirmado!" 
+            });
+          }
+        } catch (stripeError) {
+          console.error("Error verifying Stripe payment:", stripeError);
+          // Don't expose Stripe errors to client
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        order,
+        message: "Pedido registrado. Aguardando confirmação de pagamento." 
+      });
+    } catch (error) {
+      console.error("Error confirming store checkout:", error);
+      res.status(500).json({ message: "Falha ao confirmar pedido" });
+    }
+  });
+
+  // Get order by number (for success page) - returns limited info for public access
+  app.get("/api/store/orders/:orderNumber", async (req, res) => {
+    try {
+      const order = await storage.getStoreOrderByNumber(req.params.orderNumber);
+      if (!order) {
+        return res.status(404).json({ message: "Pedido não encontrado" });
+      }
+      
+      const items = await storage.getStoreOrderItems(order.id);
+      
+      // Return sanitized order data (don't expose sensitive fields)
+      const sanitizedOrder = {
+        orderNumber: order.orderNumber,
+        status: order.status,
+        totalAmount: order.totalAmount,
+        currency: order.currency,
+        createdAt: order.createdAt,
+        items: items.map(item => ({
+          id: item.id,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          totalPrice: item.totalPrice,
+          productSnapshot: item.productSnapshot,
+        })),
+      };
+      
+      res.json(sanitizedOrder);
+    } catch (error) {
+      console.error("Error fetching store order:", error);
+      res.status(500).json({ message: "Falha ao buscar pedido" });
+    }
+  });
+
   // Product Media (Admin) - Imagens e Vídeos
   app.get("/api/admin/store/products/:productId/media", isAdmin, async (req, res) => {
     try {

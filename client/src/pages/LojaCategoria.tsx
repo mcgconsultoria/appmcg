@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -28,23 +36,49 @@ import {
   BookOpen,
   Briefcase,
   Store,
+  Loader2,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import type { StoreProduct, StoreProductCategory } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import logoMcg from "@assets/logo_mcg_principal.png";
 
 export default function LojaCategoria() {
   const params = useParams();
   const categorySlug = params.slug as string;
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const { toast } = useToast();
   
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<StoreProduct | null>(null);
   const [showProductDialog, setShowProductDialog] = useState(false);
   const [showGiftWarning, setShowGiftWarning] = useState(false);
   const [giftAcknowledged, setGiftAcknowledged] = useState(false);
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
+
+  const checkoutMutation = useMutation({
+    mutationFn: async (data: { items: any[]; customerEmail?: string; customerName?: string }) => {
+      const response = await apiRequest("POST", "/api/store/checkout", data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao processar compra",
+        description: error.message || "Tente novamente mais tarde",
+        variant: "destructive",
+      });
+    },
+  });
 
   const { data: categories, isLoading: categoriesLoading } = useQuery<StoreProductCategory[]>({
     queryKey: ["/api/store/categories"],
@@ -98,17 +132,45 @@ export default function LojaCategoria() {
   };
 
   const handleBuyClick = (product: StoreProduct) => {
+    setSelectedProduct(product);
+    setSelectedSize("");
+    setSelectedQuantity(1);
+    
     if (categorySlug === 'brindes') {
-      setSelectedProduct(product);
       setShowGiftWarning(true);
     } else {
-      console.log("Buy product:", product.id);
+      setShowCheckoutDialog(true);
     }
   };
 
   const handleConfirmPurchase = () => {
     setGiftAcknowledged(true);
     setShowGiftWarning(false);
+    setShowCheckoutDialog(true);
+  };
+
+  const handleProceedToCheckout = () => {
+    if (!selectedProduct) return;
+    
+    if (selectedProduct.sizes && selectedProduct.sizes.length > 0 && !selectedSize) {
+      toast({
+        title: "Selecione um tamanho",
+        description: "Por favor, escolha o tamanho desejado antes de continuar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    checkoutMutation.mutate({
+      items: [{
+        productId: selectedProduct.id,
+        quantity: selectedQuantity,
+        selectedSize: selectedSize || undefined,
+        fulfillmentType: selectedProduct.fulfillmentType,
+      }],
+      customerEmail: user?.email,
+      customerName: user?.name,
+    });
   };
 
   const CategoryIcon = getCategoryIcon();
@@ -348,6 +410,117 @@ export default function LojaCategoria() {
             </Button>
             <Button onClick={handleConfirmPurchase}>
               Entendi, continuar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showCheckoutDialog} onOpenChange={setShowCheckoutDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              Finalizar Compra
+            </DialogTitle>
+            <DialogDescription>
+              Confirme os detalhes do seu pedido
+            </DialogDescription>
+          </DialogHeader>
+          {selectedProduct && (
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <div className="w-20 h-20 bg-muted rounded-md flex items-center justify-center overflow-hidden">
+                  {selectedProduct.primaryImageUrl ? (
+                    <img
+                      src={selectedProduct.primaryImageUrl}
+                      alt={selectedProduct.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Package className="h-8 w-8 text-muted-foreground/50" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium">{selectedProduct.name}</h4>
+                  <p className="text-lg font-bold text-primary">
+                    {formatPrice(selectedProduct.priceAmount)}
+                  </p>
+                </div>
+              </div>
+
+              {selectedProduct.sizes && selectedProduct.sizes.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Tamanho *</Label>
+                  <Select value={selectedSize} onValueChange={setSelectedSize}>
+                    <SelectTrigger data-testid="select-size">
+                      <SelectValue placeholder="Selecione o tamanho" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectedProduct.sizes.map((size) => (
+                        <SelectItem key={size} value={size}>
+                          {size}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label>Quantidade</Label>
+                <Select 
+                  value={selectedQuantity.toString()} 
+                  onValueChange={(v) => setSelectedQuantity(parseInt(v))}
+                >
+                  <SelectTrigger data-testid="select-quantity">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 10, 20, 50].map((qty) => (
+                      <SelectItem key={qty} value={qty.toString()}>
+                        {qty} {qty === 1 ? "unidade" : "unidades"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="border-t pt-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Total:</span>
+                  <span className="text-xl font-bold text-primary">
+                    {formatPrice(
+                      (parseFloat(selectedProduct.priceAmount) * selectedQuantity).toFixed(2)
+                    )}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowCheckoutDialog(false)}
+              disabled={checkoutMutation.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleProceedToCheckout}
+              disabled={checkoutMutation.isPending}
+              data-testid="button-proceed-checkout"
+            >
+              {checkoutMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Processando...
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Ir para Pagamento
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
