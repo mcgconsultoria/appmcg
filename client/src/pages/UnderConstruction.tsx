@@ -41,8 +41,8 @@ export default function UnderConstruction() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <p className="text-center text-muted-foreground">
-            A MCG Consultoria está em constante evolução. Em breve você terá acesso a ferramentas exclusivas para o seu segmento.
+          <p className="text-center text-muted-foreground italic">
+            "Em que a MCG pode te ajudar? Informe sua necessidade e em breve nosso time de suporte irá retornar."
           </p>
 
           <Form {...form}>
@@ -52,11 +52,10 @@ export default function UnderConstruction() {
                 name="interest"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>O que você está buscando no momento?</FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="Conte-nos um pouco sobre suas necessidades..." 
-                        className="min-h-[100px]"
+                        placeholder="Informe sua necessidade aqui..." 
+                        className="min-h-[120px]"
                         {...field}
                       />
                     </FormControl>
