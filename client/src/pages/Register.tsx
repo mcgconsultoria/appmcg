@@ -60,7 +60,7 @@ const planOptions = [
 ];
 
 const userCategoryOptions = [
-  { key: "servicos", label: "Transportadora", desc: "Busca clientes" },
+  { key: "transportadora", label: "Transportadora", desc: "Busca clientes" },
   { key: "embarcador", label: "Embarcador", desc: "Busca prestadores de serviço" },
   { key: "operador", label: "Operador Logístico", desc: "Busca clientes e prestadores de serviço" },
   { key: "carga_descarga", label: "Carga/Descarga", desc: "Serviços de carga e descarga" },
@@ -231,7 +231,7 @@ export default function Register() {
       const response = await apiRequest("POST", "/api/auth/register", registerData);
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       if (data.pendingApproval) {
         setPendingApproval(true);
         toast({
@@ -244,7 +244,17 @@ export default function Register() {
           title: "Conta criada",
           description: "Sua conta foi criada com sucesso!",
         });
-        setLocation("/dashboard");
+
+        // Redirect based on user category
+        const isTargetSegment = variables.userCategories.some(cat => 
+          cat === "transportadora" || cat === "operador"
+        );
+
+        if (isTargetSegment) {
+          setLocation("/dashboard");
+        } else {
+          setLocation("/under-construction");
+        }
       }
     },
     onError: (error: any) => {

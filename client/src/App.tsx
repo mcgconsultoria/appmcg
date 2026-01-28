@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { useAuth } from "@/hooks/useAuth";
 import CookieConsent from "@/components/CookieConsent";
 import NotFound from "@/pages/not-found";
+import UnderConstruction from "@/pages/UnderConstruction";
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -123,6 +124,7 @@ function Router() {
       <Route path="/registro" component={Register} />
       <Route path="/esqueci-senha" component={ForgotPassword} />
       <Route path="/redefinir-senha" component={ResetPassword} />
+      <Route path="/under-construction" component={UnderConstruction} />
       <Route path="/logout" component={Logout} />
       {/* Admin routes - show login if not authenticated or not admin */}
       <Route path="/admin">

@@ -29,11 +29,12 @@ export const sessions = pgTable(
 
 // User categories for registration
 export const userCategoryOptions = [
-  "embarcador",      // Indústrias, distribuidores - quem busca prestadores
-  "servicos",        // Prestadores de serviço - quem busca clientes  
-  "operador",        // Operador Logístico
-  "parceiro",        // Autônomos: influencers, contadores, advogados, softwares
-  "motorista",       // Motoristas
+  "embarcador",            // Indústrias, distribuidores - quem busca prestadores
+  "servicos",              // Prestadores de serviço - quem busca clientes  
+  "operador",              // Operador Logístico
+  "transportadora",        // Transportadora
+  "parceiro",              // Autônomos: influencers, contadores, advogados, softwares
+  "motorista",             // Motoristas
 ] as const;
 
 export type UserCategory = typeof userCategoryOptions[number];
