@@ -134,7 +134,8 @@ export async function registerUser(data: RegisterData): Promise<{ user: User; se
   if (isMcgEmail) {
     return { user, sessionToken };
   } else {
-    return { user, sessionToken: "", pendingApproval: true };
+    // Return a special object or use a more specific type to handle pending approval
+    return { user, sessionToken: "", pendingApproval: true } as any;
   }
 }
 
