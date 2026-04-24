@@ -17,8 +17,9 @@ import {
   Mail,
   Handshake,
   UserCheck,
+  Linkedin,
 } from "lucide-react";
-import { SiFacebook, SiInstagram, SiLinkedin, SiWhatsapp, SiGoogle, SiYoutube, SiX } from "react-icons/si";
+import { SiFacebook, SiInstagram, SiWhatsapp, SiGoogle, SiYoutube, SiX } from "react-icons/si";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import logoMcg from "@assets/logo_mcg_principal.png";
@@ -519,7 +520,7 @@ export default function Landing() {
                   data-testid="link-linkedin"
                   aria-label="LinkedIn"
                 >
-                  <SiLinkedin className="h-4 w-4 text-muted-foreground" />
+                  <Linkedin className="h-4 w-4 text-muted-foreground" />
                 </a>
                 <a
                   href="https://x.com/mcgconsultoriac"
