@@ -133,10 +133,9 @@ export async function registerUser(data: RegisterData): Promise<{ user: User; se
   // Se for MCG, retorna com sessão ativa. Se não, retorna sem sessão (precisa aprovação)
   if (isMcgEmail) {
     return { user, sessionToken };
-  } else {
-    // Return a special object or use a more specific type to handle pending approval
-    return { user, sessionToken: "", pendingApproval: true } as any;
   }
+
+  return { user, sessionToken: "" };
 }
 
 async function sendApprovalRequestEmail(user: User): Promise<void> {
