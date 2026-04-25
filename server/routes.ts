@@ -4428,6 +4428,22 @@ export async function registerRoutes(
     }
   });
 
+  // Update plan, fullAccess and vendedor for a user (admin_mcg only)
+  app.post("/api/admin/users/:userId/update-settings", isMcgAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { selectedPlan, fullAccessGranted, vendedor } = req.body;
+      const grantedBy = req.user?.email || 'admin';
+      const user = await storage.updateUserPlanAndVendedor(userId, { selectedPlan, fullAccessGranted, vendedor, grantedBy });
+      if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
+      const { password, activeSessionToken, ...safeUser } = user;
+      res.json({ message: "Configurações atualizadas com sucesso", user: safeUser });
+    } catch (error) {
+      console.error("Error updating user settings:", error);
+      res.status(500).json({ message: "Erro ao atualizar configurações" });
+    }
+  });
+
   // Admin Dashboard
   app.get("/api/admin/dashboard", isAdmin, async (req: any, res) => {
     try {

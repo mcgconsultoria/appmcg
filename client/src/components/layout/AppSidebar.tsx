@@ -347,6 +347,12 @@ interface CollapsibleSectionProps {
 }
 
 function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = false, userPlan, planLoaded = true, userRole, fullAccessGranted }: CollapsibleSectionProps) {
+  const visibleItems = items.filter(item =>
+    isUrlAllowedForPlan(item.url, userPlan, planLoaded, userRole, fullAccessGranted)
+  );
+
+  if (visibleItems.length === 0) return null;
+
   const isItemActive = (itemUrl: string) => {
     if (itemUrl === "/admin") {
       return location === "/admin";
