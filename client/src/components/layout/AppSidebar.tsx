@@ -64,7 +64,6 @@ import {
   UserCheck,
   MessageSquare,
   Database,
-  Lock,
   HelpCircle,
   Shirt,
 } from "lucide-react";
@@ -384,27 +383,7 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
                 const isActive = isItemActive(item.url);
                 const isLocked = !isUrlAllowedForPlan(item.url, userPlan, planLoaded, userRole, fullAccessGranted);
                 
-                if (isLocked) {
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div
-                            className="flex items-center gap-2 px-3 py-2 text-muted-foreground/60 cursor-not-allowed"
-                            data-testid={`nav-${item.url.replace("/", "")}-locked`}
-                          >
-                            <item.icon className="h-4 w-4" />
-                            <span className="flex-1">{item.title}</span>
-                            <Lock className="h-3 w-3" />
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="right">
-                          <p>Disponível em planos superiores</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </SidebarMenuItem>
-                  );
-                }
+                if (isLocked) return null;
                 
                 const manualInfo = manualMapping[item.url];
                 
@@ -523,27 +502,7 @@ function LojaMcgDynamicSection({ location, userPlan, planLoaded = true, userRole
                 const isActive = isItemActive(item.url);
                 const isLocked = !isUrlAllowedForPlan(item.url, userPlan, planLoaded, userRole, fullAccessGranted);
                 
-                if (isLocked) {
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div
-                            className="flex items-center gap-2 px-3 py-2 text-muted-foreground/60 cursor-not-allowed"
-                            data-testid={`nav-${item.url.replace("/", "")}-locked`}
-                          >
-                            <item.icon className="h-4 w-4" />
-                            <span className="flex-1">{item.title}</span>
-                            <Lock className="h-3 w-3" />
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="right">
-                          <p>Disponivel em planos superiores</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </SidebarMenuItem>
-                  );
-                }
+                if (isLocked) return null;
                 
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -751,27 +710,7 @@ function AdminPFSection({ location, userPlan, planLoaded = true, userRole, fullA
                 const isActive = isItemActive(item.url);
                 const isLocked = !isUrlAllowedForPlan(item.url, userPlan, planLoaded, userRole, fullAccessGranted);
                 
-                if (isLocked) {
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div
-                            className="flex items-center gap-2 px-3 py-2 text-muted-foreground/60 cursor-not-allowed"
-                            data-testid={`nav-${item.url.replace("/", "")}-locked`}
-                          >
-                            <item.icon className="h-4 w-4" />
-                            <span className="flex-1">{item.title}</span>
-                            <Lock className="h-3 w-3" />
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="right">
-                          <p>Disponível em planos superiores</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </SidebarMenuItem>
-                  );
-                }
+                if (isLocked) return null;
                 
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -829,11 +768,11 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {(user?.role === "admin" || user?.role === "admin_mcg") && (
+        {user?.role === "admin_mcg" && (
           <AdminPJSection location={location} userRole={user?.role} userPlan={effectivePlan} planLoaded={planLoaded} fullAccessGranted={user?.fullAccessGranted} />
         )}
 
-        {(user?.role === "admin" || user?.role === "admin_mcg") && (
+        {user?.role === "admin_mcg" && (
           <AdminPFSection location={location} userPlan={effectivePlan} planLoaded={planLoaded} userRole={user?.role} fullAccessGranted={user?.fullAccessGranted} />
         )}
 
