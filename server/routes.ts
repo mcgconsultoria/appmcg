@@ -4389,6 +4389,45 @@ export async function registerRoutes(
     }
   });
 
+  // Reset password for any user (admin_mcg only)
+  app.post("/api/admin/users/:userId/reset-password", isMcgAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { newPassword } = req.body;
+      if (!newPassword || newPassword.length < 6) {
+        return res.status(400).json({ message: "Senha deve ter no mínimo 6 caracteres" });
+      }
+      const bcrypt = await import('bcryptjs');
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      await storage.updateUserPassword(userId, hashedPassword);
+      res.json({ message: "Senha redefinida com sucesso" });
+    } catch (error) {
+      console.error("Error resetting user password:", error);
+      res.status(500).json({ message: "Erro ao redefinir senha" });
+    }
+  });
+
+  // Set role for any user (admin_mcg only)
+  app.post("/api/admin/users/:userId/set-role", isMcgAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { role } = req.body;
+      const validRoles = ['user', 'admin', 'admin_mcg'];
+      if (!role || !validRoles.includes(role)) {
+        return res.status(400).json({ message: `Role inválido. Use: ${validRoles.join(', ')}` });
+      }
+      const user = await storage.updateUserRole(userId, role);
+      if (!user) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+      const { password, activeSessionToken, ...safeUser } = user;
+      res.json({ message: "Role atualizado com sucesso", user: safeUser });
+    } catch (error) {
+      console.error("Error setting user role:", error);
+      res.status(500).json({ message: "Erro ao atualizar role" });
+    }
+  });
+
   // Admin Dashboard
   app.get("/api/admin/dashboard", isAdmin, async (req: any, res) => {
     try {
