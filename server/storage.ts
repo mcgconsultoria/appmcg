@@ -844,7 +844,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUserPlanAndVendedor(userId: string, data: { selectedPlan?: string; fullAccessGranted?: boolean; vendedor?: string; grantedBy?: string }): Promise<User | undefined> {
+  async updateUserPlanAndVendedor(userId: string, data: { selectedPlan?: string; fullAccessGranted?: boolean; vendedor?: string; grantedBy?: string; companyId?: number | null; role?: string }): Promise<User | undefined> {
     const updateData: any = { updatedAt: new Date() };
     if (data.selectedPlan !== undefined) updateData.selectedPlan = data.selectedPlan;
     if (data.fullAccessGranted !== undefined) {
@@ -853,6 +853,8 @@ export class DatabaseStorage implements IStorage {
       updateData.fullAccessGrantedBy = data.fullAccessGranted ? (data.grantedBy || 'admin') : null;
     }
     if (data.vendedor !== undefined) updateData.vendedor = data.vendedor;
+    if (data.companyId !== undefined) updateData.companyId = data.companyId;
+    if (data.role !== undefined) updateData.role = data.role;
     const [user] = await db.update(users).set(updateData).where(eq(users.id, userId)).returning();
     return user;
   }

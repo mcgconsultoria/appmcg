@@ -4428,19 +4428,51 @@ export async function registerRoutes(
     }
   });
 
-  // Update plan, fullAccess and vendedor for a user (admin_mcg only)
+  // Update plan, fullAccess, vendedor, companyId and role for a user (admin_mcg only)
   app.post("/api/admin/users/:userId/update-settings", isMcgAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
-      const { selectedPlan, fullAccessGranted, vendedor } = req.body;
+      const { selectedPlan, fullAccessGranted, vendedor, companyId, role } = req.body;
       const grantedBy = req.user?.email || 'admin';
-      const user = await storage.updateUserPlanAndVendedor(userId, { selectedPlan, fullAccessGranted, vendedor, grantedBy });
+      const user = await storage.updateUserPlanAndVendedor(userId, { selectedPlan, fullAccessGranted, vendedor, grantedBy, companyId, role });
       if (!user) return res.status(404).json({ message: "Usuário não encontrado" });
       const { password, activeSessionToken, ...safeUser } = user;
       res.json({ message: "Configurações atualizadas com sucesso", user: safeUser });
     } catch (error) {
       console.error("Error updating user settings:", error);
       res.status(500).json({ message: "Erro ao atualizar configurações" });
+    }
+  });
+
+  // Create a company and optionally link a user to it (admin_mcg only)
+  app.post("/api/admin/create-company-for-user", isMcgAdmin, async (req: any, res) => {
+    try {
+      const { userId, companyName, cnpj } = req.body;
+      if (!companyName) return res.status(400).json({ message: "Nome da empresa é obrigatório" });
+      const company = await storage.createCompany({
+        name: companyName,
+        cnpj: cnpj || null,
+        cnpjRaiz: null,
+        tipoUnidade: "matriz",
+        subscriptionStatus: "active",
+        selectedPlan: "corporativo",
+        maxUsers: 10,
+        currentUsers: 1,
+        email: null,
+        phone: null,
+        nomeFantasia: null,
+        inscricaoEstadual: null,
+        inscricaoEstadualIsento: false,
+        inscricaoMunicipal: null,
+      });
+      if (userId) {
+        await storage.updateUserPlanAndVendedor(userId, { companyId: company.id });
+        await storage.updateCompany(company.id, { primaryAdminId: userId });
+      }
+      res.json({ message: "Empresa criada com sucesso", company, companyId: company.id });
+    } catch (error) {
+      console.error("Error creating company:", error);
+      res.status(500).json({ message: "Erro ao criar empresa" });
     }
   });
 
