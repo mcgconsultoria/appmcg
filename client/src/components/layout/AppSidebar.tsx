@@ -353,10 +353,17 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
     }
     return location === itemUrl || location.startsWith(itemUrl + "/");
   };
-  
-  // Initialize open state: always closed by default unless explicitly set
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-  
+
+  const hasActiveItem = items.some(item => isItemActive(item.url));
+
+  const [isOpen, setIsOpen] = useState(defaultOpen || hasActiveItem);
+
+  useEffect(() => {
+    if (hasActiveItem) {
+      setIsOpen(true);
+    }
+  }, [location]);
+
   const handleToggle = (open: boolean) => {
     setIsOpen(open);
   };
@@ -543,15 +550,14 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true, fullA
   );
   
   const [isOpen, setIsOpen] = useState(hasActiveItem);
-  const [wasManuallyToggled, setWasManuallyToggled] = useState(false);
-  
-  // Auto-open when navigating to an item in this section
-  if (hasActiveItem && !isOpen && !wasManuallyToggled) {
-    setIsOpen(true);
-  }
-  
+
+  useEffect(() => {
+    if (hasActiveItem) {
+      setIsOpen(true);
+    }
+  }, [location]);
+
   const handleToggle = (open: boolean) => {
-    setWasManuallyToggled(true);
     setIsOpen(open);
   };
 
@@ -676,15 +682,14 @@ function AdminPFSection({ location, userPlan, planLoaded = true, userRole, fullA
   const hasActiveItem = adminPfItems.some(item => isItemActive(item.url));
   
   const [isOpen, setIsOpen] = useState(hasActiveItem);
-  const [wasManuallyToggled, setWasManuallyToggled] = useState(false);
-  
-  // Auto-open when navigating to an item in this section
-  if (hasActiveItem && !isOpen && !wasManuallyToggled) {
-    setIsOpen(true);
-  }
-  
+
+  useEffect(() => {
+    if (hasActiveItem) {
+      setIsOpen(true);
+    }
+  }, [location]);
+
   const handleToggle = (open: boolean) => {
-    setWasManuallyToggled(true);
     setIsOpen(open);
   };
 
