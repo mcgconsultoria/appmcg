@@ -918,6 +918,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createCompany(company: InsertCompany): Promise<Company> {
+    // Sync the sequence with the max existing id before inserting to avoid PK conflicts
+    await db.execute(sql`SELECT setval('companies_id_seq', COALESCE((SELECT MAX(id) FROM companies), 0))`);
     const [newCompany] = await db.insert(companies).values(company).returning();
     return newCompany;
   }
