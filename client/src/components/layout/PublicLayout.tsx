@@ -3,6 +3,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PublicLayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,8 @@ interface PublicLayoutProps {
 }
 
 export function PublicLayout({ children, title, subtitle }: PublicLayoutProps) {
+  const { isAuthenticated } = useAuth();
+
   return (
     <div className="min-h-screen bg-background">
       <header className="h-16 flex items-center justify-between gap-4 px-4 md:px-6 border-b border-border bg-background sticky top-0 z-40">
@@ -34,11 +37,13 @@ export function PublicLayout({ children, title, subtitle }: PublicLayoutProps) {
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Link href="/login">
-            <Button variant="outline" size="sm" data-testid="button-login">
-              Entrar
-            </Button>
-          </Link>
+          {!isAuthenticated && (
+            <Link href="/login">
+              <Button variant="outline" size="sm" data-testid="button-login">
+                Entrar
+              </Button>
+            </Link>
+          )}
         </div>
       </header>
       <main className="p-4 md:p-6 bg-background">
