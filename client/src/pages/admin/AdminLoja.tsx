@@ -72,8 +72,8 @@ import { brazilianSizes } from "@shared/schema";
 import { ProductMediaManager } from "@/components/ProductMediaManager";
 
 const productFormSchema = z.object({
-  name: z.string().min(1, "Nome obrigatorio"),
-  slug: z.string().min(1, "Slug obrigatorio"),
+  name: z.string().min(1, "Nome obrigatório"),
+  slug: z.string().min(1, "Slug obrigatório"),
   shortDescription: z.string().optional(),
   longDescription: z.string().optional(),
   productType: z.enum(["merch", "ebook", "escritorio", "vestuario"]),
@@ -106,9 +106,9 @@ const modeloOptions = [
 type ProductFormValues = z.infer<typeof productFormSchema>;
 
 const categoryFormSchema = z.object({
-  name: z.string().min(1, "Nome obrigatorio"),
-  slug: z.string().min(1, "Slug obrigatorio"),
-  code: z.string().max(10, "Maximo 10 caracteres").optional(),
+  name: z.string().min(1, "Nome obrigatório"),
+  slug: z.string().min(1, "Slug obrigatório"),
+  code: z.string().max(10, "Máximo 10 caracteres").optional(),
   description: z.string().optional(),
   parentId: z.number().optional().nullable(),
   displayOrder: z.number().default(0),
@@ -706,7 +706,7 @@ export default function AdminLoja() {
               {editingProduct ? "Editar Produto" : "Novo Produto"}
             </DialogTitle>
             <DialogDescription>
-              Preencha as informacoes do produto
+              Preencha as informações do produto
             </DialogDescription>
           </DialogHeader>
           <Form {...productForm}>
@@ -852,7 +852,7 @@ export default function AdminLoja() {
                         <SelectContent>
                           <SelectItem value="merch">Brindes</SelectItem>
                           <SelectItem value="ebook">E-book</SelectItem>
-                          <SelectItem value="escritorio">Escritorio</SelectItem>
+                          <SelectItem value="escritorio">Escritório</SelectItem>
                           <SelectItem value="vestuario">M. Veste</SelectItem>
                         </SelectContent>
                       </Select>
@@ -878,7 +878,7 @@ export default function AdminLoja() {
                               data-testid="select-modelo"
                               className={!isVestuario ? "opacity-50 cursor-not-allowed" : ""}
                             >
-                              <SelectValue placeholder={isVestuario ? "Selecione" : "Disponivel apenas para M. Veste"} />
+                              <SelectValue placeholder={isVestuario ? "Selecione" : "Disponível apenas para M. Veste"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -909,13 +909,13 @@ export default function AdminLoja() {
                         <div className="flex items-center gap-2">
                           <Ruler className="h-4 w-4 text-muted-foreground" />
                           <FormLabel className={!isVestuario ? "text-muted-foreground" : ""}>
-                            Tamanhos Disponiveis
+                            Tamanhos Disponíveis
                           </FormLabel>
                         </div>
                         <FormDescription className={!isVestuario ? "text-muted-foreground/60" : ""}>
                           {isVestuario 
-                            ? "Selecione os tamanhos disponiveis" 
-                            : "Disponivel apenas para M. Veste"}
+                            ? "Selecione os tamanhos disponíveis" 
+                            : "Disponível apenas para M. Veste"}
                         </FormDescription>
                         <FormControl>
                           <div className="flex flex-wrap gap-2">
@@ -963,13 +963,13 @@ export default function AdminLoja() {
                         <div className="flex items-center gap-2">
                           <Palette className="h-4 w-4 text-muted-foreground" />
                           <FormLabel className={!isVestuario ? "text-muted-foreground" : ""}>
-                            Cores Disponiveis
+                            Cores Disponíveis
                           </FormLabel>
                         </div>
                         <FormDescription className={!isVestuario ? "text-muted-foreground/60" : ""}>
                           {isVestuario 
                             ? "Selecione ou crie novas cores" 
-                            : "Disponivel apenas para M. Veste"}
+                            : "Disponível apenas para M. Veste"}
                         </FormDescription>
                         <FormControl>
                           <div className="space-y-3">
@@ -1242,7 +1242,7 @@ export default function AdminLoja() {
               {editingCategory ? "Editar Categoria" : "Nova Categoria"}
             </DialogTitle>
             <DialogDescription>
-              Preencha as informacoes da categoria
+              Preencha as informações da categoria
             </DialogDescription>
           </DialogHeader>
           <Form {...categoryForm}>

@@ -390,9 +390,9 @@ export default function AdminContratos() {
                       <TableRow>
                         <TableHead>Nome</TableHead>
                         <TableHead>Tipo</TableHead>
-                        <TableHead>Versao</TableHead>
+                        <TableHead>Versão</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Acoes</TableHead>
+                        <TableHead>Ações</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>

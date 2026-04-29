@@ -53,7 +53,7 @@ export default function AdminRelatorioDRE() {
     queryFn: async () => {
       const url = queryString ? `/api/dre-report?${queryString}` : "/api/dre-report";
       const res = await fetch(url, { credentials: "include" });
-      if (!res.ok) throw new Error("Falha ao carregar relatorio");
+      if (!res.ok) throw new Error("Falha ao carregar relatório");
       return res.json();
     },
   });
@@ -96,7 +96,7 @@ export default function AdminRelatorioDRE() {
               Demonstrativo de Resultado (DRE)
             </h1>
             <p className="text-muted-foreground">
-              Relatorio gerencial de receitas e despesas do período
+              Relatório gerencial de receitas e despesas do período
             </p>
           </div>
           <Button variant="outline" data-testid="button-export-dre">

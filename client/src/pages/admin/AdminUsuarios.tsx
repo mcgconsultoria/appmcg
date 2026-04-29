@@ -33,14 +33,14 @@ export default function AdminUsuarios() {
       toast({
         title: variables.granted ? "Acesso completo liberado" : "Acesso completo removido",
         description: variables.granted 
-          ? "O usuario agora tem acesso a todos os modulos independente do plano." 
-          : "O usuario voltara a seguir as restricoes do plano.",
+          ? "O usuário agora tem acesso a todos os módulos independente do plano." 
+          : "O usuário voltará a seguir as restrições do plano.",
       });
     },
     onError: () => {
       toast({
         title: "Erro",
-        description: "Nao foi possivel atualizar o acesso do usuario.",
+        description: "Não foi possível atualizar o acesso do usuário.",
         variant: "destructive",
       });
     },
@@ -53,16 +53,16 @@ export default function AdminUsuarios() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({
-        title: variables.active ? "Usuario ativado" : "Usuario desativado",
+        title: variables.active ? "Usuário ativado" : "Usuário desativado",
         description: variables.active 
-          ? "O usuario pode acessar o sistema normalmente." 
-          : "O usuario foi bloqueado e nao pode mais acessar o sistema.",
+          ? "O usuário pode acessar o sistema normalmente." 
+          : "O usuário foi bloqueado e não pode mais acessar o sistema.",
       });
     },
     onError: () => {
       toast({
         title: "Erro",
-        description: "Nao foi possivel atualizar o status do usuario.",
+        description: "Não foi possível atualizar o status do usuário.",
         variant: "destructive",
       });
     },
@@ -243,10 +243,10 @@ export default function AdminUsuarios() {
                       </div>
                       <p className="text-xs text-muted-foreground max-w-[280px] text-right">
                         {user.isActive === false 
-                          ? "Usuario bloqueado - nao pode acessar o sistema" 
+                          ? "Usuário bloqueado - não pode acessar o sistema" 
                           : user.fullAccessGranted 
-                            ? "Usuario ativo com acesso a todos os modulos" 
-                            : "Usuario ativo seguindo restricoes do plano"}
+                            ? "Usuário ativo com acesso a todos os módulos" 
+                            : "Usuário ativo seguindo restrições do plano"}
                       </p>
                     </div>
                   </div>

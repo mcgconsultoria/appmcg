@@ -62,14 +62,14 @@ export default function AdminBackup() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/github/backup/config"] });
       toast({
-        title: "Configuracao salva",
-        description: "As configuracoes de backup foram atualizadas com sucesso.",
+        title: "Configuração salva",
+        description: "As configurações de backup foram atualizadas com sucesso.",
       });
     },
     onError: () => {
       toast({
         title: "Erro",
-        description: "Nao foi possivel salvar as configuracoes.",
+        description: "Não foi possível salvar as configurações.",
         variant: "destructive",
       });
     },
@@ -90,7 +90,7 @@ export default function AdminBackup() {
     onError: (error: any) => {
       toast({
         title: "Erro no backup",
-        description: error.message || "Nao foi possivel realizar o backup.",
+        description: error.message || "Não foi possível realizar o backup.",
         variant: "destructive",
       });
     },
@@ -100,7 +100,7 @@ export default function AdminBackup() {
     if (!repositoryOwner) {
       toast({
         title: "Erro",
-        description: "Informe o usuario do GitHub (owner do repositorio).",
+        description: "Informe o usuário do GitHub (owner do repositório).",
         variant: "destructive",
       });
       return;
@@ -165,18 +165,18 @@ export default function AdminBackup() {
               {githubStatus?.configured ? (
                 <Badge variant="default" className="bg-green-500">Conectado</Badge>
               ) : (
-                <Badge variant="secondary">Nao Conectado</Badge>
+                <Badge variant="secondary">Não Conectado</Badge>
               )}
             </div>
             {githubStatus?.user && (
               <div className="flex items-center justify-between">
-                <span>Usuario:</span>
+                <span>Usuário:</span>
                 <span className="font-mono">{githubStatus.user.login}</span>
               </div>
             )}
             {!githubStatus?.configured && (
               <p className="text-sm text-muted-foreground">
-                Configure a conexao com o GitHub no painel de integracoes do Replit.
+                Configure a conexão com o GitHub no painel de integrações do Replit.
               </p>
             )}
           </CardContent>
@@ -186,9 +186,9 @@ export default function AdminBackup() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Database className="h-5 w-5" />
-              Ultimo Backup
+              Último Backup
             </CardTitle>
-            <CardDescription>Status do ultimo backup realizado</CardDescription>
+            <CardDescription>Status do último backup realizado</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
@@ -214,15 +214,15 @@ export default function AdminBackup() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5" />
-            Configuracao de Backup
+            Configuração de Backup
           </CardTitle>
-          <CardDescription>Configure o backup automatico diario</CardDescription>
+          <CardDescription>Configure o backup automático diário</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Backup Automatico</Label>
-              <p className="text-sm text-muted-foreground">Habilitar backup diario automatico</p>
+              <Label>Backup Automático</Label>
+              <p className="text-sm text-muted-foreground">Habilitar backup diário automático</p>
             </div>
             <Switch
               checked={enabled}
@@ -234,7 +234,7 @@ export default function AdminBackup() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="repositoryOwner">Usuario do GitHub (Owner)</Label>
+              <Label htmlFor="repositoryOwner">Usuário do GitHub (Owner)</Label>
               <Input
                 id="repositoryOwner"
                 value={repositoryOwner}
@@ -245,7 +245,7 @@ export default function AdminBackup() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="repositoryName">Nome do Repositorio</Label>
+              <Label htmlFor="repositoryName">Nome do Repositório</Label>
               <Input
                 id="repositoryName"
                 value={repositoryName}
@@ -271,13 +271,13 @@ export default function AdminBackup() {
               </SelectContent>
             </Select>
             <p className="text-sm text-muted-foreground">
-              O backup sera executado automaticamente neste horario (horario do servidor)
+              O backup será executado automaticamente neste horário (horário do servidor)
             </p>
           </div>
 
           {repositories && repositories.length > 0 && (
             <div className="space-y-2">
-              <Label>Repositorio Configurado</Label>
+              <Label>Repositório Configurado</Label>
               <div className="flex flex-wrap gap-2">
                 {repositories
                   .filter((repo) => repo.fullName === "mcgconsultoria/appmcg")
@@ -305,7 +305,7 @@ export default function AdminBackup() {
               disabled={saveConfigMutation.isPending}
               data-testid="button-save-config"
             >
-              {saveConfigMutation.isPending ? "Salvando..." : "Salvar Configuracao"}
+              {saveConfigMutation.isPending ? "Salvando..." : "Salvar Configuração"}
             </Button>
 
             <Button

@@ -415,7 +415,7 @@ function ConfigSection() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-semibold">Configuracao WhatsApp Business API</h3>
+          <h3 className="text-lg font-semibold">Configuração WhatsApp Business API</h3>
           <p className="text-sm text-muted-foreground">
             Configure sua conta de WhatsApp Business para atendimento automatizado
           </p>
@@ -435,7 +435,7 @@ function ConfigSection() {
           <form onSubmit={(e) => { e.preventDefault(); mutation.mutate(formData); }} className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <Label htmlFor="phoneNumber">Numero WhatsApp</Label>
+                <Label htmlFor="phoneNumber">Número WhatsApp</Label>
                 <Input
                   id="phoneNumber"
                   value={formData.phoneNumber}
@@ -568,9 +568,9 @@ function ConfigSection() {
           </div>
           <Separator />
           <div className="space-y-2">
-            <h4 className="font-medium">3. Configurar numero WhatsApp</h4>
+            <h4 className="font-medium">3. Configurar número WhatsApp</h4>
             <p className="text-sm text-muted-foreground">
-              Conecte o numero de telefone da MCG (deve ser dedicado ao WhatsApp Business).
+              Conecte o número de telefone da MCG (deve ser dedicado ao WhatsApp Business).
             </p>
           </div>
           <Separator />
@@ -656,7 +656,7 @@ function AgentsSection() {
               </div>
               <div className="mt-4 flex items-center justify-between">
                 <Badge variant={agent.isAvailable ? "default" : "secondary"}>
-                  {agent.isAvailable ? "Disponivel" : "Indisponivel"}
+                  {agent.isAvailable ? "Disponível" : "Indisponível"}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
                   {agent.currentChatCount || 0}/{agent.maxConcurrentChats || 5} chats
@@ -749,7 +749,7 @@ function AgentForm({ agent, onSuccess }: { agent?: WhatsappAgent; onSuccess: () 
         />
       </div>
       <div className="flex items-center justify-between">
-        <Label htmlFor="isAvailable">Disponivel para atendimento</Label>
+        <Label htmlFor="isAvailable">Disponível para atendimento</Label>
         <Switch
           id="isAvailable"
           checked={formData.isAvailable}
@@ -865,7 +865,7 @@ export default function AdminWhatsApp() {
             </TabsTrigger>
             <TabsTrigger value="config" className="flex items-center gap-2" data-testid="tab-config">
               <Settings className="w-4 h-4" />
-              Configuracao
+              Configuração
             </TabsTrigger>
             <TabsTrigger value="agents" className="flex items-center gap-2" data-testid="tab-agents">
               <Users className="w-4 h-4" />

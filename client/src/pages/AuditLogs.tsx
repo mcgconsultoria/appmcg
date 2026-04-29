@@ -14,14 +14,14 @@ import { useState } from "react";
 import type { AuditLog } from "@shared/schema";
 
 const actionLabels: Record<string, { label: string; variant: "default" | "destructive" | "secondary" | "outline" }> = {
-  create: { label: "Criacao", variant: "default" },
-  update: { label: "Atualizacao", variant: "secondary" },
-  delete: { label: "Exclusao", variant: "destructive" },
-  view: { label: "Visualizacao", variant: "outline" },
-  export: { label: "Exportacao", variant: "secondary" },
+  create: { label: "Criação", variant: "default" },
+  update: { label: "Atualização", variant: "secondary" },
+  delete: { label: "Exclusão", variant: "destructive" },
+  view: { label: "Visualização", variant: "outline" },
+  export: { label: "Exportação", variant: "secondary" },
   login: { label: "Login", variant: "default" },
   logout: { label: "Logout", variant: "outline" },
-  import: { label: "Importacao", variant: "secondary" },
+  import: { label: "Importação", variant: "secondary" },
   send_email: { label: "Email Enviado", variant: "default" },
   generate_pdf: { label: "PDF Gerado", variant: "secondary" },
 };
@@ -29,7 +29,7 @@ const actionLabels: Record<string, { label: string; variant: "default" | "destru
 const entityLabels: Record<string, string> = {
   client: "Cliente",
   checklist: "Checklist",
-  meeting_record: "Ata de Reuniao",
+  meeting_record: "Ata de Reunião",
   commercial_event: "Evento Comercial",
   task: "Tarefa",
   project: "Projeto",
@@ -37,7 +37,7 @@ const entityLabels: Record<string, string> = {
   financial_account: "Conta Financeira",
   team_member: "Membro da Equipe",
   rfi: "RFI",
-  user: "Usuario",
+  user: "Usuário",
   company: "Empresa",
   store_order: "Pedido Loja",
   store_product: "Produto Loja",
@@ -102,7 +102,7 @@ export default function AuditLogs() {
               Logs de Auditoria
             </h1>
             <p className="text-muted-foreground">
-              Acompanhe todas as acoes realizadas pelos usuarios da sua empresa
+              Acompanhe todas as ações realizadas pelos usuários da sua empresa
             </p>
           </div>
         </div>
@@ -112,7 +112,7 @@ export default function AuditLogs() {
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
                 <FileText className="w-5 h-5" />
-                Historico de Atividades
+                Histórico de Atividades
               </CardTitle>
               <div className="flex flex-wrap gap-2 items-center">
                 <div className="relative flex-1 min-w-[200px]">
@@ -128,14 +128,14 @@ export default function AuditLogs() {
                 <Select value={actionFilter} onValueChange={setActionFilter}>
                   <SelectTrigger className="w-[180px]" data-testid="select-action-filter">
                     <Filter className="w-4 h-4 mr-2" />
-                    <SelectValue placeholder="Filtrar por acao" />
+                    <SelectValue placeholder="Filtrar por ação" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todas as acoes</SelectItem>
-                    <SelectItem value="create">Criacao</SelectItem>
-                    <SelectItem value="update">Atualizacao</SelectItem>
-                    <SelectItem value="delete">Exclusao</SelectItem>
-                    <SelectItem value="export">Exportacao</SelectItem>
+                    <SelectItem value="all">Todas as ações</SelectItem>
+                    <SelectItem value="create">Criação</SelectItem>
+                    <SelectItem value="update">Atualização</SelectItem>
+                    <SelectItem value="delete">Exclusão</SelectItem>
+                    <SelectItem value="export">Exportação</SelectItem>
                     <SelectItem value="send_email">Email Enviado</SelectItem>
                   </SelectContent>
                 </Select>
@@ -196,7 +196,7 @@ export default function AuditLogs() {
                 <Activity className="w-12 h-12 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium mb-2">Nenhum log encontrado</h3>
                 <p className="text-muted-foreground">
-                  Os logs de atividades aparecerao aqui conforme os usuarios realizarem acoes
+                  Os logs de atividades aparecerão aqui conforme os usuários realizarem ações
                 </p>
               </div>
             )}

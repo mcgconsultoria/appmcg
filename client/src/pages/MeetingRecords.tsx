@@ -360,9 +360,9 @@ export default function MeetingRecords() {
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{selectedRecord ? "Editar Ata" : "Nova Ata de Reuniao"}</DialogTitle>
+              <DialogTitle>{selectedRecord ? "Editar Ata" : "Nova Ata de Reunião"}</DialogTitle>
               <DialogDescription>
-                Registre os detalhes da reuniao e defina acoes
+                Registre os detalhes da reunião e defina ações
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -421,7 +421,7 @@ export default function MeetingRecords() {
                       id="meetingLocation"
                       value={formData.meetingLocation}
                       onChange={(e) => setFormData({ ...formData, meetingLocation: e.target.value })}
-                      placeholder="Ex: Escritorio central, Sala de reunioes 3"
+                      placeholder="Ex: Escritório central, Sala de reuniões 3"
                       data-testid="input-meeting-location"
                     />
                   </div>

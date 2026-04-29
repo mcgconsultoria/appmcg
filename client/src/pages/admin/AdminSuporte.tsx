@@ -274,7 +274,7 @@ export default function AdminSuporte() {
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar por numero, assunto, cliente..."
+                  placeholder="Buscar por número, assunto, cliente..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -320,7 +320,7 @@ export default function AdminSuporte() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Numero</TableHead>
+                      <TableHead>Número</TableHead>
                       <TableHead>Assunto</TableHead>
                       <TableHead>Cliente</TableHead>
                       <TableHead>Categoria</TableHead>

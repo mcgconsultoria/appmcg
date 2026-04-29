@@ -57,7 +57,7 @@ import {
 import type { CompanyTeamMember, User } from "@shared/schema";
 
 const teamMemberFormSchema = z.object({
-  userId: z.string().min(1, "Selecione um usuario"),
+  userId: z.string().min(1, "Selecione um usuário"),
   role: z.string().min(1, "Selecione um perfil"),
   department: z.string().optional(),
   permissions: z.array(z.string()).default([]),
@@ -320,12 +320,12 @@ export default function TeamManagement() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Usuario</TableHead>
+                    <TableHead>Usuário</TableHead>
                     <TableHead>Perfil</TableHead>
                     <TableHead>Departamento</TableHead>
-                    <TableHead>Permissoes</TableHead>
+                    <TableHead>Permissões</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Acoes</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -420,7 +420,7 @@ export default function TeamManagement() {
                   name="userId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email do Usuario</FormLabel>
+                      <FormLabel>E-mail do Usuário</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -476,7 +476,7 @@ export default function TeamManagement() {
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="Comercial">Comercial</SelectItem>
-                            <SelectItem value="Operação">Operacao</SelectItem>
+                            <SelectItem value="Operação">Operação</SelectItem>
                             <SelectItem value="Financeiro">Financeiro</SelectItem>
                             <SelectItem value="SAC">SAC</SelectItem>
                           </SelectContent>
@@ -541,7 +541,7 @@ export default function TeamManagement() {
                         />
                       </FormControl>
                       <FormLabel className="font-normal cursor-pointer">
-                        Usuario ativo
+                        Usuário ativo
                       </FormLabel>
                     </FormItem>
                   )}

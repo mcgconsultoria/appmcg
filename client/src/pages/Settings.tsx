@@ -146,7 +146,7 @@ export default function Settings() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 500000) {
-        toast({ title: "Imagem muito grande. Maximo 500KB.", variant: "destructive" });
+        toast({ title: "Imagem muito grande. Máximo 500KB.", variant: "destructive" });
         return;
       }
       const reader = new FileReader();
@@ -185,7 +185,7 @@ export default function Settings() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 500000) {
-        toast({ title: "Imagem muito grande. Maximo 500KB.", variant: "destructive" });
+        toast({ title: "Imagem muito grande. Máximo 500KB.", variant: "destructive" });
         return;
       }
       const reader = new FileReader();

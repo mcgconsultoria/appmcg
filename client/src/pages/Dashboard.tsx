@@ -395,7 +395,7 @@ export default function Dashboard() {
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <Target className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                  <p>Nenhuma operacao cadastrada</p>
+                  <p>Nenhuma operação cadastrada</p>
                   <p className="text-sm mt-1">Cadastre operações nos clientes para acompanhar o ritmo de faturamento</p>
                 </div>
               )}
@@ -432,7 +432,7 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               ) : (
                 <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-                  Nenhum dado disponivel
+                  Nenhum dado disponível
                 </div>
               )}
             </CardContent>
@@ -471,7 +471,7 @@ export default function Dashboard() {
                 </ResponsiveContainer>
               ) : (
                 <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-                  Nenhum dado disponivel
+                  Nenhum dado disponível
                 </div>
               )}
             </CardContent>

@@ -700,7 +700,7 @@ export default function FreightCalculator() {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor={`operationName-${route.id}`}>
-                    Nome da Operacao (opcional)
+                    Nome da Operação (opcional)
                   </Label>
                   <Input
                     id={`operationName-${route.id}`}
@@ -935,8 +935,8 @@ export default function FreightCalculator() {
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {routeApiStatus?.configured 
-                      ? `Calculado automaticamente via ${routeApiStatus.provider}. Altere manualmente se necessario.`
-                      : "Configure ROTAS_BRASIL_TOKEN nas configurações para calculo automatico."
+                      ? `Calculado automaticamente via ${routeApiStatus.provider}. Altere manualmente se necessário.`
+                      : "Configure ROTAS_BRASIL_TOKEN nas configurações para cálculo automático."
                     }
                   </p>
                 </div>
@@ -945,9 +945,9 @@ export default function FreightCalculator() {
                   <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950 rounded-md text-sm">
                     <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
                     <p className="text-blue-700 dark:text-blue-300">
-                      <strong>Lei do PR (Decreto 7.871/2017):</strong> Pedagio nao
-                      incide na base de calculo do ICMS para cargas com origem no
-                      Parana.
+                      <strong>Lei do PR (Decreto 7.871/2017):</strong> Pedágio não
+                      incide na base de cálculo do ICMS para cargas com origem no
+                      Paraná.
                     </p>
                   </div>
                 )}
@@ -1593,12 +1593,12 @@ export default function FreightCalculator() {
 
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                   <Calculator className="h-4 w-4" />
-                  Calculo do Frete
+                  Cálculo do Frete
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Frete Minimo ANTT</Label>
+                    <Label>Frete Mínimo ANTT</Label>
                     <div className="flex items-center gap-2 min-h-9 px-3 py-2 rounded-md border bg-muted/50">
                       <span className="font-medium">
                         {formatCurrency(calc?.anttMinFreight || 0)}
@@ -1636,7 +1636,7 @@ export default function FreightCalculator() {
                     htmlFor={`useAnttMinFreight-${route.id}`}
                     className="text-sm cursor-pointer"
                   >
-                    Usar frete minimo ANTT como base
+                    Usar frete mínimo ANTT como base
                   </Label>
                 </div>
 
@@ -2127,23 +2127,23 @@ export default function FreightCalculator() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             <p>
-              <strong>Tabela ANTT:</strong> Os valores minimos de frete sao
-              calculados conforme Resolucao ANTT 6.034/2024, usando os
+              <strong>Tabela ANTT:</strong> Os valores mínimos de frete são
+              calculados conforme Resolução ANTT 6.034/2024, usando os
               coeficientes CCD (R$/km) e CC (custo de carga).
             </p>
             <p>
-              <strong>Lei do PR:</strong> Conforme Decreto 7.871/2017, o pedagio
-              nao incide na base de calculo do ICMS para transportes com origem
-              no Parana.
+              <strong>Lei do PR:</strong> Conforme Decreto 7.871/2017, o pedágio
+              não incide na base de cálculo do ICMS para transportes com origem
+              no Paraná.
             </p>
             <p>
-              <strong>ICMS Interestadual:</strong> Aliquota de 7% para destinos
+              <strong>ICMS Interestadual:</strong> Alíquota de 7% para destinos
               no Sul/Sudeste a partir de origem Norte/Nordeste/Centro-Oeste, e
               12% nos demais casos.
             </p>
             <p>
               <strong>ISS:</strong> Incide em transportes municipais (dentro da
-              mesma cidade) com aliquota de 5%.
+              mesma cidade) com alíquota de 5%.
             </p>
             <p>
               <strong>GRIS/ADV:</strong> Calculados sobre o valor da NF
@@ -2157,19 +2157,19 @@ export default function FreightCalculator() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Crown className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                Calculos Gratuitos Esgotados
+                Cálculos Gratuitos Esgotados
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <p className="text-muted-foreground">
-                Voce utilizou todos os seus calculos gratuitos. Para continuar
-                enviando propostas e acessar recursos avancados, escolha um de
+                Você utilizou todos os seus cálculos gratuitos. Para continuar
+                enviando propostas e acessar recursos avançados, escolha um de
                 nossos planos.
               </p>
               <div className="bg-muted p-4 rounded-md space-y-2">
-                <h4 className="font-semibold">Com um plano voce tem acesso a:</h4>
+                <h4 className="font-semibold">Com um plano você tem acesso a:</h4>
                 <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>Calculos ilimitados de frete e armazenagem</li>
+                  <li>Cálculos ilimitados de frete e armazenagem</li>
                   <li>CRM completo para gestão de clientes</li>
                   <li>Pipeline de vendas</li>
                   <li>Checklists operacionais</li>
