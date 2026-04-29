@@ -457,10 +457,10 @@ interface LojaMcgDynamicSectionProps {
 
 // Categorias fixas da loja - sempre visíveis no menu
 const DEFAULT_STORE_CATEGORIES = [
-  { title: "E-books", url: "/loja/e-books", icon: BookOpen },
-  { title: "Brindes", url: "/loja/brindes", icon: Gift },
+  { title: "E-books", url: "/loja/ebooks", icon: BookOpen },
   { title: "Escritório", url: "/loja/escritorio", icon: Briefcase },
-  { title: "Vestuário", url: "/loja/vestuario", icon: Shirt },
+  { title: "Brindes", url: "/loja/brindes", icon: Gift },
+  { title: "M. Veste", url: "/loja/vestuario", icon: Shirt },
 ];
 
 function LojaMcgDynamicSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted }: LojaMcgDynamicSectionProps) {

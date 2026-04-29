@@ -66,7 +66,7 @@ export default function Vestuario() {
 
   return (
     <AppLayout
-      title="Vestuário MCG"
+      title="M. Veste"
       subtitle="Uniformes e roupas personalizadas para sua empresa"
     >
       <div className="space-y-6">

@@ -409,7 +409,7 @@ export default function AdminLoja() {
       case "escritorio":
         return <Badge variant="outline">Escritório</Badge>;
       case "vestuario":
-        return <Badge variant="secondary">Vestuário</Badge>;
+        return <Badge variant="secondary">M. Veste</Badge>;
       default:
         return <Badge variant="outline">{type}</Badge>;
     }
@@ -853,7 +853,7 @@ export default function AdminLoja() {
                           <SelectItem value="merch">Brindes</SelectItem>
                           <SelectItem value="ebook">E-book</SelectItem>
                           <SelectItem value="escritorio">Escritorio</SelectItem>
-                          <SelectItem value="vestuario">Vestuario</SelectItem>
+                          <SelectItem value="vestuario">M. Veste</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -878,7 +878,7 @@ export default function AdminLoja() {
                               data-testid="select-modelo"
                               className={!isVestuario ? "opacity-50 cursor-not-allowed" : ""}
                             >
-                              <SelectValue placeholder={isVestuario ? "Selecione" : "Disponivel apenas para Vestuario"} />
+                              <SelectValue placeholder={isVestuario ? "Selecione" : "Disponivel apenas para M. Veste"} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -915,7 +915,7 @@ export default function AdminLoja() {
                         <FormDescription className={!isVestuario ? "text-muted-foreground/60" : ""}>
                           {isVestuario 
                             ? "Selecione os tamanhos disponiveis" 
-                            : "Disponivel apenas para Vestuario"}
+                            : "Disponivel apenas para M. Veste"}
                         </FormDescription>
                         <FormControl>
                           <div className="flex flex-wrap gap-2">
@@ -969,7 +969,7 @@ export default function AdminLoja() {
                         <FormDescription className={!isVestuario ? "text-muted-foreground/60" : ""}>
                           {isVestuario 
                             ? "Selecione ou crie novas cores" 
-                            : "Disponivel apenas para Vestuario"}
+                            : "Disponivel apenas para M. Veste"}
                         </FormDescription>
                         <FormControl>
                           <div className="space-y-3">

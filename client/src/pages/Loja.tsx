@@ -36,6 +36,19 @@ const getCategoryIcon = (slug: string) => {
   }
 };
 
+const getCategoryDisplayName = (slug: string, name: string) => {
+  if (slug === 'vestuario') return 'M. Veste';
+  return name;
+};
+
+const CATEGORY_ORDER: Record<string, number> = {
+  ebooks: 1,
+  ebook: 1,
+  escritorio: 2,
+  brindes: 3,
+  vestuario: 4,
+};
+
 function LojaContent() {
   const { data: categories, isLoading } = useQuery<StoreProductCategory[]>({
     queryKey: ["/api/store/categories"],
@@ -57,7 +70,13 @@ function LojaContent() {
     );
   }
 
-  const activeCategories = categories?.filter(c => c.isActive) || [];
+  const activeCategories = (categories?.filter(c => c.isActive) || [])
+    .slice()
+    .sort((a, b) => {
+      const orderA = CATEGORY_ORDER[a.slug] ?? 99;
+      const orderB = CATEGORY_ORDER[b.slug] ?? 99;
+      return orderA - orderB;
+    });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -77,18 +96,19 @@ function LojaContent() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex flex-col gap-4 max-w-md mx-auto">
           {activeCategories.map((category) => {
             const Icon = getCategoryIcon(category.slug);
+            const displayName = getCategoryDisplayName(category.slug, category.name);
             return (
               <Link key={category.id} href={`/loja/${category.slug}`}>
-                <Card className="hover-elevate cursor-pointer transition-all h-full">
+                <Card className="hover-elevate cursor-pointer transition-all">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-3">
                       <div className="p-3 rounded-lg bg-primary/10">
                         <Icon className="h-6 w-6 text-primary" />
                       </div>
-                      <CardTitle className="text-lg">{category.name}</CardTitle>
+                      <CardTitle className="text-lg">{displayName}</CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent>

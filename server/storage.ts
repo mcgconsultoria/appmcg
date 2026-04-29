@@ -3840,9 +3840,9 @@ export class DatabaseStorage implements IStorage {
 
     const defaultCategories = [
       { name: 'E-books', slug: 'ebooks', description: 'Livros digitais e Materiais educativos', icon: 'book', displayOrder: 1, isActive: true },
-      { name: 'Brindes', slug: 'brindes', description: 'Brindes e itens promocionais', icon: 'gift', displayOrder: 2, isActive: true },
-      { name: 'Escritorio', slug: 'escritorio', description: 'Materiais para escritorio', icon: 'briefcase', displayOrder: 3, isActive: true },
-      { name: 'Vestuario', slug: 'vestuario', description: 'Uniformes e roupas corporativas', icon: 'shirt', displayOrder: 4, isActive: true },
+      { name: 'Escritório', slug: 'escritorio', description: 'Materiais para escritorio', icon: 'briefcase', displayOrder: 2, isActive: true },
+      { name: 'Brindes', slug: 'brindes', description: 'Brindes e itens promocionais', icon: 'gift', displayOrder: 3, isActive: true },
+      { name: 'M. Veste', slug: 'vestuario', description: 'Uniformes e roupas corporativas MCG Grupo', icon: 'shirt', displayOrder: 4, isActive: true },
     ];
 
     for (const category of defaultCategories) {
