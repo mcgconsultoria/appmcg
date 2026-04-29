@@ -3834,21 +3834,30 @@ export class DatabaseStorage implements IStorage {
 
   async seedStoreCategories(): Promise<void> {
     const existingCategories = await db.select().from(storeProductCategories);
-    if (existingCategories.length > 0) {
-      return;
-    }
 
     const defaultCategories = [
-      { name: 'E-books', slug: 'ebooks', description: 'Livros digitais e Materiais educativos', icon: 'book', displayOrder: 1, isActive: true },
-      { name: 'Escritório', slug: 'escritorio', description: 'Materiais para escritorio', icon: 'briefcase', displayOrder: 2, isActive: true },
-      { name: 'Brindes', slug: 'brindes', description: 'Brindes e itens promocionais', icon: 'gift', displayOrder: 3, isActive: true },
-      { name: 'M. Veste', slug: 'vestuario', description: 'Uniformes e roupas corporativas MCG Grupo', icon: 'shirt', displayOrder: 4, isActive: true },
+      { name: 'E-books', slug: 'ebooks', code: 'EBK', description: 'Livros digitais e Materiais educativos', icon: 'book', displayOrder: 1, isActive: true },
+      { name: 'Escritório', slug: 'escritorio', code: 'ESCR', description: 'Materiais para escritorio', icon: 'briefcase', displayOrder: 2, isActive: true },
+      { name: 'Brindes', slug: 'brindes', code: 'BRDS', description: 'Brindes e itens promocionais', icon: 'gift', displayOrder: 3, isActive: true },
+      { name: 'M. Veste', slug: 'vestuario', code: 'MVT', description: 'Uniformes e roupas personalizadas MCG Grupo', icon: 'shirt', displayOrder: 4, isActive: true },
     ];
 
-    for (const category of defaultCategories) {
-      await db.insert(storeProductCategories).values(category);
+    if (existingCategories.length === 0) {
+      for (const category of defaultCategories) {
+        await db.insert(storeProductCategories).values(category);
+      }
+      console.log("Store categories seeded successfully");
+    } else {
+      // Apply corrections to existing categories (name, code, displayOrder)
+      for (const category of defaultCategories) {
+        const existing = existingCategories.find(c => c.slug === category.slug);
+        if (existing && (existing.code !== category.code || existing.name !== category.name || existing.displayOrder !== category.displayOrder)) {
+          await db.update(storeProductCategories)
+            .set({ name: category.name, code: category.code, displayOrder: category.displayOrder })
+            .where(eq(storeProductCategories.slug, category.slug));
+        }
+      }
     }
-    console.log("Store categories seeded successfully");
   }
 }
 
