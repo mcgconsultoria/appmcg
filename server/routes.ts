@@ -2,7 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./replitAuth";
-import { registerUser, loginUser, validateSession, logoutUser } from "./customAuth";
+import { registerUser, loginUser, validateSession, logoutUser, hashPassword } from "./customAuth";
 import { consultarCNPJ } from "./cnpjService";
 import { logAudit } from "./auditHelper";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
@@ -4441,6 +4441,40 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error updating user settings:", error);
       res.status(500).json({ message: "Erro ao atualizar configurações" });
+    }
+  });
+
+  // Create a user directly without registration flow (admin_mcg only)
+  app.post("/api/admin/create-user", isMcgAdmin, async (req: any, res) => {
+    try {
+      const { email, password, firstName, lastName, role, companyId, selectedPlan, fullAccessGranted, vendedor } = req.body;
+      if (!email || !password) return res.status(400).json({ message: "Email e senha são obrigatórios" });
+      const existing = await storage.getUserByEmail(email);
+      if (existing) return res.status(409).json({ message: "Usuário com este email já existe" });
+      const hashedPassword = await hashPassword(password);
+      const { v4: uuidv4 } = await import("uuid");
+      const newUser = await storage.createUserWithPassword({
+        id: uuidv4(),
+        email,
+        password: hashedPassword,
+        firstName: firstName || "",
+        lastName: lastName || "",
+        role: role || "admin",
+        companyId: companyId ?? null,
+        selectedPlan: selectedPlan || "corporativo",
+        fullAccessGranted: fullAccessGranted ?? true,
+        fullAccessGrantedAt: fullAccessGranted ? new Date() : null,
+        fullAccessGrantedBy: req.user?.email || "admin",
+        vendedor: vendedor || null,
+        accountStatus: "approved",
+        approvedAt: new Date(),
+        isActive: true,
+      });
+      const { password: _, activeSessionToken: __, ...safeUser } = newUser;
+      res.json({ message: "Usuário criado com sucesso", user: safeUser });
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Erro ao criar usuário" });
     }
   });
 
