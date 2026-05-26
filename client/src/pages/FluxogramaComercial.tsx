@@ -201,7 +201,7 @@ const defaultNodes: Node[] = [
     id: "com-3",
     type: "default",
     position: { x: 350, y: 440 },
-    data: { label: "Calendario", area: "com", link: "/calendário" },
+    data: { label: "Calendário", area: "com", link: "/calendário" },
     style: {
       background: "#bfdbfe",
       color: "#1e40af",

@@ -114,7 +114,7 @@ export default function Settings() {
         setCnpjFound(true);
         toast({ title: "Dados encontrados na Receita Federal" });
       } else {
-        toast({ title: "CNPJ nao encontrado", variant: "destructive" });
+        toast({ title: "CNPJ não encontrado", variant: "destructive" });
       }
     } catch {
       toast({ title: "Erro ao consultar CNPJ", variant: "destructive" });

@@ -480,8 +480,8 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Curva ABC - Analise de Clientes</CardTitle>
-            <CardDescription>Classificacao dos clientes por importancia no faturamento</CardDescription>
+            <CardTitle className="text-lg">Curva ABC - Análise de Clientes</CardTitle>
+            <CardDescription>Classificação dos clientes por importância no faturamento</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-4">

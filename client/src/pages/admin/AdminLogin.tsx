@@ -16,7 +16,7 @@ import logoMcg from "@assets/logo_mcg_principal.png";
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
-  password: z.string().min(1, "Senha obrigatoria"),
+  password: z.string().min(1, "Senha obrigatória"),
 });
 
 type LoginData = z.infer<typeof loginSchema>;
@@ -43,7 +43,7 @@ export default function AdminLogin() {
       if (data.user?.role !== "admin" && data.user?.role !== "admin_mcg") {
         toast({
           title: "Acesso negado",
-          description: "Voce nao tem permissao para acessar a area administrativa.",
+          description: "Você não tem permissão para acessar a área administrativa.",
           variant: "destructive",
         });
         return;

@@ -153,7 +153,7 @@ export default function AdminDashboard() {
         </div>
 
         <FinancialCalendar
-          title="Calendario Financeiro MCG"
+          title="Calendário Financeiro MCG"
           transactions={accountingEntries.map(e => ({
             id: e.id,
             date: e.date,

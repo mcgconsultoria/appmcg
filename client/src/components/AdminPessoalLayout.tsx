@@ -32,12 +32,12 @@ import logoMcg from "@assets/logo_mcg_principal.png";
 
 const menuItems = [
   {
-    title: "Visao Geral",
+    title: "Visão Geral",
     url: "/pessoal",
     icon: LayoutDashboard,
   },
   {
-    title: "Gestao Financeira",
+    title: "Gestão Financeira",
     url: "/pessoal/financeiro",
     icon: Wallet,
   },

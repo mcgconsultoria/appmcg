@@ -370,7 +370,7 @@ export default function AdminContratos() {
               <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
                 <div>
                   <CardTitle>Modelos de Contrato</CardTitle>
-                  <CardDescription>Templates de contrato disponiveis para envio</CardDescription>
+                  <CardDescription>Templates de contrato disponíveis para envio</CardDescription>
                 </div>
                 <Button onClick={() => setIsTemplateDialogOpen(true)} data-testid="button-new-template">
                   <Plus className="h-4 w-4 mr-2" />

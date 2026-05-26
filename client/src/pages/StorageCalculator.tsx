@@ -116,7 +116,7 @@ const storageTypes: StorageType[] = [
     baseRate: 28,
     temperature: "Ambiente (15-30C)",
     legislation: ["NBR 15.524-2/2008", "NR-11", "ABNT NBR 16280"],
-    requirements: ["Empilhamento maximo definido", "Separacao por lote", "Controle FIFO/FEFO"],
+    requirements: ["Empilhamento máximo definido", "Separação por lote", "Controle FIFO/FEFO"],
     icon: Package,
   },
   {
@@ -136,17 +136,17 @@ const storageTypes: StorageType[] = [
     baseRate: 55,
     temperature: "0C a 10C",
     legislation: ["ANVISA RDC 216/2004", "Portaria SVS 326/1997", "MAPA IN 16/2017"],
-    requirements: ["Monitoramento continuo de temperatura", "Separacao por tipo de alimento", "Higienizacao diaria", "Registro de temperaturas"],
+    requirements: ["Monitoramento contínuo de temperatura", "Separação por tipo de alimento", "Higienização diária", "Registro de temperaturas"],
     icon: Apple,
   },
   {
     value: "refrigerated_dairy",
-    label: "Laticinios",
+    label: "Laticínios",
     category: "refrigerated",
     baseRate: 60,
     temperature: "2C a 8C",
     legislation: ["ANVISA RDC 216/2004", "MAPA IN 76/2018", "Decreto 9.013/2017 (RIISPOA)"],
-    requirements: ["Cadeia de frio ininterrupta", "Controle de validade FEFO", "Area exclusiva para laticinios"],
+    requirements: ["Cadeia de frio ininterrupta", "Controle de validade FEFO", "Área exclusiva para laticínios"],
     icon: Apple,
   },
   {
@@ -156,7 +156,7 @@ const storageTypes: StorageType[] = [
     baseRate: 65,
     temperature: "0C a 4C",
     legislation: ["MAPA Decreto 9.013/2017", "ANVISA RDC 216/2004", "IN MAPA 60/2018"],
-    requirements: ["Prateleiras inferiores obrigatorias", "Separacao de carnes cruas", "SIF obrigatorio para comércio interestadual"],
+    requirements: ["Prateleiras inferiores obrigatórias", "Separação de carnes cruas", "SIF obrigatório para comércio interestadual"],
     icon: Apple,
   },
   {
@@ -165,7 +165,7 @@ const storageTypes: StorageType[] = [
     category: "refrigerated",
     baseRate: 70,
     temperature: "0C a 2C",
-    legislation: ["MAPA Decreto 9.013/2017", "ANVISA RDC 216/2004", "Resolucao CISA 10/1984"],
+    legislation: ["MAPA Decreto 9.013/2017", "ANVISA RDC 216/2004", "Resolução CISA 10/1984"],
     requirements: ["Gelo ou refrigeração permanente", "Area exclusiva", "Rastreabilidade de origem"],
     icon: Apple,
   },
@@ -175,8 +175,8 @@ const storageTypes: StorageType[] = [
     category: "frozen",
     baseRate: 75,
     temperature: "-18C ou inferior",
-    legislation: ["ANVISA RDC 216/2004", "Resolucao CNNPA 35/1977", "NBR 14701"],
-    requirements: ["Temperatura <= -18C constante", "Nao recongelar produtos descongelados", "Embalagem hermetica"],
+    legislation: ["ANVISA RDC 216/2004", "Resolução CNNPA 35/1977", "NBR 14701"],
+    requirements: ["Temperatura <= -18C constante", "Não recongelar produtos descongelados", "Embalagem hermética"],
     icon: Snowflake,
   },
   {
@@ -185,8 +185,8 @@ const storageTypes: StorageType[] = [
     category: "frozen",
     baseRate: 80,
     temperature: "-18C ou inferior",
-    legislation: ["MAPA Decreto 9.013/2017", "Resolucao CNNPA 35/1977", "IN MAPA 60/2018"],
-    requirements: ["Camara exclusiva para carnes", "Registro de temperatura automatico", "Descongelamento controlado"],
+    legislation: ["MAPA Decreto 9.013/2017", "Resolução CNNPA 35/1977", "IN MAPA 60/2018"],
+    requirements: ["Câmara exclusiva para carnes", "Registro de temperatura automático", "Descongelamento controlado"],
     icon: Snowflake,
   },
   {
@@ -195,18 +195,18 @@ const storageTypes: StorageType[] = [
     category: "frozen",
     baseRate: 85,
     temperature: "-23C ou inferior",
-    legislation: ["ANVISA RDC 266/2005", "Resolucao CNNPA 35/1977"],
-    requirements: ["Temperatura ultra-congelada", "Embalagem lacrada original", "Controle de cristalizacao"],
+    legislation: ["ANVISA RDC 266/2005", "Resolução CNNPA 35/1977"],
+    requirements: ["Temperatura ultra-congelada", "Embalagem lacrada original", "Controle de cristalização"],
     icon: Snowflake,
   },
   {
     value: "pharma_standard",
-    label: "Medicamentos Padrao",
+    label: "Medicamentos Padrão",
     category: "pharmaceutical",
     baseRate: 90,
     temperature: "15C a 30C",
     legislation: ["ANVISA RDC 430/2020", "RDC 653/2022", "RDC 304"],
-    requirements: ["Sistema de Gestão da Qualidade", "Area de quarentena", "Rastreabilidade total", "POPs documentados"],
+    requirements: ["Sistema de Gestão da Qualidade", "Área de quarentena", "Rastreabilidade total", "POPs documentados"],
     icon: Pill,
   },
   {
@@ -216,27 +216,27 @@ const storageTypes: StorageType[] = [
     baseRate: 120,
     temperature: "2C a 8C",
     legislation: ["ANVISA RDC 430/2020", "RDC 938/2024", "RDC 653/2022"],
-    requirements: ["Cadeia de frio farmaceutica", "Mapeamento termico obrigatorio", "Monitoramento 24/7", "Qualificacao termica de equipamentos"],
+    requirements: ["Cadeia de frio farmacêutica", "Mapeamento térmico obrigatório", "Monitoramento 24/7", "Qualificação térmica de equipamentos"],
     icon: Pill,
   },
   {
     value: "pharma_frozen",
-    label: "Vacinas e Biologicos",
+    label: "Vacinas e Biológicos",
     category: "pharmaceutical",
     baseRate: 150,
     temperature: "-20C a -70C",
     legislation: ["ANVISA RDC 430/2020", "RDC 938/2024", "PNI/MS"],
-    requirements: ["Ultra-freezers qualificados", "Backup de energia obrigatorio", "Registro automatico de temperatura", "Plano de contingencia"],
+    requirements: ["Ultra-freezers qualificados", "Backup de energia obrigatório", "Registro automático de temperatura", "Plano de contingência"],
     icon: Pill,
   },
   {
     value: "hazardous_flammable",
-    label: "Inflamaveis",
+    label: "Inflamáveis",
     category: "hazardous",
     baseRate: 100,
     temperature: "Ambiente controlado",
     legislation: ["ABNT NBR 14725", "NR-20", "Decreto 96.044/1988"],
-    requirements: ["Area isolada e ventilada", "Sistema anti-incendio", "Sinalizacao de risco", "FISPQ obrigatoria"],
+    requirements: ["Área isolada e ventilada", "Sistema anti-incêndio", "Sinalização de risco", "FISPQ obrigatória"],
     icon: AlertTriangle,
   },
   {
@@ -245,28 +245,28 @@ const storageTypes: StorageType[] = [
     category: "hazardous",
     baseRate: 95,
     temperature: "Ambiente controlado",
-    legislation: ["ABNT NBR 14725", "NR-20", "Resolucao ANTT 5.232/2016"],
-    requirements: ["Piso resistente a corrosao", "Bacias de contencao", "EPIs especificos obrigatorios"],
+    legislation: ["ABNT NBR 14725", "NR-20", "Resolução ANTT 5.232/2016"],
+    requirements: ["Piso resistente à corrosão", "Bacias de contenção", "EPIs específicos obrigatórios"],
     icon: AlertTriangle,
   },
   {
     value: "hazardous_toxic",
-    label: "Toxicos",
+    label: "Tóxicos",
     category: "hazardous",
     baseRate: 110,
     temperature: "Ambiente controlado",
-    legislation: ["ABNT NBR 14725", "NR-20", "Lei 7.802/1989 (Agrotoxicos)"],
-    requirements: ["Acesso restrito e controlado", "Exaustao adequada", "Licenca ambiental especifica"],
+    legislation: ["ABNT NBR 14725", "NR-20", "Lei 7.802/1989 (Agrotóxicos)"],
+    requirements: ["Acesso restrito e controlado", "Exaustão adequada", "Licença ambiental específica"],
     icon: AlertTriangle,
   },
   {
     value: "agricultural_grains",
-    label: "Graos e Cereais",
+    label: "Grãos e Cereais",
     category: "agricultural",
     baseRate: 18,
     temperature: "Ambiente seco (< 14% umidade)",
     legislation: ["CONAB Normativo", "IN MAPA 12/2020", "Lei 9.973/2000"],
-    requirements: ["Controle de umidade e aeracao", "Prevencao de pragas", "Certificacao SNCUA opcional"],
+    requirements: ["Controle de umidade e aeração", "Prevenção de pragas", "Certificação SNCUA opcional"],
     icon: Wheat,
   },
   {
@@ -276,27 +276,27 @@ const storageTypes: StorageType[] = [
     baseRate: 22,
     temperature: "Ambiente seco",
     legislation: ["MAPA IN 53/2013", "Decreto 4.954/2004"],
-    requirements: ["Separacao por tipo", "Protecao contra umidade", "Registro MAPA"],
+    requirements: ["Separação por tipo", "Proteção contra umidade", "Registro MAPA"],
     icon: Wheat,
   },
   {
     value: "chemical_industrial",
-    label: "Quimicos Industriais",
+    label: "Químicos Industriais",
     category: "hazardous",
     baseRate: 85,
     temperature: "Conforme FISPQ",
     legislation: ["ABNT NBR 14725", "NR-20", "Lei 12.305/2010 (PNRS)"],
-    requirements: ["Compatibilidade quimica verificada", "Ventilacao adequada", "Plano de emergencia"],
+    requirements: ["Compatibilidade química verificada", "Ventilação adequada", "Plano de emergência"],
     icon: FlaskConical,
   },
   {
     value: "special_fragile",
-    label: "Frageis",
+    label: "Frágeis",
     category: "special",
     baseRate: 45,
     temperature: "Ambiente controlado",
     legislation: ["NBR 15.524-2/2008"],
-    requirements: ["Manuseio especializado", "Embalagem reforçada", "Sinalizacao de fragilidade"],
+    requirements: ["Manuseio especializado", "Embalagem reforçada", "Sinalização de fragilidade"],
     icon: Package,
   },
   {
@@ -306,7 +306,7 @@ const storageTypes: StorageType[] = [
     baseRate: 60,
     temperature: "Ambiente controlado",
     legislation: ["NBR 15.524-2/2008"],
-    requirements: ["Area com seguranca reforçada", "CFTV e controle de acesso", "Seguro obrigatorio"],
+    requirements: ["Área com segurança reforçada", "CFTV e controle de acesso", "Seguro obrigatório"],
     icon: Gem,
   },
   {
@@ -529,7 +529,7 @@ export default function StorageCalculator() {
   const TypeIcon = selectedType?.icon || Package;
 
   return (
-    <PublicLayout title="Calculadora de Armazenagem" subtitle="Calcule custos de armazenagem e movimentacao com base na legislacao brasileira">
+    <PublicLayout title="Calculadora de Armazenagem" subtitle="Calcule custos de armazenagem e movimentação com base na legislação brasileira">
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card>
@@ -539,7 +539,7 @@ export default function StorageCalculator() {
                 Dados da Armazenagem
                 {isAuthenticated && quota && !quota.unlimited && quota.remaining !== null && (
                   <Badge variant="outline" className="ml-auto">
-                    {quota.remaining} calculos gratuitos restantes
+                    {quota.remaining} cálculos gratuitos restantes
                   </Badge>
                 )}
               </CardTitle>
@@ -606,7 +606,7 @@ export default function StorageCalculator() {
                         </div>
                         <div className="space-y-1">
                           <p className="text-sm text-muted-foreground">
-                            <strong>Legislacao:</strong> {selectedType.legislation.join(", ")}
+                            <strong>Legislação:</strong> {selectedType.legislation.join(", ")}
                           </p>
                           <p className="text-sm text-muted-foreground">
                             <strong>Requisitos:</strong> {selectedType.requirements.join("; ")}
@@ -686,7 +686,7 @@ export default function StorageCalculator() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="movementRate">Taxa de Movimentacao (R$/m²)</Label>
+                  <Label htmlFor="movementRate">Taxa de Movimentação (R$/m²)</Label>
                   <Input
                     id="movementRate"
                     type="number"
@@ -735,7 +735,7 @@ export default function StorageCalculator() {
                     type="number"
                     step="0.01"
                     min="0"
-                    placeholder="Para calculo de seguro"
+                    placeholder="Para cálculo de seguro"
                     value={formData.productValue}
                     onChange={(e) => updateField("productValue", e.target.value)}
                     data-testid="input-product-value"
@@ -777,7 +777,7 @@ export default function StorageCalculator() {
                     data-testid="button-save-storage"
                   >
                     <Save className="h-4 w-4 mr-2" />
-                    {saveMutation.isPending ? "Salvando..." : "Salvar Calculo"}
+                    {saveMutation.isPending ? "Salvando..." : "Salvar Cálculo"}
                     {quota?.remaining !== null && !quota?.unlimited && (
                       <Badge variant="secondary" className="ml-2">
                         {quota?.remaining} gratuitos
@@ -793,7 +793,7 @@ export default function StorageCalculator() {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Info className="h-5 w-5" />
-                Legislacao e Normas Aplicaveis
+                Legislação e Normas Aplicáveis
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm text-muted-foreground">
@@ -801,41 +801,41 @@ export default function StorageCalculator() {
                 <p className="font-medium text-foreground mb-2">Carga Seca</p>
                 <ul className="list-disc pl-5 space-y-1">
                   <li><strong>NBR 15.524-2/2008:</strong> Sistemas de armazenagem e estruturas porta-paletes</li>
-                  <li><strong>NR-11:</strong> Transporte, movimentacao e armazenagem de materiais</li>
+                  <li><strong>NR-11:</strong> Transporte, movimentação e armazenagem de materiais</li>
                 </ul>
               </div>
               <div>
                 <p className="font-medium text-foreground mb-2">Alimentos Refrigerados/Congelados</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li><strong>ANVISA RDC 216/2004:</strong> Boas praticas para serviços de alimentacao</li>
-                  <li><strong>MAPA Decreto 9.013/2017 (RIISPOA):</strong> Inspecao de produtos de origem animal</li>
-                  <li><strong>Resolucao CNNPA 35/1977:</strong> Padroes para alimentos congelados (min. -18C)</li>
-                  <li><strong>NBR 14701:</strong> Transporte de produtos pereciveis refrigerados/congelados</li>
+                  <li><strong>ANVISA RDC 216/2004:</strong> Boas práticas para serviços de alimentação</li>
+                  <li><strong>MAPA Decreto 9.013/2017 (RIISPOA):</strong> Inspeção de produtos de origem animal</li>
+                  <li><strong>Resolução CNNPA 35/1977:</strong> Padrões para alimentos congelados (min. -18C)</li>
+                  <li><strong>NBR 14701:</strong> Transporte de produtos perecíveis refrigerados/congelados</li>
                 </ul>
               </div>
               <div>
-                <p className="font-medium text-foreground mb-2">Medicamentos e Farmaceuticos</p>
+                <p className="font-medium text-foreground mb-2">Medicamentos e Farmacêuticos</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li><strong>ANVISA RDC 430/2020:</strong> Boas praticas de distribuição e armazenagem</li>
-                  <li><strong>RDC 938/2024:</strong> Armazens alfandegados - mapeamento termico obrigatorio</li>
-                  <li><strong>RDC 653/2022:</strong> Prazo final marco/2024 para adequacao</li>
+                  <li><strong>ANVISA RDC 430/2020:</strong> Boas práticas de distribuição e armazenagem</li>
+                  <li><strong>RDC 938/2024:</strong> Armazéns alfandegados - mapeamento térmico obrigatório</li>
+                  <li><strong>RDC 653/2022:</strong> Prazo final março/2024 para adequação</li>
                   <li><strong>RDC 887/2024:</strong> Gases medicinais - distribuição e armazenagem</li>
                 </ul>
               </div>
               <div>
                 <p className="font-medium text-foreground mb-2">Produtos Perigosos</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li><strong>ABNT NBR 14725:</strong> Produtos quimicos - FISPQ obrigatoria</li>
-                  <li><strong>NR-20:</strong> Seguranca com inflamaveis e combustiveis</li>
-                  <li><strong>Resolucao ANTT 5.232/2016:</strong> Transporte terrestre de produtos perigosos</li>
+                  <li><strong>ABNT NBR 14725:</strong> Produtos químicos - FISPQ obrigatória</li>
+                  <li><strong>NR-20:</strong> Segurança com inflamáveis e combustíveis</li>
+                  <li><strong>Resolução ANTT 5.232/2016:</strong> Transporte terrestre de produtos perigosos</li>
                 </ul>
               </div>
               <div>
-                <p className="font-medium text-foreground mb-2">Produtos Agricolas</p>
+                <p className="font-medium text-foreground mb-2">Produtos Agrícolas</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li><strong>Lei 9.973/2000:</strong> Sistema de armazenagem de produtos agropecuarios</li>
-                  <li><strong>SNCUA:</strong> Sistema Nacional de Certificacao de Unidades Armazenadoras</li>
-                  <li><strong>CONAB:</strong> Normativos para graos e cereais</li>
+                  <li><strong>Lei 9.973/2000:</strong> Sistema de armazenagem de produtos agropecuários</li>
+                  <li><strong>SNCUA:</strong> Sistema Nacional de Certificação de Unidades Armazenadoras</li>
+                  <li><strong>CONAB:</strong> Normativos para grãos e cereais</li>
                 </ul>
               </div>
             </CardContent>
@@ -853,7 +853,7 @@ export default function StorageCalculator() {
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-primary-foreground/80">Area</span>
+                  <span className="text-primary-foreground/80">Área</span>
                   <span className="font-medium">
                     {parseFloat(formData.area) || 0} m²
                   </span>
@@ -884,7 +884,7 @@ export default function StorageCalculator() {
                   </div>
                 )}
                 <div className="flex justify-between items-center">
-                  <span className="text-primary-foreground/80">Movimentacao</span>
+                  <span className="text-primary-foreground/80">Movimentação</span>
                   <span className="font-medium">
                     {formatCurrency(calculations.movementValue)}
                   </span>
@@ -1117,17 +1117,17 @@ export default function StorageCalculator() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Crown className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              Limite de Calculos Gratuitos Atingido
+              Limite de Cálculos Gratuitos Atingido
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <p className="text-muted-foreground">
-              Voce utilizou seus 3 calculos gratuitos. Para continuar usando as calculadoras e acessar todos os recursos, atualize para um plano pago.
+              Você utilizou seus 3 cálculos gratuitos. Para continuar usando as calculadoras e acessar todos os recursos, atualize para um plano pago.
             </p>
             <div className="bg-muted p-4 rounded-md space-y-2">
-              <p className="font-medium">Com um plano pago voce tem:</p>
+              <p className="font-medium">Com um plano pago você tem:</p>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>- Calculos ilimitados de frete e armazenagem</li>
+                <li>- Cálculos ilimitados de frete e armazenagem</li>
                 <li>- CRM completo para gestão de clientes</li>
                 <li>- Pipeline de vendas e oportunidades</li>
                 <li>- Checklists operacionais para 15 departamentos</li>

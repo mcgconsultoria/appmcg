@@ -152,7 +152,7 @@ export default function PessoalDashboard() {
         </div>
 
         <FinancialCalendar
-          title="Calendario Financeiro Pessoal"
+          title="Calendário Financeiro Pessoal"
           transactions={transactions.map(t => ({
             id: t.id,
             date: t.date,
@@ -168,9 +168,9 @@ export default function PessoalDashboard() {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Wallet className="h-5 w-5" />
-                  Ultimas Transacoes
+                  Últimas Transações
                 </CardTitle>
-                <CardDescription>Movimentacoes recentes</CardDescription>
+                <CardDescription>Movimentações recentes</CardDescription>
               </div>
               <Link href="/pessoal/financeiro">
                 <Button variant="outline" size="sm">

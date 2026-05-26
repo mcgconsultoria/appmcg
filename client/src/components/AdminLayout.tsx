@@ -134,7 +134,7 @@ const financeConfigItems = [
     icon: FileText,
   },
   {
-    title: "Relatorio DRE",
+    title: "Relatório DRE",
     url: "/admin/relatorio-dre",
     icon: BarChart3,
   },

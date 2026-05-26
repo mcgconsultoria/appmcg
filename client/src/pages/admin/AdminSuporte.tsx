@@ -415,7 +415,7 @@ export default function AdminSuporte() {
               <DialogDescription className="flex items-center gap-4 flex-wrap">
                 <span className="flex items-center gap-1">
                   <User className="h-4 w-4" />
-                  {selectedTicket?.userName || "Usuario"}
+                  {selectedTicket?.userName || "Usuário"}
                 </span>
                 {selectedTicket?.companyName && (
                   <span className="flex items-center gap-1">

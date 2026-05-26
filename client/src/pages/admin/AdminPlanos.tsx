@@ -38,7 +38,7 @@ export default function AdminPlanos() {
     onError: () => {
       toast({
         title: "Erro",
-        description: "Nao foi possivel atualizar o plano.",
+        description: "Não foi possível atualizar o plano.",
         variant: "destructive",
       });
     },
@@ -52,13 +52,13 @@ export default function AdminPlanos() {
       queryClient.invalidateQueries({ queryKey: ["/api/subscription-plans"] });
       toast({
         title: "Planos criados",
-        description: "Os planos padrao foram criados com sucesso.",
+        description: "Os planos padrão foram criados com sucesso.",
       });
     },
     onError: () => {
       toast({
         title: "Erro",
-        description: "Nao foi possivel criar os planos.",
+        description: "Não foi possível criar os planos.",
         variant: "destructive",
       });
     },

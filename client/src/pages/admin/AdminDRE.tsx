@@ -263,7 +263,7 @@ export default function AdminDRE() {
               DRE - Plano de Contas
             </h1>
             <p className="text-muted-foreground">
-              Estrutura de contas para Demonstracao do Resultado do Exercicio
+              Estrutura de contas para Demonstração do Resultado do Exercício
             </p>
           </div>
           <div className="flex items-center gap-2">

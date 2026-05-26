@@ -54,9 +54,9 @@ import { ptBR } from "date-fns/locale";
 import type { SupportTicket, SupportTicketMessage } from "@shared/schema";
 
 const ticketFormSchema = z.object({
-  subject: z.string().min(1, "Assunto e obrigatorio"),
-  description: z.string().min(1, "Descrição e obrigatoria"),
-  category: z.string().min(1, "Categoria e obrigatoria"),
+  subject: z.string().min(1, "Assunto é obrigatório"),
+  description: z.string().min(1, "Descrição é obrigatória"),
+  category: z.string().min(1, "Categoria é obrigatória"),
   priority: z.string().default("medium"),
 });
 
@@ -333,7 +333,7 @@ export default function Support() {
                   <HeadphonesIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-medium">Nenhum chamado</h3>
                   <p className="text-muted-foreground mb-4">
-                    Voce ainda nao tem chamados abertos
+                    Você ainda não tem chamados abertos
                   </p>
                   <Button onClick={() => setIsDialogOpen(true)}>
                     <Plus className="h-4 w-4 mr-2" />

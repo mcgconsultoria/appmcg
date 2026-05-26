@@ -251,7 +251,7 @@ export default function CentrosCustoPF() {
               Centros de Custo Pessoal
             </h1>
             <p className="text-muted-foreground">
-              Estrutura hierarquica para organizar financas pessoais: Moradia, Saude, Alimentacao, Transporte, etc.
+              Estrutura hierárquica para organizar finanças pessoais: Moradia, Saúde, Alimentação, Transporte, etc.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -282,9 +282,9 @@ export default function CentrosCustoPF() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Arvore de Centros de Custo Pessoal</CardTitle>
+            <CardTitle>Árvore de Centros de Custo Pessoal</CardTitle>
             <CardDescription>
-              Organize seus gastos por categoria: Bancos, Saude, Alimentacao, Transporte, Moradia, Educacao, Vestuario, Lazer, Investimentos
+              Organize seus gastos por categoria: Bancos, Saúde, Alimentação, Transporte, Moradia, Educação, Vestuário, Lazer, Investimentos
             </CardDescription>
           </CardHeader>
           <CardContent>

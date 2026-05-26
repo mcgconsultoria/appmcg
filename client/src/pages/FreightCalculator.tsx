@@ -377,8 +377,8 @@ export default function FreightCalculator() {
   const handleSendProposal = () => {
     if (!isAuthenticated) {
       toast({
-        title: "Cadastro necessario",
-        description: "Para enviar propostas, voce precisa criar uma conta gratuita.",
+        title: "Cadastro necessário",
+        description: "Para enviar propostas, você precisa criar uma conta gratuita.",
         variant: "default",
       });
       setLocation("/registro");

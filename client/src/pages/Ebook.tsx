@@ -36,7 +36,7 @@ export default function Ebook() {
   };
 
   return (
-    <AppLayout title="E-book" subtitle="Conhecimento transformador em logistica comercial">
+    <AppLayout title="E-book" subtitle="Conhecimento transformador em logística comercial">
       <div className="space-y-8 max-w-5xl mx-auto">
         <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-primary/10 via-primary/5 to-background border">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMDAwMDA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50" />
@@ -45,14 +45,14 @@ export default function Ebook() {
               <div className="space-y-6">
                 <Badge className="bg-primary/20 text-primary border-none">
                   <Award className="h-3 w-3 mr-1" />
-                  Lancamento Exclusivo
+                  Lançamento Exclusivo
                 </Badge>
                 <div>
                   <h1 className="text-3xl md:text-4xl font-bold leading-tight">
-                    A Arte do Comercial em Logistica
+                    A Arte do Comercial em Logística
                   </h1>
                   <p className="text-lg text-muted-foreground mt-2">
-                    Uma trilogia sobre experiencia, estrategia e sucesso na area comercial logistica
+                    Uma trilogia sobre experiência, estratégia e sucesso na área comercial logística
                   </p>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -77,7 +77,7 @@ export default function Ebook() {
                     />
                   ))}
                   <span className="ml-2 text-sm text-muted-foreground">
-                    Avaliacao dos leitores
+                    Avaliação dos leitores
                   </span>
                 </div>
               </div>
@@ -111,17 +111,17 @@ export default function Ebook() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground leading-relaxed">
-              Fruto de anos de experiencia no mercado de logistica brasileiro, esta obra reune 
-              conhecimentos praticos e estrategias testadas no campo de batalha comercial. O autor, 
-              com mais de duas decadas atuando na area comercial de grandes operadores logisticos, 
+              Fruto de anos de experiência no mercado de logística brasileiro, esta obra reúne 
+              conhecimentos práticos e estratégias testadas no campo de batalha comercial. O autor, 
+              com mais de duas décadas atuando na área comercial de grandes operadores logísticos, 
               compartilha insights valiosos sobre como construir relacionamentos duradouros com clientes, 
               entender as nuances do mercado de transporte e armazenagem, e principalmente, como 
-              transformar desafios em oportunidades de negocios.
+              transformar desafios em oportunidades de negócios.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              Este e-book e o primeiro volume de uma trilogia que aborda desde a formacao do 
-              profissional comercial ate as estrategias mais avancadas de gestao de carteira 
-              e fidelizacao de clientes no setor logistico.
+              Este e-book é o primeiro volume de uma trilogia que aborda desde a formação do 
+              profissional comercial até as estratégias mais avançadas de gestão de carteira 
+              e fidelização de clientes no setor logístico.
             </p>
           </CardContent>
         </Card>
@@ -161,7 +161,7 @@ export default function Ebook() {
                 </div>
                 <h3 className="font-semibold">Foco no Resultado</h3>
                 <p className="text-sm text-muted-foreground">
-                  Orientacao pratica para alcançar metas comerciais de forma consistente
+                  Orientação prática para alcançar metas comerciais de forma consistente
                 </p>
               </div>
             </CardContent>
@@ -178,14 +178,14 @@ export default function Ebook() {
           <CardContent>
             <div className="grid md:grid-cols-2 gap-4">
               {[
-                "O DNA do profissional comercial em logistica",
+                "O DNA do profissional comercial em logística",
                 "Entendendo o mercado brasileiro de transporte",
-                "Construcao de relacionamentos de longo prazo",
+                "Construção de relacionamentos de longo prazo",
                 "A arte da prospecção: do lead ao contrato",
-                "Negociacao de fretes e tarifas de armazenagem",
-                "Gestao de carteira e fidelização de clientes",
-                "Cases de sucesso e licoes aprendidas",
-                "O futuro do comercial em logistica",
+                "Negociação de fretes e tarifas de armazenagem",
+                "Gestão de carteira e fidelização de clientes",
+                "Cases de sucesso e lições aprendidas",
+                "O futuro do comercial em logística",
               ].map((chapter, index) => (
                 <div key={index} className="flex items-start gap-3">
                   <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
@@ -304,13 +304,13 @@ export default function Ebook() {
           <Card className="border-dashed">
             <CardContent className="p-8 text-center">
               <BookOpen className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-              <h3 className="font-semibold mb-2">Em Breve Disponivel</h3>
+              <h3 className="font-semibold mb-2">Em Breve Disponível</h3>
               <p className="text-muted-foreground text-sm mb-4">
-                O e-book "A Arte do Comercial em Logistica" estara disponivel em breve para compra.
-                Cadastre-se para ser notificado quando o lancamento acontecer.
+                O e-book "A Arte do Comercial em Logística" estará disponível em breve para compra.
+                Cadastre-se para ser notificado quando o lançamento acontecer.
               </p>
               <Button variant="outline" disabled>
-                Notifique-me quando disponivel
+                Notifique-me quando disponível
               </Button>
             </CardContent>
           </Card>

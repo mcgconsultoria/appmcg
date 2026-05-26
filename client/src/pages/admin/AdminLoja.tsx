@@ -1350,7 +1350,7 @@ export default function AdminLoja() {
           <DialogHeader>
             <DialogTitle>Excluir Produto</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir "{deleteConfirmProduct?.name}"? Esta acao nao pode ser desfeita.
+              Tem certeza que deseja excluir "{deleteConfirmProduct?.name}"? Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

@@ -102,9 +102,9 @@ const teamMemberFormSchema = z.object({
 type TeamMemberFormData = z.infer<typeof teamMemberFormSchema>;
 
 const ticketFormSchema = z.object({
-  subject: z.string().min(1, "Assunto e obrigatorio"),
-  description: z.string().min(1, "Descrição e obrigatoria"),
-  category: z.string().min(1, "Categoria e obrigatoria"),
+  subject: z.string().min(1, "Assunto é obrigatório"),
+  description: z.string().min(1, "Descrição é obrigatória"),
+  category: z.string().min(1, "Categoria é obrigatória"),
   priority: z.string().default("medium"),
 });
 
@@ -138,25 +138,25 @@ const modulosPermissoes = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { key: "clientes", label: "CRM - Clientes", icon: Users },
   { key: "pipeline", label: "Pipeline de Vendas", icon: BarChart3 },
-  { key: "checklist", label: "Checklist Diagnostico", icon: ClipboardCheck },
-  { key: "atas", label: "Atas / Plano de Acao", icon: FileText },
-  { key: "rfi", label: "RFI - Ficha Tecnica", icon: FileText },
-  { key: "calendario", label: "Calendario Comercial", icon: Calendar },
+  { key: "checklist", label: "Checklist Diagnóstico", icon: ClipboardCheck },
+  { key: "atas", label: "Atas / Plano de Ação", icon: FileText },
+  { key: "rfi", label: "RFI - Ficha Técnica", icon: FileText },
+  { key: "calendario", label: "Calendário Comercial", icon: Calendar },
   { key: "tarefas", label: "Tarefas", icon: ClipboardCheck },
   { key: "projetos", label: "Projetos", icon: Package },
   { key: "calculadoras", label: "Calculadoras", icon: Calculator },
   { key: "loja", label: "Loja MCG", icon: Store },
-  { key: "mkt", label: "MKT (Pre Vendas)", icon: Megaphone },
+  { key: "mkt", label: "MKT (Pré-Vendas)", icon: Megaphone },
   { key: "com", label: "COM (Vendas)", icon: ShoppingCart },
-  { key: "cac", label: "CAC (Pos Vendas)", icon: Handshake },
-  { key: "financeiro", label: "Gestao Financeira", icon: Wallet },
+  { key: "cac", label: "CAC (Pós-Vendas)", icon: Handshake },
+  { key: "financeiro", label: "Gestão Financeira", icon: Wallet },
   { key: "whatsapp", label: "WhatsApp", icon: MessageSquare },
   { key: "manual", label: "Manual APP", icon: BookOpen },
   { key: "fluxograma", label: "Fluxograma", icon: GitBranch },
 ];
 
 const categoryLabels: Record<string, string> = {
-  suporte: "Suporte Tecnico",
+  suporte: "Suporte Técnico",
   financeiro: "Financeiro",
   comercial: "Comercial",
   tecnico: "Técnico",
@@ -410,10 +410,10 @@ function TeamTab() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Usuario</TableHead>
+                  <TableHead>Usuário</TableHead>
                   <TableHead>Perfil</TableHead>
                   <TableHead>Departamento</TableHead>
-                  <TableHead>Permissoes</TableHead>
+                  <TableHead>Permissões</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Acoes</TableHead>
                 </TableRow>
@@ -525,11 +525,11 @@ function TeamTab() {
                   name="userId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Usuario</FormLabel>
+                      <FormLabel>Usuário</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger data-testid="select-user">
-                            <SelectValue placeholder="Selecione um usuario" />
+                            <SelectValue placeholder="Selecione um usuário" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -679,7 +679,7 @@ function TeamTab() {
           <DialogHeader>
             <DialogTitle>Confirmar Exclusão</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja remover este membro da equipe? Esta acao nao pode ser desfeita.
+              Tem certeza que deseja remover este membro da equipe? Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -961,7 +961,7 @@ function SupportTab() {
                           }`}
                         >
                           <div className="text-xs text-muted-foreground mb-1">
-                            {msg.isInternal ? "Suporte MCG" : "Voce"} -{" "}
+                            {msg.isInternal ? "Suporte MCG" : "Você"} -{" "}
                             {msg.createdAt && format(new Date(msg.createdAt), "dd/MM HH:mm")}
                           </div>
                           <p className="text-sm">{msg.message}</p>
@@ -1271,7 +1271,7 @@ function ContractsTab() {
               <CardContent className="py-8 text-center">
                 <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">
-                  Nenhum contrato de consultoria disponivel
+                  Nenhum contrato de consultoria disponível
                 </p>
               </CardContent>
             </Card>
@@ -1290,7 +1290,7 @@ function ContractsTab() {
               <CardContent className="py-8 text-center">
                 <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">
-                  Nenhum contrato do aplicativo disponivel
+                  Nenhum contrato do aplicativo disponível
                 </p>
               </CardContent>
             </Card>
@@ -1395,7 +1395,7 @@ function ContractsTab() {
               />
             </div>
             <p className="text-sm text-muted-foreground">
-              Ao clicar em "Assinar", voce concorda com os termos do contrato e confirma que as informações fornecidas sao verdadeiras.
+              Ao clicar em "Assinar", você concorda com os termos do contrato e confirma que as informações fornecidas são verdadeiras.
             </p>
           </div>
           <DialogFooter>

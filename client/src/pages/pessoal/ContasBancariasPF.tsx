@@ -166,10 +166,10 @@ export default function ContasBancariasPF() {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Landmark className="h-6 w-6" />
-              Contas Bancarias Pessoais
+              Contas Bancárias Pessoais
             </h1>
             <p className="text-muted-foreground">
-              Gerencie suas contas bancarias pessoais
+              Gerencie suas contas bancárias pessoais
             </p>
           </div>
           <Button
@@ -192,7 +192,7 @@ export default function ContasBancariasPF() {
             <CardContent className="py-12 text-center">
               <CreditCard className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground mb-4">
-                Nenhuma conta bancaria pessoal cadastrada.
+                Nenhuma conta bancária pessoal cadastrada.
               </p>
               <Button
                 onClick={() => {
@@ -270,7 +270,7 @@ export default function ContasBancariasPF() {
                         variant="ghost"
                         size="icon"
                         onClick={() => {
-                          if (confirm("Remover esta conta bancaria?")) {
+                          if (confirm("Remover esta conta bancária?")) {
                             deleteAccount.mutate(account.id);
                           }
                         }}
@@ -290,10 +290,10 @@ export default function ContasBancariasPF() {
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>
-                {editingAccount ? "Editar Conta Bancaria" : "Nova Conta Bancaria"}
+                {editingAccount ? "Editar Conta Bancária" : "Nova Conta Bancária"}
               </DialogTitle>
               <DialogDescription>
-                Preencha os dados da sua conta bancaria pessoal
+                Preencha os dados da sua conta bancária pessoal
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
@@ -334,7 +334,7 @@ export default function ContasBancariasPF() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Numero da Conta</Label>
+                  <Label>Número da Conta</Label>
                   <Input
                     value={formData.accountNumber}
                     onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}

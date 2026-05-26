@@ -98,20 +98,20 @@ export default function AdminCampanhaPiloto() {
 
 Prezado(a) ${data.contactName || "[Nome do Contato]"},
 
-E um prazer entrar em contato com voce da ${data.companyName || "[Nome da Empresa]"}.
+É um prazer entrar em contato com você da ${data.companyName || "[Nome da Empresa]"}.
 
-A MCG Consultoria esta selecionando empresas do segmento de ${segmentLabel || "logística"} para participar do nosso Programa Piloto exclusivo, e acreditamos que sua empresa seria uma candidata ideal.
+A MCG Consultoria está selecionando empresas do segmento de ${segmentLabel || "logística"} para participar do nosso Programa Piloto exclusivo, e acreditamos que sua empresa seria uma candidata ideal.
 
-O QUE E O PROGRAMA PILOTO?
+O QUE É O PROGRAMA PILOTO?
 
-Durante ${data.pilotDays} dias, sua empresa tera acesso GRATUITO a nossa plataforma completa de gestão comercial para logística, incluindo:
+Durante ${data.pilotDays} dias, sua empresa terá acesso GRATUITO à nossa plataforma completa de gestão comercial para logística, incluindo:
 
 - Calculadoras profissionais de frete e armazenagem (com base ANTT)
 - CRM especializado para operações logísticas
 - Checklist de diagnóstico para prospectos e clientes
 - Dashboard com indicadores ABC, por estado e segmento
 - Calendário comercial integrado
-- Modulo de RFI (Request for Information) para participar de BIDs
+- Módulo de RFI (Request for Information) para participar de BIDs
 
 O QUE ESPERAMOS EM TROCA?
 
@@ -120,17 +120,17 @@ Apenas seu feedback honesto sobre a plataforma:
 - O que pode melhorar?
 - A ferramenta resolveu algum problema real?
 
-Se autorizado, gostariaamos de usar seu depoimento como case de sucesso.
+Se autorizado, gostaríamos de usar seu depoimento como case de sucesso.
 
 ${data.customMessage ? `MENSAGEM PESSOAL:\n${data.customMessage}\n` : ""}
-PROXIMO PASSO
+PRÓXIMO PASSO
 
-Clique no link abaixo para criar sua conta gratuita e comecar o piloto:
+Clique no link abaixo para criar sua conta gratuita e começar o piloto:
 [LINK DE CADASTRO]
 
-Ou responda este email para agendarmos uma demonstracao de 20 minutos.
+Ou responda este e-mail para agendarmos uma demonstração de 20 minutos.
 
-Estamos ansiosos para ter voces conosco nessa jornada!
+Estamos ansiosos para ter vocês conosco nessa jornada!
 
 Atenciosamente,
 
@@ -149,7 +149,7 @@ www.mcgconsultoria.com.br`;
 
 Sou da MCG Consultoria e estamos selecionando empresas de *${segmentLabel || "logística"}* para nosso *Programa Piloto*.
 
-Durante *${data.pilotDays} dias GRATUITOS*, a ${data.companyName || "[Empresa]"} tera acesso a:
+Durante *${data.pilotDays} dias GRATUITOS*, a ${data.companyName || "[Empresa]"} terá acesso a:
 
 - Calculadoras de frete/armazenagem (base ANTT)
 - CRM especializado para logística
@@ -240,7 +240,7 @@ Equipe MCG`;
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="pilotDays">Duracao do Piloto (dias)</Label>
+                  <Label htmlFor="pilotDays">Duração do Piloto (dias)</Label>
                   <Select
                     value={data.pilotDays}
                     onValueChange={(value) => updateField("pilotDays", value)}
@@ -368,23 +368,23 @@ Equipe MCG`;
               <CardContent className="space-y-3 text-sm text-muted-foreground">
                 <div className="flex gap-2">
                   <Badge variant="outline" className="shrink-0">1</Badge>
-                  <span>Selecione 3-5 empresas para comecar - número gerenciavel para coletar feedback</span>
+                  <span>Selecione 3-5 empresas para começar — número gerenciável para coletar feedback</span>
                 </div>
                 <div className="flex gap-2">
                   <Badge variant="outline" className="shrink-0">2</Badge>
-                  <span>Escolha empresas de diferentes segmentos para validar varios casos de uso</span>
+                  <span>Escolha empresas de diferentes segmentos para validar vários casos de uso</span>
                 </div>
                 <div className="flex gap-2">
                   <Badge variant="outline" className="shrink-0">3</Badge>
-                  <span>Agende reunioes semanais de 15 min para acompanhar o uso e coletar feedback</span>
+                  <span>Agende reuniões semanais de 15 min para acompanhar o uso e coletar feedback</span>
                 </div>
                 <div className="flex gap-2">
                   <Badge variant="outline" className="shrink-0">4</Badge>
-                  <span>Documente os problemas que a ferramenta resolveu - isso vira material de vendas</span>
+                  <span>Documente os problemas que a ferramenta resolveu — isso virará material de vendas</span>
                 </div>
                 <div className="flex gap-2">
                   <Badge variant="outline" className="shrink-0">5</Badge>
-                  <span>Ao final, peca um depoimento escrito ou em video (case de sucesso)</span>
+                  <span>Ao final, peça um depoimento escrito ou em vídeo (case de sucesso)</span>
                 </div>
               </CardContent>
             </Card>

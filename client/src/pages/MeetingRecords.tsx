@@ -816,7 +816,7 @@ export default function MeetingRecords() {
                                     const data = await res.json();
                                     if (data.emailServiceNotConfigured) {
                                       toast({ 
-                                        title: "Serviço de email nao configurado", 
+                                        title: "Serviço de e-mail não configurado", 
                                         description: "Configure o RESEND_API_KEY ou SENDGRID_API_KEY para enviar emails.",
                                         variant: "destructive" 
                                       });

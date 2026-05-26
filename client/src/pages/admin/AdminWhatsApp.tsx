@@ -561,9 +561,9 @@ function ConfigSection() {
           </div>
           <Separator />
           <div className="space-y-2">
-            <h4 className="font-medium">2. Verificar negocio no Meta Business</h4>
+            <h4 className="font-medium">2. Verificar negócio no Meta Business</h4>
             <p className="text-sm text-muted-foreground">
-              O AiSensy guiara voce pelo processo de verificacao da empresa no Meta Business Manager.
+              O AiSensy guiará você pelo processo de verificação da empresa no Meta Business Manager.
             </p>
           </div>
           <Separator />

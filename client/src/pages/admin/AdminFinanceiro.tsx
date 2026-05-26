@@ -27,8 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import type { AdminFinancialRecord } from "@shared/schema";
 
 const categories = {
-  receita: ["Assinatura", "Consultoria Diagnóstico", "Consultoria Implementacao", "Consultoria Execucao", "Consultoria Expansao", "Revenda", "Outro"],
-  despesa: ["Salarios", "Impostos", "Marketing", "Infraestrutura", "Software", "Viagens", "Outro"],
+  receita: ["Assinatura", "Consultoria Diagnóstico", "Consultoria Implementação", "Consultoria Execução", "Consultoria Expansão", "Revenda", "Outro"],
+  despesa: ["Salários", "Impostos", "Marketing", "Infraestrutura", "Software", "Viagens", "Outro"],
 };
 
 export default function AdminFinanceiro() {
@@ -129,12 +129,12 @@ export default function AdminFinanceiro() {
             <DialogTrigger asChild>
               <Button data-testid="button-add-financial">
                 <Plus className="h-4 w-4 mr-2" />
-                Novo Lancamento
+                Novo Lançamento
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Novo Lancamento</DialogTitle>
+                <DialogTitle>Novo Lançamento</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div>

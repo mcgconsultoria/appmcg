@@ -68,7 +68,7 @@ export default function FinanceiroPessoal() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/personal/transactions"] });
       setIsDialogOpen(false);
       resetForm();
-      toast({ title: editingTransaction ? "Lancamento atualizado" : "Lancamento criado" });
+      toast({ title: editingTransaction ? "Lançamento atualizado" : "Lançamento criado" });
     },
   });
 
@@ -78,7 +78,7 @@ export default function FinanceiroPessoal() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/personal/transactions"] });
-      toast({ title: "Lancamento excluido" });
+      toast({ title: "Lançamento excluído" });
     },
   });
 
@@ -160,12 +160,12 @@ export default function FinanceiroPessoal() {
             <DialogTrigger asChild>
               <Button data-testid="button-add-lancamento">
                 <Plus className="h-4 w-4 mr-2" />
-                Novo Lancamento
+                Novo Lançamento
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{editingTransaction ? "Editar Lancamento" : "Novo Lancamento"}</DialogTitle>
+                <DialogTitle>{editingTransaction ? "Editar Lançamento" : "Novo Lançamento"}</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div>
@@ -256,7 +256,7 @@ export default function FinanceiroPessoal() {
                   </div>
                 )}
                 <div>
-                  <Label>Vinculacao MCG</Label>
+                  <Label>Vinculação MCG</Label>
                   <Select
                     value={form.linkedToMcg ? "true" : "false"}
                     onValueChange={(v) => setForm({ ...form, linkedToMcg: v === "true" })}
@@ -289,7 +289,7 @@ export default function FinanceiroPessoal() {
                   </div>
                 )}
                 <div>
-                  <Label>Observacoes</Label>
+                  <Label>Observações</Label>
                   <Textarea
                     value={form.notes}
                     onChange={(e) => setForm({ ...form, notes: e.target.value })}

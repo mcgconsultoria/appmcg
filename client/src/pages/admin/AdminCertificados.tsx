@@ -160,7 +160,7 @@ export default function AdminCertificados() {
           <CardHeader>
             <CardTitle>Sobre Certificados Digitais</CardTitle>
             <CardDescription>
-              O certificado digital e necessario para emitir Notas Fiscais de Serviço Eletronicas (NFS-e)
+              O certificado digital é necessário para emitir Notas Fiscais de Serviço Eletrônicas (NFS-e)
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -172,7 +172,7 @@ export default function AdminCertificados() {
                 </h4>
                 <p className="text-sm text-muted-foreground">
                   Arquivo digital (.pfx ou .p12) armazenado no computador. Validade de 1 ano. 
-                  Mais pratico para sistemas automatizados.
+                  Mais prático para sistemas automatizados.
                 </p>
               </div>
               <div className="p-4 bg-muted/50 rounded-md">
@@ -182,7 +182,7 @@ export default function AdminCertificados() {
                 </h4>
                 <p className="text-sm text-muted-foreground">
                   Armazenado em token USB ou smart card. Validade de 1 a 3 anos.
-                  Mais seguro, mas requer hardware especifico.
+                  Mais seguro, mas requer hardware específico.
                 </p>
               </div>
             </div>
@@ -190,7 +190,7 @@ export default function AdminCertificados() {
               <p className="text-sm text-amber-800 dark:text-amber-200 flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <span>
-                  <strong>Importante:</strong> Para emissao de NFS-e em Curitiba/PR, voce precisara de um certificado 
+                  <strong>Importante:</strong> Para emissão de NFS-e em Curitiba/PR, você precisará de um certificado 
                   digital e-CNPJ válido. Recomendamos adquirir de uma Autoridade Certificadora credenciada pelo ICP-Brasil 
                   (como Serasa, Certisign, ou outras).
                 </span>

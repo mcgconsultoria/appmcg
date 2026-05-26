@@ -211,7 +211,7 @@ export default function DiagnósticoComercial() {
     onError: () => {
       toast({
         title: "Erro",
-        description: "Nao foi possivel salvar. Tente novamente.",
+        description: "Não foi possível salvar. Tente novamente.",
         variant: "destructive",
       });
     },

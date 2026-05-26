@@ -109,7 +109,7 @@ const adminMcgComercialItems = [
     icon: UserCheck,
   },
   {
-    title: "Usuarios",
+    title: "Usuários",
     url: "/admin/usuarios",
     icon: Users,
   },
@@ -185,7 +185,7 @@ const adminMcgFinanceiroItems = [
     icon: Building2,
   },
   {
-    title: "Contas Bancarias",
+    title: "Contas Bancárias",
     url: "/admin/bancos",
     icon: Landmark,
   },
@@ -200,7 +200,7 @@ const adminMcgFinanceiroItems = [
     icon: BookOpen,
   },
   {
-    title: "Relatorio DRE",
+    title: "Relatório DRE",
     url: "/admin/relatorio-dre",
     icon: BarChart3,
   },
@@ -736,6 +736,87 @@ function AdminPFSection({ location, userPlan, planLoaded = true, userRole, fullA
   );
 }
 
+interface ComercialSectionProps {
+  location: string;
+  userPlan?: string | null;
+  planLoaded?: boolean;
+  userRole?: string | null;
+  fullAccessGranted?: boolean | null;
+}
+
+function ComercialSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted }: ComercialSectionProps) {
+  const allComercialItems = [...preVendasItems, ...vendasItems, ...posVendasItems];
+
+  const hasActiveItem = allComercialItems.some(item =>
+    location === item.url || location.startsWith(item.url + "/")
+  );
+
+  const [isOpen, setIsOpen] = useState(hasActiveItem);
+
+  useEffect(() => {
+    if (hasActiveItem) {
+      setIsOpen(true);
+    }
+  }, [location]);
+
+  const handleToggle = (open: boolean) => {
+    setIsOpen(open);
+  };
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={handleToggle}>
+      <SidebarGroup>
+        <CollapsibleTrigger asChild>
+          <button
+            className="flex items-center justify-between w-full px-3 py-2 text-base font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
+            data-testid="section-comercial"
+          >
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              <span>Comercial</span>
+            </div>
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="pl-2">
+            <CollapsibleSection
+              title="MKT (Pré Vendas)"
+              icon={Megaphone}
+              items={preVendasItems}
+              location={location}
+              userPlan={userPlan}
+              planLoaded={planLoaded}
+              userRole={userRole}
+              fullAccessGranted={fullAccessGranted}
+            />
+            <CollapsibleSection
+              title="COM (Vendas)"
+              icon={ShoppingCart}
+              items={vendasItems}
+              location={location}
+              userPlan={userPlan}
+              planLoaded={planLoaded}
+              userRole={userRole}
+              fullAccessGranted={fullAccessGranted}
+            />
+            <CollapsibleSection
+              title="CAC (Pós Vendas)"
+              icon={Handshake}
+              items={posVendasItems}
+              location={location}
+              userPlan={userPlan}
+              planLoaded={planLoaded}
+              userRole={userRole}
+              fullAccessGranted={fullAccessGranted}
+            />
+          </div>
+        </CollapsibleContent>
+      </SidebarGroup>
+    </Collapsible>
+  );
+}
+
 export function AppSidebar() {
   const [location] = useLocation();
   const { user, logout, isLoading } = useAuth();
@@ -781,21 +862,38 @@ export function AppSidebar() {
           <AdminPFSection location={location} userPlan={effectivePlan} planLoaded={planLoaded} userRole={user?.role} fullAccessGranted={user?.fullAccessGranted} />
         )}
 
+        {(user?.role === "admin" || user?.role === "admin_mcg") && (
+          <CollapsibleSection
+            title="administrativo"
+            icon={UserCog}
+            items={adminClienteItems}
+            location={location}
+            userPlan={effectivePlan}
+            planLoaded={planLoaded}
+            userRole={user?.role}
+            fullAccessGranted={user?.fullAccessGranted}
+          />
+        )}
+
+        <ComercialSection
+          location={location}
+          userPlan={effectivePlan}
+          planLoaded={planLoaded}
+          userRole={user?.role}
+          fullAccessGranted={user?.fullAccessGranted}
+        />
+
+        <LojaMcgDynamicSection
+          location={location}
+          userPlan={effectivePlan}
+          planLoaded={planLoaded}
+          userRole={user?.role}
+          fullAccessGranted={user?.fullAccessGranted}
+        />
+
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={location === "/suporte"}>
-                  <Link 
-                    href="/suporte" 
-                    data-testid="nav-suporte"
-                    className="flex items-center gap-2 px-3 py-2 text-base font-semibold text-blue-600 dark:text-blue-400"
-                  >
-                    <HeadphonesIcon className="h-5 w-5" />
-                    <span>Suporte</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={location === "/manual-app"}>
                   <Link 
@@ -808,64 +906,21 @@ export function AppSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={location === "/suporte"}>
+                  <Link 
+                    href="/suporte" 
+                    data-testid="nav-suporte"
+                    className="flex items-center gap-2 px-3 py-2 text-base font-semibold text-blue-600 dark:text-blue-400"
+                  >
+                    <HeadphonesIcon className="h-5 w-5" />
+                    <span>Suporte</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        <LojaMcgDynamicSection
-          location={location}
-          userPlan={effectivePlan}
-          planLoaded={planLoaded}
-          userRole={user?.role}
-          fullAccessGranted={user?.fullAccessGranted}
-        />
-
-        <CollapsibleSection
-          title="MKT (Pré Vendas)"
-          icon={Megaphone}
-          items={preVendasItems}
-          location={location}
-          userPlan={effectivePlan}
-          planLoaded={planLoaded}
-          userRole={user?.role}
-          fullAccessGranted={user?.fullAccessGranted}
-        />
-
-        <CollapsibleSection
-          title="COM (Vendas)"
-          icon={ShoppingCart}
-          items={vendasItems}
-          location={location}
-          userPlan={effectivePlan}
-          planLoaded={planLoaded}
-          userRole={user?.role}
-          fullAccessGranted={user?.fullAccessGranted}
-        />
-
-        <CollapsibleSection
-          title="CAC (Pós Vendas)"
-          icon={Handshake}
-          items={posVendasItems}
-          location={location}
-          userPlan={effectivePlan}
-          planLoaded={planLoaded}
-          userRole={user?.role}
-          fullAccessGranted={user?.fullAccessGranted}
-        />
-
-        {/* ADMIN section - only visible to MCG admin and company administrators created by MCG */}
-        {(user?.role === "admin" || user?.role === "admin_mcg") && (
-          <CollapsibleSection
-            title="ADMIN"
-            icon={UserCog}
-            items={adminClienteItems}
-            location={location}
-            userPlan={effectivePlan}
-            planLoaded={planLoaded}
-            userRole={user?.role}
-            fullAccessGranted={user?.fullAccessGranted}
-          />
-        )}
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-sidebar-border">

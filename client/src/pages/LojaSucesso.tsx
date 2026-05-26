@@ -155,10 +155,10 @@ export default function LojaSucesso() {
                   <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
                   <div>
                     <h4 className="font-medium text-blue-800 dark:text-blue-200">
-                      Confirmacao por Email
+                      Confirmação por E-mail
                     </h4>
                     <p className="text-sm text-blue-700 dark:text-blue-300">
-                      Voce recebera um email com os detalhes do seu pedido em breve.
+                      Você receberá um e-mail com os detalhes do seu pedido em breve.
                     </p>
                   </div>
                 </div>
@@ -170,10 +170,10 @@ export default function LojaSucesso() {
                     <Clock className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
                     <div>
                       <h4 className="font-medium text-amber-800 dark:text-amber-200">
-                        Aguardando Confirmacao de Pagamento
+                        Aguardando Confirmação de Pagamento
                       </h4>
                       <p className="text-sm text-amber-700 dark:text-amber-300">
-                        Se voce pagou com Boleto ou PIX, o status sera atualizado assim que o pagamento for confirmado.
+                        Se você pagou com Boleto ou PIX, o status será atualizado assim que o pagamento for confirmado.
                       </p>
                     </div>
                   </div>

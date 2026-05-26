@@ -301,7 +301,7 @@ export default function LojaCategoria() {
                 Em breve teremos novos produtos nesta categoria.
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                Os produtos estarao disponiveis assim que forem ativados pelo administrador.
+                Os produtos estarão disponíveis assim que forem ativados pelo administrador.
               </p>
             </CardContent>
           </Card>
@@ -383,7 +383,7 @@ export default function LojaCategoria() {
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-muted-foreground">
-              Se voce esta comprando este produto para presentear um cliente, lembre-se:
+              Se você está comprando este produto para presentear um cliente, lembre-se:
             </p>
             <ul className="space-y-2 text-sm">
               <li className="flex items-start gap-2">

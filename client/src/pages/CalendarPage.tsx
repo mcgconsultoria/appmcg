@@ -252,7 +252,7 @@ export default function CalendarPage() {
       tabelas: "Tabela",
       licencas: "Licença",
       cnd: "CND",
-      certificacoes: "Certificacao",
+      certificacoes: "Certificação",
     };
     return labels[categoria] || categoria;
   };

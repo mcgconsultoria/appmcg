@@ -280,8 +280,8 @@ export default function AdminTemplates() {
   const handleSave = () => {
     if (!formData.name || !formData.segment) {
       toast({
-        title: "Campos obrigatorios",
-        description: "Nome e segmento sao obrigatorios",
+        title: "Campos obrigatórios",
+        description: "Nome e segmento são obrigatórios",
         variant: "destructive",
       });
       return;
@@ -327,7 +327,7 @@ export default function AdminTemplates() {
               Biblioteca de Templates
             </h1>
             <p className="text-muted-foreground">
-              Gerencie os templates de checklist disponiveis para venda
+              Gerencie os templates de checklist disponíveis para venda
             </p>
           </div>
           <Button onClick={handleOpenCreate} data-testid="button-create-template">

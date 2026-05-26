@@ -16,10 +16,10 @@ export default function Pesquisas() {
           <CardContent>
             <div className="text-center py-12 text-muted-foreground">
               <MessageSquareHeart className="h-16 w-16 mx-auto mb-4 opacity-50" />
-              <h3 className="text-lg font-medium mb-2">Modulo em Construcao</h3>
+              <h3 className="text-lg font-medium mb-2">Módulo em Construção</h3>
               <p className="max-w-md mx-auto">
-                Esta pagina permitira criar e gerenciar pesquisas de satisfação 
-                para medir a qualidade do atendimento pos-venda e fidelizacao de clientes.
+                Esta página permitirá criar e gerenciar pesquisas de satisfação 
+                para medir a qualidade do atendimento pós-venda e fidelização de clientes.
               </p>
             </div>
           </CardContent>

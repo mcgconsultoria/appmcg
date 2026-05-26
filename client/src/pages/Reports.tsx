@@ -25,7 +25,7 @@ export default function Reports() {
             </CardHeader>
             <CardContent>
               <CardDescription>
-                Analise de clientes por segmento, estado e classificacao ABC
+                Análise de clientes por segmento, estado e classificação ABC
               </CardDescription>
               <Button variant="outline" size="sm" className="mt-4" data-testid="button-report-clients">
                 <Download className="h-4 w-4 mr-2" />
@@ -36,7 +36,7 @@ export default function Reports() {
 
           <Card className="hover-elevate cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
-              <CardTitle className="text-base font-medium">Relatorio de Pipeline</CardTitle>
+              <CardTitle className="text-base font-medium">Relatório de Pipeline</CardTitle>
               <TrendingUp className="h-5 w-5 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -119,7 +119,7 @@ export default function Reports() {
           <CardHeader>
             <CardTitle>Em breve</CardTitle>
             <CardDescription>
-              Novos relatórios estao sendo desenvolvidos para ajudar voce a tomar melhores decisoes
+              Novos relatórios estão sendo desenvolvidos para ajudar você a tomar melhores decisões
             </CardDescription>
           </CardHeader>
           <CardContent>

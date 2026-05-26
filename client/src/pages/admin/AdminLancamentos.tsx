@@ -104,10 +104,10 @@ export default function AdminLançamentos() {
       queryClient.invalidateQueries({ queryKey: ["/api/accounting-entries"] });
       setDialogOpen(false);
       resetForm();
-      toast({ title: "Lancamento criado com sucesso" });
+      toast({ title: "Lançamento criado com sucesso" });
     },
     onError: () => {
-      toast({ title: "Erro ao criar lancamento", variant: "destructive" });
+      toast({ title: "Erro ao criar lançamento", variant: "destructive" });
     },
   });
 
@@ -124,10 +124,10 @@ export default function AdminLançamentos() {
       setDialogOpen(false);
       setEditingEntry(null);
       resetForm();
-      toast({ title: "Lancamento atualizado com sucesso" });
+      toast({ title: "Lançamento atualizado com sucesso" });
     },
     onError: () => {
-      toast({ title: "Erro ao atualizar lancamento", variant: "destructive" });
+      toast({ title: "Erro ao atualizar lançamento", variant: "destructive" });
     },
   });
 
@@ -137,10 +137,10 @@ export default function AdminLançamentos() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/accounting-entries"] });
-      toast({ title: "Lancamento removido com sucesso" });
+      toast({ title: "Lançamento removido com sucesso" });
     },
     onError: () => {
-      toast({ title: "Erro ao remover lancamento", variant: "destructive" });
+      toast({ title: "Erro ao remover lançamento", variant: "destructive" });
     },
   });
 
@@ -347,7 +347,7 @@ export default function AdminLançamentos() {
               data-testid="button-new-entry"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Novo Lancamento
+              Novo Lançamento
             </Button>
           </CardHeader>
           <CardContent>
@@ -355,7 +355,7 @@ export default function AdminLançamentos() {
               <div className="text-center py-8 text-muted-foreground">Carregando...</div>
             ) : entries.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                Nenhum lancamento encontrado. Clique em "Novo Lancamento" para adicionar.
+                Nenhum lançamento encontrado. Clique em "Novo Lançamento" para adicionar.
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -419,7 +419,7 @@ export default function AdminLançamentos() {
                               size="icon"
                               variant="ghost"
                               onClick={() => {
-                                if (confirm("Remover este lancamento?")) {
+                                if (confirm("Remover este lançamento?")) {
                                   deleteEntry.mutate(entry.id);
                                 }
                               }}
@@ -443,17 +443,17 @@ export default function AdminLançamentos() {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {editingEntry ? "Editar Lancamento" : "Novo Lancamento"}
+              {editingEntry ? "Editar Lançamento" : "Novo Lançamento"}
             </DialogTitle>
             <DialogDescription>
-              Preencha os dados do lancamento contábil
+              Preencha os dados do lançamento contábil
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Tipo de Lancamento *</Label>
+                <Label>Tipo de Lançamento *</Label>
                 <Select
                   value={formData.entryType}
                   onValueChange={(value: "debito" | "credito") =>
@@ -580,7 +580,7 @@ export default function AdminLançamentos() {
             <div className="space-y-2">
               <Label>Descrição</Label>
               <Input
-                placeholder="Descrição resumida do lancamento"
+                placeholder="Descrição resumida do lançamento"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
@@ -592,7 +592,7 @@ export default function AdminLançamentos() {
             <div className="space-y-2">
               <Label>Histórico</Label>
               <Textarea
-                placeholder="Detalhes adicionais do lancamento"
+                placeholder="Detalhes adicionais do lançamento"
                 value={formData.history}
                 onChange={(e) =>
                   setFormData({ ...formData, history: e.target.value })

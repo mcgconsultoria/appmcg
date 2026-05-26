@@ -93,6 +93,7 @@ const permissionOptions = [
 export default function TeamManagement() {
   const { toast } = useToast();
   const { user } = useAuth();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<CompanyTeamMember | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
@@ -158,6 +159,20 @@ export default function TeamManagement() {
       toast({ title: "Erro ao remover membro", variant: "destructive" });
     },
   });
+
+  if (user && user.role !== "admin" && user.role !== "admin_mcg") {
+    return (
+      <AppLayout>
+        <div className="flex flex-col items-center justify-center h-[60vh] text-center gap-4">
+          <Shield className="h-16 w-16 text-muted-foreground/40" />
+          <h2 className="text-xl font-semibold">Acesso Restrito</h2>
+          <p className="text-muted-foreground max-w-sm">
+            Apenas administradores podem gerenciar colaboradores da equipe.
+          </p>
+        </div>
+      </AppLayout>
+    );
+  }
 
   const handleEdit = (member: CompanyTeamMember) => {
     setEditingMember(member);
@@ -575,9 +590,9 @@ export default function TeamManagement() {
         <Dialog open={deleteConfirmId !== null} onOpenChange={() => setDeleteConfirmId(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Confirmar Remocao</DialogTitle>
+              <DialogTitle>Confirmar Remoção</DialogTitle>
               <DialogDescription>
-                Tem certeza que deseja remover este membro do time? Esta acao nao pode ser desfeita.
+                Tem certeza que deseja remover este membro do time? Esta ação não pode ser desfeita.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
