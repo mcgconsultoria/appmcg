@@ -1,0 +1,39 @@
+ESSES EXCLUEM
+*** Tarefas (Excluir em definitivo esse item)
+*** Projetos (Excluir dessa árvore, esse icone é apenas pra ficar na arvore do ADMIN PJ)
+
+ESSES SEGUEM NOVA ORGANIZAÇÃO DO MENU COM (VENDAS), criando os Submenus e depois os itens abaixo desse Submenus, cuide para que nessa transição não se perca nada que já estejam dentro de cada item que já existe.
+
+📌 PLANEJAMENTO
+• Check List (Core)
+• Meu RFI
+(Novo nome do módulo RFI.)
+• Ata Plano de Ação
+• Metas
+• Fluxograma Comercial
+📌 RELACIONAMENTO
+• Clientes
+• Bilaterais
+(Criar este ícone. Será o cadastro centralizado de Nome, E-mail, Telefone, Cargo e Área de atuação. As áreas deverão ser as mesmas utilizadas no Check List. Esta será a base oficial de contatos do sistema e o Check List deverá apenas consultar e buscar informações cadastradas aqui.)
+• Segmentos
+(Criar este ícone. Será o cadastro centralizado dos segmentos de mercado. Hoje existe dentro do cadastro de clientes, porém deverá existir de forma independente para permitir inclusão, edição e exclusão dos segmentos sem depender do cadastro de clientes.)
+• Eventos
+(Criar este ícone. Terá estrutura semelhante ao antigo formulário de tarefas, porém voltado para organização do cronograma comercial anual. Deverá permitir registrar e controlar Ligações, Reuniões Online, Reuniões Presenciais, Visitas Comerciais, Feiras, Eventos, Convenções, Lançamentos, BID's, Licitações e também permitir criação de novas categorias personalizadas.)
+• Calendário
+(Visão consolidada dos compromissos comerciais cadastrados no módulo Eventos.)
+📌 PRECIFICAÇÃO E PROPOSTAS
+• Calcule Frete
+(Todo cálculo deverá poder ser salvo. Cada cálculo deverá possuir numeração sequencial própria, data de criação e histórico. Posteriormente deverá ser possível buscar e vincular este cálculo dentro da Proposta.)
+• Calcule Armazenagem
+(Todo cálculo deverá poder ser salvo. Cada cálculo deverá possuir numeração sequencial própria, data de criação e histórico. Posteriormente deverá ser possível buscar e vincular este cálculo dentro da Proposta.)
+• Proposta
+(Criar este módulo. Será a central de geração de propostas comerciais. Deverá possuir formulário próprio contendo os dados do cliente, informações do Meu RFI, perfil logístico, cálculos de Frete e/ou Armazenagem. Os cálculos realizados anteriormente deverão poder ser pesquisados e vinculados à proposta. A proposta deverá possuir numeração automática sequencial, data de emissão, validade editável, observações, anexos e possibilidade de exportação para PDF.)
+• Contratos
+(As propostas aprovadas serão transformadas em contratos. O módulo deverá possuir modelo padrão de contrato entre indústria e transportadora. Deverá possuir numeração automática sequencial, período de vigência, data de assinatura, renovação e campo de assinatura. Os dados da proposta deverão ser herdados automaticamente para o contrato.)
+📌 GESTÃO E CONTROLE
+• Pipeline
+• Rotas
+• Dashboard
+• Indicadores
+• Relatórios
+• Biblioteca
