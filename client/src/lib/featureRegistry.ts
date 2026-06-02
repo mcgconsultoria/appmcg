@@ -243,6 +243,19 @@ export const featureRegistry: FeatureItem[] = [
       type: "pdf",
     },
   },
+  {
+    id: "com-contrato",
+    title: "Contrato",
+    url: "/contratos",
+    icon: FileText,
+    subCategory: "com",
+    comGroup: "precificacao",
+    manual: {
+      title: "Contratos",
+      description: "Visualize e acompanhe seus contratos com a MCG",
+      type: "pdf",
+    },
+  },
 
   // COM - Vendas — GESTÃO E CONTROLE
   {

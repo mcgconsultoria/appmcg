@@ -85,6 +85,7 @@ import Bilaterais from "@/pages/Bilaterais";
 import Segmentos from "@/pages/Segmentos";
 import EventosComerciais from "@/pages/EventosComerciais";
 import PropostaPage from "@/pages/Proposta";
+import Contratos from "@/pages/Contratos";
 import Brindes from "@/pages/Brindes";
 import Escritorio from "@/pages/Escritorio";
 import Vestuario from "@/pages/Vestuario";
@@ -256,6 +257,7 @@ function Router() {
           <Route path="/segmentos" component={Segmentos} />
           <Route path="/eventos-comerciais" component={EventosComerciais} />
           <Route path="/proposta" component={PropostaPage} />
+          <Route path="/contratos" component={Contratos} />
           <Route path="/tarefas" component={TasksPage} />
           <Route path="/projetos" component={ProjectsPage} />
           <Route path="/relatórios" component={Reports} />
