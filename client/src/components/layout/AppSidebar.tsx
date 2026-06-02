@@ -68,7 +68,7 @@ import {
   Shirt,
 } from "lucide-react";
 
-import { getSidebarItems, getManualMapping } from "@/lib/featureRegistry";
+import { getSidebarItems, getManualMapping, getComGroupItems } from "@/lib/featureRegistry";
 
 const manualMapping = getManualMapping();
 import logoMcg from "@assets/logo_mcg_principal.png";
@@ -81,8 +81,11 @@ import { useQuery } from "@tanstack/react-query";
 import type { StoreProductCategory } from "@shared/schema";
 
 const preVendasItems = getSidebarItems("mkt");
-const vendasItems = getSidebarItems("com");
 const posVendasItems = getSidebarItems("cac");
+const comPlanejamentoItems = getComGroupItems("planejamento");
+const comRelacionamentoItems = getComGroupItems("relacionamento");
+const comPrecificacaoItems = getComGroupItems("precificacao");
+const comGestaoItems = getComGroupItems("gestao");
 
 const adminClienteItems = [
   {
@@ -744,8 +747,81 @@ interface ComercialSectionProps {
   fullAccessGranted?: boolean | null;
 }
 
+function ComVendasSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted }: ComercialSectionProps) {
+  const allComItems = [...comPlanejamentoItems, ...comRelacionamentoItems, ...comPrecificacaoItems, ...comGestaoItems];
+  const hasActiveItem = allComItems.some(item => location === item.url || location.startsWith(item.url + "/"));
+  const [isOpen, setIsOpen] = useState(hasActiveItem);
+
+  useEffect(() => {
+    if (hasActiveItem) setIsOpen(true);
+  }, [location]);
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <SidebarGroup>
+        <CollapsibleTrigger asChild>
+          <button
+            className="flex items-center justify-between w-full px-3 py-2 text-base font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
+            data-testid="section-com-vendas"
+          >
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5" />
+              <span>COM (Vendas)</span>
+            </div>
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+          </button>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="pl-2">
+            <CollapsibleSection
+              title="Planejamento"
+              icon={ClipboardList}
+              items={comPlanejamentoItems}
+              location={location}
+              userPlan={userPlan}
+              planLoaded={planLoaded}
+              userRole={userRole}
+              fullAccessGranted={fullAccessGranted}
+            />
+            <CollapsibleSection
+              title="Relacionamento"
+              icon={Users}
+              items={comRelacionamentoItems}
+              location={location}
+              userPlan={userPlan}
+              planLoaded={planLoaded}
+              userRole={userRole}
+              fullAccessGranted={fullAccessGranted}
+            />
+            <CollapsibleSection
+              title="Precificação e Propostas"
+              icon={Calculator}
+              items={comPrecificacaoItems}
+              location={location}
+              userPlan={userPlan}
+              planLoaded={planLoaded}
+              userRole={userRole}
+              fullAccessGranted={fullAccessGranted}
+            />
+            <CollapsibleSection
+              title="Gestão e Controle"
+              icon={BarChart3}
+              items={comGestaoItems}
+              location={location}
+              userPlan={userPlan}
+              planLoaded={planLoaded}
+              userRole={userRole}
+              fullAccessGranted={fullAccessGranted}
+            />
+          </div>
+        </CollapsibleContent>
+      </SidebarGroup>
+    </Collapsible>
+  );
+}
+
 function ComercialSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted }: ComercialSectionProps) {
-  const allComercialItems = [...preVendasItems, ...vendasItems, ...posVendasItems];
+  const allComercialItems = [...preVendasItems, ...comPlanejamentoItems, ...comRelacionamentoItems, ...comPrecificacaoItems, ...comGestaoItems, ...posVendasItems];
 
   const hasActiveItem = allComercialItems.some(item =>
     location === item.url || location.startsWith(item.url + "/")
@@ -790,10 +866,7 @@ function ComercialSection({ location, userPlan, planLoaded = true, userRole, ful
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
             />
-            <CollapsibleSection
-              title="COM (Vendas)"
-              icon={ShoppingCart}
-              items={vendasItems}
+            <ComVendasSection
               location={location}
               userPlan={userPlan}
               planLoaded={planLoaded}

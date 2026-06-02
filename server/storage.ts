@@ -235,6 +235,18 @@ import {
   type InsertIrpjSummary,
   type IrpjDasPayment,
   type InsertIrpjDasPayment,
+  bilaterals,
+  type Bilateral,
+  type InsertBilateral,
+  segmentosMercado,
+  type SegmentoMercado,
+  type InsertSegmentoMercado,
+  eventosComerciais,
+  type EventoComercial,
+  type InsertEventoComercial,
+  propostas,
+  type Proposta,
+  type InsertProposta,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
@@ -3830,6 +3842,82 @@ export class DatabaseStorage implements IStorage {
       }
     }
     return Array.from(permissions);
+  }
+
+  // ==================== BILATERAIS ====================
+  async getBilaterais(companyId: number) {
+    return await db.select().from(bilaterals).where(eq(bilaterals.companyId, companyId)).orderBy(bilaterals.nome);
+  }
+
+  async createBilateral(data: InsertBilateral) {
+    const [item] = await db.insert(bilaterals).values(data).returning();
+    return item;
+  }
+
+  async updateBilateral(id: number, data: Partial<InsertBilateral>) {
+    const [item] = await db.update(bilaterals).set({ ...data, updatedAt: new Date() }).where(eq(bilaterals.id, id)).returning();
+    return item;
+  }
+
+  async deleteBilateral(id: number) {
+    await db.delete(bilaterals).where(eq(bilaterals.id, id));
+  }
+
+  // ==================== SEGMENTOS MERCADO ====================
+  async getSegmentos(companyId: number) {
+    return await db.select().from(segmentosMercado).where(eq(segmentosMercado.companyId, companyId)).orderBy(segmentosMercado.nome);
+  }
+
+  async createSegmento(data: InsertSegmentoMercado) {
+    const [item] = await db.insert(segmentosMercado).values(data).returning();
+    return item;
+  }
+
+  async updateSegmento(id: number, data: Partial<InsertSegmentoMercado>) {
+    const [item] = await db.update(segmentosMercado).set({ ...data, updatedAt: new Date() }).where(eq(segmentosMercado.id, id)).returning();
+    return item;
+  }
+
+  async deleteSegmento(id: number) {
+    await db.delete(segmentosMercado).where(eq(segmentosMercado.id, id));
+  }
+
+  // ==================== EVENTOS COMERCIAIS ====================
+  async getEventosComerciais(companyId: number) {
+    return await db.select().from(eventosComerciais).where(eq(eventosComerciais.companyId, companyId)).orderBy(eventosComerciais.dataInicio);
+  }
+
+  async createEventoComercial(data: InsertEventoComercial) {
+    const [item] = await db.insert(eventosComerciais).values(data).returning();
+    return item;
+  }
+
+  async updateEventoComercial(id: number, data: Partial<InsertEventoComercial>) {
+    const [item] = await db.update(eventosComerciais).set({ ...data, updatedAt: new Date() }).where(eq(eventosComerciais.id, id)).returning();
+    return item;
+  }
+
+  async deleteEventoComercial(id: number) {
+    await db.delete(eventosComerciais).where(eq(eventosComerciais.id, id));
+  }
+
+  // ==================== PROPOSTAS ====================
+  async getPropostas(companyId: number) {
+    return await db.select().from(propostas).where(eq(propostas.companyId, companyId)).orderBy(propostas.numero);
+  }
+
+  async createProposta(data: InsertProposta) {
+    const [item] = await db.insert(propostas).values(data).returning();
+    return item;
+  }
+
+  async updateProposta(id: number, data: Partial<InsertProposta>) {
+    const [item] = await db.update(propostas).set({ ...data, updatedAt: new Date() }).where(eq(propostas.id, id)).returning();
+    return item;
+  }
+
+  async deleteProposta(id: number) {
+    await db.delete(propostas).where(eq(propostas.id, id));
   }
 
   async seedStoreCategories(): Promise<void> {

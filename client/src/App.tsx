@@ -81,6 +81,10 @@ import Ebook from "@/pages/Ebook";
 import ManualApp from "@/pages/ManualApp";
 import Calculadoras from "@/pages/Calculadoras";
 import FluxogramaComercial from "@/pages/FluxogramaComercial";
+import Bilaterais from "@/pages/Bilaterais";
+import Segmentos from "@/pages/Segmentos";
+import EventosComerciais from "@/pages/EventosComerciais";
+import PropostaPage from "@/pages/Proposta";
 import Brindes from "@/pages/Brindes";
 import Escritorio from "@/pages/Escritorio";
 import Vestuario from "@/pages/Vestuario";
@@ -248,6 +252,10 @@ function Router() {
           <Route path="/escritorio" component={Escritorio} />
           <Route path="/vestuario" component={Vestuario} />
           <Route path="/rfi" component={RFI} />
+          <Route path="/bilaterais" component={Bilaterais} />
+          <Route path="/segmentos" component={Segmentos} />
+          <Route path="/eventos-comerciais" component={EventosComerciais} />
+          <Route path="/proposta" component={PropostaPage} />
           <Route path="/tarefas" component={TasksPage} />
           <Route path="/projetos" component={ProjectsPage} />
           <Route path="/relatórios" component={Reports} />

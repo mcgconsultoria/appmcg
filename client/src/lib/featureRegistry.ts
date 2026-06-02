@@ -20,6 +20,10 @@ import {
   FileText,
   Library,
   GitBranch,
+  UsersRound,
+  Tag,
+  CalendarDays,
+  FileSignature,
 } from "lucide-react";
 
 export interface FeatureItem {
@@ -28,6 +32,7 @@ export interface FeatureItem {
   url: string;
   icon: typeof Megaphone;
   subCategory: "mkt" | "com" | "cac";
+  comGroup?: "planejamento" | "relacionamento" | "precificacao" | "gestao";
   manual: {
     title: string;
     description: string;
@@ -64,13 +69,14 @@ export const featureRegistry: FeatureItem[] = [
     },
   },
 
-  // COM - Vendas
+  // COM - Vendas — PLANEJAMENTO
   {
     id: "com-checklist",
     title: "Checklist",
     url: "/checklist",
     icon: ClipboardCheck,
     subCategory: "com",
+    comGroup: "planejamento",
     manual: {
       title: "Checklist Comercial",
       description: "Diagnóstico operacional do cliente",
@@ -78,11 +84,133 @@ export const featureRegistry: FeatureItem[] = [
     },
   },
   {
+    id: "com-rfi",
+    title: "Meu RFI",
+    url: "/rfi",
+    icon: ClipboardList,
+    subCategory: "com",
+    comGroup: "planejamento",
+    manual: {
+      title: "RFI - Request for Information",
+      description: "Ficha técnica para licitações",
+      type: "pdf",
+    },
+  },
+  {
+    id: "com-ata",
+    title: "Ata Plano de Ação",
+    url: "/atas",
+    icon: FileEdit,
+    subCategory: "com",
+    comGroup: "planejamento",
+    manual: {
+      title: "Ata Plano de Ação",
+      description: "Registro de reuniões e planos de ação",
+      type: "pdf",
+    },
+  },
+  {
+    id: "com-metas",
+    title: "Metas",
+    url: "/operações",
+    icon: Settings2,
+    subCategory: "com",
+    comGroup: "planejamento",
+    manual: {
+      title: "Gestão de Metas",
+      description: "Definição e acompanhamento de metas",
+      type: "pdf",
+    },
+  },
+  {
+    id: "com-fluxograma",
+    title: "Fluxograma Comercial",
+    url: "/fluxograma",
+    icon: GitBranch,
+    subCategory: "com",
+    comGroup: "planejamento",
+    manual: {
+      title: "Fluxograma Comercial",
+      description: "Fluxo visual do processo comercial",
+      type: "pdf",
+    },
+  },
+
+  // COM - Vendas — RELACIONAMENTO
+  {
+    id: "com-clientes",
+    title: "Clientes",
+    url: "/clientes",
+    icon: Users,
+    subCategory: "com",
+    comGroup: "relacionamento",
+    manual: {
+      title: "Gestão de Clientes",
+      description: "Como gerenciar sua carteira de clientes",
+      type: "pdf",
+    },
+  },
+  {
+    id: "com-bilaterais",
+    title: "Bilaterais",
+    url: "/bilaterais",
+    icon: UsersRound,
+    subCategory: "com",
+    comGroup: "relacionamento",
+    manual: {
+      title: "Bilaterais",
+      description: "Diretório de contatos comerciais e parceiros",
+      type: "pdf",
+    },
+  },
+  {
+    id: "com-segmentos",
+    title: "Segmentos",
+    url: "/segmentos",
+    icon: Tag,
+    subCategory: "com",
+    comGroup: "relacionamento",
+    manual: {
+      title: "Segmentos de Mercado",
+      description: "Gestão dos segmentos de atuação",
+      type: "pdf",
+    },
+  },
+  {
+    id: "com-eventos",
+    title: "Eventos",
+    url: "/eventos-comerciais",
+    icon: CalendarDays,
+    subCategory: "com",
+    comGroup: "relacionamento",
+    manual: {
+      title: "Eventos Comerciais",
+      description: "Feiras, visitas e reuniões do setor",
+      type: "pdf",
+    },
+  },
+  {
+    id: "com-calendario",
+    title: "Calendário",
+    url: "/calendário",
+    icon: Calendar,
+    subCategory: "com",
+    comGroup: "relacionamento",
+    manual: {
+      title: "Calendário Comercial",
+      description: "Agendamento de reuniões e visitas",
+      type: "pdf",
+    },
+  },
+
+  // COM - Vendas — PRECIFICAÇÃO E PROPOSTAS
+  {
     id: "com-calcule-frete",
     title: "Calcule Frete",
     url: "/calculadora-frete",
     icon: Calculator,
     subCategory: "com",
+    comGroup: "precificacao",
     manual: {
       title: "Calculadora de Frete",
       description: "Como calcular fretes com ICMS e taxas",
@@ -95,9 +223,51 @@ export const featureRegistry: FeatureItem[] = [
     url: "/calculadora-armazenagem",
     icon: Warehouse,
     subCategory: "com",
+    comGroup: "precificacao",
     manual: {
       title: "Calculadora de Armazenagem",
       description: "Como precificar serviços de armazenagem",
+      type: "pdf",
+    },
+  },
+  {
+    id: "com-proposta",
+    title: "Proposta",
+    url: "/proposta",
+    icon: FileSignature,
+    subCategory: "com",
+    comGroup: "precificacao",
+    manual: {
+      title: "Propostas Comerciais",
+      description: "Criação e gestão de propostas para clientes",
+      type: "pdf",
+    },
+  },
+
+  // COM - Vendas — GESTÃO E CONTROLE
+  {
+    id: "com-pipeline",
+    title: "Pipeline",
+    url: "/pipeline",
+    icon: Kanban,
+    subCategory: "com",
+    comGroup: "gestao",
+    manual: {
+      title: "Pipeline de Vendas",
+      description: "Acompanhamento do funil comercial",
+      type: "pdf",
+    },
+  },
+  {
+    id: "com-rotas",
+    title: "Rotas",
+    url: "/rotas",
+    icon: Route,
+    subCategory: "com",
+    comGroup: "gestao",
+    manual: {
+      title: "Rotas Salvas",
+      description: "Gerenciamento de rotas de entrega",
       type: "pdf",
     },
   },
@@ -107,6 +277,7 @@ export const featureRegistry: FeatureItem[] = [
     url: "/dashboard",
     icon: LayoutDashboard,
     subCategory: "com",
+    comGroup: "gestao",
     manual: {
       title: "Dashboard Comercial",
       description: "Visão geral dos indicadores de vendas",
@@ -119,6 +290,7 @@ export const featureRegistry: FeatureItem[] = [
     url: "/indicadores-vendas",
     icon: BarChart3,
     subCategory: "com",
+    comGroup: "gestao",
     manual: {
       title: "Indicadores de Vendas",
       description: "KPIs de performance comercial",
@@ -131,93 +303,10 @@ export const featureRegistry: FeatureItem[] = [
     url: "/relatórios",
     icon: FileText,
     subCategory: "com",
+    comGroup: "gestao",
     manual: {
       title: "Relatórios",
       description: "Exportação e análise de dados",
-      type: "pdf",
-    },
-  },
-  {
-    id: "com-rfi",
-    title: "RFI",
-    url: "/rfi",
-    icon: ClipboardList,
-    subCategory: "com",
-    manual: {
-      title: "RFI - Request for Information",
-      description: "Ficha técnica para licitações",
-      type: "pdf",
-    },
-  },
-  {
-    id: "com-metas",
-    title: "Metas",
-    url: "/operações",
-    icon: Settings2,
-    subCategory: "com",
-    manual: {
-      title: "Gestão de Metas",
-      description: "Definição e acompanhamento de metas",
-      type: "pdf",
-    },
-  },
-  {
-    id: "com-clientes",
-    title: "Clientes",
-    url: "/clientes",
-    icon: Users,
-    subCategory: "com",
-    manual: {
-      title: "Gestão de Clientes",
-      description: "Como gerenciar sua carteira de clientes",
-      type: "pdf",
-    },
-  },
-  {
-    id: "com-pipeline",
-    title: "Pipeline",
-    url: "/pipeline",
-    icon: Kanban,
-    subCategory: "com",
-    manual: {
-      title: "Pipeline de Vendas",
-      description: "Acompanhamento do funil comercial",
-      type: "pdf",
-    },
-  },
-  {
-    id: "com-calendario",
-    title: "Calendário",
-    url: "/calendário",
-    icon: Calendar,
-    subCategory: "com",
-    manual: {
-      title: "Calendário Comercial",
-      description: "Agendamento de reuniões e visitas",
-      type: "pdf",
-    },
-  },
-  {
-    id: "com-rotas",
-    title: "Rotas",
-    url: "/rotas",
-    icon: Route,
-    subCategory: "com",
-    manual: {
-      title: "Rotas Salvas",
-      description: "Gerenciamento de rotas de entrega",
-      type: "pdf",
-    },
-  },
-  {
-    id: "com-ata",
-    title: "Ata Plano de Ação",
-    url: "/atas",
-    icon: FileEdit,
-    subCategory: "com",
-    manual: {
-      title: "Ata Plano de Ação",
-      description: "Registro de reuniões e planos de ação",
       type: "pdf",
     },
   },
@@ -227,45 +316,10 @@ export const featureRegistry: FeatureItem[] = [
     url: "/biblioteca",
     icon: Library,
     subCategory: "com",
+    comGroup: "gestao",
     manual: {
       title: "Biblioteca de Checklists",
       description: "Templates prontos de checklists por segmento",
-      type: "pdf",
-    },
-  },
-  {
-    id: "com-tarefas",
-    title: "Tarefas",
-    url: "/tarefas",
-    icon: ListTodo,
-    subCategory: "com",
-    manual: {
-      title: "Gestão de Tarefas",
-      description: "Controle de atividades e prazos",
-      type: "pdf",
-    },
-  },
-  {
-    id: "com-projetos",
-    title: "Projetos",
-    url: "/projetos",
-    icon: FolderKanban,
-    subCategory: "com",
-    manual: {
-      title: "Gestão de Projetos",
-      description: "Acompanhamento de projetos comerciais",
-      type: "pdf",
-    },
-  },
-  {
-    id: "com-fluxograma",
-    title: "Fluxograma Comercial",
-    url: "/fluxograma",
-    icon: GitBranch,
-    subCategory: "com",
-    manual: {
-      title: "Fluxograma Comercial",
-      description: "Fluxo visual do processo comercial",
       type: "pdf",
     },
   },
@@ -300,6 +354,16 @@ export const featureRegistry: FeatureItem[] = [
 export function getSidebarItems(subCategory: "mkt" | "com" | "cac") {
   return featureRegistry
     .filter((item) => item.subCategory === subCategory)
+    .map((item) => ({
+      title: item.title,
+      url: item.url,
+      icon: item.icon,
+    }));
+}
+
+export function getComGroupItems(group: "planejamento" | "relacionamento" | "precificacao" | "gestao") {
+  return featureRegistry
+    .filter((item) => item.subCategory === "com" && item.comGroup === group)
     .map((item) => ({
       title: item.title,
       url: item.url,

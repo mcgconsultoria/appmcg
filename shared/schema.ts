@@ -2593,6 +2593,84 @@ export const userRoleAssignments = pgTable("user_role_assignments", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// ==================== BILATERAIS ====================
+export const bilaterals = pgTable("bilaterals", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  nome: varchar("nome", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }),
+  telefone: varchar("telefone", { length: 30 }),
+  cargo: varchar("cargo", { length: 100 }),
+  areaAtuacao: varchar("area_atuacao", { length: 100 }),
+  clientId: integer("client_id"),
+  observacoes: text("observacoes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+export const insertBilateralSchema = createInsertSchema(bilaterals).omit({ id: true, createdAt: true, updatedAt: true });
+export type Bilateral = typeof bilaterals.$inferSelect;
+export type InsertBilateral = z.infer<typeof insertBilateralSchema>;
+
+// ==================== SEGMENTOS MERCADO ====================
+export const segmentosMercado = pgTable("segmentos_mercado", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  nome: varchar("nome", { length: 150 }).notNull(),
+  descricao: text("descricao"),
+  ativo: boolean("ativo").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+export const insertSegmentoMercadoSchema = createInsertSchema(segmentosMercado).omit({ id: true, createdAt: true, updatedAt: true });
+export type SegmentoMercado = typeof segmentosMercado.$inferSelect;
+export type InsertSegmentoMercado = z.infer<typeof insertSegmentoMercadoSchema>;
+
+// ==================== EVENTOS COMERCIAIS ====================
+export const eventosComerciais = pgTable("eventos_comerciais", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  titulo: varchar("titulo", { length: 255 }).notNull(),
+  categoria: varchar("categoria", { length: 100 }).notNull(),
+  dataInicio: timestamp("data_inicio").notNull(),
+  dataFim: timestamp("data_fim"),
+  local: varchar("local", { length: 255 }),
+  descricao: text("descricao"),
+  clientId: integer("client_id"),
+  responsavelId: varchar("responsavel_id", { length: 100 }),
+  status: varchar("status", { length: 50 }).default("agendado"),
+  observacoes: text("observacoes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+export const insertEventoComercialSchema = createInsertSchema(eventosComerciais).omit({ id: true, createdAt: true, updatedAt: true });
+export type EventoComercial = typeof eventosComerciais.$inferSelect;
+export type InsertEventoComercial = z.infer<typeof insertEventoComercialSchema>;
+
+// ==================== PROPOSTAS ====================
+export const propostas = pgTable("propostas", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  numero: integer("numero").notNull(),
+  clientId: integer("client_id"),
+  nomeCliente: varchar("nome_cliente", { length: 255 }),
+  dataEmissao: timestamp("data_emissao").defaultNow(),
+  validade: integer("validade").default(30),
+  status: varchar("status", { length: 50 }).default("rascunho"),
+  perfilLogistico: text("perfil_logistico"),
+  observacoes: text("observacoes"),
+  totalFrete: decimal("total_frete", { precision: 15, scale: 2 }),
+  totalArmazenagem: decimal("total_armazenagem", { precision: 15, scale: 2 }),
+  freteCalculoId: integer("frete_calculo_id"),
+  armazenagemCalculoId: integer("armazenagem_calculo_id"),
+  rfiId: integer("rfi_id"),
+  createdBy: varchar("created_by", { length: 100 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+export const insertPropostaSchema = createInsertSchema(propostas).omit({ id: true, createdAt: true, updatedAt: true });
+export type Proposta = typeof propostas.$inferSelect;
+export type InsertProposta = z.infer<typeof insertPropostaSchema>;
+
 // Insert schemas
 export const insertPermissionDefinitionSchema = createInsertSchema(permissionDefinitions).omit({ id: true, createdAt: true });
 export const insertCompanyRoleSchema = createInsertSchema(companyRoles).omit({ id: true, createdAt: true, updatedAt: true });

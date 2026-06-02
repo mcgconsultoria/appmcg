@@ -50,6 +50,10 @@ import {
   insertSubscriptionPlanSchema,
   insertCompanyRoleSchema,
   insertUserRoleAssignmentSchema,
+  insertBilateralSchema,
+  insertSegmentoMercadoSchema,
+  insertEventoComercialSchema,
+  insertPropostaSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -7893,6 +7897,158 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error removing role:", error);
       res.status(500).json({ message: "Falha ao remover cargo" });
+    }
+  });
+
+  // ==================== BILATERAIS ====================
+  app.get("/api/bilaterais", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getBilaterais(req.user!.companyId!);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar bilaterais" });
+    }
+  });
+
+  app.post("/api/bilaterais", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertBilateralSchema.parse({ ...req.body, companyId: req.user!.companyId });
+      const item = await storage.createBilateral(data);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao criar bilateral" });
+    }
+  });
+
+  app.patch("/api/bilaterais/:id", isAuthenticated, async (req, res) => {
+    try {
+      const item = await storage.updateBilateral(parseInt(req.params.id), req.body);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao atualizar bilateral" });
+    }
+  });
+
+  app.delete("/api/bilaterais/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteBilateral(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao remover bilateral" });
+    }
+  });
+
+  // ==================== SEGMENTOS ====================
+  app.get("/api/segmentos", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getSegmentos(req.user!.companyId!);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar segmentos" });
+    }
+  });
+
+  app.post("/api/segmentos", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertSegmentoMercadoSchema.parse({ ...req.body, companyId: req.user!.companyId });
+      const item = await storage.createSegmento(data);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao criar segmento" });
+    }
+  });
+
+  app.patch("/api/segmentos/:id", isAuthenticated, async (req, res) => {
+    try {
+      const item = await storage.updateSegmento(parseInt(req.params.id), req.body);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao atualizar segmento" });
+    }
+  });
+
+  app.delete("/api/segmentos/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteSegmento(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao remover segmento" });
+    }
+  });
+
+  // ==================== EVENTOS COMERCIAIS ====================
+  app.get("/api/eventos-comerciais", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getEventosComerciais(req.user!.companyId!);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar eventos comerciais" });
+    }
+  });
+
+  app.post("/api/eventos-comerciais", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertEventoComercialSchema.parse({ ...req.body, companyId: req.user!.companyId });
+      const item = await storage.createEventoComercial(data);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao criar evento comercial" });
+    }
+  });
+
+  app.patch("/api/eventos-comerciais/:id", isAuthenticated, async (req, res) => {
+    try {
+      const item = await storage.updateEventoComercial(parseInt(req.params.id), req.body);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao atualizar evento comercial" });
+    }
+  });
+
+  app.delete("/api/eventos-comerciais/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteEventoComercial(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao remover evento comercial" });
+    }
+  });
+
+  // ==================== PROPOSTAS ====================
+  app.get("/api/propostas", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getPropostas(req.user!.companyId!);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar propostas" });
+    }
+  });
+
+  app.post("/api/propostas", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertPropostaSchema.parse({ ...req.body, companyId: req.user!.companyId, createdBy: req.user!.id });
+      const item = await storage.createProposta(data);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao criar proposta" });
+    }
+  });
+
+  app.patch("/api/propostas/:id", isAuthenticated, async (req, res) => {
+    try {
+      const item = await storage.updateProposta(parseInt(req.params.id), req.body);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao atualizar proposta" });
+    }
+  });
+
+  app.delete("/api/propostas/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteProposta(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao remover proposta" });
     }
   });
 
