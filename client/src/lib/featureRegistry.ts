@@ -66,6 +66,18 @@ export const featureRegistry: FeatureItem[] = [
 
   // COM - Vendas
   {
+    id: "com-checklist",
+    title: "Checklist",
+    url: "/checklist",
+    icon: ClipboardCheck,
+    subCategory: "com",
+    manual: {
+      title: "Checklist Comercial",
+      description: "Diagnóstico operacional do cliente",
+      type: "pdf",
+    },
+  },
+  {
     id: "com-calcule-frete",
     title: "Calcule Frete",
     url: "/calculadora-frete",
@@ -158,18 +170,6 @@ export const featureRegistry: FeatureItem[] = [
     manual: {
       title: "Ata Plano de Ação",
       description: "Registro de reuniões e planos de ação",
-      type: "pdf",
-    },
-  },
-  {
-    id: "com-checklist",
-    title: "Checklist",
-    url: "/checklist",
-    icon: ClipboardCheck,
-    subCategory: "com",
-    manual: {
-      title: "Checklist Comercial",
-      description: "Diagnóstico operacional do cliente",
       type: "pdf",
     },
   },
