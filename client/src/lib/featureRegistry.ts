@@ -138,6 +138,18 @@ export const featureRegistry: FeatureItem[] = [
     },
   },
   {
+    id: "com-rfi",
+    title: "RFI",
+    url: "/rfi",
+    icon: ClipboardList,
+    subCategory: "com",
+    manual: {
+      title: "RFI - Request for Information",
+      description: "Ficha técnica para licitações",
+      type: "pdf",
+    },
+  },
+  {
     id: "com-metas",
     title: "Metas",
     url: "/operações",
@@ -218,18 +230,6 @@ export const featureRegistry: FeatureItem[] = [
     manual: {
       title: "Biblioteca de Checklists",
       description: "Templates prontos de checklists por segmento",
-      type: "pdf",
-    },
-  },
-  {
-    id: "com-rfi",
-    title: "RFI",
-    url: "/rfi",
-    icon: ClipboardList,
-    subCategory: "com",
-    manual: {
-      title: "RFI - Request for Information",
-      description: "Ficha técnica para licitações",
       type: "pdf",
     },
   },
