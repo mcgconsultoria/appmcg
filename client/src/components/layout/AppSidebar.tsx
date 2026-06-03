@@ -376,14 +376,14 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
       <SidebarGroup>
         <CollapsibleTrigger asChild>
           <button
-            className="flex items-center justify-between w-full px-3 py-2 text-base font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
+            className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
             data-testid={`section-${title.toLowerCase().replace(/\s+/g, '-')}`}
           >
-            <div className="flex items-center gap-2">
-              <Icon className="h-5 w-5" />
-              <span>{title}</span>
+            <div className="flex items-center gap-2 min-w-0">
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="whitespace-nowrap">{title}</span>
             </div>
-            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`h-4 w-4 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
@@ -761,14 +761,14 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
       <SidebarGroup>
         <CollapsibleTrigger asChild>
           <button
-            className="flex items-center justify-between w-full px-3 py-2 text-base font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
+            className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
             data-testid="section-com-vendas"
           >
-            <div className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" />
-              <span>COM (Vendas)</span>
+            <div className="flex items-center gap-2 min-w-0">
+              <ShoppingCart className="h-4 w-4 shrink-0" />
+              <span className="whitespace-nowrap">COM (Vendas)</span>
             </div>
-            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`h-4 w-4 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
