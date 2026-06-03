@@ -505,7 +505,7 @@ export default function MetasPage() {
                   <SelectValue placeholder="Selecione o cliente (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Geral (sem cliente)</SelectItem>
+                  <SelectItem value="none">Geral (sem cliente)</SelectItem>
                   {clients.map((c) => (
                     <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>
                   ))}

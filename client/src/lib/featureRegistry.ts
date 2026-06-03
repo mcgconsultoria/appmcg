@@ -290,6 +290,7 @@ export const featureRegistry: FeatureItem[] = [
     url: "/dashboard",
     icon: LayoutDashboard,
     subCategory: "com",
+    comGroup: "gestao",
     manual: {
       title: "Dashboard Comercial",
       description: "Visão geral dos indicadores de vendas",

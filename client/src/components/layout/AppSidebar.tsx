@@ -928,24 +928,6 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={location === "/dashboard"}>
-                  <Link
-                    href="/dashboard"
-                    data-testid="nav-dashboard"
-                    className="flex items-center gap-2 px-3 py-2 text-sm font-semibold"
-                  >
-                    <LayoutDashboard className="h-4 w-4 shrink-0" />
-                    <span>Dashboard</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
 
         {user?.role === "admin_mcg" && (
           <AdminPJSection location={location} userRole={user?.role} userPlan={effectivePlan} planLoaded={planLoaded} fullAccessGranted={user?.fullAccessGranted} />
