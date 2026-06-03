@@ -142,11 +142,6 @@ const adminMcgComercialItems = [
     icon: FileSignature,
   },
   {
-    title: "Campanha Piloto",
-    url: "/admin/campanha-piloto",
-    icon: Rocket,
-  },
-  {
     title: "Dashboard",
     url: "/admin/leads-diagnóstico",
     icon: Search,
@@ -168,6 +163,11 @@ const adminMcgMarketingItems = [
     title: "Kit Marca",
     url: "/admin/kit-marca",
     icon: Palette,
+  },
+  {
+    title: "Campanha Piloto",
+    url: "/admin/campanha-piloto",
+    icon: Rocket,
   },
 ];
 
