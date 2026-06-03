@@ -215,9 +215,15 @@ export default function PropostaPage() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Propostas Comerciais</h1>
-          <p className="text-muted-foreground text-sm">Gerencie suas propostas e cotações de serviços logísticos</p>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" className="gap-1 shrink-0" onClick={() => window.history.back()} data-testid="button-voltar-lista-proposta">
+            <ArrowLeft className="h-4 w-4" />
+            Voltar
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Propostas Comerciais</h1>
+            <p className="text-muted-foreground text-sm">Gerencie suas propostas e cotações de serviços logísticos</p>
+          </div>
         </div>
         <Button onClick={openNew} data-testid="button-nova-proposta">
           <Plus className="w-4 h-4 mr-2" />
