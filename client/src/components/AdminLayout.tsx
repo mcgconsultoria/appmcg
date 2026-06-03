@@ -53,7 +53,7 @@ const adminMenuItems = [
     icon: User,
   },
   {
-    title: "Gestão Comercial",
+    title: "Pipeline",
     url: "/admin/comercial",
     icon: Users,
   },
@@ -101,7 +101,7 @@ const marketingMenuItems = [
     icon: Megaphone,
   },
   {
-    title: "Leads Diagnóstico",
+    title: "Dashboard",
     url: "/admin/leads-diagnóstico",
     icon: Users,
   },
