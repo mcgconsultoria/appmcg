@@ -347,12 +347,13 @@ export default function PropostaPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-center gap-2">
-              <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0"
+            <div className="flex items-center gap-3">
+              <Button type="button" variant="outline" size="sm" className="shrink-0 gap-1"
                 onClick={() => setOpen(false)} data-testid="button-voltar-proposta">
                 <ArrowLeft className="h-4 w-4" />
+                Voltar
               </Button>
-              <DialogTitle>{editing ? "Editar Proposta" : "Nova Proposta Comercial"}</DialogTitle>
+              <DialogTitle className="text-left">{editing ? "Editar Proposta" : "Nova Proposta Comercial"}</DialogTitle>
             </div>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
