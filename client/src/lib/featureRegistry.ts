@@ -115,7 +115,7 @@ export const featureRegistry: FeatureItem[] = [
     url: "/operações",
     icon: Settings2,
     subCategory: "com",
-    comGroup: "planejamento",
+    comGroup: "gestao",
     manual: {
       title: "Gestão de Metas",
       description: "Definição e acompanhamento de metas",
