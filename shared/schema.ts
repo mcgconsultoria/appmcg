@@ -2694,6 +2694,8 @@ export const contratosLogisticos = pgTable("contratos_logisticos", {
   modeloContrato: text("modelo_contrato"),
   totalFrete: decimal("total_frete", { precision: 15, scale: 2 }),
   totalArmazenagem: decimal("total_armazenagem", { precision: 15, scale: 2 }),
+  propostaFreteIds: integer("proposta_frete_ids").array(),
+  propostaArmazenagemIds: integer("proposta_armazenagem_ids").array(),
   observacoes: text("observacoes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

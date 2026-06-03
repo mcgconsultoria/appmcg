@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { FileText, Plus, Pencil, Trash2, Clock, CheckCircle2, XCircle, AlertCircle, FilePlus2, Calendar, RefreshCw } from "lucide-react";
+import {
+  FileText, Plus, Pencil, Trash2, Clock, CheckCircle2, RefreshCw,
+  FilePlus2, Calendar, Truck, Warehouse, Search, X, ArrowLeft
+} from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { ContratoLogistico, Proposta } from "@shared/schema";
@@ -32,22 +35,35 @@ function fmtDate(d: string | Date | null | undefined) {
 
 function fmtCurrency(v: string | null | undefined) {
   if (!v) return "—";
-  return Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const n = Number(v);
+  if (isNaN(n)) return v;
+  return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
+
+function propostaLabel(p: Proposta) {
+  return `#${String(p.numero).padStart(4, "0")} — ${p.nomeCliente ?? "Cliente"}`;
+}
+
+const emptyForm = {
+  nomeCliente: "", objeto: "", dataAssinatura: "", vigenciaInicio: "",
+  vigenciaFim: "", renovacaoAutomatica: false, status: "ativo",
+  modeloContrato: "", totalFrete: "", totalArmazenagem: "", observacoes: "",
+  propostaFreteIds: [] as number[],
+  propostaArmazenagemIds: [] as number[],
+};
 
 export default function Contratos() {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<ContratoLogistico | null>(null);
-  const [showFromPropostaDialog, setShowFromPropostaDialog] = useState(false);
-  const [selectedPropostaId, setSelectedPropostaId] = useState<string>("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
+  const [form, setForm] = useState({ ...emptyForm });
 
-  const [form, setForm] = useState({
-    nomeCliente: "", objeto: "", dataAssinatura: "", vigenciaInicio: "",
-    vigenciaFim: "", renovacaoAutomatica: false, status: "ativo",
-    modeloContrato: "", totalFrete: "", totalArmazenagem: "", observacoes: "",
-  });
+  // Picker states
+  const [showFretePicker, setShowFretePicker] = useState(false);
+  const [showArmazenagemPicker, setShowArmazenagemPicker] = useState(false);
+  const [searchFrete, setSearchFrete] = useState("");
+  const [searchArmazenagem, setSearchArmazenagem] = useState("");
 
   const { data: contratos = [], isLoading } = useQuery<ContratoLogistico[]>({
     queryKey: ["/api/contratos-logisticos"],
@@ -57,7 +73,17 @@ export default function Contratos() {
     queryKey: ["/api/propostas"],
   });
 
-  const propostasAprovadas = propostas.filter((p) => p.status === "aprovada");
+  // Propostas de frete = têm totalFrete preenchido ou freteCalculoId
+  const propostasComFrete = propostas.filter((p) => p.totalFrete || p.freteCalculoId);
+  // Propostas de armazenagem = têm totalArmazenagem ou armazenagemCalculoId
+  const propostasComArmazenagem = propostas.filter((p) => p.totalArmazenagem || p.armazenagemCalculoId);
+
+  const filteredFrete = propostasComFrete.filter((p) =>
+    !searchFrete || propostaLabel(p).toLowerCase().includes(searchFrete.toLowerCase())
+  );
+  const filteredArmazenagem = propostasComArmazenagem.filter((p) =>
+    !searchArmazenagem || propostaLabel(p).toLowerCase().includes(searchArmazenagem.toLowerCase())
+  );
 
   const createMutation = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/contratos-logisticos", data),
@@ -65,7 +91,7 @@ export default function Contratos() {
       queryClient.invalidateQueries({ queryKey: ["/api/contratos-logisticos"] });
       toast({ title: "Contrato criado com sucesso!" });
       setOpen(false);
-      resetForm();
+      setForm({ ...emptyForm });
     },
     onError: () => toast({ title: "Erro ao criar contrato", variant: "destructive" }),
   });
@@ -91,15 +117,9 @@ export default function Contratos() {
     onError: () => toast({ title: "Erro ao remover contrato", variant: "destructive" }),
   });
 
-  function resetForm() {
-    setForm({ nomeCliente: "", objeto: "", dataAssinatura: "", vigenciaInicio: "",
-      vigenciaFim: "", renovacaoAutomatica: false, status: "ativo",
-      modeloContrato: "", totalFrete: "", totalArmazenagem: "", observacoes: "" });
-  }
-
   function openNew() {
     setEditing(null);
-    resetForm();
+    setForm({ ...emptyForm });
     setOpen(true);
   }
 
@@ -117,8 +137,69 @@ export default function Contratos() {
       totalFrete: c.totalFrete ?? "",
       totalArmazenagem: c.totalArmazenagem ?? "",
       observacoes: c.observacoes ?? "",
+      propostaFreteIds: (c.propostaFreteIds as number[] | null) ?? [],
+      propostaArmazenagemIds: (c.propostaArmazenagemIds as number[] | null) ?? [],
     });
     setOpen(true);
+  }
+
+  function addFreteProposta(p: Proposta) {
+    if (form.propostaFreteIds.includes(p.id)) return;
+    const newIds = [...form.propostaFreteIds, p.id];
+    // Auto-sum totalFrete from all linked propostas
+    const total = newIds.reduce((sum, id) => {
+      const prop = propostas.find((x) => x.id === id);
+      return sum + (prop?.totalFrete ? Number(prop.totalFrete) : 0);
+    }, 0);
+    setForm(f => ({
+      ...f,
+      propostaFreteIds: newIds,
+      totalFrete: total > 0 ? String(total) : f.totalFrete,
+    }));
+    setShowFretePicker(false);
+    setSearchFrete("");
+  }
+
+  function removeFreteProposta(id: number) {
+    const newIds = form.propostaFreteIds.filter((x) => x !== id);
+    const total = newIds.reduce((sum, pid) => {
+      const prop = propostas.find((x) => x.id === pid);
+      return sum + (prop?.totalFrete ? Number(prop.totalFrete) : 0);
+    }, 0);
+    setForm(f => ({
+      ...f,
+      propostaFreteIds: newIds,
+      totalFrete: total > 0 ? String(total) : f.totalFrete,
+    }));
+  }
+
+  function addArmazenagemProposta(p: Proposta) {
+    if (form.propostaArmazenagemIds.includes(p.id)) return;
+    const newIds = [...form.propostaArmazenagemIds, p.id];
+    const total = newIds.reduce((sum, id) => {
+      const prop = propostas.find((x) => x.id === id);
+      return sum + (prop?.totalArmazenagem ? Number(prop.totalArmazenagem) : 0);
+    }, 0);
+    setForm(f => ({
+      ...f,
+      propostaArmazenagemIds: newIds,
+      totalArmazenagem: total > 0 ? String(total) : f.totalArmazenagem,
+    }));
+    setShowArmazenagemPicker(false);
+    setSearchArmazenagem("");
+  }
+
+  function removeArmazenagemProposta(id: number) {
+    const newIds = form.propostaArmazenagemIds.filter((x) => x !== id);
+    const total = newIds.reduce((sum, pid) => {
+      const prop = propostas.find((x) => x.id === pid);
+      return sum + (prop?.totalArmazenagem ? Number(prop.totalArmazenagem) : 0);
+    }, 0);
+    setForm(f => ({
+      ...f,
+      propostaArmazenagemIds: newIds,
+      totalArmazenagem: total > 0 ? String(total) : f.totalArmazenagem,
+    }));
   }
 
   function onSubmit(e: React.FormEvent) {
@@ -130,30 +211,14 @@ export default function Contratos() {
       vigenciaFim: form.vigenciaFim ? new Date(form.vigenciaFim).toISOString() : undefined,
       totalFrete: form.totalFrete || undefined,
       totalArmazenagem: form.totalArmazenagem || undefined,
+      propostaFreteIds: form.propostaFreteIds.length > 0 ? form.propostaFreteIds : undefined,
+      propostaArmazenagemIds: form.propostaArmazenagemIds.length > 0 ? form.propostaArmazenagemIds : undefined,
     };
     if (editing) {
       updateMutation.mutate({ id: editing.id, data: payload });
     } else {
       createMutation.mutate(payload);
     }
-  }
-
-  function createFromProposta() {
-    const proposta = propostasAprovadas.find((p) => p.id.toString() === selectedPropostaId);
-    if (!proposta) return;
-    const payload = {
-      propostaId: proposta.id,
-      clientId: proposta.clientId ?? undefined,
-      nomeCliente: proposta.nomeCliente ?? "",
-      objeto: proposta.perfilLogistico ?? "",
-      status: "ativo",
-      totalFrete: proposta.totalFrete ?? undefined,
-      totalArmazenagem: proposta.totalArmazenagem ?? undefined,
-      observacoes: `Gerado a partir da Proposta #${String(proposta.numero).padStart(4, "0")}`,
-    };
-    createMutation.mutate(payload);
-    setShowFromPropostaDialog(false);
-    setSelectedPropostaId("");
   }
 
   const filtered = filtroStatus === "todos" ? contratos : contratos.filter((c) => c.status === filtroStatus);
@@ -168,18 +233,10 @@ export default function Contratos() {
             <h1 className="text-2xl font-bold text-foreground">Contratos Logísticos</h1>
             <p className="text-muted-foreground text-sm">Contratos entre sua empresa e clientes de logística</p>
           </div>
-          <div className="flex gap-2">
-            {propostasAprovadas.length > 0 && (
-              <Button variant="outline" onClick={() => setShowFromPropostaDialog(true)} data-testid="button-contrato-de-proposta">
-                <FilePlus2 className="w-4 h-4 mr-2" />
-                De Proposta Aprovada
-              </Button>
-            )}
-            <Button onClick={openNew} data-testid="button-novo-contrato">
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Contrato
-            </Button>
-          </div>
+          <Button onClick={openNew} data-testid="button-novo-contrato">
+            <Plus className="w-4 h-4 mr-2" />
+            Novo Contrato
+          </Button>
         </div>
 
         {/* KPIs */}
@@ -229,15 +286,15 @@ export default function Contratos() {
             <CardContent className="flex flex-col items-center justify-center py-16 text-center">
               <FileText className="w-12 h-12 text-muted-foreground mb-4" />
               <h3 className="font-semibold text-lg mb-1">Nenhum contrato encontrado</h3>
-              <p className="text-muted-foreground text-sm">
-                Crie contratos logísticos ou converta propostas aprovadas em contratos.
-              </p>
+              <p className="text-muted-foreground text-sm">Crie contratos logísticos para seus clientes.</p>
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-3">
             {filtered.map((c) => {
               const sc = statusConfig[c.status ?? "ativo"];
+              const nFrete = (c.propostaFreteIds as number[] | null)?.length ?? 0;
+              const nArm = (c.propostaArmazenagemIds as number[] | null)?.length ?? 0;
               return (
                 <Card key={c.id} className="hover:shadow-sm transition-shadow" data-testid={`card-contrato-${c.id}`}>
                   <CardContent className="p-4">
@@ -268,16 +325,25 @@ export default function Contratos() {
                               Vigência: {fmtDate(c.vigenciaInicio)} até {fmtDate(c.vigenciaFim)}
                             </span>
                           )}
+                          {nFrete > 0 && (
+                            <span className="flex items-center gap-1">
+                              <Truck className="w-3.5 h-3.5 text-blue-500" />
+                              {nFrete} proposta{nFrete > 1 ? "s" : ""} frete
+                            </span>
+                          )}
+                          {nArm > 0 && (
+                            <span className="flex items-center gap-1">
+                              <Warehouse className="w-3.5 h-3.5 text-orange-500" />
+                              {nArm} proposta{nArm > 1 ? "s" : ""} armazenagem
+                            </span>
+                          )}
                           {(c.totalFrete || c.totalArmazenagem) && (
-                            <span className="flex items-center gap-1 font-medium text-foreground">
-                              Total: {fmtCurrency(c.totalFrete)} + {fmtCurrency(c.totalArmazenagem)}
+                            <span className="font-medium text-foreground">
+                              Total: {c.totalFrete ? fmtCurrency(c.totalFrete) : "—"} frete / {c.totalArmazenagem ? fmtCurrency(c.totalArmazenagem) : "—"} arm.
                             </span>
                           )}
                         </div>
                         {c.objeto && <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{c.objeto}</p>}
-                        {c.propostaId && (
-                          <p className="text-xs text-blue-500 mt-1">Originado de uma proposta aprovada</p>
-                        )}
                       </div>
                       <div className="flex gap-1 shrink-0">
                         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEdit(c)} data-testid={`btn-edit-contrato-${c.id}`}>
@@ -300,17 +366,29 @@ export default function Contratos() {
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{editing ? "Editar Contrato" : "Novo Contrato Logístico"}</DialogTitle>
+              <div className="flex items-center gap-2">
+                <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0"
+                  onClick={() => setOpen(false)} data-testid="button-voltar-contrato">
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <DialogTitle>{editing ? "Editar Contrato" : "Novo Contrato Logístico"}</DialogTitle>
+              </div>
             </DialogHeader>
+
             <form onSubmit={onSubmit} className="space-y-4">
               <div>
                 <label className="text-sm font-medium">Cliente *</label>
-                <Input placeholder="Razão social do cliente" value={form.nomeCliente} onChange={(e) => setForm(f => ({ ...f, nomeCliente: e.target.value }))} required data-testid="input-nome-cliente-contrato" />
+                <Input placeholder="Razão social do cliente" value={form.nomeCliente}
+                  onChange={(e) => setForm(f => ({ ...f, nomeCliente: e.target.value }))}
+                  required data-testid="input-nome-cliente-contrato" />
               </div>
+
               <div>
                 <label className="text-sm font-medium">Objeto do Contrato</label>
-                <Textarea placeholder="Descreva os serviços contratados..." rows={3} value={form.objeto} onChange={(e) => setForm(f => ({ ...f, objeto: e.target.value }))} />
+                <Textarea placeholder="Descreva os serviços contratados..." rows={3}
+                  value={form.objeto} onChange={(e) => setForm(f => ({ ...f, objeto: e.target.value }))} />
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Status</label>
@@ -323,44 +401,130 @@ export default function Contratos() {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Data de Assinatura</label>
-                  <Input type="date" value={form.dataAssinatura} onChange={(e) => setForm(f => ({ ...f, dataAssinatura: e.target.value }))} />
+                  <Input type="date" value={form.dataAssinatura}
+                    onChange={(e) => setForm(f => ({ ...f, dataAssinatura: e.target.value }))} />
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Vigência Início</label>
-                  <Input type="date" value={form.vigenciaInicio} onChange={(e) => setForm(f => ({ ...f, vigenciaInicio: e.target.value }))} />
+                  <Input type="date" value={form.vigenciaInicio}
+                    onChange={(e) => setForm(f => ({ ...f, vigenciaInicio: e.target.value }))} />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Vigência Fim</label>
-                  <Input type="date" value={form.vigenciaFim} onChange={(e) => setForm(f => ({ ...f, vigenciaFim: e.target.value }))} />
+                  <Input type="date" value={form.vigenciaFim}
+                    onChange={(e) => setForm(f => ({ ...f, vigenciaFim: e.target.value }))} />
                 </div>
               </div>
+
+              {/* Propostas de Frete */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-1">
+                  <Truck className="w-4 h-4 text-blue-500" />
+                  Propostas de Frete vinculadas
+                </label>
+                {form.propostaFreteIds.length > 0 && (
+                  <div className="space-y-1">
+                    {form.propostaFreteIds.map((id) => {
+                      const p = propostas.find((x) => x.id === id);
+                      if (!p) return null;
+                      return (
+                        <div key={id} className="flex items-center gap-2 p-2 border rounded-md bg-blue-50/50 dark:bg-blue-950/20">
+                          <Truck className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                          <span className="text-sm flex-1">
+                            {propostaLabel(p)}
+                            {p.totalFrete && ` — ${fmtCurrency(p.totalFrete)}`}
+                          </span>
+                          <Button type="button" size="icon" variant="ghost" className="h-6 w-6 shrink-0"
+                            onClick={() => removeFreteProposta(id)} data-testid={`btn-remove-frete-prop-${id}`}>
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                <Button type="button" variant="outline" size="sm"
+                  onClick={() => { setSearchFrete(""); setShowFretePicker(true); }}
+                  data-testid="button-buscar-proposta-frete">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Buscar Proposta de Frete
+                </Button>
+              </div>
+
+              {/* Propostas de Armazenagem */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-1">
+                  <Warehouse className="w-4 h-4 text-orange-500" />
+                  Propostas de Armazenagem vinculadas
+                </label>
+                {form.propostaArmazenagemIds.length > 0 && (
+                  <div className="space-y-1">
+                    {form.propostaArmazenagemIds.map((id) => {
+                      const p = propostas.find((x) => x.id === id);
+                      if (!p) return null;
+                      return (
+                        <div key={id} className="flex items-center gap-2 p-2 border rounded-md bg-orange-50/50 dark:bg-orange-950/20">
+                          <Warehouse className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                          <span className="text-sm flex-1">
+                            {propostaLabel(p)}
+                            {p.totalArmazenagem && ` — ${fmtCurrency(p.totalArmazenagem)}`}
+                          </span>
+                          <Button type="button" size="icon" variant="ghost" className="h-6 w-6 shrink-0"
+                            onClick={() => removeArmazenagemProposta(id)} data-testid={`btn-remove-arm-prop-${id}`}>
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                <Button type="button" variant="outline" size="sm"
+                  onClick={() => { setSearchArmazenagem(""); setShowArmazenagemPicker(true); }}
+                  data-testid="button-buscar-proposta-armazenagem">
+                  <Plus className="w-4 h-4 mr-1" />
+                  Buscar Proposta de Armazenagem
+                </Button>
+              </div>
+
+              {/* Totais calculados */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Total Frete (R$)</label>
-                  <Input type="number" step="0.01" placeholder="0,00" value={form.totalFrete} onChange={(e) => setForm(f => ({ ...f, totalFrete: e.target.value }))} />
+                  <Input type="number" step="0.01" placeholder="0,00" value={form.totalFrete}
+                    onChange={(e) => setForm(f => ({ ...f, totalFrete: e.target.value }))} />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Total Armazenagem (R$)</label>
-                  <Input type="number" step="0.01" placeholder="0,00" value={form.totalArmazenagem} onChange={(e) => setForm(f => ({ ...f, totalArmazenagem: e.target.value }))} />
+                  <Input type="number" step="0.01" placeholder="0,00" value={form.totalArmazenagem}
+                    onChange={(e) => setForm(f => ({ ...f, totalArmazenagem: e.target.value }))} />
                 </div>
               </div>
+
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="renovacao" checked={form.renovacaoAutomatica} onChange={(e) => setForm(f => ({ ...f, renovacaoAutomatica: e.target.checked }))} className="h-4 w-4" />
+                <input type="checkbox" id="renovacao" checked={form.renovacaoAutomatica}
+                  onChange={(e) => setForm(f => ({ ...f, renovacaoAutomatica: e.target.checked }))} className="h-4 w-4" />
                 <label htmlFor="renovacao" className="text-sm">Renovação automática</label>
               </div>
+
               <div>
                 <label className="text-sm font-medium">Modelo / Cláusulas do Contrato</label>
-                <Textarea placeholder="Cole aqui as cláusulas contratuais ou notas sobre o contrato..." rows={4} value={form.modeloContrato} onChange={(e) => setForm(f => ({ ...f, modeloContrato: e.target.value }))} />
+                <Textarea placeholder="Cole aqui as cláusulas contratuais ou notas sobre o contrato..." rows={4}
+                  value={form.modeloContrato} onChange={(e) => setForm(f => ({ ...f, modeloContrato: e.target.value }))} />
               </div>
+
               <div>
                 <label className="text-sm font-medium">Observações</label>
-                <Textarea placeholder="Notas internas..." rows={2} value={form.observacoes} onChange={(e) => setForm(f => ({ ...f, observacoes: e.target.value }))} />
+                <Textarea placeholder="Notas internas..." rows={2}
+                  value={form.observacoes} onChange={(e) => setForm(f => ({ ...f, observacoes: e.target.value }))} />
               </div>
+
               <div className="flex justify-end gap-2 pt-2">
                 <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending} data-testid="button-salvar-contrato">
+                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}
+                  data-testid="button-salvar-contrato">
                   {editing ? "Atualizar" : "Criar Contrato"}
                 </Button>
               </div>
@@ -368,33 +532,102 @@ export default function Contratos() {
           </DialogContent>
         </Dialog>
 
-        {/* Dialog: Criar de Proposta Aprovada */}
-        <Dialog open={showFromPropostaDialog} onOpenChange={setShowFromPropostaDialog}>
-          <DialogContent className="max-w-md">
+        {/* Picker: Proposta de Frete */}
+        <Dialog open={showFretePicker} onOpenChange={setShowFretePicker}>
+          <DialogContent className="max-w-lg max-h-[70vh] flex flex-col">
             <DialogHeader>
-              <DialogTitle>Criar Contrato de Proposta Aprovada</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                <Truck className="w-5 h-5 text-blue-500" />
+                Buscar Proposta de Frete
+              </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-2">
-              <p className="text-sm text-muted-foreground">Selecione uma proposta aprovada para gerar o contrato automaticamente com os dados da proposta.</p>
-              <Select value={selectedPropostaId} onValueChange={setSelectedPropostaId}>
-                <SelectTrigger data-testid="select-proposta-aprovada">
-                  <SelectValue placeholder="Selecione a proposta aprovada" />
-                </SelectTrigger>
-                <SelectContent>
-                  {propostasAprovadas.map((p) => (
-                    <SelectItem key={p.id} value={p.id.toString()}>
-                      #{String(p.numero).padStart(4, "0")} — {p.nomeCliente ?? "Cliente"}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setShowFromPropostaDialog(false)}>Cancelar</Button>
-                <Button onClick={createFromProposta} disabled={!selectedPropostaId || createMutation.isPending} data-testid="button-gerar-contrato-de-proposta">
-                  <FilePlus2 className="w-4 h-4 mr-2" />
-                  Gerar Contrato
-                </Button>
-              </div>
+            <div className="relative mb-2">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Buscar por número ou cliente..." className="pl-8"
+                value={searchFrete} onChange={(e) => setSearchFrete(e.target.value)}
+                data-testid="input-search-frete-proposta" />
+            </div>
+            <div className="overflow-y-auto flex-1 space-y-2">
+              {propostasComFrete.length === 0 ? (
+                <p className="text-sm text-center text-muted-foreground py-8">
+                  Nenhuma proposta com valor de frete. Crie uma proposta com Total Frete preenchido.
+                </p>
+              ) : filteredFrete.length === 0 ? (
+                <p className="text-sm text-center text-muted-foreground py-6">Nenhum resultado para "{searchFrete}"</p>
+              ) : (
+                filteredFrete.map((p) => {
+                  const jaVinculada = form.propostaFreteIds.includes(p.id);
+                  return (
+                    <Card key={p.id}
+                      className={`cursor-pointer transition-colors ${jaVinculada ? "opacity-50 cursor-not-allowed" : "hover:bg-muted/50"}`}
+                      onClick={() => !jaVinculada && addFreteProposta(p)}
+                      data-testid={`pick-frete-prop-${p.id}`}>
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <p className="font-medium text-sm">{propostaLabel(p)}</p>
+                            {p.totalFrete && <p className="text-xs text-muted-foreground">Frete: {fmtCurrency(p.totalFrete)}</p>}
+                          </div>
+                          {jaVinculada && <Badge variant="secondary" className="text-xs">Já vinculada</Badge>}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              )}
+            </div>
+            <div className="pt-2 border-t">
+              <Button variant="outline" className="w-full" onClick={() => setShowFretePicker(false)}>Fechar</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Picker: Proposta de Armazenagem */}
+        <Dialog open={showArmazenagemPicker} onOpenChange={setShowArmazenagemPicker}>
+          <DialogContent className="max-w-lg max-h-[70vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Warehouse className="w-5 h-5 text-orange-500" />
+                Buscar Proposta de Armazenagem
+              </DialogTitle>
+            </DialogHeader>
+            <div className="relative mb-2">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Buscar por número ou cliente..." className="pl-8"
+                value={searchArmazenagem} onChange={(e) => setSearchArmazenagem(e.target.value)}
+                data-testid="input-search-arm-proposta" />
+            </div>
+            <div className="overflow-y-auto flex-1 space-y-2">
+              {propostasComArmazenagem.length === 0 ? (
+                <p className="text-sm text-center text-muted-foreground py-8">
+                  Nenhuma proposta com valor de armazenagem. Crie uma proposta com Total Armazenagem preenchido.
+                </p>
+              ) : filteredArmazenagem.length === 0 ? (
+                <p className="text-sm text-center text-muted-foreground py-6">Nenhum resultado para "{searchArmazenagem}"</p>
+              ) : (
+                filteredArmazenagem.map((p) => {
+                  const jaVinculada = form.propostaArmazenagemIds.includes(p.id);
+                  return (
+                    <Card key={p.id}
+                      className={`cursor-pointer transition-colors ${jaVinculada ? "opacity-50 cursor-not-allowed" : "hover:bg-muted/50"}`}
+                      onClick={() => !jaVinculada && addArmazenagemProposta(p)}
+                      data-testid={`pick-arm-prop-${p.id}`}>
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <p className="font-medium text-sm">{propostaLabel(p)}</p>
+                            {p.totalArmazenagem && <p className="text-xs text-muted-foreground">Armazenagem: {fmtCurrency(p.totalArmazenagem)}</p>}
+                          </div>
+                          {jaVinculada && <Badge variant="secondary" className="text-xs">Já vinculada</Badge>}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              )}
+            </div>
+            <div className="pt-2 border-t">
+              <Button variant="outline" className="w-full" onClick={() => setShowArmazenagemPicker(false)}>Fechar</Button>
             </div>
           </DialogContent>
         </Dialog>
