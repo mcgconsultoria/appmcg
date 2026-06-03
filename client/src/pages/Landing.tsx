@@ -251,12 +251,12 @@ export default function Landing() {
                 </Button>
               </Link>
               <div className="flex flex-row items-center gap-4">
-                <Link href="/login">
+                <Link href="/calculadora-frete">
                   <Button size="lg" variant="outline" className="gap-2" data-testid="button-calc-frete">
                     Calculadora de Frete
                   </Button>
                 </Link>
-                <Link href="/login">
+                <Link href="/calculadora-armazenagem">
                   <Button size="lg" variant="outline" className="gap-2" data-testid="button-calc-armazenagem">
                     Calculadora de Armazenagem
                   </Button>

@@ -345,13 +345,25 @@ export default function DiagnósticoComercial() {
       <div className="min-h-screen bg-background">
         <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
           <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
-            <Link href="/" className="flex items-center gap-2">
-              <img src={logoMcg} alt="MCG Consultoria" className="h-10 w-10 object-contain" />
-              <div className="flex flex-col">
-                <span className="font-bold text-lg leading-tight">MCG</span>
-                <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
-              </div>
-            </Link>
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.history.back()}
+                className="gap-2"
+                data-testid="button-voltar-section"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Voltar
+              </Button>
+              <Link href="/" className="flex items-center gap-2">
+                <img src={logoMcg} alt="MCG Consultoria" className="h-10 w-10 object-contain" />
+                <div className="flex flex-col">
+                  <span className="font-bold text-lg leading-tight">MCG</span>
+                  <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
+                </div>
+              </Link>
+            </div>
             <ThemeToggle />
           </div>
         </header>
@@ -443,13 +455,25 @@ export default function DiagnósticoComercial() {
       <div className="min-h-screen bg-background">
         <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
           <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
-            <Link href="/" className="flex items-center gap-2">
-              <img src={logoMcg} alt="MCG Consultoria" className="h-10 w-10 object-contain" />
-              <div className="flex flex-col">
-                <span className="font-bold text-lg leading-tight">MCG</span>
-                <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
-              </div>
-            </Link>
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.history.back()}
+                className="gap-2"
+                data-testid="button-voltar-section"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Voltar
+              </Button>
+              <Link href="/" className="flex items-center gap-2">
+                <img src={logoMcg} alt="MCG Consultoria" className="h-10 w-10 object-contain" />
+                <div className="flex flex-col">
+                  <span className="font-bold text-lg leading-tight">MCG</span>
+                  <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
+                </div>
+              </Link>
+            </div>
             <ThemeToggle />
           </div>
         </header>
@@ -550,13 +574,25 @@ export default function DiagnósticoComercial() {
     <div className="min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <img src={logoMcg} alt="MCG Consultoria" className="h-10 w-10 object-contain" />
-            <div className="flex flex-col">
-              <span className="font-bold text-lg leading-tight">MCG</span>
-              <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
-            </div>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.history.back()}
+              className="gap-2"
+              data-testid="button-voltar"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </Button>
+            <Link href="/" className="flex items-center gap-2">
+              <img src={logoMcg} alt="MCG Consultoria" className="h-10 w-10 object-contain" />
+              <div className="flex flex-col">
+                <span className="font-bold text-lg leading-tight">MCG</span>
+                <span className="text-xs text-muted-foreground leading-tight">Consultoria</span>
+              </div>
+            </Link>
+          </div>
           <ThemeToggle />
         </div>
       </header>
