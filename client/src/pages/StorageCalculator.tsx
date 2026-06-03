@@ -556,7 +556,7 @@ export default function StorageCalculator() {
   const TypeIcon = selectedType?.icon || Package;
 
   return (
-    <PublicLayout title="Calculadora de Armazenagem" subtitle="Calcule custos de armazenagem e movimentação com base na legislação brasileira">
+    <PublicLayout title="Calculadora de Armazenagem" subtitle="Calcule custos de armazenagem e movimentação com base na legislação brasileira" backHref="/negociacao">
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card>

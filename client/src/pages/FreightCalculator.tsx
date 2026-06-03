@@ -705,6 +705,7 @@ export default function FreightCalculator() {
     <PublicLayout
       title="Calculadora de Frete"
       subtitle="Calcule fretes com impostos, taxas e tabela ANTT"
+      backHref="/negociacao"
     >
       <div className="space-y-6">
         {routes.map((route, index) => {

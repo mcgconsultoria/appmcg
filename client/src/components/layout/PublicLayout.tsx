@@ -9,16 +9,17 @@ interface PublicLayoutProps {
   children: React.ReactNode;
   title: string;
   subtitle?: string;
+  backHref?: string;
 }
 
-export function PublicLayout({ children, title, subtitle }: PublicLayoutProps) {
+export function PublicLayout({ children, title, subtitle, backHref = "/" }: PublicLayoutProps) {
   const { isAuthenticated } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
       <header className="h-16 flex items-center justify-between gap-4 px-4 md:px-6 border-b border-border bg-background sticky top-0 z-40">
         <div className="flex items-center gap-4">
-          <Link href="/">
+          <Link href={backHref}>
             <Button variant="ghost" size="icon" data-testid="button-back-home">
               <ArrowLeft className="h-5 w-5" />
             </Button>
