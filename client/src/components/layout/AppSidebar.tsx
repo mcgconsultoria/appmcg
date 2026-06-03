@@ -937,7 +937,7 @@ export function AppSidebar() {
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
           <CollapsibleSection
-            title="administrativo"
+            title="Administrativo"
             icon={UserCog}
             items={adminClienteItems}
             location={location}
