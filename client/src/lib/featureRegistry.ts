@@ -112,7 +112,7 @@ export const featureRegistry: FeatureItem[] = [
   {
     id: "com-metas",
     title: "Metas",
-    url: "/operações",
+    url: "/metas",
     icon: Settings2,
     subCategory: "com",
     comGroup: "gestao",

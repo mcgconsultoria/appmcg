@@ -55,6 +55,8 @@ import {
   insertEventoComercialSchema,
   insertPropostaSchema,
   insertContratoLogisticoSchema,
+  insertMetaComercialSchema,
+  insertMetaLancamentoSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -8089,6 +8091,82 @@ export async function registerRoutes(
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: "Erro ao remover contrato" });
+    }
+  });
+
+  // ==================== METAS COMERCIAIS ====================
+
+  app.get("/api/metas-comerciais", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getMetasComerciais(req.user!.companyId!);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar metas" });
+    }
+  });
+
+  app.post("/api/metas-comerciais", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertMetaComercialSchema.parse({ ...req.body, companyId: req.user!.companyId });
+      const item = await storage.createMetaComercial(data);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao criar meta" });
+    }
+  });
+
+  app.patch("/api/metas-comerciais/:id", isAuthenticated, async (req, res) => {
+    try {
+      const item = await storage.updateMetaComercial(parseInt(req.params.id), req.body);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao atualizar meta" });
+    }
+  });
+
+  app.delete("/api/metas-comerciais/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteMetaComercial(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao remover meta" });
+    }
+  });
+
+  app.get("/api/metas-lancamentos/:metaId", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getMetasLancamentos(parseInt(req.params.metaId));
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar lançamentos" });
+    }
+  });
+
+  app.post("/api/metas-lancamentos", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertMetaLancamentoSchema.parse(req.body);
+      const item = await storage.createMetaLancamento(data);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao criar lançamento" });
+    }
+  });
+
+  app.patch("/api/metas-lancamentos/:id", isAuthenticated, async (req, res) => {
+    try {
+      const item = await storage.updateMetaLancamento(parseInt(req.params.id), req.body);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao atualizar lançamento" });
+    }
+  });
+
+  app.delete("/api/metas-lancamentos/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteMetaLancamento(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao remover lançamento" });
     }
   });
 

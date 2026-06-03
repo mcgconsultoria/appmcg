@@ -38,6 +38,7 @@ import Support from "@/pages/Support";
 import Reports from "@/pages/Reports";
 import Vendedores from "@/pages/Vendedores";
 import Operações from "@/pages/Operacoes";
+import MetasPage from "@/pages/Metas";
 import IndicadoresPreVendas from "@/pages/IndicadoresPreVendas";
 import IndicadoresVendas from "@/pages/IndicadoresVendas";
 import IndicadoresPosVendas from "@/pages/IndicadoresPosVendas";
@@ -267,6 +268,7 @@ function Router() {
           <Route path="/indicadores-vendas" component={IndicadoresVendas} />
           <Route path="/indicadores-pos-vendas" component={IndicadoresPosVendas} />
           <Route path="/operações" component={Operações} />
+          <Route path="/metas" component={MetasPage} />
           <Route path="/marketing" component={Marketing} />
           <Route path="/configurações" component={Settings} />
           <Route path="/assinatura" component={Subscription} />

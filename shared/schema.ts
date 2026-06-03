@@ -2704,6 +2704,37 @@ export const insertContratoLogisticoSchema = createInsertSchema(contratosLogisti
 export type ContratoLogistico = typeof contratosLogisticos.$inferSelect;
 export type InsertContratoLogistico = z.infer<typeof insertContratoLogisticoSchema>;
 
+// ============================================================
+// METAS COMERCIAIS
+// ============================================================
+export const metasComerciais = pgTable("metas_comerciais", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  clienteId: integer("cliente_id"),
+  ano: integer("ano").notNull(),
+  mes: integer("mes").notNull(),
+  metaFrete: decimal("meta_frete", { precision: 15, scale: 2 }).default("0"),
+  metaArmazenagem: decimal("meta_armazenagem", { precision: 15, scale: 2 }).default("0"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const metasLancamentos = pgTable("metas_lancamentos", {
+  id: serial("id").primaryKey(),
+  metaId: integer("meta_id").notNull(),
+  data: date("data").notNull(),
+  valorFrete: decimal("valor_frete", { precision: 15, scale: 2 }).default("0"),
+  valorArmazenagem: decimal("valor_armazenagem", { precision: 15, scale: 2 }).default("0"),
+  observacao: text("observacao"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertMetaComercialSchema = createInsertSchema(metasComerciais).omit({ id: true, createdAt: true });
+export const insertMetaLancamentoSchema = createInsertSchema(metasLancamentos).omit({ id: true, createdAt: true });
+export type MetaComercial = typeof metasComerciais.$inferSelect;
+export type InsertMetaComercial = z.infer<typeof insertMetaComercialSchema>;
+export type MetaLancamento = typeof metasLancamentos.$inferSelect;
+export type InsertMetaLancamento = z.infer<typeof insertMetaLancamentoSchema>;
+
 // Insert schemas
 export const insertPermissionDefinitionSchema = createInsertSchema(permissionDefinitions).omit({ id: true, createdAt: true });
 export const insertCompanyRoleSchema = createInsertSchema(companyRoles).omit({ id: true, createdAt: true, updatedAt: true });

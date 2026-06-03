@@ -250,6 +250,12 @@ import {
   contratosLogisticos,
   type ContratoLogistico,
   type InsertContratoLogistico,
+  metasComerciais,
+  metasLancamentos,
+  type MetaComercial,
+  type InsertMetaComercial,
+  type MetaLancamento,
+  type InsertMetaLancamento,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
@@ -320,6 +326,16 @@ export interface IStorage {
   createContratoLogistico(data: InsertContratoLogistico): Promise<ContratoLogistico>;
   updateContratoLogistico(id: number, data: Partial<InsertContratoLogistico>): Promise<ContratoLogistico | undefined>;
   deleteContratoLogistico(id: number): Promise<void>;
+
+  // Metas comerciais
+  getMetasComerciais(companyId: number): Promise<MetaComercial[]>;
+  createMetaComercial(data: InsertMetaComercial): Promise<MetaComercial>;
+  updateMetaComercial(id: number, data: Partial<InsertMetaComercial>): Promise<MetaComercial | undefined>;
+  deleteMetaComercial(id: number): Promise<void>;
+  getMetasLancamentos(metaId: number): Promise<MetaLancamento[]>;
+  createMetaLancamento(data: InsertMetaLancamento): Promise<MetaLancamento>;
+  updateMetaLancamento(id: number, data: Partial<InsertMetaLancamento>): Promise<MetaLancamento | undefined>;
+  deleteMetaLancamento(id: number): Promise<void>;
 
   // Saved route operations
   getSavedRoutes(companyId: number): Promise<SavedRoute[]>;
@@ -3964,6 +3980,43 @@ export class DatabaseStorage implements IStorage {
 
   async deleteContratoLogistico(id: number): Promise<void> {
     await db.delete(contratosLogisticos).where(eq(contratosLogisticos.id, id));
+  }
+
+  async getMetasComerciais(companyId: number): Promise<MetaComercial[]> {
+    return await db.select().from(metasComerciais).where(eq(metasComerciais.companyId, companyId)).orderBy(desc(metasComerciais.ano), desc(metasComerciais.mes));
+  }
+
+  async createMetaComercial(data: InsertMetaComercial): Promise<MetaComercial> {
+    const [item] = await db.insert(metasComerciais).values(data).returning();
+    return item;
+  }
+
+  async updateMetaComercial(id: number, data: Partial<InsertMetaComercial>): Promise<MetaComercial | undefined> {
+    const [item] = await db.update(metasComerciais).set(data).where(eq(metasComerciais.id, id)).returning();
+    return item;
+  }
+
+  async deleteMetaComercial(id: number): Promise<void> {
+    await db.delete(metasLancamentos).where(eq(metasLancamentos.metaId, id));
+    await db.delete(metasComerciais).where(eq(metasComerciais.id, id));
+  }
+
+  async getMetasLancamentos(metaId: number): Promise<MetaLancamento[]> {
+    return await db.select().from(metasLancamentos).where(eq(metasLancamentos.metaId, metaId)).orderBy(metasLancamentos.data);
+  }
+
+  async createMetaLancamento(data: InsertMetaLancamento): Promise<MetaLancamento> {
+    const [item] = await db.insert(metasLancamentos).values(data).returning();
+    return item;
+  }
+
+  async updateMetaLancamento(id: number, data: Partial<InsertMetaLancamento>): Promise<MetaLancamento | undefined> {
+    const [item] = await db.update(metasLancamentos).set(data).where(eq(metasLancamentos.id, id)).returning();
+    return item;
+  }
+
+  async deleteMetaLancamento(id: number): Promise<void> {
+    await db.delete(metasLancamentos).where(eq(metasLancamentos.id, id));
   }
 
   async seedStoreCategories(): Promise<void> {
