@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import {
   Plus, FileText, Clock, Pencil, Trash2, CheckCircle, Send, Printer,
-  Truck, Warehouse, Link2, X, Search
+  Truck, Warehouse, Link2, X, Search, ArrowLeft
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -347,7 +347,13 @@ export default function PropostaPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editing ? "Editar Proposta" : "Nova Proposta Comercial"}</DialogTitle>
+            <div className="flex items-center gap-2">
+              <Button type="button" variant="ghost" size="icon" className="h-8 w-8 shrink-0"
+                onClick={() => setOpen(false)} data-testid="button-voltar-proposta">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <DialogTitle>{editing ? "Editar Proposta" : "Nova Proposta Comercial"}</DialogTitle>
+            </div>
           </DialogHeader>
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
