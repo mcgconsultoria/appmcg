@@ -153,10 +153,10 @@ export default function Landing() {
             <Link href="/diagnóstico" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Diagnóstico Grátis
             </Link>
-            <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/calculadora-frete" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Calculadora Frete
             </Link>
-            <Link href="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/calculadora-armazenagem" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Calculadora Armazenagem
             </Link>
             <Link href="/planos" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-planos-nav">
