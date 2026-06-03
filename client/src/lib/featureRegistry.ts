@@ -935,7 +935,16 @@ export function getManualCategories() {
       title: "Roteiro Comercial",
       description: "Guia completo do processo comercial da plataforma MCG",
       icon: Route,
-      subCategories: comercialSubCategories,
+      subCategories: [
+        ...comercialSubCategories,
+        {
+          id: "administrativo",
+          title: "Administrativo",
+          description: "Meu plano, colaboradores e auditoria da conta",
+          icon: UserRound,
+          items: administrativoItems,
+        },
+      ],
     },
     {
       id: "plataforma-mcg",
@@ -956,13 +965,6 @@ export function getManualCategories() {
           description: "Gestão financeira pessoal do CEO",
           icon: Wallet,
           items: adminpfItems,
-        },
-        {
-          id: "administrativo",
-          title: "Administrativo",
-          description: "Meu plano, colaboradores e auditoria",
-          icon: UserRound,
-          items: administrativoItems,
         },
       ],
     },
