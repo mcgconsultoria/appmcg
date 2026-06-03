@@ -21,8 +21,9 @@ import { ptBR } from "date-fns/locale";
 
 const CATEGORIAS = [
   "Ligação", "Reunião Online", "Reunião Presencial", "Visita Comercial",
+  "Apresentação Comercial", "Follow-up", "Prospecção", "Negociação",
   "Feira", "Evento", "Convenção", "Lançamento", "BID", "Licitação",
-  "Workshop", "Webinar", "Outro",
+  "Workshop", "Webinar", "Treinamento", "Auditoria", "Pós-venda", "Outro",
 ];
 const STATUS_OPTS = ["agendado", "realizado", "cancelado", "adiado"];
 

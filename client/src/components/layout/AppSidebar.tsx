@@ -348,9 +348,12 @@ interface CollapsibleSectionProps {
   userRole?: string | null;
   fullAccessGranted?: boolean | null;
   subtle?: boolean;
+  // Controlled mode (accordion support)
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = false, userPlan, planLoaded = true, userRole, fullAccessGranted, subtle = false }: CollapsibleSectionProps) {
+function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = false, userPlan, planLoaded = true, userRole, fullAccessGranted, subtle = false, isOpen: controlledOpen, onOpenChange: onControlledChange }: CollapsibleSectionProps) {
   const isItemActive = (itemUrl: string) => {
     if (itemUrl === "/admin") {
       return location === "/admin";
@@ -359,17 +362,20 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
   };
 
   const hasActiveItem = items.some(item => isItemActive(item.url));
-
-  const [isOpen, setIsOpen] = useState(defaultOpen || hasActiveItem);
+  const [internalOpen, setInternalOpen] = useState(
+    controlledOpen !== undefined ? controlledOpen : (defaultOpen || hasActiveItem)
+  );
 
   useEffect(() => {
-    if (hasActiveItem) {
-      setIsOpen(true);
+    if (hasActiveItem && controlledOpen === undefined) {
+      setInternalOpen(true);
     }
   }, [location]);
 
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const handleToggle = (open: boolean) => {
-    setIsOpen(open);
+    if (onControlledChange) onControlledChange(open);
+    else setInternalOpen(open);
   };
 
   return (
@@ -467,28 +473,22 @@ const DEFAULT_STORE_CATEGORIES = [
   { title: "M. Veste", url: "/loja/vestuario", icon: Shirt },
 ];
 
-function LojaMcgDynamicSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted }: LojaMcgDynamicSectionProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [wasManuallyToggled, setWasManuallyToggled] = useState(false);
-
-  // Usar categorias fixas para sempre mostrar a loja
+function LojaMcgDynamicSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted, isOpen: controlledOpen, onOpenChange: onControlledChange }: LojaMcgDynamicSectionProps & { isOpen?: boolean; onOpenChange?: (open: boolean) => void }) {
   const items = DEFAULT_STORE_CATEGORIES;
 
-  const isItemActive = (itemUrl: string) => {
-    return location === itemUrl || location.startsWith(itemUrl + "/");
-  };
-  
+  const isItemActive = (itemUrl: string) => location === itemUrl || location.startsWith(itemUrl + "/");
   const hasActiveItem = items.some(item => isItemActive(item.url));
-  
+
+  const [internalOpen, setInternalOpen] = useState(hasActiveItem);
+
   useEffect(() => {
-    if (!wasManuallyToggled) {
-      setIsOpen(hasActiveItem);
-    }
-  }, [hasActiveItem, wasManuallyToggled]);
-  
+    if (hasActiveItem && controlledOpen === undefined) setInternalOpen(true);
+  }, [hasActiveItem]);
+
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const handleToggle = (open: boolean) => {
-    setWasManuallyToggled(true);
-    setIsOpen(open);
+    if (onControlledChange) onControlledChange(open);
+    else setInternalOpen(open);
   };
 
   return (
@@ -534,13 +534,11 @@ function LojaMcgDynamicSection({ location, userPlan, planLoaded = true, userRole
   );
 }
 
-function AdminPJSection({ location, userRole, userPlan, planLoaded = true, fullAccessGranted }: { location: string; userRole?: string; userPlan?: string | null; planLoaded?: boolean; fullAccessGranted?: boolean | null }) {
-  // Filter comercial items - only admin_mcg can see "Aguardando Aprovação" and "Usuarios"
+function AdminPJSection({ location, userRole, userPlan, planLoaded = true, fullAccessGranted, isOpen: controlledOpen, onOpenChange: onControlledChange }: { location: string; userRole?: string; userPlan?: string | null; planLoaded?: boolean; fullAccessGranted?: boolean | null; isOpen?: boolean; onOpenChange?: (open: boolean) => void }) {
   const filteredComercialItems = userRole === 'admin_mcg' 
     ? adminMcgComercialItems 
     : adminMcgComercialItems.filter(item => item.url !== '/admin/aguardando-aprovacao' && item.url !== '/admin/usuarios');
 
-  // Check if any item in Admin PJ sections is currently active
   const allAdminPJItems = [
     ...filteredComercialItems,
     ...adminMcgMarketingItems,
@@ -552,18 +550,27 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true, fullA
   const hasActiveItem = allAdminPJItems.some(item => 
     location === item.url || location.startsWith(item.url + "/")
   );
-  
-  const [isOpen, setIsOpen] = useState(hasActiveItem);
 
-  useEffect(() => {
-    if (hasActiveItem) {
-      setIsOpen(true);
-    }
-  }, [location]);
+  const [internalOpen, setInternalOpen] = useState(hasActiveItem);
+  useEffect(() => { if (hasActiveItem && controlledOpen === undefined) setInternalOpen(true); }, [location]);
 
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const handleToggle = (open: boolean) => {
-    setIsOpen(open);
+    if (onControlledChange) onControlledChange(open);
+    else setInternalOpen(open);
   };
+
+  const getActiveSubGroup = () => {
+    if (filteredComercialItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "comercial";
+    if (adminMcgMarketingItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "marketing";
+    if (adminMcgFinanceiroItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "financeiro";
+    if (adminMcgLojaItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "loja";
+    if (adminMcgSistemaItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "sistema";
+    return null;
+  };
+  const [openSubGroup, setOpenSubGroup] = useState<string | null>(getActiveSubGroup());
+  useEffect(() => { const ag = getActiveSubGroup(); if (ag) setOpenSubGroup(ag); }, [location]);
+  const handleSubToggle = (group: string) => (open: boolean) => setOpenSubGroup(open ? group : null);
 
   return (
     <Collapsible open={isOpen} onOpenChange={handleToggle}>
@@ -591,6 +598,8 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true, fullA
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              isOpen={openSubGroup === "comercial"}
+              onOpenChange={handleSubToggle("comercial")}
             />
             <CollapsibleSection
               title="Marketing"
@@ -601,6 +610,8 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true, fullA
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              isOpen={openSubGroup === "marketing"}
+              onOpenChange={handleSubToggle("marketing")}
             />
             <CollapsibleSection
               title="Financeiro"
@@ -611,6 +622,8 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true, fullA
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              isOpen={openSubGroup === "financeiro"}
+              onOpenChange={handleSubToggle("financeiro")}
             />
             <CollapsibleSection
               title="Loja MCG"
@@ -621,6 +634,8 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true, fullA
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              isOpen={openSubGroup === "loja"}
+              onOpenChange={handleSubToggle("loja")}
             />
             {userRole === 'admin_mcg' && (
               <CollapsibleSection
@@ -632,6 +647,8 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true, fullA
                 planLoaded={planLoaded}
                 userRole={userRole}
                 fullAccessGranted={fullAccessGranted}
+                isOpen={openSubGroup === "sistema"}
+                onOpenChange={handleSubToggle("sistema")}
               />
             )}
           </div>
@@ -674,27 +691,21 @@ const adminPfItems = [
   },
 ];
 
-function AdminPFSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted }: { location: string; userPlan?: string | null; planLoaded?: boolean; userRole?: string; fullAccessGranted?: boolean | null }) {
+function AdminPFSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted, isOpen: controlledOpen, onOpenChange: onControlledChange }: { location: string; userPlan?: string | null; planLoaded?: boolean; userRole?: string; fullAccessGranted?: boolean | null; isOpen?: boolean; onOpenChange?: (open: boolean) => void }) {
   const isItemActive = (itemUrl: string) => {
-    if (itemUrl === "/pessoal") {
-      return location === "/pessoal";
-    }
+    if (itemUrl === "/pessoal") return location === "/pessoal";
     return location === itemUrl || location.startsWith(itemUrl + "/");
   };
   
-  // Check if any item in Admin PF section is currently active
   const hasActiveItem = adminPfItems.some(item => isItemActive(item.url));
-  
-  const [isOpen, setIsOpen] = useState(hasActiveItem);
+  const [internalOpen, setInternalOpen] = useState(hasActiveItem);
 
-  useEffect(() => {
-    if (hasActiveItem) {
-      setIsOpen(true);
-    }
-  }, [location]);
+  useEffect(() => { if (hasActiveItem && controlledOpen === undefined) setInternalOpen(true); }, [location]);
 
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const handleToggle = (open: boolean) => {
-    setIsOpen(open);
+    if (onControlledChange) onControlledChange(open);
+    else setInternalOpen(open);
   };
 
   return (
@@ -748,17 +759,39 @@ interface ComercialSectionProps {
   fullAccessGranted?: boolean | null;
 }
 
-function ComVendasSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted }: ComercialSectionProps) {
+function ComVendasSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted, isOpen: controlledOpen, onOpenChange: onControlledChange }: ComercialSectionProps & { isOpen?: boolean; onOpenChange?: (open: boolean) => void }) {
   const allComItems = [...comPlanejamentoItems, ...comRelacionamentoItems, ...comPrecificacaoItems, ...comGestaoItems];
   const hasActiveItem = allComItems.some(item => location === item.url || location.startsWith(item.url + "/"));
-  const [isOpen, setIsOpen] = useState(hasActiveItem);
+  const [internalOpen, setInternalOpen] = useState(hasActiveItem);
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+
+  const getActiveGroup = () => {
+    if (comPlanejamentoItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "planejamento";
+    if (comPrecificacaoItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "negociacao";
+    if (comRelacionamentoItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "relacionamento";
+    if (comGestaoItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "gestao";
+    return null;
+  };
+
+  const [openGroup, setOpenGroup] = useState<string | null>(getActiveGroup());
 
   useEffect(() => {
-    if (hasActiveItem) setIsOpen(true);
+    if (hasActiveItem && controlledOpen === undefined) setInternalOpen(true);
+    const ag = getActiveGroup();
+    if (ag) setOpenGroup(ag);
   }, [location]);
 
+  const handleGroupToggle = (group: string) => (open: boolean) => {
+    setOpenGroup(open ? group : null);
+  };
+
+  const handleComVendasToggle = (open: boolean) => {
+    if (onControlledChange) onControlledChange(open);
+    else setInternalOpen(open);
+  };
+
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <Collapsible open={isOpen} onOpenChange={handleComVendasToggle}>
       <SidebarGroup>
         <CollapsibleTrigger asChild>
           <button
@@ -783,6 +816,8 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              isOpen={openGroup === "planejamento"}
+              onOpenChange={handleGroupToggle("planejamento")}
             />
             <CollapsibleSection
               title="Negociação"
@@ -793,6 +828,8 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              isOpen={openGroup === "negociacao"}
+              onOpenChange={handleGroupToggle("negociacao")}
             />
             <CollapsibleSection
               title="Relacionamento"
@@ -803,6 +840,8 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              isOpen={openGroup === "relacionamento"}
+              onOpenChange={handleGroupToggle("relacionamento")}
             />
             <CollapsibleSection
               title="Gestão"
@@ -813,6 +852,8 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              isOpen={openGroup === "gestao"}
+              onOpenChange={handleGroupToggle("gestao")}
             />
           </div>
         </CollapsibleContent>
@@ -821,24 +862,32 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
   );
 }
 
-function ComercialSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted }: ComercialSectionProps) {
+function ComercialSection({ location, userPlan, planLoaded = true, userRole, fullAccessGranted, isOpen: controlledOpen, onOpenChange: onControlledChange }: ComercialSectionProps & { isOpen?: boolean; onOpenChange?: (open: boolean) => void }) {
   const allComercialItems = [...preVendasItems, ...comPlanejamentoItems, ...comRelacionamentoItems, ...comPrecificacaoItems, ...comGestaoItems, ...posVendasItems];
 
   const hasActiveItem = allComercialItems.some(item =>
     location === item.url || location.startsWith(item.url + "/")
   );
 
-  const [isOpen, setIsOpen] = useState(hasActiveItem);
+  const [internalOpen, setInternalOpen] = useState(hasActiveItem);
+  useEffect(() => { if (hasActiveItem && controlledOpen === undefined) setInternalOpen(true); }, [location]);
 
-  useEffect(() => {
-    if (hasActiveItem) {
-      setIsOpen(true);
-    }
-  }, [location]);
-
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const handleToggle = (open: boolean) => {
-    setIsOpen(open);
+    if (onControlledChange) onControlledChange(open);
+    else setInternalOpen(open);
   };
+
+  // Accordion for MKT / COM / CAC
+  const getActiveSubSection = () => {
+    if (preVendasItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "mkt";
+    if (posVendasItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "cac";
+    if ([...comPlanejamentoItems, ...comRelacionamentoItems, ...comPrecificacaoItems, ...comGestaoItems].some(i => location === i.url || location.startsWith(i.url + "/"))) return "com";
+    return null;
+  };
+  const [openSubSection, setOpenSubSection] = useState<string | null>(getActiveSubSection());
+  useEffect(() => { const s = getActiveSubSection(); if (s) setOpenSubSection(s); }, [location]);
+  const handleSubToggle = (section: string) => (open: boolean) => setOpenSubSection(open ? section : null);
 
   return (
     <Collapsible open={isOpen} onOpenChange={handleToggle}>
@@ -866,6 +915,8 @@ function ComercialSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              isOpen={openSubSection === "mkt"}
+              onOpenChange={handleSubToggle("mkt")}
             />
             <ComVendasSection
               location={location}
@@ -873,6 +924,8 @@ function ComercialSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              isOpen={openSubSection === "com"}
+              onOpenChange={handleSubToggle("com")}
             />
             <CollapsibleSection
               title="CAC (Pós Vendas)"
@@ -883,6 +936,8 @@ function ComercialSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              isOpen={openSubSection === "cac"}
+              onOpenChange={handleSubToggle("cac")}
             />
           </div>
         </CollapsibleContent>
@@ -905,6 +960,24 @@ export function AppSidebar() {
   
   const planLoaded = !isLoading && user !== undefined;
   const effectivePlan = planLoaded ? user?.selectedPlan : "corporativo";
+
+  // Accordion de nível raiz: só uma seção aberta por vez
+  const getInitialTopSection = () => {
+    const adminPjUrls = ["/usuarios", "/planos", "/assinaturas", "/mensagens", "/configuracoes-sistema", "/relatorios-sistema", "/logs-sistema"];
+    const adminPfUrls = ["/pessoal", "/config-pessoal"];
+    const adminClienteUrls = ["/admin", "/equipe"];
+    const comercialUrls = ["/marketing", "/indicadores-pre-vendas", "/checklist", "/rfi", "/atas", "/fluxograma", "/calculadora-frete", "/calculadora-armazenagem", "/rotas", "/proposta", "/contratos", "/clientes", "/bilaterais", "/segmentos", "/eventos-comerciais", "/calendario-eventos", "/metas", "/pipeline", "/dashboard", "/indicadores-vendas", "/relatorios", "/biblioteca", "/pesquisas", "/indicadores-pos-vendas"];
+    const lojaUrls = ["/loja"];
+    if (adminPjUrls.some(u => location === u || location.startsWith(u + "/"))) return "adminpj";
+    if (adminPfUrls.some(u => location === u || location.startsWith(u + "/"))) return "adminpf";
+    if (adminClienteUrls.some(u => location === u || location.startsWith(u + "/"))) return "admincliente";
+    if (comercialUrls.some(u => location === u || location.startsWith(u + "/"))) return "comercial";
+    if (lojaUrls.some(u => location === u || location.startsWith(u + "/"))) return "loja";
+    return "comercial";
+  };
+  const [openTopSection, setOpenTopSection] = useState<string>(getInitialTopSection());
+  useEffect(() => { setOpenTopSection(getInitialTopSection()); }, [location]);
+  const makeTopToggle = (key: string) => (open: boolean) => setOpenTopSection(open ? key : openTopSection === key ? "" : openTopSection);
 
   return (
     <Sidebar>
@@ -930,11 +1003,11 @@ export function AppSidebar() {
       <SidebarContent>
 
         {user?.role === "admin_mcg" && (
-          <AdminPJSection location={location} userRole={user?.role} userPlan={effectivePlan} planLoaded={planLoaded} fullAccessGranted={user?.fullAccessGranted} />
+          <AdminPJSection location={location} userRole={user?.role} userPlan={effectivePlan} planLoaded={planLoaded} fullAccessGranted={user?.fullAccessGranted} isOpen={openTopSection === "adminpj"} onOpenChange={makeTopToggle("adminpj")} />
         )}
 
         {user?.role === "admin_mcg" && (
-          <AdminPFSection location={location} userPlan={effectivePlan} planLoaded={planLoaded} userRole={user?.role} fullAccessGranted={user?.fullAccessGranted} />
+          <AdminPFSection location={location} userPlan={effectivePlan} planLoaded={planLoaded} userRole={user?.role} fullAccessGranted={user?.fullAccessGranted} isOpen={openTopSection === "adminpf"} onOpenChange={makeTopToggle("adminpf")} />
         )}
 
         {(user?.role === "admin" || user?.role === "admin_mcg") && (
@@ -947,6 +1020,8 @@ export function AppSidebar() {
             planLoaded={planLoaded}
             userRole={user?.role}
             fullAccessGranted={user?.fullAccessGranted}
+            isOpen={openTopSection === "admincliente"}
+            onOpenChange={makeTopToggle("admincliente")}
           />
         )}
 
@@ -956,6 +1031,8 @@ export function AppSidebar() {
           planLoaded={planLoaded}
           userRole={user?.role}
           fullAccessGranted={user?.fullAccessGranted}
+          isOpen={openTopSection === "comercial"}
+          onOpenChange={makeTopToggle("comercial")}
         />
 
         <LojaMcgDynamicSection
@@ -964,6 +1041,8 @@ export function AppSidebar() {
           planLoaded={planLoaded}
           userRole={user?.role}
           fullAccessGranted={user?.fullAccessGranted}
+          isOpen={openTopSection === "loja"}
+          onOpenChange={makeTopToggle("loja")}
         />
 
         <SidebarGroup>

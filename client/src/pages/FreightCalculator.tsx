@@ -66,7 +66,9 @@ import { getCitiesByState } from "@/lib/brazilCities";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Client } from "@shared/schema";
+import type { Client, FreightCalculation } from "@shared/schema";
+import { History, ChevronDown } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface AdditionalCharge {
   id: string;
@@ -259,6 +261,11 @@ export default function FreightCalculator() {
     queryKey: ["/api/route-calculation/status"],
     retry: false,
     staleTime: 60 * 1000,
+  });
+
+  const { data: savedFreightCalcs = [] } = useQuery<FreightCalculation[]>({
+    queryKey: ["/api/freight-calculations"],
+    enabled: isAuthenticated,
   });
 
   const [loadingRouteCalc, setLoadingRouteCalc] = useState<Record<string, boolean>>({});
@@ -2269,6 +2276,48 @@ export default function FreightCalculator() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {isAuthenticated && savedFreightCalcs.length > 0 && (
+          <Collapsible defaultOpen={false}>
+            <Card>
+              <CollapsibleTrigger asChild>
+                <CardHeader className="pb-3 cursor-pointer hover:bg-muted/50 transition-colors rounded-t-lg">
+                  <CardTitle className="text-base flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <History className="h-4 w-4" />
+                      Histórico de Cálculos Salvos ({savedFreightCalcs.length})
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  </CardTitle>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="pt-0">
+                  <div className="divide-y">
+                    {savedFreightCalcs.slice(0, 20).map((calc) => (
+                      <div key={calc.id} className="py-3 flex items-center justify-between gap-3" data-testid={`row-freight-history-${calc.id}`}>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm truncate">
+                            {calc.numero ? `#${String(calc.numero).padStart(4,"0")} — ` : ""}{calc.titulo || "Cálculo sem título"}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {calc.originCity && calc.destinationCity ? `${calc.originCity}/${calc.originState} → ${calc.destinationCity}/${calc.destinationState}` : ""}
+                            {calc.createdAt ? ` · ${new Date(calc.createdAt).toLocaleDateString("pt-BR")}` : ""}
+                          </p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="font-semibold text-sm">
+                            {calc.totalValue ? Number(calc.totalValue).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) : "—"}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+        )}
       </div>
     </AppLayout>
   );

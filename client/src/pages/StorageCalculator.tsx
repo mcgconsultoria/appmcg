@@ -47,7 +47,9 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { ClientCombobox } from "@/components/ClientCombobox";
-import type { Client } from "@shared/schema";
+import type { Client, StorageCalculation } from "@shared/schema";
+import { History, ChevronDown } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface StorageFormData {
   area: string;
@@ -364,6 +366,11 @@ export default function StorageCalculator() {
 
   const { data: clients } = useQuery<Client[]>({
     queryKey: ["/api/clients"],
+    enabled: isAuthenticated,
+  });
+
+  const { data: savedStorageCalcs = [] } = useQuery<StorageCalculation[]>({
+    queryKey: ["/api/storage-calculations"],
     enabled: isAuthenticated,
   });
 
@@ -1213,6 +1220,48 @@ export default function StorageCalculator() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {isAuthenticated && savedStorageCalcs.length > 0 && (
+        <Collapsible defaultOpen={false}>
+          <Card>
+            <CollapsibleTrigger asChild>
+              <CardHeader className="pb-3 cursor-pointer hover:bg-muted/50 transition-colors rounded-t-lg">
+                <CardTitle className="text-base flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <History className="h-4 w-4" />
+                    Histórico de Cálculos Salvos ({savedStorageCalcs.length})
+                  </div>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </CardTitle>
+              </CardHeader>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <CardContent className="pt-0">
+                <div className="divide-y">
+                  {savedStorageCalcs.slice(0, 20).map((calc) => (
+                    <div key={calc.id} className="py-3 flex items-center justify-between gap-3" data-testid={`row-storage-history-${calc.id}`}>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm truncate">
+                          {calc.numero ? `#${String(calc.numero).padStart(4,"0")} — ` : ""}{calc.titulo || "Cálculo sem título"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {calc.productType ? `${calc.productType} · ` : ""}{calc.area ? `${calc.area} m² · ` : ""}{calc.period ? `${calc.period} dias` : ""}
+                          {calc.createdAt ? ` · ${new Date(calc.createdAt).toLocaleDateString("pt-BR")}` : ""}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="font-semibold text-sm">
+                          {calc.totalValue ? Number(calc.totalValue).toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) : "—"}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </CollapsibleContent>
+          </Card>
+        </Collapsible>
+      )}
     </AppLayout>
   );
 }
