@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearch, useLocation } from "wouter";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { getManualCategories } from "@/lib/featureRegistry";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ManualItem {
   id: string;
@@ -42,9 +43,16 @@ interface ManualCategory {
   subCategories: ManualSubCategory[];
 }
 
-const manualCategories = getManualCategories() as ManualCategory[];
-
 export default function ManualApp() {
+  const { user } = useAuth();
+  const isMcgAdmin = user?.role === "admin_mcg";
+
+  const manualCategories = useMemo(() => {
+    const all = getManualCategories() as ManualCategory[];
+    if (isMcgAdmin) return all;
+    return all.filter((cat) => cat.id !== "plataforma-mcg");
+  }, [isMcgAdmin]);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<ManualCategory | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<ManualSubCategory | null>(null);
