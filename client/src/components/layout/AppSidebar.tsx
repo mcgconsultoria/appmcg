@@ -794,7 +794,7 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               fullAccessGranted={fullAccessGranted}
             />
             <CollapsibleSection
-              title="Precificação e Propostas"
+              title="Negociação"
               icon={Calculator}
               items={comPrecificacaoItems}
               location={location}
@@ -804,7 +804,7 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               fullAccessGranted={fullAccessGranted}
             />
             <CollapsibleSection
-              title="Gestão e Controle"
+              title="Gestão"
               icon={BarChart3}
               items={comGestaoItems}
               location={location}
