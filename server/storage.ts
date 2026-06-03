@@ -258,7 +258,7 @@ import {
   type InsertMetaLancamento,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
+import { eq, desc, sql, and, gte, lt, lte, ne, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -333,6 +333,7 @@ export interface IStorage {
   updateMetaComercial(id: number, data: Partial<InsertMetaComercial>): Promise<MetaComercial | undefined>;
   deleteMetaComercial(id: number): Promise<void>;
   getMetasLancamentos(metaId: number): Promise<MetaLancamento[]>;
+  getAllMetasLancamentos(companyId: number): Promise<MetaLancamento[]>;
   createMetaLancamento(data: InsertMetaLancamento): Promise<MetaLancamento>;
   updateMetaLancamento(id: number, data: Partial<InsertMetaLancamento>): Promise<MetaLancamento | undefined>;
   deleteMetaLancamento(id: number): Promise<void>;
@@ -4003,6 +4004,13 @@ export class DatabaseStorage implements IStorage {
 
   async getMetasLancamentos(metaId: number): Promise<MetaLancamento[]> {
     return await db.select().from(metasLancamentos).where(eq(metasLancamentos.metaId, metaId)).orderBy(metasLancamentos.data);
+  }
+
+  async getAllMetasLancamentos(companyId: number): Promise<MetaLancamento[]> {
+    const metaRows = await db.select({ id: metasComerciais.id }).from(metasComerciais).where(eq(metasComerciais.companyId, companyId));
+    if (metaRows.length === 0) return [];
+    const ids = metaRows.map((m) => m.id);
+    return await db.select().from(metasLancamentos).where(inArray(metasLancamentos.metaId, ids)).orderBy(metasLancamentos.data);
   }
 
   async createMetaLancamento(data: InsertMetaLancamento): Promise<MetaLancamento> {

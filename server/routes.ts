@@ -8133,6 +8133,15 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/metas-lancamentos", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getAllMetasLancamentos(req.user!.companyId!);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar lançamentos" });
+    }
+  });
+
   app.get("/api/metas-lancamentos/:metaId", isAuthenticated, async (req, res) => {
     try {
       const items = await storage.getMetasLancamentos(parseInt(req.params.metaId));
