@@ -231,6 +231,19 @@ export const featureRegistry: FeatureItem[] = [
     },
   },
   {
+    id: "com-rotas",
+    title: "Rotas",
+    url: "/rotas",
+    icon: Route,
+    subCategory: "com",
+    comGroup: "precificacao",
+    manual: {
+      title: "Rotas Salvas",
+      description: "Gerenciamento de rotas de entrega",
+      type: "pdf",
+    },
+  },
+  {
     id: "com-proposta",
     title: "Proposta",
     url: "/proposta",
@@ -268,19 +281,6 @@ export const featureRegistry: FeatureItem[] = [
     manual: {
       title: "Pipeline de Vendas",
       description: "Acompanhamento do funil comercial",
-      type: "pdf",
-    },
-  },
-  {
-    id: "com-rotas",
-    title: "Rotas",
-    url: "/rotas",
-    icon: Route,
-    subCategory: "com",
-    comGroup: "gestao",
-    manual: {
-      title: "Rotas Salvas",
-      description: "Gerenciamento de rotas de entrega",
       type: "pdf",
     },
   },
