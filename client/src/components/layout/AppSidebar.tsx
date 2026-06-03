@@ -117,7 +117,7 @@ const adminMcgComercialItems = [
     icon: Users,
   },
   {
-    title: "Comercial",
+    title: "Pipeline",
     url: "/admin/comercial",
     icon: Briefcase,
   },
@@ -142,7 +142,7 @@ const adminMcgComercialItems = [
     icon: Rocket,
   },
   {
-    title: "Diagnóstico Leads",
+    title: "Dashboard",
     url: "/admin/leads-diagnóstico",
     icon: Search,
   },
