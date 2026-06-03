@@ -563,7 +563,7 @@ function AdminPJSection({ location, userRole, userPlan, planLoaded = true, fullA
   const getActiveSubGroup = () => {
     if (filteredComercialItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "comercial";
     if (adminMcgMarketingItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "marketing";
-    if (adminMcgFinanceiroItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "financeiro";
+    if (adminMcgFinanceiroItems.some(i => location === i.url || (i.url.length > 6 && location.startsWith(i.url + "/")))) return "financeiro";
     if (adminMcgLojaItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "loja";
     if (adminMcgSistemaItems.some(i => location === i.url || location.startsWith(i.url + "/"))) return "sistema";
     return null;
