@@ -783,7 +783,6 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
-              subtle
             />
             <CollapsibleSection
               title="Relacionamento"
@@ -794,7 +793,6 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
-              subtle
             />
             <CollapsibleSection
               title="Negociação"
@@ -805,7 +803,6 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
-              subtle
             />
             <CollapsibleSection
               title="Gestão"
@@ -816,7 +813,6 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
-              subtle
             />
           </div>
         </CollapsibleContent>
