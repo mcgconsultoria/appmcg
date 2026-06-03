@@ -1044,7 +1044,7 @@ export function AppSidebar() {
           <AdminPFSection location={location} userPlan={effectivePlan} planLoaded={planLoaded} userRole={user?.role} fullAccessGranted={user?.fullAccessGranted} isOpen={openTopSection === "adminpf"} onOpenChange={makeTopToggle("adminpf")} />
         )}
 
-        {(user?.role === "admin" || user?.role === "admin_mcg") && (
+        {(user?.role === "admin" || user?.role === "admin_mcg" || user?.perfilConta === "administrador") && (
           <CollapsibleSection
             title="Administrativo"
             icon={UserCog}
