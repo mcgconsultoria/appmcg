@@ -153,10 +153,10 @@ export default function Landing() {
             <Link href="/diagnóstico" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Diagnóstico Grátis
             </Link>
-            <Link href="/calculadora-frete" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href={isAuthenticated ? "/calculadora-frete" : "/login"} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Calculadora Frete
             </Link>
-            <Link href="/calculadora-armazenagem" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href={isAuthenticated ? "/calculadora-armazenagem" : "/login"} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Calculadora Armazenagem
             </Link>
             <Link href="/planos" className="text-sm text-muted-foreground hover:text-foreground transition-colors" data-testid="link-planos-nav">
@@ -358,7 +358,7 @@ export default function Landing() {
             <p className="text-primary-foreground/80 max-w-2xl mx-auto mb-8">
               Comece agora e tenha acesso ao sistema completo de gestão para empresas de logística
             </p>
-            <Link href="/login">
+            <Link href={isAuthenticated ? "/dashboard" : "/login"}>
               <Button size="lg" variant="secondary" className="gap-2" data-testid="button-cta-start">
                 Acessar o sistema
                 <ArrowRight className="h-4 w-4" />
