@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Download, FileImage, FileText, Palette, Type } from "lucide-react";
 import logoMcg from "@assets/logo_mcg_principal.png";
-import { AdminLayout } from "@/components/AdminLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 interface BrandKitProps {
   isAdmin?: boolean;
@@ -163,9 +163,5 @@ export default function BrandKit({ isAdmin = false }: BrandKitProps) {
     </div>
   );
 
-  if (isAdmin) {
-    return <AdminLayout>{content}</AdminLayout>;
-  }
-
-  return content;
+  return <AppLayout title="Kit da Marca">{content}</AppLayout>;
 }

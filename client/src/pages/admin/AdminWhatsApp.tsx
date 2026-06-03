@@ -33,7 +33,6 @@ import {
   CheckCircle,
   AlertCircle,
   Smartphone,
-  ChevronRight,
   MessageCircle,
   Headphones,
   HelpCircle,
@@ -43,7 +42,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { SiWhatsapp } from "react-icons/si";
-import { Link } from "wouter";
+
 
 const stepTypeConfig = {
   welcome: { label: "Boas-vindas", icon: MessageCircle, color: "bg-green-500" },
@@ -834,66 +833,43 @@ export default function AdminWhatsApp() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Link href="/admin-mcg">
-              <Button variant="ghost" size="sm">
-                <ChevronRight className="w-4 h-4 mr-1 rotate-180" />
-                Voltar
-              </Button>
-            </Link>
-            <div className="flex items-center gap-2">
-              <SiWhatsapp className="w-6 h-6 text-green-500" />
-              <h1 className="text-xl font-bold">WhatsApp Business</h1>
-            </div>
-          </div>
-          <Badge variant="outline" className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-green-500" />
-            Integracão Ativa
-          </Badge>
-        </div>
-      </header>
+    <AppLayout title="WhatsApp Business">
+      <Tabs defaultValue="journey" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="journey" className="flex items-center gap-2" data-testid="tab-journey">
+            <MessageCircle className="w-4 h-4" />
+            Jornada
+          </TabsTrigger>
+          <TabsTrigger value="config" className="flex items-center gap-2" data-testid="tab-config">
+            <Settings className="w-4 h-4" />
+            Configuração
+          </TabsTrigger>
+          <TabsTrigger value="agents" className="flex items-center gap-2" data-testid="tab-agents">
+            <Users className="w-4 h-4" />
+            Agentes
+          </TabsTrigger>
+          <TabsTrigger value="conversations" className="flex items-center gap-2" data-testid="tab-conversations">
+            <MessageSquare className="w-4 h-4" />
+            Conversas
+          </TabsTrigger>
+        </TabsList>
 
-      <main className="max-w-screen-xl mx-auto px-6 py-8">
-        <Tabs defaultValue="journey" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="journey" className="flex items-center gap-2" data-testid="tab-journey">
-              <MessageCircle className="w-4 h-4" />
-              Jornada
-            </TabsTrigger>
-            <TabsTrigger value="config" className="flex items-center gap-2" data-testid="tab-config">
-              <Settings className="w-4 h-4" />
-              Configuração
-            </TabsTrigger>
-            <TabsTrigger value="agents" className="flex items-center gap-2" data-testid="tab-agents">
-              <Users className="w-4 h-4" />
-              Agentes
-            </TabsTrigger>
-            <TabsTrigger value="conversations" className="flex items-center gap-2" data-testid="tab-conversations">
-              <MessageSquare className="w-4 h-4" />
-              Conversas
-            </TabsTrigger>
-          </TabsList>
+        <TabsContent value="journey">
+          <JourneyMap steps={journeySteps} />
+        </TabsContent>
 
-          <TabsContent value="journey">
-            <JourneyMap steps={journeySteps} />
-          </TabsContent>
+        <TabsContent value="config">
+          <ConfigSection />
+        </TabsContent>
 
-          <TabsContent value="config">
-            <ConfigSection />
-          </TabsContent>
+        <TabsContent value="agents">
+          <AgentsSection />
+        </TabsContent>
 
-          <TabsContent value="agents">
-            <AgentsSection />
-          </TabsContent>
-
-          <TabsContent value="conversations">
-            <ConversationsSection />
-          </TabsContent>
-        </Tabs>
-      </main>
-    </div>
+        <TabsContent value="conversations">
+          <ConversationsSection />
+        </TabsContent>
+      </Tabs>
+    </AppLayout>
   );
 }

@@ -963,16 +963,16 @@ export function AppSidebar() {
 
   // Accordion de nível raiz: só uma seção aberta por vez
   const getInitialTopSection = () => {
-    const adminPjUrls = ["/usuarios", "/planos", "/assinaturas", "/mensagens", "/configuracoes-sistema", "/relatorios-sistema", "/logs-sistema"];
-    const adminPfUrls = ["/pessoal", "/config-pessoal"];
-    const adminClienteUrls = ["/admin", "/equipe"];
-    const comercialUrls = ["/marketing", "/indicadores-pre-vendas", "/checklist", "/rfi", "/atas", "/fluxograma", "/calculadora-frete", "/calculadora-armazenagem", "/rotas", "/proposta", "/contratos", "/clientes", "/bilaterais", "/segmentos", "/eventos-comerciais", "/calendario-eventos", "/metas", "/pipeline", "/dashboard", "/indicadores-vendas", "/relatorios", "/biblioteca", "/pesquisas", "/indicadores-pos-vendas"];
-    const lojaUrls = ["/loja"];
-    if (adminPjUrls.some(u => location === u || location.startsWith(u + "/"))) return "adminpj";
-    if (adminPfUrls.some(u => location === u || location.startsWith(u + "/"))) return "adminpf";
-    if (adminClienteUrls.some(u => location === u || location.startsWith(u + "/"))) return "admincliente";
-    if (comercialUrls.some(u => location === u || location.startsWith(u + "/"))) return "comercial";
-    if (lojaUrls.some(u => location === u || location.startsWith(u + "/"))) return "loja";
+    // AdminPF: páginas pessoais
+    if (location.startsWith("/pessoal")) return "adminpf";
+    // Administrativo (cliente): apenas URLs específicas dessa seção
+    const adminClienteOnly = ["/admin/meu-plano", "/vendedores", "/logs-auditoria"];
+    if (adminClienteOnly.some(u => location === u || location.startsWith(u + "/"))) return "admincliente";
+    // AdminPJ: qualquer outra página /admin/*
+    if (location === "/admin" || location.startsWith("/admin/")) return "adminpj";
+    // Loja
+    if (location.startsWith("/loja")) return "loja";
+    // Comercial (padrão)
     return "comercial";
   };
   const [openTopSection, setOpenTopSection] = useState<string>(getInitialTopSection());
