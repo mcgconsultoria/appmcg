@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useLocation } from "wouter";
-import { PublicLayout } from "@/components/layout/PublicLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -702,11 +702,7 @@ export default function FreightCalculator() {
   );
 
   return (
-    <PublicLayout
-      title="Calculadora de Frete"
-      subtitle="Calcule fretes com impostos, taxas e tabela ANTT"
-      backHref="/calculadoras"
-    >
+    <AppLayout>
       <div className="space-y-6">
         {routes.map((route, index) => {
           const calc = routeCalculations.find((c) => c.route.id === route.id);
@@ -2274,6 +2270,6 @@ export default function FreightCalculator() {
           </DialogContent>
         </Dialog>
       </div>
-    </PublicLayout>
+    </AppLayout>
   );
 }
