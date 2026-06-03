@@ -84,6 +84,7 @@ import Ebook from "@/pages/Ebook";
 import ManualApp from "@/pages/ManualApp";
 import Calculadoras from "@/pages/Calculadoras";
 import FluxogramaComercial from "@/pages/FluxogramaComercial";
+import Atualizacoes from "@/pages/Atualizacoes";
 import Bilaterais from "@/pages/Bilaterais";
 import Segmentos from "@/pages/Segmentos";
 import EventosComerciais from "@/pages/EventosComerciais";
@@ -279,6 +280,7 @@ function Router() {
           <Route path="/pesquisas" component={Pesquisas} />
           <Route path="/admin-cliente" component={AdminCliente} />
           <Route path="/logs-auditoria" component={AuditLogs} />
+          <Route path="/atualizacoes" component={Atualizacoes} />
           <Route path="/suporte" component={Support} />
           <Route path="/faleconosco" component={Support} />
         </>

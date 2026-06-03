@@ -48,6 +48,7 @@ import {
   FileText,
   Palette,
   FileSignature,
+  Bell,
   Rocket,
   Search,
   PieChart,
@@ -102,6 +103,11 @@ const adminClienteItems = [
     title: "Logs de Auditoria",
     url: "/logs-auditoria",
     icon: Activity,
+  },
+  {
+    title: "Atualizações",
+    url: "/atualizacoes",
+    icon: Bell,
   },
 ];
 
@@ -275,6 +281,7 @@ const FREE_PLAN_ALLOWED_URLS = [
   "/admin/meu-plano",
   "/vendedores",
   "/logs-auditoria",
+  "/atualizacoes",
   "/loja",
 ];
 
@@ -991,7 +998,7 @@ export function AppSidebar() {
     // AdminPF: páginas pessoais
     if (location.startsWith("/pessoal")) return "adminpf";
     // Administrativo (cliente): apenas URLs específicas dessa seção
-    const adminClienteOnly = ["/admin/meu-plano", "/vendedores", "/logs-auditoria"];
+    const adminClienteOnly = ["/admin/meu-plano", "/vendedores", "/logs-auditoria", "/atualizacoes"];
     if (adminClienteOnly.some(u => location === u || location.startsWith(u + "/"))) return "admincliente";
     // AdminPJ: qualquer outra página /admin/*
     if (location === "/admin" || location.startsWith("/admin/")) return "adminpj";

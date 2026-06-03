@@ -31,6 +31,7 @@ const C = {
   mkt:      { border: "#ea580c", bg: "#fed7aa", text: "#9a3412", phase: "#f97316" },
   com:      { border: "#2563eb", bg: "#bfdbfe", text: "#1e40af", phase: "#3b82f6" },
   cac:      { border: "#16a34a", bg: "#bbf7d0", text: "#166534", phase: "#22c55e" },
+  adm:      { border: "#64748b", bg: "#f1f5f9", text: "#334155", phase: "#64748b" },
   central:  { border: "#7c3aed", bg: "#8b5cf6", text: "#ffffff", phase: "#8b5cf6" },
   group:    { border: "#94a3b8", bg: "#f1f5f9", text: "#334155" },
 };
@@ -59,6 +60,7 @@ const CX = 760;      // central x
 const MKT_X = 60;
 const COM_X = 760;
 const CAC_X = 1560;
+const ADM_X = 1960;
 
 const GROUP_X: Record<string, number> = {
   planejamento: 440,
@@ -74,6 +76,7 @@ const PHASE_Y  = 160;
 const CENTRAL_Y = 30;
 const MKT_ITEM_Y0 = 290;
 const CAC_ITEM_Y0 = 290;
+const ADM_ITEM_Y0 = 290;
 
 // ── Nodes ────────────────────────────────────────────────────────────────────
 const defaultNodes: Node[] = [
@@ -284,6 +287,38 @@ const defaultNodes: Node[] = [
     data: { label: "Indicadores", area: "cac", link: "/indicadores-pos-vendas" },
     style: itemStyle(C.cac),
   },
+
+  // ── Phase: ADM (Administrativo) ──
+  {
+    id: "adm",
+    position: { x: ADM_X, y: PHASE_Y },
+    data: { label: "ADMINISTRATIVO", area: "adm" },
+    style: phaseStyle(C.adm),
+  },
+  {
+    id: "adm-meu-plano",
+    position: { x: ADM_X - 10, y: ADM_ITEM_Y0 },
+    data: { label: "Meu Plano", area: "adm", link: "/admin/meu-plano" },
+    style: itemStyle(C.adm),
+  },
+  {
+    id: "adm-colaboradores",
+    position: { x: ADM_X - 10, y: ADM_ITEM_Y0 + ITEM_DY },
+    data: { label: "Colaboradores", area: "adm", link: "/vendedores" },
+    style: itemStyle(C.adm),
+  },
+  {
+    id: "adm-logs",
+    position: { x: ADM_X - 10, y: ADM_ITEM_Y0 + ITEM_DY * 2 },
+    data: { label: "Logs de Auditoria", area: "adm", link: "/logs-auditoria" },
+    style: itemStyle(C.adm),
+  },
+  {
+    id: "adm-atualizacoes",
+    position: { x: ADM_X - 10, y: ADM_ITEM_Y0 + ITEM_DY * 3 },
+    data: { label: "Atualizações", area: "adm", link: "/atualizacoes" },
+    style: itemStyle(C.adm),
+  },
 ];
 
 // ── Edges ────────────────────────────────────────────────────────────────────
@@ -297,10 +332,12 @@ const defaultEdges: Edge[] = [
   mkEdge("e-c-mkt", "central", "mkt", C.mkt.phase, true),
   mkEdge("e-c-com", "central", "com", C.com.phase, true),
   mkEdge("e-c-cac", "central", "cac", C.cac.phase, true),
+  mkEdge("e-c-adm", "central", "adm", C.adm.phase, true),
 
   // flow
   mkEdge("e-mkt-com", "mkt", "com", "#a855f7", true, true),
   mkEdge("e-com-cac", "com", "cac", "#a855f7", true, true),
+  mkEdge("e-cac-adm", "cac", "adm", "#a855f7", true, true),
 
   // MKT items
   mkEdge("e-mkt-marketing",    "mkt", "mkt-marketing",    C.mkt.phase),
@@ -343,6 +380,12 @@ const defaultEdges: Edge[] = [
   // CAC items
   mkEdge("e-cac-pesquisas",    "cac", "cac-pesquisas",    C.cac.phase),
   mkEdge("e-cac-indicadores",  "cac", "cac-indicadores",  C.cac.phase),
+
+  // ADM items
+  mkEdge("e-adm-meu-plano",     "adm", "adm-meu-plano",     C.adm.phase),
+  mkEdge("e-adm-colaboradores", "adm", "adm-colaboradores", C.adm.phase),
+  mkEdge("e-adm-logs",          "adm", "adm-logs",          C.adm.phase),
+  mkEdge("e-adm-atualizacoes",  "adm", "adm-atualizacoes",  C.adm.phase),
 ];
 
 // ── Component ────────────────────────────────────────────────────────────────

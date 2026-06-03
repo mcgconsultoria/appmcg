@@ -817,6 +817,18 @@ export const featureRegistry: FeatureItem[] = [
       type: "pdf",
     },
   },
+  {
+    id: "adm-atualizacoes",
+    title: "Atualizações",
+    url: "/atualizacoes",
+    icon: HeadphonesIcon,
+    subCategory: "administrativo",
+    manual: {
+      title: "Atualizações da Plataforma",
+      description: "Histórico de novas funcionalidades e melhorias lançadas na plataforma MCG",
+      type: "article",
+    },
+  },
 ];
 
 export function getSidebarItems(subCategory: "mkt" | "com" | "cac") {
