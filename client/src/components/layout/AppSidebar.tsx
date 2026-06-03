@@ -785,9 +785,9 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               fullAccessGranted={fullAccessGranted}
             />
             <CollapsibleSection
-              title="Relacionamento"
-              icon={Users}
-              items={comRelacionamentoItems}
+              title="Negociação"
+              icon={Calculator}
+              items={comPrecificacaoItems}
               location={location}
               userPlan={userPlan}
               planLoaded={planLoaded}
@@ -795,9 +795,9 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               fullAccessGranted={fullAccessGranted}
             />
             <CollapsibleSection
-              title="Negociação"
-              icon={Calculator}
-              items={comPrecificacaoItems}
+              title="Relacionamento"
+              icon={Users}
+              items={comRelacionamentoItems}
               location={location}
               userPlan={userPlan}
               planLoaded={planLoaded}
