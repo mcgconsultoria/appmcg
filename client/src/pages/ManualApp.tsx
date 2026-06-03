@@ -9,8 +9,6 @@ import {
   Search,
   Download,
   ExternalLink,
-  PlayCircle,
-  BookOpen,
   Route,
   ChevronRight,
   ArrowLeft,
@@ -33,6 +31,7 @@ interface ManualSubCategory {
   description: string;
   icon: typeof Route;
   items: ManualItem[];
+  subCategories?: ManualSubCategory[];
 }
 
 interface ManualCategory {
@@ -48,42 +47,47 @@ const manualCategories = getManualCategories() as ManualCategory[];
 export default function ManualApp() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<ManualCategory | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<ManualSubCategory | null>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<ManualSubCategory | null>(null);
   const [selectedItem, setSelectedItem] = useState<ManualItem | null>(null);
   const searchString = useSearch();
   const [, setLocation] = useLocation();
 
-  // Processar parâmetros da URL para navegação direta
   useEffect(() => {
     const params = new URLSearchParams(searchString);
     const subParam = params.get("sub");
     const itemParam = params.get("item");
-    
+
     if (subParam) {
-      // Encontrar a categoria principal (Roteiro Comercial)
-      const category = manualCategories.find(cat => 
-        cat.subCategories.some(sub => sub.id === subParam)
-      );
-      
-      if (category) {
-        setSelectedCategory(category);
-        
-        // Encontrar a subcategoria
-        const subCategory = category.subCategories.find(sub => sub.id === subParam);
-        if (subCategory) {
-          setSelectedSubCategory(subCategory);
-          
-          // Se tiver itemParam, encontrar e selecionar o item diretamente
+      for (const cat of manualCategories) {
+        // Check direct subcategories
+        const directSub = cat.subCategories.find(s => s.id === subParam);
+        if (directSub) {
+          setSelectedCategory(cat);
+          setSelectedGroup(null);
+          setSelectedSubCategory(directSub);
           if (itemParam) {
-            const item = subCategory.items.find(i => i.id === itemParam);
-            if (item) {
-              setSelectedItem(item);
+            const item = directSub.items.find(i => i.id === itemParam);
+            if (item) setSelectedItem(item);
+          }
+          break;
+        }
+        // Check inside groups (subCategories that have subCategories)
+        for (const group of cat.subCategories) {
+          if (!group.subCategories) continue;
+          const nestedSub = group.subCategories.find(s => s.id === subParam);
+          if (nestedSub) {
+            setSelectedCategory(cat);
+            setSelectedGroup(group);
+            setSelectedSubCategory(nestedSub);
+            if (itemParam) {
+              const item = nestedSub.items.find(i => i.id === itemParam);
+              if (item) setSelectedItem(item);
             }
+            break;
           }
         }
       }
-      
-      // Limpar os parâmetros da URL após processar
       setLocation("/manual-app", { replace: true });
     }
   }, [searchString, setLocation]);
@@ -93,34 +97,43 @@ export default function ManualApp() {
     item.description.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
+  const filteredGroupSubs = selectedGroup?.subCategories?.filter((sub) =>
+    sub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    sub.description.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
   const filteredSubCategories = selectedCategory?.subCategories.filter((sub) =>
     sub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     sub.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    sub.items.some(item => 
+    (sub.items || []).some(item =>
       item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(searchTerm.toLowerCase())
+    ) ||
+    (sub.subCategories || []).some(ss =>
+      ss.title.toLowerCase().includes(searchTerm.toLowerCase())
     )
-  ) || [];
+  );
 
   const filteredCategories = manualCategories.filter((cat) =>
     cat.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     cat.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cat.subCategories.some(sub => 
+    cat.subCategories.some(sub =>
       sub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sub.items.some(item => item.title.toLowerCase().includes(searchTerm.toLowerCase()))
+      (sub.items || []).some(item => item.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (sub.subCategories || []).some(ss => ss.title.toLowerCase().includes(searchTerm.toLowerCase()))
     )
   );
 
-  // Nível 4: Item específico selecionado
+  // ── Nível 4: Item específico ─────────────────────────────────────────────
   if (selectedItem && selectedSubCategory) {
     const Icon = selectedItem.icon;
     return (
       <AppLayout title="Manual do APP" subtitle="Documentação e tutoriais da plataforma MCG">
         <div className="space-y-6">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setSelectedItem(null)}
               data-testid="button-back-item"
             >
@@ -151,7 +164,6 @@ export default function ManualApp() {
                     Tipo: {selectedItem.type === "pdf" ? "Documento PDF" : selectedItem.type === "video" ? "Vídeo Tutorial" : "Artigo"}
                   </p>
                 </div>
-                
                 <div className="flex gap-3">
                   {selectedItem.downloadUrl ? (
                     <Button asChild>
@@ -175,12 +187,11 @@ export default function ManualApp() {
                     </Button>
                   )}
                 </div>
-
                 <div className="mt-6 p-4 border rounded-lg">
                   <h3 className="font-medium mb-2">Conteúdo do Manual</h3>
                   <p className="text-sm text-muted-foreground">
-                    O conteúdo detalhado deste manual estará disponível em breve. 
-                    Estamos preparando materiais completos com instruções passo-a-passo, 
+                    O conteúdo detalhado deste manual estará disponível em breve.
+                    Estamos preparando materiais completos com instruções passo-a-passo,
                     exemplos práticos e dicas de uso.
                   </p>
                 </div>
@@ -192,15 +203,15 @@ export default function ManualApp() {
     );
   }
 
-  // Nível 3: Itens da subcategoria
+  // ── Nível 3: Itens de uma subcategoria ────────────────────────────────────
   if (selectedSubCategory) {
     return (
       <AppLayout title="Manual do APP" subtitle="Documentação e tutoriais da plataforma MCG">
         <div className="space-y-6">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setSelectedSubCategory(null)}
               data-testid="button-back-subcategory"
             >
@@ -249,15 +260,23 @@ export default function ManualApp() {
                     <CardContent className="pt-0">
                       <p className="text-sm text-muted-foreground mb-4">{item.description}</p>
                       <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelectedItem(item)}
+                          data-testid={`button-open-manual-${item.id}`}
+                        >
+                          Ver manual
+                        </Button>
                         {item.downloadUrl ? (
-                          <Button size="sm" variant="outline" asChild>
+                          <Button size="sm" variant="ghost" asChild>
                             <a href={item.downloadUrl} download>
                               <Download className="h-4 w-4 mr-1" />
                               Baixar
                             </a>
                           </Button>
                         ) : (
-                          <Button size="sm" variant="outline" disabled>
+                          <Button size="sm" variant="ghost" disabled>
                             <Download className="h-4 w-4 mr-1" />
                             Em breve
                           </Button>
@@ -282,15 +301,93 @@ export default function ManualApp() {
     );
   }
 
-  // Nível 2: Subcategorias (MKT, COM, CAC)
+  // ── Nível 2b: Subcategorias dentro de um grupo (ex: MKT/COM/CAC) ──────────
+  if (selectedGroup) {
+    return (
+      <AppLayout title="Manual do APP" subtitle="Documentação e tutoriais da plataforma MCG">
+        <div className="space-y-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSelectedGroup(null)}
+              data-testid="button-back-group"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h2 className="text-xl font-semibold">{selectedGroup.title}</h2>
+              <p className="text-sm text-muted-foreground">{selectedGroup.description}</p>
+            </div>
+          </div>
+
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9"
+              data-testid="input-search-group"
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            {filteredGroupSubs.length === 0 ? (
+              <Card className="col-span-full">
+                <CardContent className="p-8 text-center">
+                  <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                  <p className="text-muted-foreground">Nenhuma seção encontrada</p>
+                </CardContent>
+              </Card>
+            ) : (
+              filteredGroupSubs.map((sub) => {
+                const Icon = sub.icon;
+                return (
+                  <Card
+                    key={sub.id}
+                    className="cursor-pointer hover-elevate transition-all"
+                    onClick={() => setSelectedSubCategory(sub)}
+                    data-testid={`card-groupsub-${sub.id}`}
+                  >
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-md bg-primary/10">
+                            <Icon className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-base">{sub.title}</CardTitle>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {sub.items.length} {sub.items.length === 1 ? "item" : "itens"}
+                            </p>
+                          </div>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <p className="text-sm text-muted-foreground">{sub.description}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // ── Nível 2: Subcategorias / Grupos de uma categoria ─────────────────────
   if (selectedCategory) {
     return (
       <AppLayout title="Manual do APP" subtitle="Documentação e tutoriais da plataforma MCG">
         <div className="space-y-6">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setSelectedCategory(null)}
               data-testid="button-back-category"
             >
@@ -314,7 +411,7 @@ export default function ManualApp() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
-            {filteredSubCategories.length === 0 ? (
+            {(filteredSubCategories || []).length === 0 ? (
               <Card className="col-span-full">
                 <CardContent className="p-8 text-center">
                   <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
@@ -322,13 +419,24 @@ export default function ManualApp() {
                 </CardContent>
               </Card>
             ) : (
-              filteredSubCategories.map((sub) => {
+              (filteredSubCategories || []).map((sub) => {
                 const Icon = sub.icon;
+                const isGroup = !!(sub.subCategories && sub.subCategories.length > 0);
+                const itemCount = isGroup
+                  ? sub.subCategories!.reduce((acc, ss) => acc + ss.items.length, 0)
+                  : sub.items.length;
+
                 return (
-                  <Card 
-                    key={sub.id} 
+                  <Card
+                    key={sub.id}
                     className="cursor-pointer hover-elevate transition-all"
-                    onClick={() => setSelectedSubCategory(sub)}
+                    onClick={() => {
+                      if (isGroup) {
+                        setSelectedGroup(sub);
+                      } else {
+                        setSelectedSubCategory(sub);
+                      }
+                    }}
                     data-testid={`card-subcategory-${sub.id}`}
                   >
                     <CardHeader className="pb-3">
@@ -340,7 +448,9 @@ export default function ManualApp() {
                           <div className="flex-1 min-w-0">
                             <CardTitle className="text-base">{sub.title}</CardTitle>
                             <p className="text-xs text-muted-foreground mt-1">
-                              {sub.items.length} {sub.items.length === 1 ? 'item' : 'itens'}
+                              {isGroup
+                                ? `${sub.subCategories!.length} seções • ${itemCount} itens`
+                                : `${itemCount} ${itemCount === 1 ? "item" : "itens"}`}
                             </p>
                           </div>
                         </div>
@@ -360,7 +470,7 @@ export default function ManualApp() {
     );
   }
 
-  // Nível 1: Categorias principais (Roteiro Comercial)
+  // ── Nível 1: Categorias principais ───────────────────────────────────────
   return (
     <AppLayout title="Manual do APP" subtitle="Documentação e tutoriais da plataforma MCG">
       <div className="space-y-6">
@@ -388,10 +498,15 @@ export default function ManualApp() {
           ) : (
             filteredCategories.map((category) => {
               const Icon = category.icon;
-              const totalItems = category.subCategories.reduce((acc, sub) => acc + sub.items.length, 0);
+              const totalItems = category.subCategories.reduce((acc, sub) => {
+                if (sub.subCategories && sub.subCategories.length > 0) {
+                  return acc + sub.subCategories.reduce((a, ss) => a + ss.items.length, 0);
+                }
+                return acc + sub.items.length;
+              }, 0);
               return (
-                <Card 
-                  key={category.id} 
+                <Card
+                  key={category.id}
                   className="cursor-pointer hover-elevate transition-all"
                   onClick={() => setSelectedCategory(category)}
                   data-testid={`card-category-${category.id}`}

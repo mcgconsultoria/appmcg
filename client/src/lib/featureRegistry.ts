@@ -44,6 +44,7 @@ import {
   Activity,
   DollarSign,
   HeadphonesIcon,
+  ShoppingCart,
 } from "lucide-react";
 
 export interface FeatureItem {
@@ -936,7 +937,14 @@ export function getManualCategories() {
       description: "Guia completo do processo comercial da plataforma MCG",
       icon: Route,
       subCategories: [
-        ...comercialSubCategories,
+        {
+          id: "comercial",
+          title: "Comercial",
+          description: "Ferramentas de marketing, vendas e pós-vendas",
+          icon: ShoppingCart,
+          items: [],
+          subCategories: comercialSubCategories,
+        },
         {
           id: "administrativo",
           title: "Administrativo",
