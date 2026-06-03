@@ -18,7 +18,21 @@ import { z } from "zod";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-const CATEGORIAS = ["Visita", "Reunião", "Feira", "Evento", "Congresso", "Workshop", "Webinar", "Outro"];
+const CATEGORIAS = [
+  "Ligação",
+  "Reunião Online",
+  "Reunião Presencial",
+  "Visita Comercial",
+  "Feira",
+  "Evento",
+  "Convenção",
+  "Lançamento",
+  "BID",
+  "Licitação",
+  "Workshop",
+  "Webinar",
+  "Outro",
+];
 const STATUS_OPTS = ["agendado", "realizado", "cancelado", "adiado"];
 
 const statusColors: Record<string, string> = {

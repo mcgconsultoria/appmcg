@@ -54,6 +54,7 @@ import {
   insertSegmentoMercadoSchema,
   insertEventoComercialSchema,
   insertPropostaSchema,
+  insertContratoLogisticoSchema,
   registerSchema,
   loginSchema,
   type User,
@@ -8049,6 +8050,45 @@ export async function registerRoutes(
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ message: "Erro ao remover proposta" });
+    }
+  });
+
+  // ==================== CONTRATOS LOGÍSTICOS ====================
+
+  app.get("/api/contratos-logisticos", isAuthenticated, async (req, res) => {
+    try {
+      const items = await storage.getContratosLogisticos(req.user!.companyId!);
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao buscar contratos" });
+    }
+  });
+
+  app.post("/api/contratos-logisticos", isAuthenticated, async (req, res) => {
+    try {
+      const data = insertContratoLogisticoSchema.parse({ ...req.body, companyId: req.user!.companyId });
+      const item = await storage.createContratoLogistico(data);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao criar contrato" });
+    }
+  });
+
+  app.patch("/api/contratos-logisticos/:id", isAuthenticated, async (req, res) => {
+    try {
+      const item = await storage.updateContratoLogistico(parseInt(req.params.id), req.body);
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao atualizar contrato" });
+    }
+  });
+
+  app.delete("/api/contratos-logisticos/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteContratoLogistico(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Erro ao remover contrato" });
     }
   });
 

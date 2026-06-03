@@ -203,6 +203,8 @@ export default function FreightCalculator() {
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [docErrors, setDocErrors] = useState<DocErrors>({});
+  const [showSaveCalcDialog, setShowSaveCalcDialog] = useState(false);
+  const [calcTitulo, setCalcTitulo] = useState("");
   const { toast } = useToast();
   const { isAuthenticated, user } = useAuth();
   const [, setLocation] = useLocation();
@@ -635,6 +637,39 @@ export default function FreightCalculator() {
     onError: () => {
       toast({ title: "Erro ao criar proposta", variant: "destructive" });
     },
+  });
+
+  const saveCalcMutation = useMutation({
+    mutationFn: async (titulo: string) => {
+      const firstRoute = routes[0];
+      const calc = calculateRouteValues(firstRoute);
+      const payload = {
+        companyId: 1,
+        titulo: titulo || `Cálculo de Frete ${new Date().toLocaleDateString("pt-BR")}`,
+        originCity: firstRoute.originCity || undefined,
+        originState: firstRoute.originState || undefined,
+        destinationCity: firstRoute.destinationCity || undefined,
+        destinationState: firstRoute.destinationState || undefined,
+        weight: firstRoute.weight || undefined,
+        cargoValue: firstRoute.cargoValue || undefined,
+        freightValue: calc.freightValue.toString(),
+        tollValue: calc.tollValue.toString(),
+        icmsRate: calc.taxInfo.taxType === "ICMS" ? calc.taxInfo.rate.toString() : undefined,
+        icmsValue: calc.taxInfo.taxType === "ICMS" ? calc.taxValue.toString() : undefined,
+        grisValue: calc.grisValue.toString(),
+        advValue: calc.advValue.toString(),
+        totalValue: totalProposalValue.toString(),
+        dados: { routes, routeCalculations },
+      };
+      return apiRequest("POST", "/api/freight-calculations", payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/freight-calculations"] });
+      toast({ title: "Cálculo salvo com sucesso! Disponível para vincular em Propostas." });
+      setShowSaveCalcDialog(false);
+      setCalcTitulo("");
+    },
+    onError: () => toast({ title: "Erro ao salvar cálculo", variant: "destructive" }),
   });
 
   const handleReset = () => {
@@ -1887,6 +1922,15 @@ export default function FreightCalculator() {
                 </Button>
               ) : (
               <>
+              <Button
+                onClick={() => { setCalcTitulo(""); setShowSaveCalcDialog(true); }}
+                disabled={!canCalculate}
+                variant="outline"
+                data-testid="button-salvar-calculo-frete"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Salvar Cálculo
+              </Button>
               <Dialog open={showProposalDialog} onOpenChange={setShowProposalDialog}>
                 <DialogTrigger asChild>
                   <Button onClick={handleSendProposal} disabled={!canCalculate} data-testid="button-create-proposal">
@@ -2151,6 +2195,45 @@ export default function FreightCalculator() {
             </p>
           </CardContent>
         </Card>
+
+        <Dialog open={showSaveCalcDialog} onOpenChange={setShowSaveCalcDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Save className="h-4 w-4" />
+                Salvar Cálculo de Frete
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div>
+                <label className="text-sm font-medium block mb-1">Título do Cálculo</label>
+                <input
+                  className="w-full border rounded-md px-3 py-2 text-sm bg-background"
+                  placeholder={`Ex: Frete SP→RJ ${new Date().toLocaleDateString("pt-BR")}`}
+                  value={calcTitulo}
+                  onChange={(e) => setCalcTitulo(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") saveCalcMutation.mutate(calcTitulo); }}
+                  autoFocus
+                  data-testid="input-titulo-calc-frete"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Este cálculo ficará disponível para vincular a propostas comerciais.
+                </p>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowSaveCalcDialog(false)}>Cancelar</Button>
+                <Button
+                  onClick={() => saveCalcMutation.mutate(calcTitulo)}
+                  disabled={saveCalcMutation.isPending}
+                  data-testid="button-confirmar-salvar-calc-frete"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {saveCalcMutation.isPending ? "Salvando..." : "Salvar"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
           <DialogContent>

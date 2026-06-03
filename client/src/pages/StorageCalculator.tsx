@@ -344,6 +344,8 @@ export default function StorageCalculator() {
   const [showProposalDialog, setShowProposalDialog] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string>("");
+  const [showSaveCalcDialog, setShowSaveCalcDialog] = useState(false);
+  const [calcTitulo, setCalcTitulo] = useState("");
   const [proposalData, setProposalData] = useState<ProposalData>({
     clientName: "",
     clientEmail: "",
@@ -448,6 +450,31 @@ export default function StorageCalculator() {
       monthlyEquivalent,
     };
   }, [formData]);
+
+  const saveCalcMutation = useMutation({
+    mutationFn: async (titulo: string) => {
+      const payload = {
+        companyId: 1,
+        titulo: titulo || `Cálculo de Armazenagem ${new Date().toLocaleDateString("pt-BR")}`,
+        area: formData.area || undefined,
+        period: formData.period ? parseInt(formData.period) : undefined,
+        productType: formData.storageCategory || undefined,
+        storageRate: formData.storageRate || undefined,
+        movementRate: formData.movementRate || undefined,
+        handlingValue: formData.handlingValue || undefined,
+        totalValue: calculations.totalValue.toString(),
+        dados: { formData, calculations },
+      };
+      return apiRequest("POST", "/api/storage-calculations", payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/storage-calculations"] });
+      toast({ title: "Cálculo salvo com sucesso! Disponível para vincular em Propostas." });
+      setShowSaveCalcDialog(false);
+      setCalcTitulo("");
+    },
+    onError: () => toast({ title: "Erro ao salvar cálculo", variant: "destructive" }),
+  });
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -772,12 +799,12 @@ export default function StorageCalculator() {
                   </Button>
                 ) : (
                   <Button
-                    onClick={handleSendProposal}
-                    disabled={!canCalculate || saveMutation.isPending}
+                    onClick={() => { setCalcTitulo(""); setShowSaveCalcDialog(true); }}
+                    disabled={!canCalculate || saveCalcMutation.isPending}
                     data-testid="button-save-storage"
                   >
                     <Save className="h-4 w-4 mr-2" />
-                    {saveMutation.isPending ? "Salvando..." : "Salvar Cálculo"}
+                    {saveCalcMutation.isPending ? "Salvando..." : "Salvar Cálculo"}
                     {quota?.remaining !== null && !quota?.unlimited && (
                       <Badge variant="secondary" className="ml-2">
                         {quota?.remaining} gratuitos
@@ -1109,6 +1136,45 @@ export default function StorageCalculator() {
               {saveMutation.isPending ? "Salvando..." : "Criar Proposta"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showSaveCalcDialog} onOpenChange={setShowSaveCalcDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Save className="h-4 w-4" />
+              Salvar Cálculo de Armazenagem
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="text-sm font-medium block mb-1">Título do Cálculo</label>
+              <input
+                className="w-full border rounded-md px-3 py-2 text-sm bg-background"
+                placeholder={`Ex: Armazenagem Seca ${new Date().toLocaleDateString("pt-BR")}`}
+                value={calcTitulo}
+                onChange={(e) => setCalcTitulo(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") saveCalcMutation.mutate(calcTitulo); }}
+                autoFocus
+                data-testid="input-titulo-calc-storage"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Este cálculo ficará disponível para vincular a propostas comerciais.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowSaveCalcDialog(false)}>Cancelar</Button>
+              <Button
+                onClick={() => saveCalcMutation.mutate(calcTitulo)}
+                disabled={saveCalcMutation.isPending}
+                data-testid="button-confirmar-salvar-calc-storage"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {saveCalcMutation.isPending ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 

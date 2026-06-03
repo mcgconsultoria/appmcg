@@ -28,6 +28,7 @@ import Terms from "@/pages/Terms";
 import Subscription from "@/pages/Subscription";
 import MeetingRecords from "@/pages/MeetingRecords";
 import CalendarPage from "@/pages/CalendarPage";
+import CalendarioEventos from "@/pages/CalendarioEventos";
 import TasksPage from "@/pages/TasksPage";
 import ProjectsPage from "@/pages/ProjectsPage";
 import RFI from "@/pages/RFI";
@@ -243,6 +244,7 @@ function Router() {
           <Route path="/pipeline" component={Pipeline} />
           <Route path="/rotas" component={SavedRoutes} />
           <Route path="/calendário" component={CalendarPage} />
+          <Route path="/calendario-eventos" component={CalendarioEventos} />
           <Route path="/atas" component={MeetingRecords} />
           <Route path="/checklist" component={Checklist} />
           <Route path="/biblioteca" component={BibliotecaChecklists} />

@@ -382,6 +382,8 @@ export const freightCalculations = pgTable("freight_calculations", {
   id: serial("id").primaryKey(),
   companyId: integer("company_id").notNull(),
   clientId: integer("client_id"),
+  numero: integer("numero"),
+  titulo: varchar("titulo", { length: 255 }),
   originCity: varchar("origin_city", { length: 100 }),
   originState: varchar("origin_state", { length: 2 }),
   destinationCity: varchar("destination_city", { length: 100 }),
@@ -398,6 +400,7 @@ export const freightCalculations = pgTable("freight_calculations", {
   tollValue: decimal("toll_value", { precision: 15, scale: 2 }),
   unloadingValue: decimal("unloading_value", { precision: 15, scale: 2 }),
   totalValue: decimal("total_value", { precision: 15, scale: 2 }),
+  dados: jsonb("dados"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -406,6 +409,8 @@ export const storageCalculations = pgTable("storage_calculations", {
   id: serial("id").primaryKey(),
   companyId: integer("company_id").notNull(),
   clientId: integer("client_id"),
+  numero: integer("numero"),
+  titulo: varchar("titulo", { length: 255 }),
   area: decimal("area", { precision: 10, scale: 2 }),
   period: integer("period"),
   productType: varchar("product_type", { length: 100 }),
@@ -413,6 +418,7 @@ export const storageCalculations = pgTable("storage_calculations", {
   storageRate: decimal("storage_rate", { precision: 10, scale: 2 }),
   handlingValue: decimal("handling_value", { precision: 15, scale: 2 }),
   totalValue: decimal("total_value", { precision: 15, scale: 2 }),
+  dados: jsonb("dados"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -2670,6 +2676,31 @@ export const propostas = pgTable("propostas", {
 export const insertPropostaSchema = createInsertSchema(propostas).omit({ id: true, createdAt: true, updatedAt: true });
 export type Proposta = typeof propostas.$inferSelect;
 export type InsertProposta = z.infer<typeof insertPropostaSchema>;
+
+// ==================== CONTRATOS LOGÍSTICOS ====================
+export const contratosLogisticos = pgTable("contratos_logisticos", {
+  id: serial("id").primaryKey(),
+  companyId: integer("company_id").notNull(),
+  numero: integer("numero").notNull(),
+  propostaId: integer("proposta_id"),
+  clientId: integer("client_id"),
+  nomeCliente: varchar("nome_cliente", { length: 255 }),
+  objeto: text("objeto"),
+  dataAssinatura: timestamp("data_assinatura"),
+  vigenciaInicio: timestamp("vigencia_inicio"),
+  vigenciaFim: timestamp("vigencia_fim"),
+  renovacaoAutomatica: boolean("renovacao_automatica").default(false),
+  status: varchar("status", { length: 50 }).default("ativo"),
+  modeloContrato: text("modelo_contrato"),
+  totalFrete: decimal("total_frete", { precision: 15, scale: 2 }),
+  totalArmazenagem: decimal("total_armazenagem", { precision: 15, scale: 2 }),
+  observacoes: text("observacoes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+export const insertContratoLogisticoSchema = createInsertSchema(contratosLogisticos).omit({ id: true, createdAt: true, updatedAt: true });
+export type ContratoLogistico = typeof contratosLogisticos.$inferSelect;
+export type InsertContratoLogistico = z.infer<typeof insertContratoLogisticoSchema>;
 
 // Insert schemas
 export const insertPermissionDefinitionSchema = createInsertSchema(permissionDefinitions).omit({ id: true, createdAt: true });

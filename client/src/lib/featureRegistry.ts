@@ -192,7 +192,7 @@ export const featureRegistry: FeatureItem[] = [
   {
     id: "com-calendario",
     title: "Calendário",
-    url: "/calendário",
+    url: "/calendario-eventos",
     icon: Calendar,
     subCategory: "com",
     comGroup: "relacionamento",

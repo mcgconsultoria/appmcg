@@ -247,6 +247,9 @@ import {
   propostas,
   type Proposta,
   type InsertProposta,
+  contratosLogisticos,
+  type ContratoLogistico,
+  type InsertContratoLogistico,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, gte, lt, lte, ne } from "drizzle-orm";
@@ -311,6 +314,12 @@ export interface IStorage {
   // Storage calculation operations
   getStorageCalculations(companyId?: number): Promise<StorageCalculation[]>;
   createStorageCalculation(calc: InsertStorageCalculation): Promise<StorageCalculation>;
+
+  // Contratos logísticos
+  getContratosLogisticos(companyId: number): Promise<ContratoLogistico[]>;
+  createContratoLogistico(data: InsertContratoLogistico): Promise<ContratoLogistico>;
+  updateContratoLogistico(id: number, data: Partial<InsertContratoLogistico>): Promise<ContratoLogistico | undefined>;
+  deleteContratoLogistico(id: number): Promise<void>;
 
   // Saved route operations
   getSavedRoutes(companyId: number): Promise<SavedRoute[]>;
@@ -1087,7 +1096,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createFreightCalculation(calc: InsertFreightCalculation): Promise<FreightCalculation> {
-    const [newCalc] = await db.insert(freightCalculations).values(calc).returning();
+    const existingList = await db.select({ numero: freightCalculations.numero })
+      .from(freightCalculations)
+      .where(eq(freightCalculations.companyId, calc.companyId))
+      .orderBy(desc(freightCalculations.numero))
+      .limit(1);
+    const nextNumero = existingList.length > 0 && existingList[0].numero ? existingList[0].numero + 1 : 1;
+    const [newCalc] = await db.insert(freightCalculations).values({ ...calc, numero: nextNumero }).returning();
     return newCalc;
   }
 
@@ -1100,7 +1115,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createStorageCalculation(calc: InsertStorageCalculation): Promise<StorageCalculation> {
-    const [newCalc] = await db.insert(storageCalculations).values(calc).returning();
+    const existingList = await db.select({ numero: storageCalculations.numero })
+      .from(storageCalculations)
+      .where(eq(storageCalculations.companyId, calc.companyId))
+      .orderBy(desc(storageCalculations.numero))
+      .limit(1);
+    const nextNumero = existingList.length > 0 && existingList[0].numero ? existingList[0].numero + 1 : 1;
+    const [newCalc] = await db.insert(storageCalculations).values({ ...calc, numero: nextNumero }).returning();
     return newCalc;
   }
 
@@ -3918,6 +3939,31 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProposta(id: number) {
     await db.delete(propostas).where(eq(propostas.id, id));
+  }
+
+  // ==================== CONTRATOS LOGÍSTICOS ====================
+  async getContratosLogisticos(companyId: number): Promise<ContratoLogistico[]> {
+    return await db.select().from(contratosLogisticos).where(eq(contratosLogisticos.companyId, companyId)).orderBy(desc(contratosLogisticos.numero));
+  }
+
+  async createContratoLogistico(data: InsertContratoLogistico): Promise<ContratoLogistico> {
+    const existingList = await db.select({ numero: contratosLogisticos.numero })
+      .from(contratosLogisticos)
+      .where(eq(contratosLogisticos.companyId, data.companyId))
+      .orderBy(desc(contratosLogisticos.numero))
+      .limit(1);
+    const nextNumero = existingList.length > 0 ? existingList[0].numero + 1 : 1;
+    const [item] = await db.insert(contratosLogisticos).values({ ...data, numero: nextNumero }).returning();
+    return item;
+  }
+
+  async updateContratoLogistico(id: number, data: Partial<InsertContratoLogistico>): Promise<ContratoLogistico | undefined> {
+    const [item] = await db.update(contratosLogisticos).set({ ...data, updatedAt: new Date() }).where(eq(contratosLogisticos.id, id)).returning();
+    return item;
+  }
+
+  async deleteContratoLogistico(id: number): Promise<void> {
+    await db.delete(contratosLogisticos).where(eq(contratosLogisticos.id, id));
   }
 
   async seedStoreCategories(): Promise<void> {
