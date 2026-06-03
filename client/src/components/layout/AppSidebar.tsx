@@ -347,9 +347,10 @@ interface CollapsibleSectionProps {
   planLoaded?: boolean;
   userRole?: string | null;
   fullAccessGranted?: boolean | null;
+  subtle?: boolean;
 }
 
-function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = false, userPlan, planLoaded = true, userRole, fullAccessGranted }: CollapsibleSectionProps) {
+function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = false, userPlan, planLoaded = true, userRole, fullAccessGranted, subtle = false }: CollapsibleSectionProps) {
   const isItemActive = (itemUrl: string) => {
     if (itemUrl === "/admin") {
       return location === "/admin";
@@ -376,7 +377,7 @@ function CollapsibleSection({ title, icon: Icon, items, location, defaultOpen = 
       <SidebarGroup>
         <CollapsibleTrigger asChild>
           <button
-            className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
+            className={`flex items-center justify-between w-full px-3 py-2 text-sm text-foreground hover-elevate rounded-md cursor-pointer ${subtle ? 'font-normal' : 'font-semibold'}`}
             data-testid={`section-${title.toLowerCase().replace(/\s+/g, '-')}`}
           >
             <div className="flex items-center gap-2 min-w-0">
@@ -782,6 +783,7 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              subtle
             />
             <CollapsibleSection
               title="Relacionamento"
@@ -792,6 +794,7 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              subtle
             />
             <CollapsibleSection
               title="Negociação"
@@ -802,6 +805,7 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              subtle
             />
             <CollapsibleSection
               title="Gestão"
@@ -812,6 +816,7 @@ function ComVendasSection({ location, userPlan, planLoaded = true, userRole, ful
               planLoaded={planLoaded}
               userRole={userRole}
               fullAccessGranted={fullAccessGranted}
+              subtle
             />
           </div>
         </CollapsibleContent>
