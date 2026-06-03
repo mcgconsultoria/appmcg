@@ -495,14 +495,14 @@ function LojaMcgDynamicSection({ location, userPlan, planLoaded = true, userRole
       <SidebarGroup>
         <CollapsibleTrigger asChild>
           <button
-            className="flex items-center justify-between w-full px-3 py-2 text-base font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
+            className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
             data-testid="section-loja-mcg"
           >
-            <div className="flex items-center gap-2">
-              <Store className="h-5 w-5" />
-              <span>Loja MCG</span>
+            <div className="flex items-center gap-2 min-w-0">
+              <Store className="h-4 w-4 shrink-0" />
+              <span className="whitespace-nowrap">Loja MCG</span>
             </div>
-            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`h-4 w-4 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
@@ -844,14 +844,14 @@ function ComercialSection({ location, userPlan, planLoaded = true, userRole, ful
       <SidebarGroup>
         <CollapsibleTrigger asChild>
           <button
-            className="flex items-center justify-between w-full px-3 py-2 text-base font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
+            className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold text-foreground hover-elevate rounded-md cursor-pointer"
             data-testid="section-comercial"
           >
-            <div className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" />
-              <span>Comercial</span>
+            <div className="flex items-center gap-2 min-w-0">
+              <ShoppingCart className="h-4 w-4 shrink-0" />
+              <span className="whitespace-nowrap">Comercial</span>
             </div>
-            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`h-4 w-4 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent>
@@ -972,9 +972,9 @@ export function AppSidebar() {
                   <Link 
                     href="/manual-app" 
                     data-testid="nav-manual-app"
-                    className="flex items-center gap-2 px-3 py-2 text-base font-semibold"
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-semibold"
                   >
-                    <FileText className="h-5 w-5" />
+                    <FileText className="h-4 w-4 shrink-0" />
                     <span>Manual APP</span>
                   </Link>
                 </SidebarMenuButton>
@@ -984,9 +984,9 @@ export function AppSidebar() {
                   <Link 
                     href="/suporte" 
                     data-testid="nav-suporte"
-                    className="flex items-center gap-2 px-3 py-2 text-base font-semibold text-blue-600 dark:text-blue-400"
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-blue-600 dark:text-blue-400"
                   >
-                    <HeadphonesIcon className="h-5 w-5" />
+                    <HeadphonesIcon className="h-4 w-4 shrink-0" />
                     <span>Suporte</span>
                   </Link>
                 </SidebarMenuButton>
