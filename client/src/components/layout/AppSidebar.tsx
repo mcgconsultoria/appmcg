@@ -736,15 +736,35 @@ function AdminPFSection({ location, userPlan, planLoaded = true, userRole, fullA
                 const isLocked = !isUrlAllowedForPlan(item.url, userPlan, planLoaded, userRole, fullAccessGranted);
                 
                 if (isLocked) return null;
+
+                const manualInfo = manualMapping[item.url];
                 
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                    <div className="flex items-center w-full">
+                      <SidebarMenuButton asChild isActive={isActive} className="flex-1">
+                        <Link href={item.url} data-testid={`nav-${item.url.replace("/", "")}`}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                      {manualInfo && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Link
+                              href={`/manual-app?sub=${manualInfo.subCategory}&item=${manualInfo.itemId}`}
+                              className="p-1 text-muted-foreground hover:text-primary transition-colors"
+                              data-testid={`help-${item.url.replace(/\//g, "")}`}
+                            >
+                              <HelpCircle className="h-3.5 w-3.5" />
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent side="right">
+                            <p>Ver instruções no manual</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
                   </SidebarMenuItem>
                 );
               })}
