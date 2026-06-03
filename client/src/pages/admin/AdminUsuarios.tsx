@@ -8,17 +8,31 @@ import { useToast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useState } from "react";
-import { Building2, Mail, Phone, Calendar, User, Search, Crown, Check, X } from "lucide-react";
+import { Building2, Mail, Phone, Calendar, User, Search, Crown, X, UserPlus } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { User as UserType } from "@shared/schema";
 
 type SafeUser = Omit<UserType, "password" | "activeSessionToken">;
 
+const defaultNewUser = {
+  email: "",
+  password: "",
+  firstName: "",
+  lastName: "",
+  selectedPlan: "corporativo",
+  fullAccessGranted: true,
+};
+
 export default function AdminUsuarios() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const [showNewUserDialog, setShowNewUserDialog] = useState(false);
+  const [newUser, setNewUser] = useState(defaultNewUser);
 
   const { data: users, isLoading } = useQuery<SafeUser[]>({
     queryKey: ["/api/admin/users"],
@@ -68,6 +82,26 @@ export default function AdminUsuarios() {
     },
   });
 
+  const createUserMutation = useMutation({
+    mutationFn: async (data: typeof defaultNewUser) => {
+      return apiRequest("POST", "/api/admin/create-user", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({ title: "Usuário criado com sucesso!" });
+      setShowNewUserDialog(false);
+      setNewUser(defaultNewUser);
+    },
+    onError: async (error: any) => {
+      let msg = "Não foi possível criar o usuário.";
+      try {
+        const json = await error?.response?.json?.();
+        if (json?.message) msg = json.message;
+      } catch {}
+      toast({ title: "Erro", description: msg, variant: "destructive" });
+    },
+  });
+
   const filteredUsers = users?.filter((user) => {
     if (!searchTerm) return true;
     const term = searchTerm.toLowerCase();
@@ -113,10 +147,111 @@ export default function AdminUsuarios() {
               data-testid="input-search-users"
             />
           </div>
-          <Badge variant="outline" className="text-base px-4 py-2">
-            {filteredUsers?.length || 0} usuarios
-          </Badge>
+          <div className="flex items-center gap-3">
+            <Badge variant="outline" className="text-base px-4 py-2">
+              {filteredUsers?.length || 0} usuarios
+            </Badge>
+            <Button
+              onClick={() => setShowNewUserDialog(true)}
+              data-testid="button-new-user"
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              Novo Usuário
+            </Button>
+          </div>
         </div>
+
+        <Dialog open={showNewUserDialog} onOpenChange={(open) => { setShowNewUserDialog(open); if (!open) setNewUser(defaultNewUser); }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Criar Novo Usuário</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="new-firstName">Nome</Label>
+                  <Input
+                    id="new-firstName"
+                    placeholder="Nome"
+                    value={newUser.firstName}
+                    onChange={(e) => setNewUser((u) => ({ ...u, firstName: e.target.value }))}
+                    data-testid="input-new-user-firstname"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="new-lastName">Sobrenome</Label>
+                  <Input
+                    id="new-lastName"
+                    placeholder="Sobrenome"
+                    value={newUser.lastName}
+                    onChange={(e) => setNewUser((u) => ({ ...u, lastName: e.target.value }))}
+                    data-testid="input-new-user-lastname"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="new-email">Email <span className="text-destructive">*</span></Label>
+                <Input
+                  id="new-email"
+                  type="email"
+                  placeholder="email@empresa.com"
+                  value={newUser.email}
+                  onChange={(e) => setNewUser((u) => ({ ...u, email: e.target.value }))}
+                  data-testid="input-new-user-email"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="new-password">Senha <span className="text-destructive">*</span></Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  placeholder="Mínimo 8 caracteres"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser((u) => ({ ...u, password: e.target.value }))}
+                  data-testid="input-new-user-password"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Plano</Label>
+                <Select
+                  value={newUser.selectedPlan}
+                  onValueChange={(val) => setNewUser((u) => ({ ...u, selectedPlan: val }))}
+                >
+                  <SelectTrigger data-testid="select-new-user-plan">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">Gratuito</SelectItem>
+                    <SelectItem value="starter">Starter</SelectItem>
+                    <SelectItem value="profissional">Profissional</SelectItem>
+                    <SelectItem value="corporativo">Corporativo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="new-fullaccess"
+                  checked={newUser.fullAccessGranted}
+                  onCheckedChange={(checked) => setNewUser((u) => ({ ...u, fullAccessGranted: checked }))}
+                  data-testid="switch-new-user-fullaccess"
+                />
+                <Label htmlFor="new-fullaccess">Acesso Completo</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowNewUserDialog(false); setNewUser(defaultNewUser); }}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => createUserMutation.mutate(newUser)}
+                disabled={createUserMutation.isPending || !newUser.email || !newUser.password}
+                data-testid="button-confirm-new-user"
+              >
+                {createUserMutation.isPending ? "Criando..." : "Criar Usuário"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {filteredUsers?.length === 0 ? (
           <Card>
