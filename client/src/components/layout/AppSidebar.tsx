@@ -1004,9 +1004,9 @@ export function AppSidebar() {
     if (location === "/admin" || location.startsWith("/admin/")) return "adminpj";
     // Loja
     if (location.startsWith("/loja")) return "loja";
-    // Dashboard / raiz: tudo fechado
-    if (location === "/" || location === "/dashboard") return "";
-    // Comercial (padrão para demais páginas internas)
+    // Raiz: tudo fechado
+    if (location === "/") return "";
+    // Comercial (padrão para demais páginas internas, incluindo /dashboard)
     return "comercial";
   };
   const [openTopSection, setOpenTopSection] = useState<string>(getInitialTopSection());
