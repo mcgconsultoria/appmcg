@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -213,7 +214,8 @@ export default function PropostaPage() {
   const enviadas = propostas.filter((p) => p.status === "enviada" || p.status === "em_analise").length;
 
   return (
-    <div className="p-6 space-y-6">
+    <AppLayout>
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Button variant="outline" size="sm" className="gap-1 shrink-0" onClick={() => window.history.back()} data-testid="button-voltar-lista-proposta">
@@ -546,5 +548,6 @@ export default function PropostaPage() {
         </DialogContent>
       </Dialog>
     </div>
+    </AppLayout>
   );
 }
