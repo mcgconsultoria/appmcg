@@ -72,6 +72,7 @@ import AdminIRPJ from "@/pages/admin/IRPJ";
 import AdminPlanos from "@/pages/admin/AdminPlanos";
 import AdminPermissoes from "@/pages/admin/AdminPermissoes";
 import AdminUsuarios from "@/pages/admin/AdminUsuarios";
+import AdminClientes from "@/pages/admin/AdminClientes";
 import MeuPlano from "@/pages/admin/MeuPlano";
 import ContasBancariasPF from "@/pages/pessoal/ContasBancariasPF";
 import CentrosCustoPF from "@/pages/pessoal/CentrosCustoPF";
@@ -142,6 +143,9 @@ function Router() {
       </Route>
       <Route path="/admin/usuarios">
         {() => isAuthenticated && isMcgAdmin ? <AdminUsuarios /> : <AdminLogin />}
+      </Route>
+      <Route path="/admin/clientes">
+        {() => isAuthenticated && isMcgAdmin ? <AdminClientes /> : <AdminLogin />}
       </Route>
       <Route path="/admin/comercial">
         {() => isAuthenticated && isAdmin ? <AdminComercial /> : <AdminLogin />}

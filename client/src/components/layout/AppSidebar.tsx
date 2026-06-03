@@ -117,6 +117,11 @@ const adminMcgComercialItems = [
     icon: Users,
   },
   {
+    title: "Clientes",
+    url: "/admin/clientes",
+    icon: Building2,
+  },
+  {
     title: "Pipeline",
     url: "/admin/comercial",
     icon: Briefcase,
